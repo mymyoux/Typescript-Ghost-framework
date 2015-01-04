@@ -1,5 +1,5 @@
 ///<module="mvc"/>
-module ghot.browser.forms
+module ghost.browser.forms
 {
     /**
      * Form managment
