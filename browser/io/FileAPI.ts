@@ -33,7 +33,7 @@ module ghost.browser.io
 					}
 					reader.readAsText(file);	
 				} else {
-					reject(new Error( "format not readable"));
+					reject(new Error( "format not readable: "+file.type));
 					//fileDisplayArea.innerText = "File not supported!"
 				}
 
