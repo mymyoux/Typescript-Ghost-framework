@@ -18,7 +18,7 @@ module ghost.browser.io
 					});
 					return;
 				}
-				var textType = /text.*/;
+				var textType = /.*javascript/;
 
 				if (file.type.match(textType)) {
 					var reader = new FileReader();
