@@ -176,7 +176,15 @@ module ghost.utils
         }
     }
 
-
+    export interface BufferFunction extends Function
+    {
+        waiting:boolean;
+        isWaiting():void
+        cancel():void
+        pause():void
+        resume():void
+        now():void
+    }
 
     /**
      * Buffer
@@ -184,11 +192,11 @@ module ghost.utils
     export class Buffer
     {
         //private _timers
-        public static throttle(callback:Function, delay:number):Function
+        public static throttle(callback:Function, delay:number):BufferFunction
         {
             var timer:any = null;
             var args:any = null;
-            var func:any = function () {
+            var func:BufferFunction = <any> function () {
 
                 args = arguments;
                 clearTimeout(timer);
@@ -226,12 +234,32 @@ module ghost.utils
                     callback.apply(func, args);
                 }
             }
+            function pause():void
+            {
+                if(isWaiting())
+                {
+                    clearTimeout(timer);
+                    func.waiting = false;
+                }
+
+            }
+            function resume():void
+            {
+                func.waiting = true;
+                timer = setTimeout(function()
+                {
+                    callback.apply(func, args);
+                }, delay);
+            }
             func.waiting = false;
             func.cancel = cancel;
+            func.pause = pause;
+            func.resume = resume;
             func.isWaiting = isWaiting;
             func.now = now;
             return func;
         }
+
         public static callLater(callback:Function, ...params:any[]):number
         {
             return Buffer.setTimeout.apply(null, [callback, 0].concat(params));
