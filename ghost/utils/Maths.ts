@@ -112,6 +112,8 @@ module ghost.utils
                     return max;
                 }
             }
+
+            return value;
         }
     }
 }
