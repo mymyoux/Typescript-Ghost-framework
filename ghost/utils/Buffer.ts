@@ -179,11 +179,13 @@ module ghost.utils
     export interface BufferFunction extends Function
     {
         waiting:boolean;
-        isWaiting():void
-        cancel():void
-        pause():void
-        resume():void
-        now():void
+        delay:number;
+        isWaiting():void;
+        cancel():void;
+        pause():void;
+        resume():void;
+        now():void;
+        getTimeRemaining():number;
     }
 
     /**
@@ -196,11 +198,13 @@ module ghost.utils
         {
             var timer:any = null;
             var args:any = null;
+            var time:number;
             var func:BufferFunction = <any> function () {
 
                 args = arguments;
                 clearTimeout(timer);
                 func.waiting = true;
+                time = Date.now();
                 timer = setTimeout(function()
                 {
                     callback.apply(func, args);
@@ -246,16 +250,23 @@ module ghost.utils
             function resume():void
             {
                 func.waiting = true;
+                time = Date.now();
                 timer = setTimeout(function()
                 {
                     callback.apply(func, args);
                 }, delay);
             }
+            function getTimeRemaining():number
+            {
+                return (!isWaiting())?0:Math.max(0, delay - (Date.now()-time));
+            }
             func.waiting = false;
             func.cancel = cancel;
             func.pause = pause;
+            func.getTimeRemaining = getTimeRemaining;
             func.resume = resume;
             func.isWaiting = isWaiting;
+            func.delay = delay;
             func.now = now;
             return func;
         }
