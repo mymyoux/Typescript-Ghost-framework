@@ -15,6 +15,7 @@ module ghost.mvc
         protected options:IRactiveOptions;
         private _name:string;
         protected $container:JQuery;
+        private first:boolean = true;
         /**
          * View is initialized
          * @type {boolean}
@@ -323,6 +324,11 @@ module ghost.mvc
         public _preactivate():void
         {
             this.activate();
+            if(this.first)
+            {
+                this.first = false;
+                this.firstActivate();
+            }
         }
         public _predisactivate():void
         {
@@ -340,7 +346,10 @@ module ghost.mvc
             }
             this.disactivate();
         }
-
+        public firstActivate():void
+        {
+            
+        }
         public activate():void
         {
             //to override
