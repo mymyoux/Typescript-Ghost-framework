@@ -1,5 +1,5 @@
 ///<file="Controller.ts"/>
-///<file="View.ts"/>
+
 ///<lib="jquery"/>
 ///<module="browser/navigation"/>
 module ghost.mvc

@@ -1,6 +1,6 @@
-/* Librairies Externes */
+/* Extern Librairies */
 ///<reference path="../../../lib/es6-promise/es6-promise.d.ts"/>
 
 
-/* Fichiers Internes */
+/* Internal Files from Deps*/
 ///<reference path="FileAPI.ts"/>

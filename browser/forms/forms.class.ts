@@ -1,6 +1,6 @@
-/* Modules Externes */
+/* Extern Modules */
 ///<reference path="../mvc/mvc.class.d.ts"/>
 
 
-/* Fichiers Internes */
+/* Internal Files from Deps*/
 ///<reference path="DynamicForm.ts"/>

@@ -1,7 +1,7 @@
-/* Modules Externes */
+/* Extern Modules */
 ///<reference path="../core/core.class.d.ts"/>
 
 
-/* Fichiers Internes */
-///<reference path="EventDispatcher.ts"/>
+/* Internal Files from Deps*/
 ///<reference path="Eventer.ts"/>
+///<reference path="EventDispatcher.ts"/>

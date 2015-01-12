@@ -1,7 +1,7 @@
 /**
  * Created by jeremy.dubois on 07/11/14.
  */
-
+///<file="ControllerView.ts"/>
 ///<lib="ractive"/>
 ///
 module ghost.mvc

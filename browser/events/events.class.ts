@@ -1,6 +1,6 @@
-/* Modules Externes */
+/* Extern Modules */
 ///<reference path="../../ghost/events/events.class.d.ts"/>
 
 
-/* Fichiers Internes */
+/* Internal Files from Deps*/
 ///<reference path="Shortcut.ts"/>

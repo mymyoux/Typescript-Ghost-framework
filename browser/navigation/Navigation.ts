@@ -147,7 +147,7 @@ module ghost.browser.navigation
             var hashes:any = hashSplit.reduce((previous:any, big_hash:string)=>
             {
                 var split:string[] = big_hash.split("_");
-                if(split.length == 0)
+                if(split.length == 0 || split[0] == "")
                 {
                     return previous;
                 }

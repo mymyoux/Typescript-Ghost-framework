@@ -1,3 +1,4 @@
+
 ///<module="ghost/core"/>
 ///<module="browser/navigation"/>
 ///<module="browser/i18n"/>

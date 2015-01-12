@@ -1,14 +1,14 @@
-/* Modules Externes */
+/* Extern Modules */
 ///<reference path="../core/core.class.d.ts"/>
 
 
-/* Fichiers Internes */
-///<reference path="Array.ts"/>
-///<reference path="Buffer.ts"/>
-///<reference path="Classes.ts"/>
-///<reference path="Cryptography.ts"/>
+/* Internal Files from Deps*/
 ///<reference path="Device.ts"/>
-///<reference path="Maths.ts"/>
-///<reference path="Objects.ts"/>
 ///<reference path="Strings.ts"/>
+///<reference path="Maths.ts"/>
+///<reference path="Cryptography.ts"/>
+///<reference path="Buffer.ts"/>
+///<reference path="Objects.ts"/>
+///<reference path="Array.ts"/>
 ///<reference path="URI.ts"/>
+///<reference path="Classes.ts"/>

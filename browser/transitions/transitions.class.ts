@@ -1,9 +1,9 @@
-/* Librairies Externes */
+/* Extern Librairies */
 ///<reference path="../../../lib/jquery/jquery.d.ts"/>
 
-/* Modules Externes */
+/* Extern Modules */
 ///<reference path="../navigation/navigation.class.d.ts"/>
 
 
-/* Fichiers Internes */
+/* Internal Files from Deps*/
 ///<reference path="Transition.ts"/>
