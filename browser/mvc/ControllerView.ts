@@ -132,6 +132,10 @@ module ghost.mvc
                 this.disactivate();
                 this.trigger(ControllerView.EVENTS.DISACTIVATED);
                 this.hideContainer();
+                for(var p in this._views)
+                {
+                    this._views[p].disactivate();
+                }
             }
             this._activated = false;
         }
@@ -565,6 +569,16 @@ module ghost.mvc
         public activate():void
         {
             super.activate();
+        }
+        protected getRootURL():string
+        {
+            var pathname:string = window.location.pathname;
+            var index:number = pathname.indexOf("/",1);
+            if(index > -1)
+            {
+                pathname = pathname.substring(0, index);
+            }
+            return window.location.protocol+"//"+window.location.host+(pathname.length>1?pathname+"/":pathname);
         }
     }
 }
