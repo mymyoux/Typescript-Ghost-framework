@@ -92,13 +92,13 @@ module ghost.mvc
          * @type {boolean}
          * @private
          */
-        private _retrieved:boolean = false;
+        protected _retrieved:boolean = false;
         /**
          * data currently being retrieve from server
          * @type {boolean}
          * @private
          */
-        private _retrieving:boolean = false;
+        protected _retrieving:boolean = false;
         /**
          * @protected
          * @type {any}

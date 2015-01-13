@@ -77,13 +77,13 @@ module ghost.mvc
          * @type {boolean}
          * @private
          */
-        private _retrieved:boolean = false;
+        protected _retrieved:boolean = false;
         /**
          * data currently being retrieve from server
          * @type {boolean}
          * @private
          */
-        private _retrieving:boolean = false;
+        protected _retrieving:boolean = false;
         /**
          * Models
          */
@@ -386,7 +386,11 @@ module ghost.mvc
             {
                 pathname = pathname.substring(0, index);
             }
-            return window.location.protocol+"//"+window.location.host+pathname+"/";
+             return window.location.protocol+"//"+window.location.host+(pathname.length>1?pathname+"/":pathname);
+        }
+        protected getMethodForServer():string
+        {
+            return "GET";
         }
         /**
         * Retrieves Data fro mserver
@@ -408,7 +412,7 @@ module ghost.mvc
                 $.ajax(url,
                     {
                         data:data,
-                        "type":"POST"
+                        "type":this.getMethodForServer()
                     }).done((result:any)=> {
                         this._retrieved = true;
                         this._retrieving = true;
