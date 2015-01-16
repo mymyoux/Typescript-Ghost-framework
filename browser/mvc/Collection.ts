@@ -62,7 +62,7 @@ module ghost.mvc
          * Save instance for further get operations
          * @param instance Instance's to save
          */
-        protected static saveInstance(instance:Collection<any>):void
+        public static saveInstance(instance:Collection<any>):void
         {
             if( Collection._instances[<any>instance.constructor])
             {
