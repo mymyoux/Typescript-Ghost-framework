@@ -1,5 +1,6 @@
 ///<module="ghost/events"/>
 ///<module="ghost/utils"/>
+///<lib="es6-promise"/>
 module ghost.mvc
 {
 
@@ -120,6 +121,129 @@ module ghost.mvc
                 Model.saveInstance(this);
             }
         }
+       
+        //PREPARE DATA
+        protected _neededData:string[] = [];
+        protected _dataFullFilled:string[] = [];
+        public addNeededData(name:string):void
+        {
+            if(this._neededData.indexOf(name) == -1)
+            {
+                this._neededData.push(name);
+                if(this.isFullFilled(name))
+                {
+                    this.markFullFilled(name);
+                }
+            }
+        }
+        public markFullFilled(name:string):void
+        {
+            if(this._dataFullFilled.indexOf(name) == -1)
+            {
+                this._dataFullFilled.push(name);
+            }
+        }
+        public isFullFilled(name:string):boolean
+        {
+            return false;
+        }
+        public hasNeed(name:string):boolean
+        {
+            return this._neededData.indexOf(name) != -1 && this._dataFullFilled.indexOf(name) == -1;
+        }
+
+        protected _partsPromises:any = {};
+
+
+        protected hasPart(name:string):boolean
+        {
+            return name == "default";
+        }
+        protected getPartPromise(name:string):Promise<any>
+        {
+            if(!this.hasPart(name))
+            {
+                return null;
+            }
+            if(!this._partsPromises[name])
+            {
+               this._partsPromises = new Promise<any>(function(accept, reject)
+               {
+                    var request:any = this.getPartRequest(name);
+                    if(!request)
+                    {
+                        request = {};
+                    }
+                    var url = request.url?request.url:this.getDataURLForServer();
+                    if(url && url.substring(0, 1) != "/" && url.substring(0,4)!="http")
+                    {
+                        url = this.getRootURL()+url;
+                    }
+                    var server_data:any = this.getDataForServer();
+                    var data:any = request.data?request.data:{};
+                    for(var p in server_data)
+                    {
+                        data[p] = server_data[p];
+                    }
+                    $.ajax(url,
+                    {
+                        data:data,
+                        "type":request.method?request.method:this.getMethodForServer()
+                    })
+                    .done(accept)
+                    .fail(reject);
+               });
+            }
+            return this._partsPromises[name];
+        }
+        protected getPartRequest(name:string):any
+        {
+            switch(name)
+            {
+                case "default":
+                    return {
+                        method:"GET",
+                        url:"data",
+                        data:{}
+                    };
+                break;
+            }
+            return null;
+        }
+        public waitDataReady(data:string[] = ["default"]):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void
+            {
+
+                var failed:boolean = false;
+                var promises:Promise<any>[] = data.map(function(name:string)
+                {
+                    if(this.hasPart(name))
+                    {
+                        return this.getPartPromise(name);
+                    }else
+                    {
+                        //reject Promise   
+                        failed = true;
+                        reject(new Error(name+" is not a correct part's name"));
+                        return null;
+                    }
+                }, this);
+                if(failed)
+                {
+                    return;
+                }
+                Promise.all(promises).then(function(values:any[])
+                {
+                    values.forEach(this.readExternal, this);
+                }.bind(this), reject);
+            });
+            return promise;
+        }
+
+
+
+
 
         /**
          * Specify if the model has to be saved

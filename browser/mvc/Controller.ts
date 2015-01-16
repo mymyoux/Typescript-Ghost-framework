@@ -1,7 +1,6 @@
 ///<module="ghost/events"/>
 ///<module="browser/data"/>
 
-///<file="Scope.ts"/>
 ///<file="Model.ts"/>
 ///<file="Collection.ts"/>
 module ghost.mvc

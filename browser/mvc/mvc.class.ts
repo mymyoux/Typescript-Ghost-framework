@@ -1,5 +1,6 @@
 /* Extern Librairies */
 ///<reference path="../../../lib/jquery/jquery.d.ts"/>
+///<reference path="../../../lib/es6-promise/es6-promise.d.ts"/>
 ///<reference path="../../../lib/ractive/ractive.d.ts"/>
 
 /* Extern Modules */
@@ -14,11 +15,8 @@
 /* Internal Files from Deps*/
 ///<reference path="Model.ts"/>
 ///<reference path="Collection.ts"/>
-///Dependencies not resolved : {u'Application.ts': ['Controller.ts'], u'ControllerView.ts': ['Controller.ts'], u'Controller.ts': ['Scope.ts'], u'View.ts': ['ControllerView.ts'], u'Scope.ts': ['Controller.ts']}
-
-/* Internal files */
-///<reference path="Application.ts"/>
 ///<reference path="Controller.ts"/>
-///<reference path="ControllerView.ts"/>
 ///<reference path="Scope.ts"/>
+///<reference path="Application.ts"/>
+///<reference path="ControllerView.ts"/>
 ///<reference path="View.ts"/>
