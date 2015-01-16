@@ -297,6 +297,15 @@ module ghost.mvc
                 model.on(Model.EVENT_CHANGED, this._onModelChange, this, model);
             }
         }
+        public removeModel(model:Model):void
+        {
+            var index:number;
+            if((index = this._models.indexOf(model))!=-1)
+            {
+                this._models.splice(index, 1);
+                model.off(Model.EVENT_CHANGED, this._onModelChange, this);
+            }
+        }
         public addCollection(collection:Collection<any>):void
         {
             if(this._collections.indexOf(collection) == -1)
@@ -305,7 +314,7 @@ module ghost.mvc
                 collection.on(Collection.EVENT_CHANGED, this._onCollectionChange, this, collection);
             }
         }
-        private _onCollectionChange(model:Model[], collection:Collection<any> )
+        protected _onCollectionChange(model:Model[], collection:Collection<any> )
         {
           //  console.log("Collection changed", collection, arguments);
             if(this.template)
@@ -313,7 +322,7 @@ module ghost.mvc
                 this.template.set(collection.name(), collection.toObject());
             }
         }
-        private _onModelChange(keys:string[], model:Model):void
+        protected _onModelChange(keys:string[], model:Model):void
         {
          //   console.log("Model changed", model, arguments);
             if(this.template)
