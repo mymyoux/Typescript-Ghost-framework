@@ -281,8 +281,16 @@ module ghost.mvc
             if(!this._retrieving && !this._retrieved)
             {
 
-                this._retrieving = true;
                 var url:string = this.getDataURLForServer();
+                if(!url)
+                {
+                    if(callback)
+                    {
+                        callback();
+                    }
+                    return;
+                }
+                this._retrieving = true;
                 if(url && url.substring(0, 1) != "/" && url.substring(0,4)!="http")
                 {
                     url = this.getRootURL()+url;
