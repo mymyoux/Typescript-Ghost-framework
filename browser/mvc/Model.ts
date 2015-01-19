@@ -28,6 +28,11 @@ module ghost.mvc
          */
         public static EVENT_CHANGED:string = "changed";
         /**
+         * Default part
+         * @type {string}
+         */
+        public static PART_DEFAULT:string = "default";
+        /**
          * Model's instances
          * @type {string:Model}
          * @private
@@ -122,42 +127,11 @@ module ghost.mvc
             }
         }
        
-        //PREPARE DATA
-        protected _neededData:string[] = [];
-        protected _dataFullFilled:string[] = [];
-        public addNeededData(name:string):void
-        {
-            if(this._neededData.indexOf(name) == -1)
-            {
-                this._neededData.push(name);
-                if(this.isFullFilled(name))
-                {
-                    this.markFullFilled(name);
-                }
-            }
-        }
-        public markFullFilled(name:string):void
-        {
-            if(this._dataFullFilled.indexOf(name) == -1)
-            {
-                this._dataFullFilled.push(name);
-            }
-        }
-        public isFullFilled(name:string):boolean
-        {
-            return false;
-        }
-        public hasNeed(name:string):boolean
-        {
-            return this._neededData.indexOf(name) != -1 && this._dataFullFilled.indexOf(name) == -1;
-        }
-
+        ///PROMISES PARTS
         protected _partsPromises:any = {};
-
-
         protected hasPart(name:string):boolean
         {
-            return name == "default";
+            return this._partsPromises[name] || this.getPartRequest(name)!=null;//name == "default";
         }
         protected getPartPromise(name:string):Promise<any>
         {
@@ -167,7 +141,7 @@ module ghost.mvc
             }
             if(!this._partsPromises[name])
             {
-               this._partsPromises = new Promise<any>(function(accept, reject)
+               this._partsPromises[name] = new Promise<any>((accept, reject)=>
                {
                     var request:any = this.getPartRequest(name);
                     if(!request)
@@ -200,7 +174,7 @@ module ghost.mvc
         {
             switch(name)
             {
-                case "default":
+                case Model.PART_DEFAULT:
                     return {
                         method:"GET",
                         url:"data",
@@ -210,8 +184,9 @@ module ghost.mvc
             }
             return null;
         }
-        public waitDataReady(data:string[] = ["default"]):Promise<any>
+        public waitDataReady(data:string[] = [Model.PART_DEFAULT]):Promise<any>
         {
+            var _this:Model = this;
             var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void
             {
 
@@ -228,19 +203,20 @@ module ghost.mvc
                         reject(new Error(name+" is not a correct part's name"));
                         return null;
                     }
-                }, this);
+                }, _this);
                 if(failed)
                 {
                     return;
                 }
                 Promise.all(promises).then(function(values:any[])
                 {
-                    values.forEach(this.readExternal, this);
-                }.bind(this), reject);
+                    values.forEach(this.readExternal, _this);
+                    accept();
+                }.bind(_this), reject);
             });
             return promise;
         }
-
+        ///END PROMISES
 
 
 
