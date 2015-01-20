@@ -13,11 +13,11 @@ module ghost.mvc
          * List of events
          * @type {{ACTIVATED: (ACTIVATED), DISACTIVATED: (DISACTIVATED)}}
          */
-        public static EVENTS:any =
+        public static EVENTS:any = Controller.EVENTS;/*
         {
             ACTIVATED:Controller.EVENTS.ACTIVATED,
             DISACTIVATED:Controller.EVENTS.DISACTIVATED
-        };
+        };*/
         /**
          * List of views
          */

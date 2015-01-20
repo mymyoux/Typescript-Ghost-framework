@@ -28,6 +28,9 @@ module ghost.mvc
          * Models
          */
         public _models:Model[];
+        /**
+         * Collections
+         */
         public _collections:Collection<any>[];
         /**
          * Constructor

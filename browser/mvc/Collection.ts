@@ -1,12 +1,13 @@
 ///<module="ghost/events"/>
 ///<module="ghost/utils"/>
 ///<file="Model.ts"/>
+///<file="IData.ts"/>
 module ghost.mvc
 {
     /**
      * Collection class
      */
-    export class Collection<T extends ghost.mvc.Model> extends ghost.events.EventDispatcher implements IRetrievable
+    export class Collection<T extends ghost.mvc.Model> extends ghost.events.EventDispatcher implements IRetrievable, IModel
     {
         public static EVENT_RETRIEVED:string = Model.EVENT_RETRIEVED;
         public static EVENT_CHANGE:string = "change";

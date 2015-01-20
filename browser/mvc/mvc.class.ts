@@ -10,12 +10,15 @@
 ///<reference path="../../ghost/events/events.class.d.ts"/>
 ///<reference path="../../ghost/utils/utils.class.d.ts"/>
 ///<reference path="../data/data.class.d.ts"/>
+///<reference path="../io/io.class.d.ts"/>
 
 
 /* Internal Files from Deps*/
+///<reference path="IData.ts"/>
 ///<reference path="Model.ts"/>
 ///<reference path="Collection.ts"/>
 ///<reference path="Controller.ts"/>
+///<reference path="Master.ts"/>
 ///<reference path="Scope.ts"/>
 ///<reference path="Application.ts"/>
 ///<reference path="ControllerView.ts"/>

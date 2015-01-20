@@ -1,6 +1,7 @@
 ///<module="ghost/events"/>
 ///<module="ghost/utils"/>
 ///<lib="es6-promise"/>
+///<file="IData"/>
 module ghost.mvc
 {
 
@@ -10,7 +11,7 @@ module ghost.mvc
     /**
      * Model class
      */
-    export class Model extends ghost.events.EventDispatcher implements IRetrievable
+    export class Model extends ghost.events.EventDispatcher implements IRetrievable, IModel
     {
         /**
          * Emits when the data are loaded from the server
