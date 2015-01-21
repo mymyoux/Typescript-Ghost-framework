@@ -2,7 +2,7 @@ module ghost.mvc
 {
 	export interface IData
 	{
-		name:string;
+		name():string;
 		value:any;
 	}
 	export class Data

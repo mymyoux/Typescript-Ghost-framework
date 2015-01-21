@@ -8,12 +8,18 @@ module ghost.mvc
 {
 	export class Master extends Controller
 	{
+		/**
+         * List of events
+         * @type {{ACTIVATED: (ACTIVATED), DISACTIVATED: (DISACTIVATED)}}
+         */
+        public static EVENTS:any = Controller.EVENTS;
 		private templateString:string;
 		private template:Ractive;
 		private templateOptions:IRactiveOptions;
 		private _firstActivation:boolean = true;
 		private _data:any[];
 		protected _activated:boolean = false;
+		protected $container:JQuery;
 		constructor()
 		{
 			super();
@@ -93,18 +99,53 @@ module ghost.mvc
         		return;
         	}
         	this._activated = true;
-		 	(<any>Promise).series([this.initializeFirstData, this.initializeView, this.initializeData, this.firstActivation]).
+		 	(<any>Promise).series([this.initializeFirstData, this.initializeView, this.initializeData, this.isActivated, this.firstActivation]).
 		 	then(()=>
 		 	{	
 		 		//if could have been turn off
-		 		if(this._activated)
+		 		if(this.isActivated())
 		 		{
-
+		 			this.render();
+		 			this.activation();
 		 		}
-	 		},function()
+	 		},function(error)
 	 		{
-
+	 			console.error("Master failed during preactivation", this, error);
  			});
+        }
+          /**
+         * Called when the controller is asked for disactivation
+         * @protected
+         */
+        public _predisactivate():void
+        {
+            if(this._activated)
+            {
+                ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
+                ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
+                this.disactivate();
+                this.trigger(Master.EVENTS.DISACTIVATED);
+                this.hideContainer();
+                if(this.template)
+           		 {
+	                /*var listener:any = this.getBindedFunctions();
+	                if(listener)
+	                {
+	                    for(var p in listener)
+	                    {
+	                        this.template.off(p, listener[p]);
+	                        
+	                    }
+	                }*/
+	                //TODO:maybe dont remove template
+	                this.template.teardown();
+            	}
+            	this._activated = false;
+            }
+        }
+        public isActivated():boolean
+        {
+        	return this._activated;
         }
         protected initializeFirstData():Promise<any>|boolean
         {
@@ -164,6 +205,27 @@ module ghost.mvc
         	this.ready();
         	return true;
         }
+        protected activation():void
+        {
+        	this.activate();
+   			this.trigger(Master.EVENTS.ACTIVATED);
+            ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
+            ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
+        }
+         /**
+         * Called when application is paused (mobile + maybe tab lost focus?)
+         */
+        protected pause():void
+        {
+
+        }
+        /**
+         * Called when application is resumed (mobile)
+         */
+        protected resume():void
+        {
+
+        }
         protected getRootURL():string
         {
             var pathname:string = window.location.pathname;
@@ -214,6 +276,97 @@ module ghost.mvc
         public activate():void
         {
             super.activate();
+        }
+        public getContainer():any
+        {
+            if(this.$container && this.$container.length)
+            {
+                return this.$container.get(0);
+            }
+            console.log("get container",this.name());
+            var $scope = $("[data-scope='"+this.scoping()+"']");
+            if($scope.length)
+            {
+                 var container:HTMLElement = $scope.children("[data-container='"+this.name()+"']").get(0);
+	            if(!container)
+	            {
+	            	$scope.append('<div data-container="'+this.name()+'"></div>');
+	            }
+	            this.$container = $scope.children("[data-container='"+this.name()+"']");
+	            container = this.$container.get(0);
+            return container;
+            }
+        }
+        protected showContainer():void
+        {
+        	if(this.$container)
+        	{
+        		this.$container.show();
+        	}
+        }
+        protected hideContainer():void
+        {
+        	if(this.$container)
+        	{
+        		this.$container.hide();
+        	}
+        }
+        public render():void
+        {
+        	 var container:any = this.getContainer();
+            if(container)
+            {
+        		this.showContainer();
+                var options:any = 
+                {
+                	template:this.templateString
+                };
+
+                var data:any = this._data.reduce(function(previous:any, item:any)
+                {
+            		previous[item.name()] = item instanceof Data?item.value:item.toObject();
+            		return previous;
+            	}, {} );
+                data.trans = ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance());
+                var binded:any = this.getBindedFunctions();
+                for(var p in binded)
+                {
+                    data[p] = binded[p];
+                }
+                //not sure
+               	for(var p in binded)
+                {
+                     options[p] = binded[p];
+                }
+                options.data = data;
+
+                options.el = container;
+
+
+
+                this.template = new Ractive(options);
+
+                var listener:any = this.getBindedFunctions(); //this.getBindedEventListeners();
+                if(listener)
+                {
+                    for(var p in listener)
+                    {
+                        this.template.on(p, listener[p]);
+                        
+                    }
+                }
+            }else
+            {
+                console.warn("no container for ", this);
+            }
+        }
+        /**
+         * List of functions to bind key/function
+         * @return {any} [description]
+         */
+        protected getBindedFunctions():any
+        {
+            return null;
         }
 	}
 }

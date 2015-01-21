@@ -7,7 +7,7 @@ module ghost.promises
 		public static series(promises:any[]):Promise<any>
 		{	
 			var sequence:Promise<any> = Promise.resolve();
-			if(promises.length == 0)
+			if(!promises || promises.length == 0)
 			{
 				return sequence;
 			}
