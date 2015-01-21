@@ -3,6 +3,7 @@
 ///<file="Controller"/>
 ///<lib="es6-promise"/>
 ///<lib="ractive"/>
+///<module="framework/ghost/promises"/>
 module ghost.mvc
 {
 	export class Master extends Controller
@@ -92,7 +93,7 @@ module ghost.mvc
         		return;
         	}
         	this._activated = true;
-		 	Promise.all(<Promise<any>[]>[this.initializeFirst(), this.initializeView(), this.initializeData()]).
+		 	(<any>Promise).series([this.initializeFirstData, this.initializeView, this.initializeData, this.firstActivation]).
 		 	then(()=>
 		 	{	
 		 		//if could have been turn off
@@ -105,13 +106,12 @@ module ghost.mvc
 
  			});
         }
-        protected initializeFirst():Promise<any>|boolean
+        protected initializeFirstData():Promise<any>|boolean
         {
-        	if(!this._firstActivation)
+        	if(this._data.length)
         	{
         		return true;
         	}
-        	this._firstActivation = false;
 			this._setData();
         	return true;
         }
@@ -145,6 +145,23 @@ module ghost.mvc
         }
         protected initializeData():Promise<any>|boolean
         {
+        	var promises:Promise<any>[] = this._data.filter(function(item:any)
+    		{
+    			return item.retrieveData != undefined;
+			}).map(function(item:any)
+        	{	
+        		return item.retrieveData();
+    		});
+        	return Promise.all(promises);
+        }
+        protected firstActivation():boolean
+        {
+        	if(!this._firstActivation)
+        	{
+        		return true;	
+        	}
+        	this._firstActivation = false;
+        	this.ready();
         	return true;
         }
         protected getRootURL():string
@@ -183,12 +200,20 @@ module ghost.mvc
         {
             return null;
         }
+
         /**
-         * Call when the master is activated (view is )
+         * Called on the first activation - after all have been set but just before #activate();
+         */
+        protected ready():void
+        {
+
+        }
+		/**
+         * Call when the master is activated
          */
         public activate():void
         {
-
+            super.activate();
         }
 	}
 }
