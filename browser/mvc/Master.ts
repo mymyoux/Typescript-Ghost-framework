@@ -35,6 +35,10 @@ module ghost.mvc
 				this._data.push(new Data(name, value));
 			}else
 			{
+                if(typeof name == "function")
+                {
+                    name = new name();
+                }
 				this._data.push(name);
 			}
 		}
@@ -75,7 +79,8 @@ module ghost.mvc
 		protected _setData():void
 		{
 			var data:any[] = this.getInitialData();
-			data.forEach(this.addData, this);
+            if(data)
+			 data.forEach(this.addData, this);
 			this.setData();
 		}
 		protected setData():void
@@ -99,7 +104,7 @@ module ghost.mvc
         		return;
         	}
         	this._activated = true;
-		 	(<any>Promise).series([this.initializeFirstData, this.initializeView, this.initializeData, this.isActivated, this.firstActivation]).
+		 	(<any>Promise).series([this.initializeFirstData.bind(this), this.initializeView.bind(this), this.initializeData.bind(this), this.isActivated.bind(this), this.firstActivation.bind(this)]).
 		 	then(()=>
 		 	{	
 		 		//if could have been turn off
@@ -108,7 +113,7 @@ module ghost.mvc
 		 			this.render();
 		 			this.activation();
 		 		}
-	 		},function(error)
+	 		},(error)=>
 	 		{
 	 			console.error("Master failed during preactivation", this, error);
  			});
@@ -149,6 +154,7 @@ module ghost.mvc
         }
         protected initializeFirstData():Promise<any>|boolean
         {
+            console.log(this, this._data);
         	if(this._data.length)
         	{
         		return true;

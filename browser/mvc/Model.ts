@@ -185,7 +185,8 @@ module ghost.mvc
             }
             return null;
         }
-        public waitDataReady(data:string[] = [Model.PART_DEFAULT]):Promise<any>
+        
+        public retrieveData(data:string[] = [Model.PART_DEFAULT]):Promise<any>
         {
             var _this:Model = this;
             var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void

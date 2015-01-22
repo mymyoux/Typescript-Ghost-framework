@@ -175,7 +175,7 @@ module ghost.mvc
                             Scope.getScope(packg[p].prototype.scoping());
                         }
                     }
-                    var name:string = p.replace(/controller/ig,"").toLowerCase();
+                    var name:string = (packg[p].prototype.name?packg[p].prototype.name.call(): p.replace(/controller/ig,"")).toLowerCase();
                     var index:number = Controller._sShortname.indexOf(name);
                     if(index ==-1)
                         Controller._sShortname.push(name);
