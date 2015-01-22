@@ -63,7 +63,7 @@ module ghost.mvc
          * Save instance for further get operations
          * @param instance Instance's to save
          */
-        protected static saveInstance(instance:Collection<any>):void
+        public static saveInstance(instance:Collection<any>):void
         {
             if( Collection._instances[<any>instance.constructor])
             {
@@ -403,8 +403,16 @@ module ghost.mvc
             if(!this._retrieving && !this._retrieved)
             {
 
-                this._retrieving = true;
                 var url:string = this.getDataURLForServer();
+                if(!url)
+                {
+                    if(callback)
+                    {
+                        callback();
+                    }
+                    return;
+                }
+                this._retrieving = true;
                 if(url && url.substring(0, 1) != "/" && url.substring(0,4)!="http")
                 {
                     url = this.getRootURL()+url;

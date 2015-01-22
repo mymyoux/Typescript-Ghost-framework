@@ -484,6 +484,7 @@ module ghost.mvc
          * @return {Model}        Collection
          */
         public getCollection(index:number):Collection<any>;
+        public getCollection(value:Function):Collection<any>
         public getCollection(value:any):Collection<any>
         {
             if(typeof value == "string")
@@ -491,6 +492,16 @@ module ghost.mvc
                 for(var p in this._collections)
                 {
                     if(this._collections[p].name() == value || this._collections[p].getClassName() == value)
+                    {
+                        return this._collections[p];
+                    }
+                }
+            }
+            if(typeof value == "function")
+            {
+                for(var p in this._collections)
+                {
+                    if(this._collections[p] instanceof value)
                     {
                         return this._collections[p];
                     }
