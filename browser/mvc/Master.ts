@@ -201,15 +201,14 @@ module ghost.mvc
     		});
         	return Promise.all(promises);
         }
-        protected firstActivation():boolean
+        protected firstActivation():Promise<any>|boolean
         {
         	if(!this._firstActivation)
         	{
         		return true;	
         	}
         	this._firstActivation = false;
-        	this.ready();
-        	return true;
+        	return this.ready();
         }
         protected activation():void
         {
@@ -272,9 +271,9 @@ module ghost.mvc
         /**
          * Called on the first activation - after all have been set but just before #activate();
          */
-        protected ready():void
+        protected ready():Promise<any>|boolean  
         {
-
+            return true;
         }
 		/**
          * Call when the master is activated
