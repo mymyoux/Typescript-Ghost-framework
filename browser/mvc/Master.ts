@@ -190,7 +190,7 @@ module ghost.mvc
         		
                 return promise;
         	}
-        	return null;
+        	return true;
         }
         protected initializeData():Promise<any>|boolean
         {

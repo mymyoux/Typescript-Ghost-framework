@@ -11,7 +11,7 @@ module ghost.promises
 			{
 				return sequence;
 			}
-			promises.forEach(function(promise:any):void
+			promises.forEach(function(promise:any, index:number):void
 			{
 				sequence = sequence.then(function()
 				{
