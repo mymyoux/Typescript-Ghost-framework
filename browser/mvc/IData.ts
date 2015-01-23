@@ -5,6 +5,11 @@ module ghost.mvc
 		name():string;
 		value:any;
 	}
+	export interface IDataParts
+	{
+		parts():string[];
+		data:Data;
+	}
 	export class Data
 	{
 		private _name:string;

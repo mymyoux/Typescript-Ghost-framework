@@ -20,12 +20,14 @@ module ghost.mvc
 		private _data:any[];
 		protected _activated:boolean = false;
 		protected $container:JQuery;
+
 		constructor()
 		{
 			super();
 			this._data = [];
 		}
 
+        public addData(value:IDataParts):void;
 		public addData(value:IData):void;
 		public addData(name:string, value:any):void
 		public addData(name:any, value?:any):void
@@ -37,7 +39,7 @@ module ghost.mvc
 			{
                 if(typeof name == "function")
                 {
-                    name = new name();
+                    name = ghost.mvc.Model.get(name);
                 }
 				this._data.push(name);
 			}
