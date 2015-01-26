@@ -21,10 +21,15 @@ module ghost.mvc
 		protected _activated:boolean = false;
 		protected $container:JQuery;
 
+        protected _parts:string[][];
+
+
+
 		constructor()
 		{
 			super();
 			this._data = [];
+            this._parts = [];
 		}
 
         public addData(value:IDataParts):void;
@@ -37,6 +42,12 @@ module ghost.mvc
 				this._data.push(new Data(name, value));
 			}else
 			{
+                //additional parts
+                if(name.parts && name.data)
+                {
+                    this._parts[this._data.length] = name.parts;
+                    name = name.data;
+                } 
                 if(typeof name == "function")
                 {
                     name = ghost.mvc.Model.get(name);
@@ -194,13 +205,21 @@ module ghost.mvc
         }
         protected initializeData():Promise<any>|boolean
         {
-        	var promises:Promise<any>[] = this._data.filter(function(item:any)
-    		{
-    			return item.retrieveData != undefined;
-			}).map(function(item:any)
+        	var promises:Promise<any>[] = this._data.map(function(item:any, index:number)
         	{	
-        		return item.retrieveData();
-    		});
+                if(item.retrieveData)
+                {
+                    if(this._parts[index])
+                    {
+                        return item.retrieveData(this._parts[index]);
+                    }
+        		  return item.retrieveData();
+                }
+                return null;
+    		}, this).filter(function(item:any)
+            {
+                return item != null;
+            });
         	return Promise.all(promises);
         }
         protected firstActivation():Promise<any>|boolean
