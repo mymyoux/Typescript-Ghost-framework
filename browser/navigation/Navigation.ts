@@ -118,7 +118,7 @@ module ghost.browser.navigation
                 
                 if(hash[scope])
                 {
-                    page = hash[scope];
+                    page = hash[scope].page;
                 }
                 if(!page)
                 {
@@ -146,7 +146,13 @@ module ghost.browser.navigation
             var hashSplit:string[] = hash.split("+");
             var hashes:any = hashSplit.reduce((previous:any, big_hash:string)=>
             {
-                var split:string[] = big_hash.split("_");
+                var split:string[] = big_hash.split("/");
+                var canHaveParam:boolean = true;
+                if(split.length == 1)
+                {
+                    canHaveParam = false;
+                    split = big_hash.split("_");
+                }
                 if(split.length == 0 || split[0] == "")
                 {
                     return previous;
@@ -157,7 +163,10 @@ module ghost.browser.navigation
                     //no _ :
                     if(!this._DEFAULT_SCOPE)
                     {
+                        console.log(hash);
+                        console.log(hashSplit);
                         console.warn("Uncaught Error: Navigation._DEFAULT_SCOPE not set!");
+                        //debugger;
                         return previous;
                     }
                     scope = this._DEFAULT_SCOPE;
@@ -165,8 +174,16 @@ module ghost.browser.navigation
                 {
                     scope = split[0];
                 }
-                page = split.slice(1).join("_");
-                previous[scope] = page;
+                var params:any = null;
+                if(canHaveParam)
+                {
+                    page = split[1];
+                    params = split.slice(2);   
+                }else
+                {
+                    page = split.slice(1).join("_");
+                }
+                previous[scope] = {page:page, params:params};
                 return previous;
             }, {});
             return hashes;
@@ -178,7 +195,7 @@ module ghost.browser.navigation
             for(var p in hashes)
             {
                 scope = p;
-                page = hashes[scope];
+                page = hashes[scope].page;
                 if(first === true)
                 {
                     $("#"+scope).attr("first",page);
