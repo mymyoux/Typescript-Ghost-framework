@@ -109,7 +109,7 @@ module ghost.mvc
          * Called when the controller is asked for activation
          * @protected
          */
-        public _preactivate():void
+        public _preactivate(params?:any):void
         {
         	if(this._activated)
         	{

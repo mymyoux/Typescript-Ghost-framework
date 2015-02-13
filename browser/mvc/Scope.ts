@@ -48,7 +48,7 @@ module ghost.mvc
                 }
             
         }
-        private _onPageChanged(name:string, type:string, previous:string, next:string):void
+        private _onPageChanged(name:string, type:string, previous:string, next:string, params:any = null):void
         {
             if(name == this._name)
             {
@@ -112,10 +112,10 @@ module ghost.mvc
          * @param name controller's name or controller instance or controller class
          * @return Controller
          */
-        public setCurrentController(name:string):Controller;
-        public setCurrentController(controller:Controller):Controller;
-        public setCurrentController(controller:any):Controller;
-        public setCurrentController(controller:any):Controller
+        public setCurrentController(name:string, params?:any):Controller;
+        public setCurrentController(controller:Controller, params?:any):Controller;
+        public setCurrentController(controller:any, params?:any):Controller;
+        public setCurrentController(controller:any, params?:any):Controller
         {
 
             if(typeof controller == "string")
