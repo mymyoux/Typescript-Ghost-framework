@@ -23,6 +23,7 @@ module ghost.mvc
 
         protected _parts:string[][];
 
+        private paramsFromActivation:any;
 
 
 		constructor()
@@ -105,17 +106,23 @@ module ghost.mvc
 		{
 			return null;
 		}
+        protected getActivationParams():any
+        {
+            return this.paramsFromActivation;
+        }
         /**
          * Called when the controller is asked for activation
          * @protected
          */
         public _preactivate(params?:any):void
         {
+            this.paramsFromActivation = params;
         	if(this._activated)
         	{
         		//already activating/ed
         		return;
         	}
+
         	this._activated = true;
 		 	(<any>Promise).series([this.initializeFirstData.bind(this), this.initializeView.bind(this), this.initializeData.bind(this), this.isActivated.bind(this), this.firstActivation.bind(this)]).
 		 	then(()=>
