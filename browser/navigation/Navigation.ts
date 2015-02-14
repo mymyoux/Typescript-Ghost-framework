@@ -118,7 +118,7 @@ module ghost.browser.navigation
                 
                 if(hash[scope])
                 {
-                    page = hash[scope];
+                    page = hash[scope].page;
                 }
                 if(!page)
                 {
@@ -146,7 +146,13 @@ module ghost.browser.navigation
             var hashSplit:string[] = hash.split("+");
             var hashes:any = hashSplit.reduce((previous:any, big_hash:string)=>
             {
-                var split:string[] = big_hash.split("_");
+                var split:string[] = big_hash.split("/");
+                var canHaveParam:boolean = true;
+                if(split.length == 1)
+                {
+                    canHaveParam = false;
+                    split = big_hash.split("_");
+                }
                 if(split.length == 0 || split[0] == "")
                 {
                     return previous;
@@ -157,7 +163,10 @@ module ghost.browser.navigation
                     //no _ :
                     if(!this._DEFAULT_SCOPE)
                     {
+                        console.log(hash);
+                        console.log(hashSplit);
                         console.warn("Uncaught Error: Navigation._DEFAULT_SCOPE not set!");
+                        //debugger;
                         return previous;
                     }
                     scope = this._DEFAULT_SCOPE;
@@ -165,8 +174,16 @@ module ghost.browser.navigation
                 {
                     scope = split[0];
                 }
-                page = split.slice(1).join("_");
-                previous[scope] = page;
+                var params:any = null;
+                if(canHaveParam)
+                {
+                    page = split[1];
+                    params = split.slice(2);   
+                }else
+                {
+                    page = split.slice(1).join("_");
+                }
+                previous[scope] = {page:page, params:params};
                 return previous;
             }, {});
             return hashes;
@@ -174,15 +191,16 @@ module ghost.browser.navigation
          private _onHashChange(first:boolean = false):void
         {
             var hashes:any = this.parseHash();
-            var scope:string, page:string;
+            var scope:string, page:string, params:any;
             for(var p in hashes)
             {
                 scope = p;
-                page = hashes[scope];
+                page = hashes[scope].page;
+                params = hashes[scope].params;
                 if(first === true)
                 {
                     $("#"+scope).attr("first",page);
-                    this.pushPage(scope, page);
+                    this.pushPage(scope, page, params);
                 }else
                 {
                     if(page == "back")
@@ -191,7 +209,7 @@ module ghost.browser.navigation
                         this.popPage(scope);
                     }else
                     {
-                        this.pushPage(scope, page);
+                        this.pushPage(scope, page, params);
                     }
 
                 }
@@ -285,9 +303,9 @@ module ghost.browser.navigation
          * @param scope scope's label
          * @param page page's name
          */
-        public pushPage(scope:string, page:string):void
+        public pushPage(scope:string, page:string, params:any = null):void
         {
-            this.getScope(scope).pushPage(page);
+            this.getScope(scope).pushPage(page, params);
         }
         /**
          * Replaces a page of a scope
@@ -392,8 +410,8 @@ module ghost.browser.navigation
          * @private
          */
         private _key:string;
-        private _history:string[];
-        private _current:string;
+        private _history:IPage[];
+        private _current:IPage;
         private _event:NavigationEvent;
         
         /**
@@ -526,44 +544,49 @@ module ghost.browser.navigation
         }
         /**
          * Gets current page's label
-         * @returns {string}
+         * @returns {IPage}
          */
-        public getCurrentPage():string
+        public getCurrentPage():IPage
         {
             return this._current;
         }
          /**
           * Gets page's index. if -1 will return the last one (=current)
-          * @returns {string}
+          * @returns {IPage}
           */
-         public getPage(index:number):string
+         public getPage(index:number):IPage
          {
              if(index<0)
              {
                  index = this._history.length+index;
              }
-             return this._history[index];
+             return <IPage>this._history[index];
          }
         /**
          * Pushes a new page
          * @param page
          */
-        public pushPage(page:string):void
+        public pushPage(page:string, params:any = null):void
         {
-            if(this._current != page)
+            if(!this._current || this._current.page != page || this._current.params !== params)
             {
-                var old = this._current;
+                var old:string = this._current?this._current.page:null;
                if(!this._isCancelled(Navigation.PUSH, old, page))
                {
-                   this._history.push(page);
+                    var ipage:IPage = 
+                    {
+                        page:page,
+                        params: params
+                    };
+                   this._history.push(ipage);
     
-                   this._current = page;
-                   window.location.hash = "#"+this._key+"_"+this._current;
-                   this._pageChange(Navigation.PUSH, old, this._current);
+                   this._current = ipage;
+                   window.location.hash = "#"+this._key+"_"+this._current.page;
+                   this._pageChange(Navigation.PUSH, old, this._current.page, params);
     
                }else
                {
-                   window.location.hash = "#"+this._key+"_"+this._current;
+                   window.location.hash = "#"+this._key+"_"+this._current.page;
                }
             }
         }
@@ -571,22 +594,27 @@ module ghost.browser.navigation
          * Replaces current page by a new one. If there is no current page, will call #pushPage instead
          * @param page
          */
-        public replacePage(page:string):void
+        public replacePage(page:string, params:any = null):void
         {
             if(this._history.length == 0)
             {
                 this.pushPage(page);
                 return;
             }
-            if(this._current!=page)
+            if(!this._current || this._current.page != page || this._current.params !== params)
             {
-                var old = this._current;
+                var old:string = this._current?this._current.page:null;
                 if(!this._isCancelled(Navigation.REPLACE, old, page))
                 {
-                    this._current = page;
-                    this._history[this._history.length-1] = page;
-                    window.location.hash = "#"+this._key+"_"+this._current;
-                    this._pageChange(Navigation.REPLACE, old, this._current);
+                     var ipage:IPage = 
+                    {
+                        page:page,
+                        params: params
+                    };
+                    this._current = ipage;
+                    this._history[this._history.length-1] = ipage;
+                    window.location.hash = "#"+this._key+"_"+this._current.page;
+                    this._pageChange(Navigation.REPLACE, old, this._current.page);
                 }
             }
         }
@@ -603,7 +631,7 @@ module ghost.browser.navigation
             if(this._history.length>1)
             {
     
-                var old = this._current;
+                var old = this._current.page;
                 if(this._history.length>count)
                 {
                     this._current = this._history[this._history.length-count-1];
@@ -613,12 +641,12 @@ module ghost.browser.navigation
                 }
     
     
-                if(!this._isCancelled(Navigation.POP, old, this._current))
+                if(!this._isCancelled(Navigation.POP, old, this._current.page))
                 {
                     this._history.splice(this._history.length-count, count);
                    // this._current = this._history.length>0?this._history[this._history.length-1]:null;
-                    window.location.hash = "#"+this._key+"_"+this._current;
-                    this._pageChange(Navigation.POP, old, this._current);
+                    window.location.hash = "#"+this._key+"_"+this._current.page;
+                    this._pageChange(Navigation.POP, old, this._current.page);
                 }
             }else
             {
@@ -632,14 +660,18 @@ module ghost.browser.navigation
          * @param next next page
          * @private
          */
-        private _pageChange(type:string, previous:string, next:string):void
+        private _pageChange(type:string, previous:string, next:string, params:any = null):void
         {
-            this.trigger(Navigation.EVENT_PAGE_CHANGED, type, previous, next);
-            ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
+            this.trigger(Navigation.EVENT_PAGE_CHANGED, type, previous, next, params);
+            ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next, params);
         }
     }
     
  //   Navigation = new Navigation();
-    
+    export interface IPage
+    {
+        page:string;
+        params:any;
+    }
     
 }

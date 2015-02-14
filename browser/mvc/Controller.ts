@@ -83,7 +83,7 @@ module ghost.mvc
         /**
          * called by scope
          */
-        public _preactivate():void
+        public _preactivate(params?:any):void
         {
             this.activate();
             this.trigger(Controller.EVENTS.ACTIVATED);
