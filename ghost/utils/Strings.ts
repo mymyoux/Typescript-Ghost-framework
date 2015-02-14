@@ -26,6 +26,14 @@ module ghost.utils
                 str = Strings.replaceAll(str, norm[i], spec[i]);
             return str;
         }
+        public static startsWith(value:string, start:string):boolean
+        {
+            if(!value || !start)
+            {
+                return false;
+            }
+            return value.indexOf(start) == 0;
+        }
         public static capitalizeAllWords(text:string):string
         {
             text = text.toLowerCase();
