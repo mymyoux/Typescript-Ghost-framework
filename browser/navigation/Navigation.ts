@@ -586,7 +586,7 @@ module ghost.browser.navigation
     
                }else
                {
-                   window.location.hash = "#"+this._key+"_"+this._current.page;
+                   window.location.hash = "#"+this._key+"_"+(this._current?this._current.page:"");
                }
             }
         }
@@ -641,12 +641,12 @@ module ghost.browser.navigation
                 }
     
     
-                if(!this._isCancelled(Navigation.POP, old, this._current.page))
+                if(!this._isCancelled(Navigation.POP, old, (this._current?this._current.page:"")))
                 {
                     this._history.splice(this._history.length-count, count);
                    // this._current = this._history.length>0?this._history[this._history.length-1]:null;
-                    window.location.hash = "#"+this._key+"_"+this._current.page;
-                    this._pageChange(Navigation.POP, old, this._current.page);
+                    window.location.hash = "#"+this._key+"_"+(this._current?this._current.page:"");
+                    this._pageChange(Navigation.POP, old, (this._current?this._current.page:""));
                 }
             }else
             {

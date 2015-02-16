@@ -127,6 +127,7 @@ module ghost.mvc
 		 	(<any>Promise).series([this.initializeFirstData.bind(this), this.initializeView.bind(this), this.initializeData.bind(this), this.isActivated.bind(this), this.firstActivation.bind(this)]).
 		 	then(()=>
 		 	{	
+                
 		 		//if could have been turn off
 		 		if(this.isActivated())
 		 		{
