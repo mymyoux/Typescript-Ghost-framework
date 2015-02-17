@@ -65,12 +65,14 @@ module ghost.events
             }
             if(!name)
             {
+                debugger;
                 throw(new Error("event's name can't be null"));
             }
             if(this._events[name])
             {
                for(var p in this._events[name])
                {
+                console.log("execute=>"+name+":"+p);
                    this._events[name][p].execute(data);
                }
             }
@@ -78,6 +80,7 @@ module ghost.events
             {
                 while(this._eventsOnce[name].length>0)
                 {
+                    console.log("execute-once=>"+name+":"+p);
                     this._eventsOnce[name].shift().execute(data);
                 }
                 delete this._eventsOnce[name];
@@ -85,7 +88,18 @@ module ghost.events
             var index:number;
             if((index = name.indexOf(":"))!=-1)
             {
-                this.trigger.apply(this, [name.substring(0, index), name.substring(index+1)].concat(data));
+                var params:any = [name.substring(0, index), name.substring(index+1)];
+                if(name && name != "")
+                    this.trigger.apply(this, [name.substring(0, index), name.substring(index+1)].concat(data));
+                else
+                {
+                       for(var n in this._events)
+                           for(var p in this._events[n])
+                           {
+                                console.log("__execute=>"+n+":"+p);
+                               this._events[n][p].execute(data);
+                           }
+                }
             }
             if(name != EventDispatcher.EVENTS.ALL)
                 this.trigger.apply(this, [EventDispatcher.EVENTS.ALL, name].concat(data));

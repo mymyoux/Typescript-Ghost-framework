@@ -88,7 +88,7 @@ module ghost.mvc
             this.activate();
             this.trigger(Controller.EVENTS.ACTIVATED);
         }
-        public canActivate():string|boolean
+        public canActivate(params?:any):string|boolean
         {
             return true;
         }

@@ -52,7 +52,6 @@ module ghost.mvc
         {
             if(name == this._name)
             {
-
                 this.removeCurrentController();
                 if(next)
                 {
@@ -60,7 +59,7 @@ module ghost.mvc
                     var controller:Controller = Controller.getController(next);
                     if(controller)
                     {
-                        this.setCurrentController(controller);
+                        this.setCurrentController(controller, params);
                     }
                 }
             }
@@ -118,6 +117,7 @@ module ghost.mvc
         public setCurrentController(controller:any, params?:any):Controller
         {
 
+
             if(typeof controller == "string")
             {
                 controller = Controller.getController(controller);
@@ -138,11 +138,11 @@ module ghost.mvc
                 throw new Error("Controller "+controller.getClassName()+" - scope doesn't match : "+controller.scoping()+" instead of "+this._name);
             }
 
-            if(controller.canActivate()==true)
+            if(controller.canActivate(params)==true)
             {
                 this.removeCurrentController();
                 this._currentController = controller;
-                this._currentController._preactivate();
+                this._currentController._preactivate(params);
             }
 
             return this._currentController;

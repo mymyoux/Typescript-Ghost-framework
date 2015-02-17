@@ -101,6 +101,10 @@ module ghost.mvc
 		{
 
 		}
+        public setParamaters(params:any):void
+        {
+            this.paramsFromActivation = params;
+        }
 
 		protected getInitialData():any[]
 		{
