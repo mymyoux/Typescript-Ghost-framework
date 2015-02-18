@@ -193,6 +193,7 @@ module ghost.browser.navigation
          private _onHashChange(first:boolean = false):void
         {
             var hashes:any = this.parseHash();
+            log.warn(hashes);
             var scope:string, page:string, params:any;
             for(var p in hashes)
             {
@@ -211,79 +212,13 @@ module ghost.browser.navigation
                         this.popPage(scope);
                     }else
                     {
-                        this.pushPage(scope, page, params);
+                        this.pushPage(scope, page, params, true);
                     }
 
                 }
 
             }   
         }
-        /**
-         * Called when hash page changed
-         * @private
-         */
-        private _onHashChange2(first:boolean = false):void
-        {
-
-            var index;
-            var hash:any = window.location.hash;
-            if((index = hash.indexOf("#"))!=-1)
-            {
-                hash = hash.substring(index+1);
-            }
-            if(hash.length>0)
-            {
-            //console.error("HASH=>"+hash);
-               if(ghost.constants.debug && hash.substring(0, 1) == "+")
-               {
-                    hash = hash.substring(1);
-                    hash = hash.split("+");
-                    var selector;
-                   for(var p in hash)
-                   {
-                       selector = hash[p].split("_");
-                       if(selector.length == 2)
-                       {
-                            $("#"+selector[0]).attr("first", selector[1]);
-                       }
-                   }
-                 //  $(selector).remove();
-                 //  alert(selector);
-
-
-
-                   scrollTo(0,0);
-                   return;
-               }
-                var index;
-                var scope:string;
-                if((index = hash.indexOf("_"))==-1)
-                {
-                    scope = this._DEFAULT_SCOPE;
-                }else
-                {
-                    scope = hash.substring(0,index);
-                    hash = hash.substring(index+1);
-                }
-                if(first === true)
-                {
-                    $("#"+scope).attr("first",hash);
-                    this.pushPage(scope, hash);
-                }else
-                {
-                    if(hash == "back")
-                    {
-        
-                        this.popPage(scope);
-                    }else
-                    {
-                        this.pushPage(scope, hash);
-                    }
-
-                }
-            }
-        }
-
         private getDefaultPage(scope:string):string
         {
             if(this._defaultsPages)
@@ -305,9 +240,9 @@ module ghost.browser.navigation
          * @param scope scope's label
          * @param page page's name
          */
-        public pushPage(scope:string, page:string, params:any = null):void
+        public pushPage(scope:string, page:string, params:any = null, fromHash:boolean = false):void
         {
-            this.getScope(scope).pushPage(page, params);
+            this.getScope(scope).pushPage(page, params, fromHash);
         }
         /**
          * Replaces a page of a scope
@@ -370,6 +305,9 @@ module ghost.browser.navigation
          * @private
          */
         private _cancelled:boolean;
+        public previous:string;
+        public next:string;
+        public params:any;
          /**
          * Constructor
          * @private
@@ -437,9 +375,12 @@ module ghost.browser.navigation
          * @returns {boolean}
          * @private
          */
-        private _isCancelled(type:string, previous:string, next:string):boolean
+        private _isCancelled(type:string, previous:string, next:string, params?:any):boolean
         {
             this._event._uncancel();
+            this._event.params = params;
+            this._event.previous = previous;
+            this._event.next = next;
             this.trigger(previous+":"+next, type, previous, next, this._event );
             if(!this._event.isCancelled())
             {
@@ -447,7 +388,19 @@ module ghost.browser.navigation
                 if(!this._event.isCancelled())
                 {
                     this.trigger("to:"+next, type, previous, next, this._event );
+                    if(this._event.isCancelled())
+                    {
+
+                    log.warn("cancelled third ["+previous+"/"+next+"]");
+                    }
+                }else
+                {
+
+                    log.warn("cancelled second ["+previous+"/"+next+"]");
                 }
+            }else
+            {
+                log.warn("cancelled first ["+previous+"/"+next+"]");
             }
             return this._event.isCancelled();
         }
@@ -568,12 +521,12 @@ module ghost.browser.navigation
          * Pushes a new page
          * @param page
          */
-        public pushPage(page:string, params:any = null):void
+        public pushPage(page:string, params:any = null, fromHash:boolean = false):void
         {
             if(!this._current || this._current.page != page || this._current.params !== params)
             {
                 var old:string = this._current?this._current.page:null;
-               if(!this._isCancelled(Navigation.PUSH, old, page))
+               if(!this._isCancelled(Navigation.PUSH, old, page, params))
                {
                     var ipage:IPage = 
                     {
@@ -583,11 +536,17 @@ module ghost.browser.navigation
                    this._history.push(ipage);
     
                    this._current = ipage;
-                   window.location.hash = "#"+this._key+"_"+this._current.page;
+                   if(!fromHash)
+                   {
+                    log.info("not from hash:"+this._key+":"+this._current.page);
+                    window.location.hash = "#"+this._key+"_"+this._current.page;
+                   }
+                    
                    this._pageChange(Navigation.PUSH, old, this._current.page, params);
     
                }else
                {
+                log.warn("CANCEL hash:"+this._key+":"+(this._current?this._current.page:""));
                    window.location.hash = "#"+this._key+"_"+(this._current?this._current.page:"");
                }
             }
@@ -606,7 +565,7 @@ module ghost.browser.navigation
             if(!this._current || this._current.page != page || this._current.params !== params)
             {
                 var old:string = this._current?this._current.page:null;
-                if(!this._isCancelled(Navigation.REPLACE, old, page))
+                if(!this._isCancelled(Navigation.REPLACE, old, page, params))
                 {
                      var ipage:IPage = 
                     {

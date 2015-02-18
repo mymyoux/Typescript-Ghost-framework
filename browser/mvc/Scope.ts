@@ -83,7 +83,7 @@ module ghost.mvc
             var controller:Controller = Controller.getController(next);
             if(controller)
             {
-                var canActivate:string|boolean = controller.canActivate();
+                var canActivate:string|boolean = controller.canActivate(event.params);
                 if(canActivate === true)
                 {
                     return;
