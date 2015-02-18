@@ -1,4 +1,5 @@
 ///<module="events"/>
+///<module="debug"/>
 ///<lib="jquery"/>
 module ghost.browser.navigation
 {
@@ -136,7 +137,8 @@ module ghost.browser.navigation
                     _this.pushPage($(this).attr("data-scope"), page);
                 }else
                 {
-                    console.warn("No child with data-name inside a data-scope element and no default page for scope["+scope+"]", this);
+                    log.warn("No child with data-name inside a data-scope element and no default page for scope["+scope+"]");
+                    log.warn(this);
                 }
             });
         }
@@ -663,7 +665,7 @@ module ghost.browser.navigation
         private _pageChange(type:string, previous:string, next:string, params:any = null):void
         {
             this.trigger(Navigation.EVENT_PAGE_CHANGED, type, previous, next, params);
-            ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next, params);
+            ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, this._key, type, previous, next, params);
         }
     }
     

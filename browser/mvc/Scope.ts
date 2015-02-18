@@ -1,4 +1,5 @@
 ///<module="ghost/events"/>
+///<module="ghost/browser/debug"/>
 ///<file="Controller.ts"/>
 module ghost.mvc
 {
@@ -40,25 +41,29 @@ module ghost.mvc
                         {
                             this._onPageChanged(page, Scope.navigation().EVENT_PAGE_CHANGED,null, page);
                         }
-                        scope.on("to", function(event_next:string, type:string, previous:string, next:string, event:ghost.browser.navigation.NavigationEvent):void
+                        scope.on("to", function(/*event_next:string,*/ type:string, previous:string, next:string, event:ghost.browser.navigation.NavigationEvent):void
                         {
                             this.onPageChanging(type, previous, next, event);
                         },this);
                     }
                 }
+                log.info("New Scope : "+name);
             
         }
         private _onPageChanged(name:string, type:string, previous:string, next:string, params:any = null):void
         {
+             log.info(name+" - page changed : "+name+" " +previous+"=>"+next);
             if(name == this._name)
             {
                 this.removeCurrentController();
                 if(next)
                 {
+
                     
                     var controller:Controller = Controller.getController(next);
                     if(controller)
                     {
+                    log.warn("Loading : "+next);
                         this.setCurrentController(controller, params);
                     }
                 }
@@ -138,8 +143,10 @@ module ghost.mvc
                 throw new Error("Controller "+controller.getClassName()+" - scope doesn't match : "+controller.scoping()+" instead of "+this._name);
             }
 
-            if(controller.canActivate(params)==true)
+            if(controller.canActivate(params)===true)
             {
+                log.info("Activating:");
+                log.warn(controller);
                 this.removeCurrentController();
                 this._currentController = controller;
                 this._currentController._preactivate(params);

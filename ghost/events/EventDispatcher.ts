@@ -11,6 +11,8 @@ module ghost.events
         {
             ALL : "all"
         };
+        private _eventsK1:any;
+        private _eventsK2:any;
         /**
          * named indexed objects for each event
          */
@@ -32,6 +34,9 @@ module ghost.events
         constructor()
         {
             super();
+            this._eventsK1 = {};
+            this._eventsK2 = {};
+
             this._events = {};
             this._eventsOnce = {};
         }
@@ -68,11 +73,93 @@ module ghost.events
                 debugger;
                 throw(new Error("event's name can't be null"));
             }
+            var key1:string;
+            var key2:string;
+            if(name.indexOf(":") != -1)
+            {
+                var parts:string[] = name.split(":");
+                key1 = parts[0];
+                key2 = parts.slice(1).join(":");
+                if(key1 == "" || !key1)
+                {
+                    key1 = EventDispatcher.EVENTS.ALL;
+                }
+                if(key2 == "" || !key2)
+                {
+                    key2 = EventDispatcher.EVENTS.ALL;
+                }
+            }else
+            {
+                key1 = name;
+                key2 = EventDispatcher.EVENTS.ALL;
+            }
+            //if(key1 == "page_changed")
+            //console.log("TT_TRIGGER_=>"+name+"     |      "+key1+":"+key2);
+            var once:Listener[] = [];
+            var listener:Listener;
+            if(key1 == "page_changed" && key2 != "all")
+            {
+                //debugger;
+            }
+
+            if(this._eventsK1[key1])
+            {
+                for(var p in this._eventsK1[key1])
+                {
+                    listener = this._eventsK1[key1][p];
+                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
+                    {
+                        continue;
+                    }
+                     //  if(key1 == "page_changed")
+                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
+                    if(listener.once)
+                    {
+                        once.push(listener);
+                    }
+                    listener.execute(data);
+                }
+            }
+            if(this._eventsK2[key2])
+            {
+                for(var p in this._eventsK2[key2])
+                {
+                    listener = this._eventsK2[key2][p];
+                    if(!listener)
+                    {
+                        debugger;
+                    }
+                    //we dont re-execute two keys match & all:all match
+                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
+                    {
+                        continue;
+                    }
+                    if(listener.once)
+                    {
+                        if( once.indexOf(listener) == -1)
+                        {
+
+                            once.push(listener);
+                        }else
+                        {
+                            //not called twice
+                            continue;
+                        }
+                    }
+                   //if(key1 == "page_changed")
+                    //console.log("TT___execute=>"+listener.key1+":"+listener.key2);
+                    listener.execute(data);
+                }
+            }
+            return;
+
+
+
             if(this._events[name])
             {
                for(var p in this._events[name])
                {
-                console.log("execute=>"+name+":"+p);
+                //console.log("TT_execute=>"+name+":"+p);
                    this._events[name][p].execute(data);
                }
             }
@@ -80,7 +167,7 @@ module ghost.events
             {
                 while(this._eventsOnce[name].length>0)
                 {
-                    console.log("execute-once=>"+name+":"+p);
+                    //console.log("TT_execute-once=>"+name+":"+p);
                     this._eventsOnce[name].shift().execute(data);
                 }
                 delete this._eventsOnce[name];
@@ -96,7 +183,7 @@ module ghost.events
                        for(var n in this._events)
                            for(var p in this._events[n])
                            {
-                                console.log("__execute=>"+n+":"+p);
+                                //console.log("__execute=>"+n+":"+p);
                                this._events[n][p].execute(data);
                            }
                 }
@@ -107,30 +194,9 @@ module ghost.events
 
         public on(name:string, callback:Function, scope?:any, ...parameters:any[]):void
         {
-            if(!name)
-            {
-                throw(new Error("event's name can't be null"));
-            }
-            if(name.indexOf(" ")>-1)
-            {
-                var names:string[] = name.split(" ");
-                for(var p in names)
-                {
-                    if(names[p].length>0)
-                    {
-                        this.on.apply(this, [names[p],callback, scope].concat(parameters));
-                    }
-                }
-                return;
-            }
-            if(!this._events[name])
-            {
-                this._events[name] = new Array<Listener>();
-            }
-
-            this._events[name].push(new Listener(callback, scope, parameters));
+            return this.__on(false, name, callback, scope, parameters);
         }
-        public once(name:string, callback:Function, scope?:any, ...parameters:any[]):void
+        private __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
         {
             if(!name)
             {
@@ -148,12 +214,49 @@ module ghost.events
                 }
                 return;
             }
-            if(!this._eventsOnce[name])
+            var key1:string;
+            var key2:string;
+            if(name.indexOf(":") != -1)
             {
-                this._eventsOnce[name] = new Array<Listener>();
+                var parts:string[] = name.split(":");
+                key1 = parts[0];
+                key2 = parts.slice(1).join(":");
+                if(key1 == "" || !key1)
+                {
+                    key1 = EventDispatcher.EVENTS.ALL;
+                }
+                if(key2 == "" || !key2)
+                {
+                    key2 = EventDispatcher.EVENTS.ALL;
+                }
+            }else
+            {
+                key1 = name;
+                key2 = EventDispatcher.EVENTS.ALL;
             }
-
-            this._eventsOnce[name].push(new Listener(callback, scope, parameters));
+          ///  if(key1 == "page_changed")
+          //console.log("TT___on["+once+"]=>"+name +"      |    "+key1+":"+key2);
+            var listener:Listener = new Listener(key1, key2, once, callback, scope, parameters);
+            if(key1)
+            {
+                if(!this._eventsK1[key1])
+                {
+                    this._eventsK1[key1] = new Array<Listener>();
+                }
+                this._eventsK1[key1].push(listener);
+            }
+            if(key2)
+            {
+                if(!this._eventsK2[key2])
+                {
+                    this._eventsK2[key2] = new Array<Listener>();
+                }
+                this._eventsK2[key2].push(listener);
+            }
+        }
+        public once(name:string, callback:Function, scope?:any, ...parameters:any[]):void
+        {
+           return this.__on(true, name, callback, scope, parameters);
         }
         public off(name?:string,  callback?:Function, scope?:any):void
         {
@@ -257,7 +360,7 @@ module ghost.events
     class Listener
     {
 
-        constructor(private callback:Function, private scope?:any, private parameters?:any[])
+        constructor(public key1:string, public key2:string, public once:boolean, private callback:Function, private scope?:any, private parameters?:any[])
         {
         }
         public isScope(scope:any):boolean

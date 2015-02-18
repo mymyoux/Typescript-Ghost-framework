@@ -16,7 +16,6 @@ module ghost.mvc
             this.prerequire(()=>
             {
                this._init();
-                console.log("ok");
             });
         }
         private _init():void

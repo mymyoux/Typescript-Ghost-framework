@@ -265,7 +265,7 @@ module ghost.mvc
                         count--;
                         if(count == 0)
                         {
-                            console.log("ALL MODEL DONE");
+//                            console.log("ALL MODEL DONE");
                             if(callback)
                             {
                                 callback();

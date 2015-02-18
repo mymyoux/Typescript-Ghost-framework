@@ -221,7 +221,8 @@ module ghost.mvc
                 {
                     if((index = Controller._sControllerInstance.indexOf(controller))==-1)
                     {
-                        console.warn("No controller registered that correspond to the instance given - you must use Controller.addPackage()");
+                        console.warn("No controller registered that correspond to the instance given - you must use Controller.addPackage()", controller);
+                        throw new Error();
                         return null;
                     }
                     console.warn("No controller registered that correspond to the class constructor given - you must use Controller.addPackage()");

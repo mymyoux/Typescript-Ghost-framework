@@ -230,7 +230,7 @@ module ghost.events
             {
                 if(!ROOT.cordova)
                 {
-                    console.log("False Cordova is Ready");
+                   // console.log("False Cordova is Ready");
                     this._triggerDeviceReady();
                     ghost.constants.cordovaEmulated = true;
                 }
@@ -240,7 +240,7 @@ module ghost.events
                     if(ROOT.location.href.indexOf("file://")==-1 || ROOT.location.href.indexOf("ripple")>-1 || ROOT.location.href.indexOf("local")>-1)
                     {
                         ghost.constants.cordovaEmulated = true;
-                        console.log("Cordova['emulated'] is Ready");
+                  //      console.log("Cordova['emulated'] is Ready");
 
                         if(ROOT.location.href.indexOf("ripple")==-1)
                         {
@@ -258,7 +258,7 @@ module ghost.events
         {
             if(!event)
             {
-                console.log("DEVICE READY EMULATED");
+               // console.log("DEVICE READY EMULATED");
             }
             if(!this._deviceReady)
             {

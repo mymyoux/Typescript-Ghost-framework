@@ -139,7 +139,7 @@ module ghost.mvc
                     }
               
                 }*/
-                console.warn("Ractive options", this.options);
+                //console.warn("Ractive options", this.options);
 
                 this.template = new Ractive(this.options);
 

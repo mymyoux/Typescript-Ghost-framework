@@ -3,6 +3,7 @@
 
 /* Extern Modules */
 ///<reference path="../events/events.class.d.ts"/>
+///<reference path="../debug/debug.class.d.ts"/>
 
 
 /* Internal Files from Deps*/

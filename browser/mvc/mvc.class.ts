@@ -12,6 +12,7 @@
 ///<reference path="../data/data.class.d.ts"/>
 ///<reference path="../io/io.class.d.ts"/>
 ///<reference path="../../ghost/promises/promises.class.d.ts"/>
+///<reference path="../debug/debug.class.d.ts"/>
 
 
 /* Internal Files from Deps*/

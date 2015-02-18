@@ -999,7 +999,7 @@ module ghost.phonegap
          * @param next next page
          * @private
          */
-        private _onPageChanged(type, previous, next)
+        private _onPageChanged(scope:string,type, previous, next)
         {
             console.log("PAGE CHANGED", next);
             //we can use Navigation properties because this event is
