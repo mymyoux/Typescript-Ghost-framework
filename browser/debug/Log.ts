@@ -89,7 +89,7 @@ module ghost.debug
          * Log to DEBUG level
          * @data Data to log
          */
-        public static debg(data:any):void
+        public static debug(data:any):void
         {
             Log.log(data, Log.LEVEL_DEBUG);
         }
@@ -112,7 +112,13 @@ module ghost.debug
                 var _cls:any = Log.getStackTrace(3);
                 if(!_cls || _cls.file != "<anonymous>")
                 {
-                    return;
+                    cls = Log.getStackTrace(2);
+                    if(cls)
+                    {
+                        cls = (<any>cls).cls;
+                    }
+                    if(!_cls || Log._white.indexOf(cls)!=-1)
+                        return;
                 }
             }
             if(!cls)

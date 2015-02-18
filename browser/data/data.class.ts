@@ -4,3 +4,4 @@
 
 /* Internal Files from Deps*/
 ///<reference path="Storage.ts"/>
+///<reference path="Cookies.ts"/>
