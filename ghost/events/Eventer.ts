@@ -318,6 +318,7 @@ module ghost.events
             var _this = this;
             object.addEventListener(name, function(event)
             {
+                console.log(name, object, event);
                 _this.trigger(name, event);
             }, false);
         }

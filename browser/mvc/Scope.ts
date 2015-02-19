@@ -29,8 +29,9 @@ module ghost.mvc
                 if(this._name && Scope.navigation())
                 {
                    // ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
-                    ghost.events.Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
-
+                   // ghost.events.Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
+                    //better than using Eventer
+                    Scope.navigation().getScope(this._name).on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
 
 
                     var scope:any = Scope.navigation().getScope(this._name);
@@ -50,11 +51,11 @@ module ghost.mvc
                 log.info("New Scope : "+name);
             
         }
-        private _onPageChanged(name:string, type:string, previous:string, next:string, params:any = null):void
+        private _onPageChanged(type:string, previous:string, next:string, params:any = null):void
         {
-             log.info(name+" - page changed : "+name+" " +previous+"=>"+next);
-            if(name == this._name)
-            {
+             log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
+           /* if(name == this._name)
+            {*/
                 this.removeCurrentController();
                 if(next)
                 {
@@ -67,7 +68,7 @@ module ghost.mvc
                         this.setCurrentController(controller, params);
                     }
                 }
-            }
+           // }
         }
 
         /**

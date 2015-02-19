@@ -1,11 +1,12 @@
 ///<module="data"/>
+///<module="framework/ghost/utils"/>
 
 module ghost.debug
 {
     /**
      * Logger
      */
-    export class Log
+    export class Log 
     {
         /**
          *  All possible stacktrace lines :
@@ -68,6 +69,7 @@ module ghost.debug
         private static _manuallyLogged:boolean = false;
 
         private static _hasColors:boolean = false;
+        private static colors:any = {}; 
 
         /**
          * Log to INFO level
@@ -100,6 +102,20 @@ module ghost.debug
         public static error(data:any):void
         {
             Log.log(data, Log.LEVEL_ERROR);
+        }
+        private static gradient:ghost.utils.Gradient;
+        private static count:number = 0; 
+        public static getColours()
+        {
+            if(!Log.gradient)
+            {
+                Log.gradient = new ghost.utils.Gradient();
+
+                Log.gradient.setColours("#000000", "#FF0000", "#FF00FF", "#FFFFFF");
+                Log.gradient.setMax(15);
+
+            }
+            return Log.gradient;
         }
         /**
          * Hides a class from the log
@@ -434,25 +450,28 @@ module ghost.debug
                 switch(level)
                 {
                     case Log.LEVEL_ERROR:
-                        color="red";
                         func=console.error;
                         break;
                     case Log.LEVEL_WARN:
-                        color="orange";
                         func=console.warn;
                         break;
                     case Log.LEVEL_DEBUG:
-                        color="black";
                         func=console.info;
                         break;
                     default:
                     case Log.LEVEL_INFO:
-                        color="#0099FF";
                         func=console.info;
                         break;
                 }
-                colors =['color:'+color+';font-weight:lighter;', 'color:grey;font-weight:lighter;','color:black;font-weight:lighter;','color:grey;font-weight:lighter;', 'color:'+color+';font-weight:bold;','color:grey;font-weight:lighter;','font-weight:lighter;'];
-                (<any>console).groupCollapsed.apply(console, ["%c["+level+"]"+txt].concat(colors));
+
+                if(!Log.colors[stackline.cls])
+                {
+                    Log.colors[stackline.cls] = Log.getColours().getColour(Log.count++, true);
+                    //Log.colors[stackline.cls] = Log.getColours().getColour(ghost.utils.Maths.randBetween(0, Log.getColours().getMax(), true);
+                }
+                color =  Log.colors[stackline.cls] ;
+                colors =['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;','color:black;font-weight:lighter;','color:grey;font-weight:lighter;', 'color:'+color+';font-weight:bold;','color:grey;font-weight:lighter;','font-weight:lighter;'];
+                (<any>console).groupCollapsed.apply(console, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+txt].concat(colors));
                 if(isData)
                     func.apply(console,[data]);
                 func.apply(console,[line, 'color:black;']);
@@ -525,6 +544,7 @@ module ghost.debug
             return null;
         }
     }
+    
 }
 
 var log = ghost.debug.Log;

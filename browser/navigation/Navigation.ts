@@ -107,6 +107,11 @@ module ghost.browser.navigation
                 }
             });
         }
+        public static changeHash(hash:string):void
+        {
+            log.info("Change hash:"+hash);
+            window.location.hash = "#"+hash;
+        }
         private _detectScope():void
         {
             var _this:Navigation = this;
@@ -190,10 +195,11 @@ module ghost.browser.navigation
             }, {});
             return hashes;
         }
+        ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
             var hashes:any = this.parseHash();
-            log.warn(hashes);
+
             var scope:string, page:string, params:any;
             for(var p in hashes)
             {
@@ -533,21 +539,18 @@ module ghost.browser.navigation
                         page:page,
                         params: params
                     };
-                   this._history.push(ipage);
+                   this._history.push(ipage); 
     
                    this._current = ipage;
                    if(!fromHash)
                    {
                     log.info("not from hash:"+this._key+":"+this._current.page);
-                    window.location.hash = "#"+this._key+"_"+this._current.page;
+                    Navigation.changeHash(this._key+"_"+this._current.page);
                    }
-                    
                    this._pageChange(Navigation.PUSH, old, this._current.page, params);
-    
                }else
                {
-                log.warn("CANCEL hash:"+this._key+":"+(this._current?this._current.page:""));
-                   window.location.hash = "#"+this._key+"_"+(this._current?this._current.page:"");
+                    Navigation.changeHash(this._key+"_"+(this._current?this._current.page:""));
                }
             }
         }
@@ -574,7 +577,7 @@ module ghost.browser.navigation
                     };
                     this._current = ipage;
                     this._history[this._history.length-1] = ipage;
-                    window.location.hash = "#"+this._key+"_"+this._current.page;
+                     Navigation.changeHash(this._key+"_"+this._current.page);
                     this._pageChange(Navigation.REPLACE, old, this._current.page);
                 }
             }
@@ -606,7 +609,7 @@ module ghost.browser.navigation
                 {
                     this._history.splice(this._history.length-count, count);
                    // this._current = this._history.length>0?this._history[this._history.length-1]:null;
-                    window.location.hash = "#"+this._key+"_"+(this._current?this._current.page:"");
+                    Navigation.changeHash(this._key+"_"+(this._current?this._current.page:""));
                     this._pageChange(Navigation.POP, old, (this._current?this._current.page:""));
                 }
             }else
