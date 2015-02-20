@@ -80,6 +80,7 @@ module ghost.browser.navigation
         constructor(ready:boolean = true)
         {
             super();
+            log.hide();
             if(Navigation.instance)
             {
                 //TODO:allow this ?
@@ -274,6 +275,7 @@ module ghost.browser.navigation
          */
         public popPage(scope:string, count?:number):void
         {
+            log.warn("pop page:"+ scope);
             this.getScope(scope).popPage(count);
         }
         /**
@@ -368,6 +370,7 @@ module ghost.browser.navigation
         constructor(key:string, navigation:Navigation)
         {
             super();
+            log.hide();
             this._key = key;
             this._history = [];
             this._current = null;
@@ -548,6 +551,7 @@ module ghost.browser.navigation
                     Navigation.changeHash(this._key+"_"+this._current.page);
                    }
                    this._pageChange(Navigation.PUSH, old, this._current.page, params);
+    
                }else
                {
                     Navigation.changeHash(this._key+"_"+(this._current?this._current.page:""));

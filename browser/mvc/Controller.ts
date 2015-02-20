@@ -46,9 +46,14 @@ module ghost.mvc
          * Links the scope
          * @param scope Scope
          */
-        public scope(scope:Scope):void
+        public scope(scope:Scope = null):Scope
         {
-            this._scope = scope;
+            if(scope)
+            {
+
+                this._scope = scope;
+            }
+            return this._scope;
         }
         /**
          * Unlinks scope

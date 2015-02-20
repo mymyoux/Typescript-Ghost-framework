@@ -23,6 +23,7 @@ module ghost.mvc
         constructor(name:string)
         {
             super();
+            log.hide();
             this._name = name;
             Scope._names.push(name);
             Scope._scopes.push(this);
@@ -150,6 +151,7 @@ module ghost.mvc
                 log.warn(controller);
                 this.removeCurrentController();
                 this._currentController = controller;
+                this._currentController.scope(this);
                 this._currentController._preactivate(params);
             }
 
@@ -160,9 +162,11 @@ module ghost.mvc
          */
         public removeCurrentController():void
         {
+            log.info("remove current controller");
             if(this._currentController != null)
             {
                 this._currentController._predisactivate();
+                this._currentController.unscope();
                 this._currentController = null;
             }
         }

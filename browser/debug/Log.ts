@@ -75,33 +75,49 @@ module ghost.debug
          * Log to INFO level
          * @data Data to log
          */
-        public static info(data:any):void
+        public static info(...data:any[]):void
         {
-            Log.log(data, Log.LEVEL_INFO);
+            for(var p in data)
+            {
+
+                Log.log(data[p], Log.LEVEL_INFO);
+            }
         }
         /**
          * Log to WARN level
          * @data Data to log
          */
-        public static warn(data:any):void
+        public static warn(...data:any[]):void
         {
-            Log.log(data, Log.LEVEL_WARN);
+            for(var p in data)
+            {
+
+                Log.log(data[p], Log.LEVEL_WARN);
+            }
         }
         /**
          * Log to DEBUG level
          * @data Data to log
          */
-        public static debug(data:any):void
+        public static debug(...data:any[]):void
         {
-            Log.log(data, Log.LEVEL_DEBUG);
+            for(var p in data)
+            {
+
+                Log.log(data[p], Log.LEVEL_DEBUG);
+            }
         }
         /**
          * Log to ERROR level
          * @data Data to log
          */
-        public static error(data:any):void
+        public static error(...data:any[]):void
         {
-            Log.log(data, Log.LEVEL_ERROR);
+            for(var p in data)
+            {
+
+                Log.log(data[p], Log.LEVEL_ERROR);
+            }
         }
         private static gradient:ghost.utils.Gradient;
         private static count:number = 0; 
@@ -110,7 +126,6 @@ module ghost.debug
             if(!Log.gradient)
             {
                 Log.gradient = new ghost.utils.Gradient();
-
                 Log.gradient.setColours("#000000", "#FF0000", "#FF00FF", "#FFFFFF");
                 Log.gradient.setMax(15);
 
@@ -373,7 +388,9 @@ module ghost.debug
             if(!Log._hasColors)
             {
                 try {
-                    console.log(JSON.stringify(data));
+                    console.log(data);
+                    //TODO:separate browser and server output
+                //    console.log(JSON.stringify(data));
                 } catch(err)
                 {
                     console.log(data);
@@ -399,8 +416,85 @@ module ghost.debug
             {
                return;
             }
+
+
+            var color:string;
+            var func:any;
+            switch(level)
+            {
+                case Log.LEVEL_ERROR:
+                    func=console.error;
+                    break;
+                case Log.LEVEL_WARN:
+                    func=console.warn;
+                    break;
+                case Log.LEVEL_DEBUG:
+                    func=console.info;
+                    break;
+                default:
+                case Log.LEVEL_INFO:
+                    func=console.info;
+                    break;
+            }
+
+            if(!Log.colors[stackline.cls])
+            {
+                Log.colors[stackline.cls] = Log.getColours().getColour(Log.count++, true);
+                //Log.colors[stackline.cls] = Log.getColours().getColour(ghost.utils.Maths.randBetween(0, Log.getColours().getMax(), true);
+            }
+            color =  Log.colors[stackline.cls] ;
+
+            var line:string = "%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+"%c"+(stackline.cls?stackline.cls+"::":"")+"%c"+stackline.func+"()%c_%c";
+            var colours:string[] = ['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;', 'color:black;font-weight:lighter;', 'color:grey;font-weight:lighter;'];
+
+
+            if(typeof data == "object" || typeof data == "function" || typeof data == "xml" || data ==null)
+            {
+                (<any>console).groupCollapsed.apply(console, [line].concat(colours).concat([data]));
+            }else
+            {
+                //console.log( [line+ "%c"+data+"%c"].concat(colours).concat(['color:'+color+';','color:black;']));
+                (<any>console).groupCollapsed.apply(console, [line+ "%c"+data+"%c"].concat(colours).concat(['color:'+color+';','color:black;']));
+            }
+            var codeline:string = "%c"+stackline.file+":"+stackline.line+":"+stackline.column+"";
+            func.apply(console,[codeline, 'color:black;']);
+            console.trace();
+            (<any>console).groupEnd();
+
+            return;
+
+
+                colors =['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;','color:black;font-weight:lighter;','color:grey;font-weight:lighter;', 'color:'+color+';font-weight:bold;','color:grey;font-weight:lighter;','font-weight:lighter;'];
+                (<any>console).groupCollapsed.apply(console, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+txt].concat(colors));
+                if(isData)
+                    func.apply(console,[data]);
+                func.apply(console,[line, 'color:black;']);
+                console.trace();
+                (<any>console).groupEnd();
+
+            var display:any = data.reduce(function(previous:any[], item:any):any
+            {
+                 if(typeof item == "object" || typeof item == "function" || typeof item == "xml" || item ==null)
+                 {
+                    previous.push(item);
+                 }else
+                 {
+                    //console.log(onsole.log("add" + item)
+                    previous.push("%c"+item+"%c");
+                    previous.push('color:red;font-weight:bold;');
+                 }
+
+                 return previous;
+            }, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+"%c"+(stackline.cls?stackline.cls+"::":"")+"%c"+stackline.func+"()%c_%c", ]);
+
+            console.log.apply(console, display);
+            return;
+
             var isData:boolean = false;
             var dataStr:string;
+
+
+
 
 
             if((typeof data == "object" || typeof data == "function" || typeof data == "xml") && data!=null)
@@ -445,31 +539,7 @@ module ghost.debug
                 var line:string = "%c"+stackline.file+":"+stackline.line+":"+stackline.column+"";
                 var colors:string[] = [];
 
-                var color:string;
-                var func:any;
-                switch(level)
-                {
-                    case Log.LEVEL_ERROR:
-                        func=console.error;
-                        break;
-                    case Log.LEVEL_WARN:
-                        func=console.warn;
-                        break;
-                    case Log.LEVEL_DEBUG:
-                        func=console.info;
-                        break;
-                    default:
-                    case Log.LEVEL_INFO:
-                        func=console.info;
-                        break;
-                }
 
-                if(!Log.colors[stackline.cls])
-                {
-                    Log.colors[stackline.cls] = Log.getColours().getColour(Log.count++, true);
-                    //Log.colors[stackline.cls] = Log.getColours().getColour(ghost.utils.Maths.randBetween(0, Log.getColours().getMax(), true);
-                }
-                color =  Log.colors[stackline.cls] ;
                 colors =['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;','color:black;font-weight:lighter;','color:grey;font-weight:lighter;', 'color:'+color+';font-weight:bold;','color:grey;font-weight:lighter;','font-weight:lighter;'];
                 (<any>console).groupCollapsed.apply(console, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+txt].concat(colors));
                 if(isData)

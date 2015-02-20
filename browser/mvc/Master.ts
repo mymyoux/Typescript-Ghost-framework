@@ -4,6 +4,7 @@
 ///<lib="es6-promise"/>
 ///<lib="ractive"/>
 ///<module="framework/ghost/promises"/>
+///<module="framework/browser/debug"/>
 module ghost.mvc
 {
 	export class Master extends Controller
@@ -14,7 +15,7 @@ module ghost.mvc
          */
         public static EVENTS:any = Controller.EVENTS;
 		private templateString:string;
-		private template:Ractive;
+		protected template:Ractive;
 		private templateOptions:IRactiveOptions;
 		private _firstActivation:boolean = true;
 		private _data:any[];
