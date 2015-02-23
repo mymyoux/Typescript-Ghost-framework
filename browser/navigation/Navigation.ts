@@ -56,6 +56,7 @@ module ghost.browser.navigation
          * @private
          */
         private _DEFAULT_SCOPE:string = null;//"default_scope";
+        private static _DISPLAYED_SCOPE:string = "main";//"default_scope";
         /**
          * @private
          */
@@ -111,7 +112,8 @@ module ghost.browser.navigation
         public static changeHash(hash:string):void
         {
             log.info("Change hash:"+hash);
-            window.location.hash = "#"+hash;
+            if(hash.split("_")[0] == Navigation._DISPLAYED_SCOPE)
+                window.location.hash = "#"+hash;
         }
         private _detectScope():void
         {
@@ -196,6 +198,7 @@ module ghost.browser.navigation
             }, {});
             return hashes;
         }
+        private _last:string;
         ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
@@ -207,6 +210,10 @@ module ghost.browser.navigation
                 scope = p;
                 page = hashes[scope].page;
                 params = hashes[scope].params;
+                if(scope == Navigation._DISPLAYED_SCOPE)
+                {
+                    this._last = scope+"/"+page+(params && params.length?"/"+params:"");
+                }
                 if(first === true)
                 {
                     $("#"+scope).attr("first",page);
@@ -223,8 +230,9 @@ module ghost.browser.navigation
                     }
 
                 }
-
             }   
+            if(this._last)
+            window.location.hash = "#"+this._last;
         }
         private getDefaultPage(scope:string):string
         {
@@ -596,7 +604,7 @@ module ghost.browser.navigation
             {
                 count = 1;
             }
-            if(this._history.length>1)
+            if(this._history.length>0/*>1*/)
             {
     
                 var old = this._current.page;
@@ -630,6 +638,7 @@ module ghost.browser.navigation
          */
         private _pageChange(type:string, previous:string, next:string, params:any = null):void
         {
+            log.info("page change:"+type+" => " +previous+ " next="+next);
             this.trigger(Navigation.EVENT_PAGE_CHANGED, type, previous, next, params);
             ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, this._key, type, previous, next, params);
         }

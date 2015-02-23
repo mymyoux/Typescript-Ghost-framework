@@ -33,6 +33,10 @@ module ghost.mvc
 			this._data = [];
             this._parts = [];
 		}
+        public navigation():ghost.browser.navigation.Navigation
+        {
+            return ghost.browser.navigation.Navigation.instance;
+        }
 
         public addData(value:IDataParts):void;
 		public addData(value:IData):void;
