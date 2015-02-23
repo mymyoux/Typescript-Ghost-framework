@@ -287,6 +287,14 @@ module ghost.browser.navigation
             this.getScope(scope).popPage(count);
         }
         /**
+         * Pops all page of a scope
+         * @param {string} scope Scope's label
+         */
+        public popAll(scope:string):void
+        {
+            this.getScope(scope).popAll();
+        }
+        /**
          * Gets scope
          * @param name scope's label
          * @returns {NavigationScope}
@@ -628,6 +636,13 @@ module ghost.browser.navigation
             {
                 //
             }
+        }
+        /**
+         * Pops all pages
+         */
+        public popAll():void
+        {
+            this.popPage(this._history.length); 
         }
         /**
          * Called during page change. Triggers events
