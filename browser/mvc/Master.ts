@@ -140,8 +140,18 @@ module ghost.mvc
 		 		//if could have been turn off
 		 		if(this.isActivated())
 		 		{
-		 			this.render();
-		 			this.activation();
+                    try
+                    {
+    		 			this.render();
+    		 			this.activation();
+                    }catch(error)
+                    {
+                        //disallow es6promise to catch this error
+                        setTimeout(function()
+                        {
+                            throw error;
+                        },0);
+                    }
 		 		}
 	 		},(error)=>
 	 		{
@@ -354,6 +364,10 @@ module ghost.mvc
         		this.$container.hide();
         	}
         }
+        protected _onModelChange(label:string, model:any, name:string):void
+        {
+            this.template.set(name, model.toRactive?model.toRactive():model instanceof Data?model.value:model.toObject());
+        }
         public render():void
         {
         	 var container:any = this.getContainer();
@@ -364,10 +378,19 @@ module ghost.mvc
                 {
                 	template:this.templateString
                 };
+                //toRactive + listener on evnetdispatcher
 
+                this._data.forEach((item:any)=>
+                {
+                    if(item instanceof ghost.mvc.Model)
+                    {
+                        item.off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
+                        item.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item, item.name());
+                    }
+                });
                 var data:any = this._data.reduce(function(previous:any, item:any)
                 {
-            		previous[item.name()] = item instanceof Data?item.value:item.toObject();
+            		previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
             		return previous;
             	}, {} );
                 data.trans = ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance());

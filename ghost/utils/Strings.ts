@@ -34,6 +34,14 @@ module ghost.utils
             }
             return value.indexOf(start) == 0;
         }
+         public static endsWith(value:string, start:string):boolean
+        {
+            if(!value || !start)
+            {
+                return false;
+            }
+            return value.indexOf(start) == value.length - start.length;
+        }
         public static capitalizeAllWords(text:string):string
         {
             text = text.toLowerCase();
