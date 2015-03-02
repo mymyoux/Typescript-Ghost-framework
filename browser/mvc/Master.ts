@@ -18,7 +18,7 @@ module ghost.mvc
 		protected template:Ractive;
 		private templateOptions:IRactiveOptions;
 		private _firstActivation:boolean = true;
-		private _data:any[];
+		protected _data:any[];
 		protected _activated:boolean = false;
 		protected $container:JQuery;
 
@@ -368,6 +368,14 @@ module ghost.mvc
         {
             this.template.set(name, model.toRactive?model.toRactive():model instanceof Data?model.value:model.toObject());
         }
+        protected toRactive():any
+        {
+            return this._data.reduce(function(previous:any, item:any)
+                {
+                    previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
+                    return previous;
+                }, {} );   
+        }
         public render():void
         {
         	 var container:any = this.getContainer();
@@ -388,11 +396,7 @@ module ghost.mvc
                         item.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item, item.name());
                     }
                 });
-                var data:any = this._data.reduce(function(previous:any, item:any)
-                {
-            		previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
-            		return previous;
-            	}, {} );
+                var data:any = this.toRactive();
                 data.trans = ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance());
                 var binded:any = this.getBindedFunctions();
                 for(var p in binded)
