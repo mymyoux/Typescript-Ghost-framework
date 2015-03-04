@@ -372,10 +372,22 @@ module ghost.mvc
         {
             return this._data.reduce(function(previous:any, item:any)
                 {
-                    previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
+                    if(!item.name || typeof item.name != "function")
+                    {
+                        //classical objects
+                        for(var p in item)
+                        {
+                            previous[p] = item[p];
+                        }
+                    }else
+                    {
+                        //models
+                        previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
+                    }
                     return previous;
                 }, {} );   
         }
+
         public render():void
         {
         	 var container:any = this.getContainer();

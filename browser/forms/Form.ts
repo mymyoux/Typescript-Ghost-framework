@@ -16,9 +16,12 @@ module ghost.browser.forms
         public static EVENT_CHANGE:string = "change";
         public static EVENT_SUBMIT:string = "submit";
         public static EVENT_CANCEL:string = "cancel";
+        public static EVENT_SUBMITTED:string = "submitted";
+        public static EVENT_SUBMIT_ERROR:string = "submit_error";
         protected autosave:boolean = false;
         protected action:string;
         protected $form:JQuery;
+        private fields:Field[];
         protected data:any;
         protected promises:any;
         public constructor()
@@ -68,6 +71,7 @@ module ghost.browser.forms
                 }
                 return false;
             });
+            this.fields = fields;
             var $forms:JQuery = $(form).find("form").addBack("form");
             this.$form = $forms;
             this.action = $forms.attr("action");
@@ -78,7 +82,7 @@ module ghost.browser.forms
                 return false;
             });
 
-            $forms.find("[data-action]").on("click", (event)=>
+            $forms.on("click", "[data-action]", (event)=>
             {
                 this[$(event.target).attr("data-action")]();//.submit();
             });
@@ -90,7 +94,7 @@ module ghost.browser.forms
         protected cancel():void
         {
             this.trigger(Form.EVENT_CANCEL, this.toObject());
-            if(!this.action)
+           /* if(!this.action)
             {
                 log.warn("unable to cancel the form - no action attribute found for the form");
                 return;
@@ -110,7 +114,7 @@ module ghost.browser.forms
             }, function(error:any):void
             {
                 log.error(error);
-            });
+            });*/
         }
         protected submit():void
         {
@@ -127,22 +131,41 @@ module ghost.browser.forms
             }
             this.promises = {}; 
             var data:any = this.toObject();
+            var action:string = this.getAction();
             data.action = "submit";
+
+
             ghost.io.ajax({
-                    url:this.action,
+                    url:action,
                     data:data,
                     retry:ghost.io.RETRY_INFINITE,
                     method:"POST"
                 }).
-            then(function(result:any):void
+            then((result:any):void=>
             {
-                log.error(result);
+                this.trigger(Form.EVENT_SUBMITTED, result);
 
-            }, function(error:any):void
+            }, (error:any):void=>
             {
-                log.error(error);
+                this.trigger(Form.EVENT_SUBMIT_ERROR, error);
             });
         }   
+        protected getAction():string
+        {
+            var action:string = this.action;
+            if(action.indexOf(":")!=-1)
+            {
+                for(var p in this.data)
+                {
+                    action = action.replace(":"+p, this.data[p]);
+                }
+            }
+             if(action.indexOf(":")!=-1)
+             {
+                debugger;
+             }
+            return action; 
+        }
 
         protected onChange(value:string, name:string):void
         {
@@ -155,10 +178,11 @@ module ghost.browser.forms
             {
                 this.promises[name].cancel();
             }
+            var action:string = this.getAction();
              var data:any = this.toObject(name);
              data.action = "autosave";
              var ajax:any = ghost.io.ajax({
-                    url:this.action,
+                    url:action,
                     data:data,
                     retry:ghost.io.RETRY_INFINITE,
                     method:"POST"
@@ -179,6 +203,10 @@ module ghost.browser.forms
             var cls:any;
             for(var p in ghost.browser.forms)
             {
+                if(p == "Field")
+                {
+                    continue;
+                }
                 if(ghost.utils.Strings.endsWith(p, "Field"))
                 {
                     if(ghost.browser.forms[p].match)
@@ -208,6 +236,11 @@ module ghost.browser.forms
                 this.$form.off("submit");
                 this.$form.find("[data-action]").off("click");
             }
+            this.fields.forEach(function(field:Field)
+            {
+                field.dispose();
+            });
+            this.fields = null;
         }
     }
     export class Validator
@@ -314,6 +347,15 @@ module ghost.browser.forms
                 this.$input.off("change", this.onChangeBinded);
             this.onChangeThrottle.cancel();
         }
+        public static match(element:any):boolean
+        {
+            var selector:string = this.prototype.constructor["selector"];
+            if($(element).find(selector).addBack(selector).length)
+            {
+                return true;
+            }
+            return false;
+        }
     }
     export class InputTextField extends Field
     {
@@ -339,7 +381,7 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
-        }
+        }/*
         public static match(element:any):boolean
         {
 
@@ -349,7 +391,32 @@ module ghost.browser.forms
                 return true;
             }
             return false;
+        }*/
+    }
+
+    export class InputHiddenField extends Field
+    {
+        public static selector:string = "input[type='hidden']";
+        public constructor(name:string, data:any, element:any)
+        {
+            super(name, data, element);
+    
         }
+        protected init():void
+        {
+            super.init();
+            //this.validators.push(new TextValidator());
+        }
+        /*
+        public static match(element:any):boolean
+        {
+            var selector:string = this.prototype.constructor["selector"];
+            if($(element).find(selector).addBack(selector).length)
+            {
+                return true;
+            }
+            return false;
+        }*/
     }
 
 
@@ -376,6 +443,7 @@ module ghost.browser.forms
             super.dispose();
          
         }
+        /*
         public static match(element:any):boolean
         {
             var selector:string = InputListField.selector;
@@ -384,7 +452,7 @@ module ghost.browser.forms
                 return true;
             }
             return false;
-        }
+        }*/
     }
 }
 
