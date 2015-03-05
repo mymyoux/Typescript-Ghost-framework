@@ -17,7 +17,7 @@ module ghost.mvc
 		private templateString:string;
 		protected template:Ractive;
 		private templateOptions:IRactiveOptions;
-		private _firstActivation:boolean = true;
+		protected _firstActivation:boolean = true;
 		protected _data:any[];
 		protected _activated:boolean = false;
 		protected $container:JQuery;
