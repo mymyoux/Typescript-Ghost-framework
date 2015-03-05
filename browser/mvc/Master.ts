@@ -24,7 +24,7 @@ module ghost.mvc
 
         protected _parts:string[][];
 
-        private paramsFromActivation:any;
+        protected paramsFromActivation:any;
 
 
 		constructor()

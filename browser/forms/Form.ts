@@ -160,10 +160,10 @@ module ghost.browser.forms
                     action = action.replace(":"+p, this.data[p]);
                 }
             }
-             if(action.indexOf(":")!=-1)
+             /*if(action.indexOf(":")!=-1)
              {
                 debugger;
-             }
+             }*/
             return action; 
         }
 
@@ -240,6 +240,7 @@ module ghost.browser.forms
             {
                 field.dispose();
             });
+            this.off();
             this.fields = null;
         }
     }
@@ -318,8 +319,11 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
-            this.data[this.name] = this.getValue();
-            this.onChangeThrottle();
+            if( this.data[this.name]  != this.getValue())
+            {
+                this.data[this.name] = this.getValue();
+                this.onChangeThrottle();
+            }
         }
         protected triggerChange():void
         {

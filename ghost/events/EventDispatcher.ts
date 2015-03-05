@@ -260,6 +260,9 @@ module ghost.events
         }
         public off(name?:string,  callback?:Function, scope?:any):void
         {
+
+            var key1:string, key2:string;
+            //TODO:off with new system
             if(name)
             {
                  if(name.indexOf(" ")>-1)
@@ -274,6 +277,11 @@ module ghost.events
                     }
                     return;
                 }
+
+                if(name.indexOf(":") != -1)
+                {
+
+                }
                  //si c'est un event categorie on supprime tous les events liés
                 if(name.indexOf(":") == -1)
                 {
@@ -286,12 +294,73 @@ module ghost.events
                     }
                 }
             }
+            if(!scope && !callback && !name)
+            {
+                this._eventsK1 = {};
+                this._eventsK2 = {};
+                return;
+            }
+             if(this._eventsK1[key1])
+            {
+                for(var p in this._eventsK1[key1])
+                {
+                    listener = this._eventsK1[key1][p];
+                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
+                    {
+                        continue;
+                    }
+                     //  if(key1 == "page_changed")
+                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
+                    if(listener.once)
+                    {
+                        once.push(listener);
+                    }
+                    listener.execute(data);
+                }
+            }
+            if(this._eventsK2[key2])
+            {
+                for(var p in this._eventsK2[key2])
+                {
+                    listener = this._eventsK2[key2][p];
+                    if(!listener)
+                    {
+                        debugger;
+                    }
+                    //we dont re-execute two keys match & all:all match
+                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
+                    {
+                        continue;
+                    }
+                    if(listener.once)
+                    {
+                        if( once.indexOf(listener) == -1)
+                        {
+
+                            once.push(listener);
+                        }else
+                        {
+                            //not called twice
+                            continue;
+                        }
+                    }
+                   //if(key1 == "page_changed")
+                    //console.log("TT___execute=>"+listener.key1+":"+listener.key2);
+                    listener.execute(data);
+                }
+            }
+
+
+
+
             if(!scope && !callback)
             {
                 if(!name)
                 {
-                    this._events = {};
-                    this._eventsOnce = {};
+                    //this._events = {};
+                    //this._eventsOnce = {};
+                    this._eventsK1 = {};
+                    this._eventsK2 = {};
                 }else
                 {
                     delete this._events[name];
