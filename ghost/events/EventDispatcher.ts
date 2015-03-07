@@ -345,7 +345,7 @@ module ghost.events
                      listener.dispose();
                     this._eventsK1[key1].splice(p, 1);
                 }
-            }
+            } 
             if(this._eventsK2[key2])
             {
                 for(var p in this._eventsK2[key2])

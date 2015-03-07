@@ -1,3 +1,4 @@
+///<module="framework/ghost/events"/>
 module ghost.browser.i18n
 {
 //  Work based on : 
@@ -29,7 +30,7 @@ module ghost.browser.i18n
 
 //TODO:LOAD TRANSLATE A LA VOLEE + CACHE
 
-	export class Polyglot
+	export class Polyglot extends ghost.events.EventDispatcher
 	{
 		/**
 		 * The string that separates the different phrase possibilities.
@@ -187,6 +188,7 @@ module ghost.browser.i18n
 		 */
 		constructor(options?:IPolyglotOptions)
 		{
+			super();
 			options = options || {};
 		    this.phrases = {};
 		    if(options.phrases)
