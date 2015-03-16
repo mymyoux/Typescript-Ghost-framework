@@ -22,7 +22,7 @@ module ghost.mvc
 		protected _activated:boolean = false;
 		protected $container:JQuery;
 
-        protected _parts:string[][];
+        protected _parts:IPart[];
 
         protected paramsFromActivation:any;
 
@@ -43,16 +43,18 @@ module ghost.mvc
 		public addData(name:string, value:any):void
 		public addData(name:any, value?:any):void
 		{
+            this._parts.push(null);
 			if(typeof name == "string")
 			{
 				this._data.push(new Data(name, value));
 			}else
 			{
                 //additional parts
-                if(name.parts && name.data)
+                if((name.parts || name.ractive || name.name) && name.data)
                 {
-                    this._parts[this._data.length] = name.parts;
+                    this._parts[this._parts.length-1] = name;
                     name = name.data;
+                    delete this._parts[this._parts.length-1].data;
                 } 
                 if(typeof name == "function")
                 {
@@ -173,6 +175,7 @@ module ghost.mvc
                 this.hideContainer();
                 if(this.template)
            		 {
+                    ghost.browser.i18n.Polyglot.instance().off("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
 	                /*var listener:any = this.getBindedFunctions();
 	                if(listener)
 	                {
@@ -236,9 +239,9 @@ module ghost.mvc
         	{	
                 if(item.retrieveData)
                 {
-                    if(this._parts[index])
+                    if(this._parts[index] && this._parts[index].parts)
                     {
-                        return item.retrieveData(this._parts[index]);
+                        return item.retrieveData(this._parts[index].parts);
                     }
         		  return item.retrieveData();
                 }
@@ -370,7 +373,8 @@ module ghost.mvc
         }
         protected toRactive():any
         {
-            return this._data.reduce(function(previous:any, item:any)
+            var _this:Master = this;
+            return this._data.reduce(function(previous:any, item:any, index:number)
                 {
                     if(!item.name || typeof item.name != "function")
                     {
@@ -381,8 +385,14 @@ module ghost.mvc
                         }
                     }else
                     {
+                        var ractiveString:string = _this._parts[index]?_this._parts[index].ractive:undefined;
+                        var name:string = _this._parts[index] && _this._parts[index].name?_this._parts[index].name:item.name();
+                        if(name == "cabinetcandidate")
+                        {
+                            debugger;
+                        }
                         //models
-                        previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
+                        previous[name] = item.toRactive?item.toRactive(ractiveString):item instanceof Data?item.value:item.toObject();
                     }
                     return previous;
                 }, {} );   
@@ -402,10 +412,20 @@ module ghost.mvc
 
                 this._data.forEach((item:any)=>
                 {
-                    if(item instanceof ghost.mvc.Model)
+                    if(item instanceof ghost.events.EventDispatcher)
                     {
                         item.off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
                         item.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item, item.name());
+                    }else
+                    {
+                        for(var p in item)
+                        {
+                            if(item[p] instanceof ghost.events.EventDispatcher)
+                            {
+                                item[p].off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
+                                item[p].on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item[p], item[p].name());
+                            }
+                        }
                     }
                 });
                 var data:any = this.toRactive();
@@ -425,6 +445,7 @@ module ghost.mvc
                 options.el = container;
 
 
+                ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
 
                 this.template = new Ractive(options);
 
@@ -442,6 +463,17 @@ module ghost.mvc
                 console.warn("no container for ", this);
             }
         }
+        private getTranslationTemplate():string
+        {
+            return this.getTemplate().split("/").slice(1, 2).join(".").toLowerCase();
+        }
+        private _onTranslationChange():void
+        {
+            if(this.template)
+            {
+                this.template.update();
+            }
+        }
         /**
          * List of functions to bind key/function
          * @return {any} [description]
@@ -451,4 +483,11 @@ module ghost.mvc
             return null;
         }
 	}
+    export interface IPart
+    {
+        data:any;
+        parts?:string[];
+        ractive?:string;
+        name?:string;
+    }
 }

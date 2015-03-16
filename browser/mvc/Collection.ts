@@ -9,6 +9,11 @@ module ghost.mvc
      */
     export class Collection<T extends ghost.mvc.Model> extends ghost.events.EventDispatcher implements IRetrievable, IModel
     {
+        /**
+         * Default part
+         * @type {string}
+         */
+        public static PART_DEFAULT:string = "default";
         public static EVENT_RETRIEVED:string = Model.EVENT_RETRIEVED;
         public static EVENT_CHANGE:string = "change";
         public static EVENT_CHANGED:string = "changed";
@@ -458,6 +463,100 @@ module ghost.mvc
             }
 
         }
+
+                ///PROMISES PARTS
+        protected _partsPromises:any = {};
+        protected hasPart(name:string):boolean
+        {
+            return this._partsPromises[name] || this.getPartRequest(name)!=null;//name == "default";
+        }
+        protected getPartPromise(name:string):Promise<any>
+        {
+            if(!this.hasPart(name))
+            {
+                return null;
+            }
+            if(!this._partsPromises[name])
+            {
+               this._partsPromises[name] = new Promise<any>((accept, reject)=>
+               {
+                    var request:any = this.getPartRequest(name);
+                    if(!request)
+                    {
+                        request = {};
+                    }
+                    var url = request.url?request.url:this.getDataURLForServer();
+                    if(url && url.substring(0, 1) != "/" && url.substring(0,4)!="http")
+                    {
+                        url = this.getRootURL()+url;
+                    }
+                    var server_data:any = this.getDataForServer();
+                    var data:any = request.data?request.data:{};
+                    for(var p in server_data)
+                    {
+                        data[p] = server_data[p];
+                    }
+                    $.ajax(url,
+                    {
+                        data:data,
+                        "type":request.method?request.method:this.getMethodForServer()
+                    })
+                    .done(()=>
+                    {
+                        this._partsPromises[name] = true;
+                        accept.apply(null, Array.prototype.slice.call(arguments));
+                    })
+                    .fail(reject);
+               });
+            }
+            return this._partsPromises[name];
+        }
+        protected getPartRequest(name:string):any
+        {
+            switch(name)
+            {
+                case Model.PART_DEFAULT:
+                    return {
+                        method:"GET",
+                        url:"data",
+                        data:{}
+                    };
+                break;
+            }
+            return null;
+        }
+        public retrieveData(data:string[] = [Collection.PART_DEFAULT]):Promise<any>
+        {
+            var _this:Collection<any> = this;
+            var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void
+            {
+
+                var failed:boolean = false;
+                var promises:Promise<any>[] = data.map(function(name:string)
+                {
+                    if(this.hasPart(name))
+                    {
+                        return this.getPartPromise(name);
+                    }else
+                    {
+                        //reject Promise   
+                        failed = true;
+                        reject(new Error(name+" is not a correct part's name"));
+                        return null;
+                    }
+                }, _this);
+                if(failed)
+                {
+                    return;
+                }
+                Promise.all(promises).then(function(values:any[])
+                {
+                    values.filter(function(data:any):boolean{ return data!==true?true:false;}).forEach(this.readExternal, _this);
+                    accept();
+                }.bind(_this), reject);
+            });
+            return promise;
+        }
         /**
          * Collection's data is retrieved from server
          * @returns {boolean}
@@ -473,7 +572,7 @@ module ghost.mvc
          */
         protected getDataURLForServer():string
         {
-            return "data";
+            return "collections/"+this.name();
         }
         /**
          * Data's arguments for data retrieving
@@ -535,6 +634,11 @@ module ghost.mvc
             {
                 return model.toObject();
             });
+        }
+
+        public toRactive():void
+        {
+            return this.toObject();
         }
 
     }

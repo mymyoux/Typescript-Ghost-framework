@@ -165,7 +165,11 @@ module ghost.mvc
                         data:data,
                         "type":request.method?request.method:this.getMethodForServer()
                     })
-                    .done(accept)
+                    .done(()=>
+                    {
+                        this._partsPromises[name] = true;
+                        accept.apply(null, Array.prototype.slice.call(arguments));
+                    })
                     .fail(reject);
                });
             }
@@ -212,7 +216,7 @@ module ghost.mvc
                 }
                 Promise.all(promises).then(function(values:any[])
                 {
-                    values.forEach(this.readExternal, _this);
+                    values.filter(function(data:any):boolean{ return data!==true?true:false;}).forEach(this.readExternal, _this);
                     accept();
                 }.bind(_this), reject);
             });
@@ -464,6 +468,11 @@ module ghost.mvc
         {
             return null;
         }
+        //TODO:futur me, check if some models override toObject() function instead of this one for ractive templates
+      /*  public toRactive():any
+        {
+            return this.toObject();
+        } */
     }
     export class ModelID extends Model
     {
