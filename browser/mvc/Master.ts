@@ -170,6 +170,29 @@ module ghost.mvc
             {
                 ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
                 ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
+                this._data.forEach((item:any, index:number)=>
+                {
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var event:string;
+                    for(var p in events)
+                    {
+                        event = events[p];
+                        if(item instanceof ghost.events.EventDispatcher)
+                        {
+                            item.off(event, this._onModelChange, this);
+                        }else
+                        {
+                            for(var p in item)
+                            {
+                                if(item[p] instanceof ghost.events.EventDispatcher)
+                                {
+                                    item[p].off(event, this._onModelChange, this);
+                                }
+                            }
+                        }
+                        
+                    }
+                });
                 this.disactivate();
                 this.trigger(Master.EVENTS.DISACTIVATED);
                 this.hideContainer();
@@ -367,11 +390,12 @@ module ghost.mvc
         		this.$container.hide();
         	}
         }
-        protected _onModelChange(model:any, name:string):void
+        protected _onModelChange(/*model:any, name:string*/):void
         {
+            //console.log(arguments);
             //required due to custom events
-            name = arguments[arguments.length - 1];
-            model = arguments[arguments.length - 2];
+            var name = arguments[arguments.length - 1];
+            var model = arguments[arguments.length - 2];
             var data:any;
             if(model.toRactive)
             {
@@ -390,10 +414,12 @@ module ghost.mvc
                     }else
                     {
                         debugger;
+                        //data = model;
+                        return;
                     }
                 }
             }
-            this.template.set(name, model.toRactive?model.toRactive():model instanceof Data?model.value:model.toObject());
+            this.template.set(name, data);
         }
         protected toRactive():any
         {
