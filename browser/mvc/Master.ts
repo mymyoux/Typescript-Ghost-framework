@@ -367,8 +367,32 @@ module ghost.mvc
         		this.$container.hide();
         	}
         }
-        protected _onModelChange(label:string, model:any, name:string):void
+        protected _onModelChange(model:any, name:string):void
         {
+            //required due to custom events
+            name = arguments[arguments.length - 1];
+            model = arguments[arguments.length - 2];
+            var data:any;
+            if(model.toRactive)
+            {
+                data = model.toRactive();
+            }else
+            {
+                if(model instanceof Data)
+                {
+                    data = model.value;
+                }else
+                {
+                    if(model.toObject)
+                    {
+
+                        data = model.toObject();
+                    }else
+                    {
+                        debugger;
+                    }
+                }
+            }
             this.template.set(name, model.toRactive?model.toRactive():model instanceof Data?model.value:model.toObject());
         }
         protected toRactive():any
