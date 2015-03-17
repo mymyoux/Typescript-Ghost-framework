@@ -168,7 +168,7 @@ module ghost.mvc
                     .done(()=>
                     {
                         this._partsPromises[name] = true;
-                        accept.apply(null, Array.prototype.slice.call(arguments));
+                        accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
                     })
                     .fail(reject);
                });
@@ -216,7 +216,10 @@ module ghost.mvc
                 }
                 Promise.all(promises).then(function(values:any[])
                 {
-                    values.filter(function(data:any):boolean{ return data!==true?true:false;}).forEach(this.readExternal, _this);
+                    //TODO:weird le data.read devrait être dans le filter ?
+                    values.filter(function(data:any):boolean{ return data!==true && !data.read?true:false;}).map(function(data:any){
+                        data.read = true;
+                        return data.data[0];}).forEach(this.readExternal, _this);
                     accept();
                 }.bind(_this), reject);
             });

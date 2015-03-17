@@ -410,22 +410,29 @@ module ghost.mvc
                 };
                 //toRactive + listener on evnetdispatcher
 
-                this._data.forEach((item:any)=>
+                this._data.forEach((item:any, index:number)=>
                 {
-                    if(item instanceof ghost.events.EventDispatcher)
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var event:string;
+                    for(var p in events)
                     {
-                        item.off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
-                        item.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item, item.name());
-                    }else
-                    {
-                        for(var p in item)
+                        event = events[p];
+                        if(item instanceof ghost.events.EventDispatcher)
                         {
-                            if(item[p] instanceof ghost.events.EventDispatcher)
+                            item.off(event, this._onModelChange, this);
+                            item.on(event, this._onModelChange, this, item, item.name());
+                        }else
+                        {
+                            for(var p in item)
                             {
-                                item[p].off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
-                                item[p].on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item[p], item[p].name());
+                                if(item[p] instanceof ghost.events.EventDispatcher)
+                                {
+                                    item[p].off(event, this._onModelChange, this);
+                                    item[p].on(event, this._onModelChange, this, item[p], item[p].name());
+                                }
                             }
                         }
+                        
                     }
                 });
                 var data:any = this.toRactive();
@@ -489,5 +496,6 @@ module ghost.mvc
         parts?:string[];
         ractive?:string;
         name?:string;
+        events?:string[];
     }
 }
