@@ -513,6 +513,8 @@ module ghost.mvc
         }
         protected getPartRequest(name:string):any
         {
+            debugger;
+            throw new Error("you must override getPartRequest function");
             switch(name)
             {
                 case Model.PART_DEFAULT:

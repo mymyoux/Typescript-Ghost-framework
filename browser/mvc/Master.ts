@@ -127,7 +127,7 @@ module ghost.mvc
          */
         public _preactivate(params?:any):void
         {
-            this.paramsFromActivation = params;
+            this.setParamaters(params);
         	if(this._activated)
         	{
         		//already activating/ed

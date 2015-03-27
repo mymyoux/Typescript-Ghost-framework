@@ -29,6 +29,13 @@ module ghost.io
 					return;
 				}
 				promise.setAjax(null);
+
+				if(data && data.success === false)
+				{
+					reject(data.error?data.error:data);
+					return;
+				}
+
 				if(settings.asObject)
 				{
 					resolve({data:data, textStatus:textStatus, jqXHR: jqXHR});
