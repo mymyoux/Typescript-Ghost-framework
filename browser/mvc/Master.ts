@@ -160,7 +160,15 @@ module ghost.mvc
 	 			console.error("Master failed during preactivation", this, error);
  			});
         }
-          /**
+        protected bindEvents():void
+        {
+
+        }
+        protected unbindEvents():void
+        {
+
+        }
+        /**
          * Called when the controller is asked for disactivation
          * @protected
          */
@@ -194,6 +202,7 @@ module ghost.mvc
                     }
                 });
                 this.disactivate();
+                this.unbindEvents();
                 this.trigger(Master.EVENTS.DISACTIVATED);
                 this.hideContainer();
                 if(this.template)
@@ -286,6 +295,7 @@ module ghost.mvc
         }
         protected activation():void
         {
+            this.bindEvents();
         	this.activate();
    			this.trigger(Master.EVENTS.ACTIVATED);
             ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);

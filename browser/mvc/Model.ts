@@ -134,7 +134,7 @@ module ghost.mvc
         {
             return this._partsPromises[name] || this.getPartRequest(name)!=null;//name == "default";
         }
-        protected getPartPromise(name:string):Promise<any>
+        protected getPartPromise(name:string):Promise<any>|boolean
         {
             if(!this.hasPart(name))
             {
@@ -142,9 +142,16 @@ module ghost.mvc
             }
             if(!this._partsPromises[name])
             {
+                var request:any = this.getPartRequest(name);
+                if(request === false)
+                {
+                    this._partsPromises[name] = true;
+                    return true;
+                }
                this._partsPromises[name] = new Promise<any>((accept, reject)=>
                {
-                    var request:any = this.getPartRequest(name);
+
+
                     if(!request)
                     {
                         request = {};
