@@ -27,49 +27,53 @@ module ghost.mvc
             this._name = name;
             Scope._names.push(name);
             Scope._scopes.push(this);
-                if(this._name && Scope.navigation())
+            if(this._name && Scope.navigation())
+            {
+                // ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
+                // ghost.events.Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
+                //better than using Eventer
+                Scope.navigation().getScope(this._name).on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
+
+
+                var scope:any = Scope.navigation().getScope(this._name);
+                if(scope)
                 {
-                   // ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
-                   // ghost.events.Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
-                    //better than using Eventer
-                    Scope.navigation().getScope(this._name).on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
-
-
-                    var scope:any = Scope.navigation().getScope(this._name);
-                    if(scope)
+                    var page:string = scope.getCurrentPage();
+                    if(page)
                     {
-                        var page:string = scope.getCurrentPage();
-                        if(page)
-                        {
-                            this._onPageChanged(page, Scope.navigation().EVENT_PAGE_CHANGED,null, page);
-                        }
-                        scope.on("to", function(/*event_next:string,*/ type:string, previous:string, next:string, event:ghost.browser.navigation.NavigationEvent):void
-                        {
-                            this.onPageChanging(type, previous, next, event);
-                        },this);
+                        this._onPageChanged(page, Scope.navigation().EVENT_PAGE_CHANGED,null, page);
                     }
+                    scope.on("to", function(/*event_next:string,*/ type:string, previous:string, next:string, event:ghost.browser.navigation.NavigationEvent):void
+                    {
+                        this.onPageChanging(type, previous, next, event);
+                    },this);
                 }
-                log.info("New Scope : "+name);
-            
+            }
+            log.info("New Scope : "+name);
+
+        }
+        public name():string
+        {
+            return this._name;
         }
         private _onPageChanged(type:string, previous:string, next:string, params:any = null):void
         {
-             log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
-           /* if(name == this._name)
-            {*/
-                this.removeCurrentController();
-                if(next)
-                {
+            log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
+            /* if(name == this._name)
+             {*/
+            this.removeCurrentController();
+            if(next)
+            {
 
-                    
-                    var controller:Controller = Controller.getController(next);
-                    if(controller)
-                    {
+
+                var controller:Controller = Controller.getController(next);
+                if(controller)
+                {
                     log.warn("Loading : "+next);
-                        this.setCurrentController(controller, params);
-                    }
+                    this.setCurrentController(controller, params);
                 }
-           // }
+            }
+            // }
         }
 
         /**
@@ -97,7 +101,7 @@ module ghost.mvc
                 }else
                 {
                     //forbidden + forward
-                   // event.cancel();
+                    // event.cancel();
                     if(Scope.navigation().getScope(this._name).getPage(-1) == canActivate)
                     {
                         event.cancel();
@@ -216,7 +220,7 @@ module ghost.mvc
         }
         private static _navigation:any = undefined;
         /**
-         * Array of Scopes 
+         * Array of Scopes
          */
         private static _scopes:Scope[] = [];
         /**
@@ -241,7 +245,7 @@ module ghost.mvc
                 {
                     new Scope(name);
                 }
-                    
+
             }
             return Scope._scopes[index];
         }
@@ -270,19 +274,38 @@ module ghost.mvc
             }
             return Scope._navigation;
         }
+        public static debug()
+        {
+            Scope._scopes.forEach(function(scope:Scope)
+            {
+                if(scope instanceof Unscope)
+                {
+                    console.log("Unscope");
+                    scope.getControllers().forEach(function(controller:Controller)
+                    {
+                        console.log("-"+controller.name(), controller);
+                    });
+                }else
+                {
+                    console.log(scope.name()+":"+(scope.getCurrentController()?scope.getCurrentController().name():null), scope.getCurrentController());
+                }
+            });
+        }
     }
-    
+
     /**
      * Un-Scope. Scope without name.
      */
     export class Unscope extends Scope
     {
+        private _controllers:Controller[];
         /**
          * constructor
          */
         constructor()
         {
             super("");
+            this._controllers = [];
         }
         /**
          * Sets current controller
@@ -316,7 +339,12 @@ module ghost.mvc
                 }
             }
             sController._preactivate();
+            this._controllers.push(sController);
             return sController;
+        }
+        public getControllers():Controller[]
+        {
+            return this._controllers;
         }
     }
 }
