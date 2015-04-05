@@ -41,6 +41,11 @@ module ghost.mvc
             this._models = [];
             this._collections = [];
             this.scope(Scope.getScope(this.scoping()));
+            this.init();
+        }
+        protected init():void
+        {
+
         }
         /**
          * Links the scope
