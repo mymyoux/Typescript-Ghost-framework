@@ -89,7 +89,7 @@ module ghost.mvc
             var controller:Controller = Controller.getController(next);
             if(controller)
             {
-                var canActivate:string|boolean = controller.canActivate(event.params);
+                var canActivate:string|boolean|IScopeOptions = controller.canActivate(event.params);
                 if(canActivate === true)
                 {
                     return;
@@ -100,16 +100,26 @@ module ghost.mvc
                     event.cancel();
                 }else
                 {
+                    var scope:string = this._name;
+                    if(typeof canActivate != "string")
+                    {
+                        if(canActivate["scope"])
+                        {
+                            scope = canActivate["scope"];
+                        }
+                        canActivate = canActivate["name"];
+                    }
                     //forbidden + forward
                     // event.cancel();
-                    if(Scope.navigation().getScope(this._name).getPage(-1) == canActivate)
+
+                    if(scope==this._name && Scope.navigation().getScope(scope).getPage(-1) == canActivate)
                     {
                         event.cancel();
                     }else
                     {
                         setTimeout(()=>
                         {
-                            Scope.navigation().getScope(this._name).pushPage(canActivate);
+                            Scope.navigation().getScope(scope).pushPage(canActivate);
                         },0);
                     }
                 }
@@ -346,5 +356,10 @@ module ghost.mvc
         {
             return this._controllers;
         }
+    }
+    export interface IScopeOptions
+    {
+        scope?:string;
+        name?:string;
     }
 }

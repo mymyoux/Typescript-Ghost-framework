@@ -93,7 +93,7 @@ module ghost.mvc
             this.activate();
             this.trigger(Controller.EVENTS.ACTIVATED);
         }
-        public canActivate(params?:any):string|boolean
+        public canActivate(params?:any):string|boolean|IScopeOptions
         {
             return true;
         }
