@@ -8,6 +8,7 @@ module ghost.mvc
      */
     export class Scope extends ghost.events.EventDispatcher
     {
+        public static EVENT_CHANGE:string = "change";
         /**
          * Current controller (activated)
          */
@@ -168,7 +169,7 @@ module ghost.mvc
                 this._currentController.scope(this);
                 this._currentController._preactivate(params);
             }
-
+            this.trigger(Scope.EVENT_CHANGE, (this._currentController?this._currentController.name():null));
             return this._currentController;
         }
         /**
