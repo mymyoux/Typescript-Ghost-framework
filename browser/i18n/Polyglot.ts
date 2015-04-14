@@ -132,6 +132,10 @@ module ghost.browser.i18n
 			    phrase = phrase.replace(new RegExp('\\{(\\{)?'+arg+'(\\})?\\}', 'g'), options[arg]);
 			  }
 			}
+			if(options && options.hasOwnProperty("smart_count"))
+			{
+				phrase = phrase.replace(/{{count}}/g, options.smart_count);
+			}
 			return phrase;
 		}
 
@@ -209,7 +213,6 @@ module ghost.browser.i18n
 		    {
 		    	locale = options.locale;
 		    }
-		    locale= "fr";
 		    this.locale(locale);
 		    this.allowMissing = !!options.allowMissing;
 		    this.warn = options.warn || Polyglot.warn;	
