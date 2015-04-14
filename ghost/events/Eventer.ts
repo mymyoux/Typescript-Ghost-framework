@@ -1,5 +1,6 @@
-///<reference path="EventDispatcher.ts"/>
-///<reference path="../core/core.class.d.ts"/>
+///<file="EventDispatcher"/>
+///<module="core"/>
+///<module="utils"/>
 module ghost.events
 {
     
@@ -391,6 +392,15 @@ module ghost.events
                 }
             }
             return this._once.apply(this, Array.prototype.slice.apply(arguments) );
+        }
+        public onThrottle(name:string, listener:Function, delay:number=300, thisObject?:any, ...parameters:any[]):void
+        {
+            var params:any[] = [];
+            params.push(name);
+            params.push(ghost.utils.Buffer.throttle(listener, delay));
+            params.push(thisObject);
+            params = params.concat(parameters);
+            this.on.apply(this, params);
         }
         public on(name:string, listener:Function, thisObject?:any, ...parameters:any[]):void
         {
