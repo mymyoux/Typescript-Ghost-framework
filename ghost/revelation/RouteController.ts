@@ -2,7 +2,15 @@ module ghost.revelation
 {
 	export class RouteController
 	{
-
+		protected app:Application;
+		public setApplication(application:Application):void
+		{
+			this.app = application;
+		}
+		public ready():void
+		{
+			
+		}
 	}
 	export class Route
 	{

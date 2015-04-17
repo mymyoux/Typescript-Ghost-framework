@@ -2,6 +2,7 @@
 ///<file="RouteController"/>
 ///<module="framework/ghost/core"/>
 ///<module="framework/ghost/utils"/>
+///<module="framework/ghost/db"/>
 module ghost.revelation
 {
 	export class Application extends ghost.core.CoreObject
@@ -10,11 +11,16 @@ module ghost.revelation
 		private _server:Server;
 		private _io:any;
 		private _http:any;
+		private static methods:string[] = ["get","post"];
+		private controllers:RouteController[];
+		public db:ghost.db.mongo.MongoDB;
 		public constructor()
 		{ 
 			super();
 			console.log("Application test");
 			this._http = require("express").Router();
+			this.controllers = [];
+			this.initDatabase();
 			/*this._http.use(function()
 			{
 				console.log("ALL");
@@ -22,6 +28,15 @@ module ghost.revelation
 			});*/
 		//	this._server = new Server(); 
 		}   
+		protected initDatabase():void
+		{
+			this.db = new ghost.db.mongo.MongoDB();
+			this.db.setOptions(
+			{
+				url:"localhost",
+				database:"test"
+			});
+		}
 		public get name():string
 		{
 			var name:string =  this.getClassName();
@@ -35,6 +50,16 @@ module ghost.revelation
 		public start():void
 		{
 			//this._server.listen();
+			console.log("Application start");
+			this.controllers.forEach(function(controller:RouteController):void
+			{
+				controller.ready();
+			}, this);
+			this.ready();
+		}
+		public ready():void
+		{
+
 		}
 		public setServer(server:Server):void
 		{
@@ -45,39 +70,43 @@ module ghost.revelation
 		}
 		public addRouteController(controller:RouteController):void
 		{
-			console.log("route");
 			var name:string;
+			var length:number;
+			controller.setApplication(this);
 			for(var p in controller.constructor.prototype)
 			{
-				if(ghost.utils.Strings.startsWith(p, "get"))
+				for(var m in Application.methods)
 				{
-					if(ghost.utils.Strings.startsWith(p, "getRoute"))
+					m = Application.methods[m];
+					length = m.length;
+					if(ghost.utils.Strings.startsWith(p, m))
 					{
-						var route:Route = controller[p]();
-						if(!(route instanceof Route))
-						{
-							throw new Error("a method getRouteXXX must return a route instance");
-						}
-						var func:Function = route.getCallback();
-						var method:string = route.getMethod();
-						var route_str:string = route.getRoute();
-						this._http[method](route_str, func.bind(controller));
-						console.log(method+":"+route_str);
-						/*
-						name = p.substring(8, 9).toLowerCase()+p.substring(4);
-						this._http["get"]("/"+name, controller.constructor.prototype[p].bind(controller));
-						console.log("get:"+name);*/
-					}else
-					{
-						name = p.substring(3, 4).toLowerCase()+p.substring(4);
-						this._http["get"]("/"+name, controller.constructor.prototype[p].bind(controller));
-						console.log("get:"+name);
+							name = p.substring(length, length+1).toLowerCase()+p.substring(length+1);
+							if(name == "index")
+							{
+								this._http[m]("/", controller.constructor.prototype[p].bind(controller));
+							}
+							this._http[m]("/"+name, controller.constructor.prototype[p].bind(controller));
+							console.log(m+":/"+name);
 					}
 				}
+				if(ghost.utils.Strings.startsWith(p, "route"))
+				{
+					var route:Route = controller[p]();
+					if(!(route instanceof Route))
+					{
+						throw new Error("a method routeXXX must return a route instance");
+					}
+					var func:Function = route.getCallback();
+					var method:string = route.getMethod();
+					var route_str:string = "/"+route.getRoute();
+					this._http[method](route_str, func.bind(controller));
+					console.log(method+":"+route_str);
+				}
+
 			}
 
-			console.log(controller.constructor);
-			//this._http[route.action](route.url, route.callback);
+			this.controllers.push(controller);
 		}
 
 	}

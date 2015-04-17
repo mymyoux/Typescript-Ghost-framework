@@ -4,6 +4,7 @@
 /* Extern Modules */
 ///<reference path="../core/core.class.d.ts"/>
 ///<reference path="../utils/utils.class.d.ts"/>
+///<reference path="../db/db.class.d.ts"/>
 
 
 /* Internal Files from Deps*/

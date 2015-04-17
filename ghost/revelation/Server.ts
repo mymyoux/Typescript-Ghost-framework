@@ -23,6 +23,7 @@ module ghost.revelation
 		private options:any;
 		private _app:any;
 		private _io:any;
+		private applications:Application[];
 		//public use:Function;
 		constructor()
 		{
@@ -32,6 +33,7 @@ module ghost.revelation
 			};
 			this.express = require("express");
 			this._app = this.express();
+			this.applications = [];
 		}
 		public use(path?:string, ...functions):void
 		{
@@ -66,15 +68,21 @@ module ghost.revelation
 		}
 		public listen():void
 		{
+	  		this.applications.forEach(function(application:Application)
+			{
+				application.start();
+			}, this);
 			this.http.listen(this.options.port, ()=>{
-			  	console.log('listening on *:'+this.options.port);
-			  	console.log(arguments);
+		  		console.log('listening on *:'+this.options.port);
 			});
+		
+
 			
 		}
 		public addApplication(prefix:string, application:Application):void
 		{
 			application.setServer(this);
+			this.applications.push(application);
 		}
 	}
 	export interface IServerOptions

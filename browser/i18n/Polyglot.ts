@@ -333,6 +333,8 @@ module ghost.browser.i18n
 		//     => "I like to write in JavaScript."
 		public t(key:string, options:any):string
 		{
+			
+			debugger;
 			if(key === undefined || key === null)
 			{
 				return "";
