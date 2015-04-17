@@ -201,17 +201,18 @@ module ghost.core
         }
         public bind(promise:Promise):void
         {
-            promise.success(()=>
+            var _this:any = this;
+            promise.success(function()
             {
-                    this.resolve.apply(this,Array.prototype.slice.call(arguments));
+                    _this.resolve.apply(_this,Array.prototype.slice.call(arguments));
             }).
-            progress(()=>
+            progress(function()
             {
-                this.pending.apply(this,Array.prototype.slice.call(arguments)); 
+                _this.pending.apply(_this,Array.prototype.slice.call(arguments)); 
             }).
-            error(()=>
+            error(function()
             {
-                this.reject.apply(this,Array.prototype.slice.call(arguments));
+                _this.reject.apply(_this,Array.prototype.slice.call(arguments));
             });
         }
         public dispose():void

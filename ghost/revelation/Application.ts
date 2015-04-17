@@ -59,7 +59,10 @@ module ghost.revelation
 		}
 		public ready():void
 		{
-
+			this._server.use("/" + this.name+"/?.*",function(request, response)
+			{
+				console.log("REQ");
+			});
 		}
 		public setServer(server:Server):void
 		{

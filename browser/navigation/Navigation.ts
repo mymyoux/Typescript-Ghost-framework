@@ -542,17 +542,48 @@ module ghost.browser.navigation
              }
              return <IPage>this._history[index];
          }
+         private _areEquals(object1:any, object2:any):boolean
+         {
+            if(object1 === object2)
+            {
+                return true;
+            }
+            if((object1 == null && object2.length==0) || (object2 == null && object1.length==0))
+            {
+                return true;
+            }
+            if(object1 == null  || object2 == null)
+            {
+                return false;
+            }
+            if(object1.length != object2.length)
+            {
+                return false;
+            }
+            var len:number = object1.length;
+            for(var i:number=0; i<len; i++)
+            {
+                if(object1[i] != object2[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+
+
+         }
         /**
          * Pushes a new page
          * @param page
          */
         public pushPage(page:string, params:any = null, fromHash:boolean = false):void
         {
-            if(!this._current || this._current.page != page || this._current.params !== params)
+            if(!this._current || this._current.page != page || !this._areEquals(this._current.params,params))
             {
                 var old:string = this._current?this._current.page:null;
                if(!this._isCancelled(Navigation.PUSH, old, page, params))
                {
+                console.log("PUSH : "+old+" => "+page, (this._current?this._current.params:null), params);
                     var ipage:IPage = 
                     {
                         page:page,
@@ -585,7 +616,7 @@ module ghost.browser.navigation
                 this.pushPage(page);
                 return;
             }
-            if(!this._current || this._current.page != page || this._current.params !== params)
+            if(!this._current || this._current.page != page || !this._areEquals(this._current.params,params))
             {
                 var old:string = this._current?this._current.page:null;
                 if(!this._isCancelled(Navigation.REPLACE, old, page, params))

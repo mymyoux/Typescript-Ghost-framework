@@ -14,11 +14,11 @@ module ghost.utils
                 loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
             }
         };
-        public static parse(str:string):any
+        public static parse(str:string):IURI
         {
             var	o   = URI.options,
                 m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
-                uri:any = {},
+                uri:IURI = {},
                 i   = 14;
 
             while (i--) uri[o.key[i]] = m[i] || "";
@@ -30,5 +30,23 @@ module ghost.utils
 
             return uri;
         }
+    }
+    export interface IURI
+    {
+        anchor?:string;
+        authority?:string;
+        directory?:string;
+        file?:string;
+        host?:string;
+        password?:string;
+        path?:string;
+        port?:string;
+        protocol?:string;
+        query?:string;
+        queryKey?:any;
+        relative?:string;
+        source?:string;
+        user?:string;
+        userInfo?:string;
     }
 }

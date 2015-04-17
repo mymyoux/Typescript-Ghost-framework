@@ -260,6 +260,12 @@ module ghost.events
         }
         public off(name?:string,  callback?:Function, scope?:any):void
         {
+
+//debugger;
+            var key1:string, key2:string;
+            var listener:Listener;
+
+            //TODO:off with new system
             if(name)
             {
                  if(name.indexOf(" ")>-1)
@@ -274,6 +280,16 @@ module ghost.events
                     }
                     return;
                 }
+                var index:number;
+                if((index = name.indexOf(":")) != -1)
+                {
+                    key1 = name.substring(0, index);
+                    key2 = name.substring(index + 1);
+                }else
+                {
+                    key1 = name;
+                }
+                /*
                  //si c'est un event categorie on supprime tous les events liés
                 if(name.indexOf(":") == -1)
                 {
@@ -284,14 +300,90 @@ module ghost.events
                             this.off(p, callback, scope);
                         }
                     }
+                }*/
+            }
+            if(!key1 || key1 == "")
+            {
+                key1 = EventDispatcher.EVENTS.ALL;
+            }
+            if(!key2 || key2 == "")
+            {
+                key2 = EventDispatcher.EVENTS.ALL;
+            }
+
+
+            if(!name)
+            {
+                this._eventsK1 = {};
+                this._eventsK2 = {};
+                return;
+            }
+             if(this._eventsK1[key1])
+            {
+                for(var p in this._eventsK1[key1])
+                {
+                    listener = this._eventsK1[key1][p];
+                    if(listener.key2 != key2 && key2 != EventDispatcher.EVENTS.ALL)
+                    {
+                        continue;
+                    }
+                    if(listener.key2 == EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL)
+                    {
+                        console.warn("a listener listen for all "+key1+" events and can't be remove from a specific one like "+key2);
+                        continue;
+                    }
+                     //  if(key1 == "page_changed")
+                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
+                     if(callback && callback !== listener.callback)
+                     {
+                        continue;
+                     }
+                     if(scope && scope !== listener.scope)
+                     {
+                        continue;
+                     }
+                     listener.dispose();
+                    this._eventsK1[key1].splice(p, 1);
+                }
+            } 
+            if(this._eventsK2[key2])
+            {
+                for(var p in this._eventsK2[key2])
+                {
+                    listener = this._eventsK2[key2][p];
+                    if(!listener)
+                    {
+                        debugger;
+                    }
+                    //we dont re-execute two keys match & all:all match
+                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
+                    {
+                        continue;
+                    }
+                    if(callback && callback !== listener.callback)
+                     {
+                        continue;
+                     }
+                     if(scope && scope !== listener.scope)
+                     {
+                        continue;
+                     }
+                    listener.dispose();
+                    this._eventsK2[key2].splice(p, 1);   
                 }
             }
+
+
+
+
             if(!scope && !callback)
             {
                 if(!name)
                 {
-                    this._events = {};
-                    this._eventsOnce = {};
+                    //this._events = {};
+                    //this._eventsOnce = {};
+                    this._eventsK1 = {};
+                    this._eventsK2 = {};
                 }else
                 {
                     delete this._events[name];
@@ -360,7 +452,7 @@ module ghost.events
     class Listener
     {
 
-        constructor(public key1:string, public key2:string, public once:boolean, private callback:Function, private scope?:any, private parameters?:any[])
+        constructor(public key1:string, public key2:string, public once:boolean, public callback:Function, public scope?:any, public parameters?:any[])
         {
         }
         public isScope(scope:any):boolean
@@ -375,6 +467,12 @@ module ghost.events
         {
             var params:any[] = parameters.length?parameters.concat(this.parameters):this.parameters;
             this.callback.apply(this.scope, params/*parameters.concat(params)*/);
+        }
+        public dispose():void
+        {
+            this.callback = null;
+            this.scope = null;
+            this.parameters = null;
         }
     }
 }

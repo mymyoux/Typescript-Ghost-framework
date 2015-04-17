@@ -41,6 +41,11 @@ module ghost.mvc
             this._models = [];
             this._collections = [];
             this.scope(Scope.getScope(this.scoping()));
+            this.init();
+        }
+        protected init():void
+        {
+
         }
         /**
          * Links the scope
@@ -93,7 +98,7 @@ module ghost.mvc
             this.activate();
             this.trigger(Controller.EVENTS.ACTIVATED);
         }
-        public canActivate(params?:any):string|boolean
+        public canActivate(params?:any):string|boolean|IScopeOptions
         {
             return true;
         }

@@ -20,7 +20,7 @@ docscss
 
 #typescript files
 public/ts/**/*.js
-public/ts/**/*.class.ts
+*.class.ts
 *.js.map
 *.d.ts
 *.class.js

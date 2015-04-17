@@ -1,6 +1,5 @@
 ///<module="ghost/events"/>
 ///<module="ghost/utils"/>
-///<lib="es6-promise"/>
 ///<file="IData"/>
 module ghost.mvc
 {
@@ -134,7 +133,7 @@ module ghost.mvc
         {
             return this._partsPromises[name] || this.getPartRequest(name)!=null;//name == "default";
         }
-        protected getPartPromise(name:string):Promise<any>
+        protected getPartPromise(name:string):Promise<any>|boolean
         {
             if(!this.hasPart(name))
             {
@@ -142,9 +141,16 @@ module ghost.mvc
             }
             if(!this._partsPromises[name])
             {
+                var request:any = this.getPartRequest(name);
+                if(request === false)
+                {
+                    this._partsPromises[name] = true;
+                    return true;
+                }
                this._partsPromises[name] = new Promise<any>((accept, reject)=>
                {
-                    var request:any = this.getPartRequest(name);
+                    var _self:any = this;
+
                     if(!request)
                     {
                         request = {};
@@ -165,7 +171,11 @@ module ghost.mvc
                         data:data,
                         "type":request.method?request.method:this.getMethodForServer()
                     })
-                    .done(accept)
+                    .done(function()
+                    {
+                        _self._partsPromises[name] = true;
+                        accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
+                    })
                     .fail(reject);
                });
             }
@@ -173,6 +183,8 @@ module ghost.mvc
         }
         protected getPartRequest(name:string):any
         {
+            debugger;
+             throw new Error("you must override getPartRequest function");
             switch(name)
             {
                 case Model.PART_DEFAULT:
@@ -212,7 +224,10 @@ module ghost.mvc
                 }
                 Promise.all(promises).then(function(values:any[])
                 {
-                    values.forEach(this.readExternal, _this);
+                    //TODO:weird le data.read devrait être dans le filter ?
+                    values.filter(function(data:any):boolean{ return data!==true && !data.read?true:false;}).map(function(data:any){
+                        data.read = true;
+                        return data.data[0];}).forEach(this.readExternal, _this);
                     accept();
                 }.bind(_this), reject);
             });
@@ -464,6 +479,11 @@ module ghost.mvc
         {
             return null;
         }
+        //TODO:futur me, check if some models override toObject() function instead of this one for ractive templates
+      /*  public toRactive():any
+        {
+            return this.toObject();
+        } */
     }
     export class ModelID extends Model
     {

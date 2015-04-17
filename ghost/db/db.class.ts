@@ -1,3 +1,6 @@
+/* Extern Librairies */
+///<reference path="../../../lib/es6-promise/es6-promise.d.ts"/>
+
 /* Extern Modules */
 ///<reference path="../utils/utils.class.d.ts"/>
 

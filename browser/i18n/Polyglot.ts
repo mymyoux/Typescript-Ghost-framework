@@ -1,3 +1,4 @@
+///<module="framework/ghost/events"/>
 module ghost.browser.i18n
 {
 //  Work based on : 
@@ -29,7 +30,7 @@ module ghost.browser.i18n
 
 //TODO:LOAD TRANSLATE A LA VOLEE + CACHE
 
-	export class Polyglot
+	export class Polyglot extends ghost.events.EventDispatcher
 	{
 		/**
 		 * The string that separates the different phrase possibilities.
@@ -131,6 +132,10 @@ module ghost.browser.i18n
 			    phrase = phrase.replace(new RegExp('\\{(\\{)?'+arg+'(\\})?\\}', 'g'), options[arg]);
 			  }
 			}
+			if(options && options.hasOwnProperty("smart_count"))
+			{
+				phrase = phrase.replace(/{{count}}/g, options.smart_count);
+			}
 			return phrase;
 		}
 
@@ -187,6 +192,7 @@ module ghost.browser.i18n
 		 */
 		constructor(options?:IPolyglotOptions)
 		{
+			super();
 			options = options || {};
 		    this.phrases = {};
 		    if(options.phrases)
@@ -207,7 +213,6 @@ module ghost.browser.i18n
 		    {
 		    	locale = options.locale;
 		    }
-		    locale= "fr";
 		    this.locale(locale);
 		    this.allowMissing = !!options.allowMissing;
 		    this.warn = options.warn || Polyglot.warn;	

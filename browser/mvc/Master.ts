@@ -1,7 +1,7 @@
 ///<module="io"/>
 ///<file="IData"/>
 ///<file="Controller"/>
-///<lib="es6-promise"/>
+
 ///<lib="ractive"/>
 ///<module="framework/ghost/promises"/>
 ///<module="framework/browser/debug"/>
@@ -17,14 +17,14 @@ module ghost.mvc
 		private templateString:string;
 		protected template:Ractive;
 		private templateOptions:IRactiveOptions;
-		private _firstActivation:boolean = true;
-		private _data:any[];
+		protected _firstActivation:boolean = true;
+		protected _data:any[];
 		protected _activated:boolean = false;
 		protected $container:JQuery;
 
-        protected _parts:string[][];
+        protected _parts:IPart[];
 
-        private paramsFromActivation:any;
+        protected paramsFromActivation:any;
 
 
 		constructor()
@@ -43,16 +43,18 @@ module ghost.mvc
 		public addData(name:string, value:any):void
 		public addData(name:any, value?:any):void
 		{
+            this._parts.push(null);
 			if(typeof name == "string")
 			{
 				this._data.push(new Data(name, value));
 			}else
 			{
                 //additional parts
-                if(name.parts && name.data)
+                if((name.parts || name.ractive || name.name) && name.data)
                 {
-                    this._parts[this._data.length] = name.parts;
+                    this._parts[this._parts.length-1] = name;
                     name = name.data;
+                    delete this._parts[this._parts.length-1].data;
                 } 
                 if(typeof name == "function")
                 {
@@ -125,7 +127,7 @@ module ghost.mvc
          */
         public _preactivate(params?:any):void
         {
-            this.paramsFromActivation = params;
+            this.setParamaters(params);
         	if(this._activated)
         	{
         		//already activating/ed
@@ -158,7 +160,15 @@ module ghost.mvc
 	 			console.error("Master failed during preactivation", this, error);
  			});
         }
-          /**
+        protected bindEvents():void
+        {
+
+        }
+        protected unbindEvents():void
+        {
+
+        }
+        /**
          * Called when the controller is asked for disactivation
          * @protected
          */
@@ -168,11 +178,36 @@ module ghost.mvc
             {
                 ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
                 ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
+                this._data.forEach((item:any, index:number)=>
+                {
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var event:string;
+                    for(var p in events)
+                    {
+                        event = events[p];
+                        if(item instanceof ghost.events.EventDispatcher)
+                        {
+                            item.off(event, this._onModelChange, this);
+                        }else
+                        {
+                            for(var p in item)
+                            {
+                                if(item[p] instanceof ghost.events.EventDispatcher)
+                                {
+                                    item[p].off(event, this._onModelChange, this);
+                                }
+                            }
+                        }
+                        
+                    }
+                });
                 this.disactivate();
+                this.unbindEvents();
                 this.trigger(Master.EVENTS.DISACTIVATED);
                 this.hideContainer();
                 if(this.template)
            		 {
+                    ghost.browser.i18n.Polyglot.instance().off("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
 	                /*var listener:any = this.getBindedFunctions();
 	                if(listener)
 	                {
@@ -236,9 +271,9 @@ module ghost.mvc
         	{	
                 if(item.retrieveData)
                 {
-                    if(this._parts[index])
+                    if(this._parts[index] && this._parts[index].parts)
                     {
-                        return item.retrieveData(this._parts[index]);
+                        return item.retrieveData(this._parts[index].parts);
                     }
         		  return item.retrieveData();
                 }
@@ -260,6 +295,7 @@ module ghost.mvc
         }
         protected activation():void
         {
+            this.bindEvents();
         	this.activate();
    			this.trigger(Master.EVENTS.ACTIVATED);
             ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
@@ -364,10 +400,64 @@ module ghost.mvc
         		this.$container.hide();
         	}
         }
-        protected _onModelChange(label:string, model:any, name:string):void
+        protected _onModelChange(/*model:any, name:string*/):void
         {
-            this.template.set(name, model.toRactive?model.toRactive():model instanceof Data?model.value:model.toObject());
+            //console.log(arguments);
+            //required due to custom events
+            var name = arguments[arguments.length - 1];
+            var model = arguments[arguments.length - 2];
+            var data:any;
+            if(model.toRactive)
+            {
+                data = model.toRactive();
+            }else
+            {
+                if(model instanceof Data)
+                {
+                    data = model.value;
+                }else
+                {
+                    if(model.toObject)
+                    {
+
+                        data = model.toObject();
+                    }else
+                    {
+                        debugger;
+                        //data = model;
+                        return;
+                    }
+                }
+            }
+            this.template.set(name, data);
         }
+        protected toRactive():any
+        {
+            var _this:Master = this;
+            return this._data.reduce(function(previous:any, item:any, index:number)
+                {
+                    if(!item.name || typeof item.name != "function")
+                    {
+                        //classical objects
+                        for(var p in item)
+                        {
+                            previous[p] = item[p];
+                        }
+                    }else
+                    {
+                        var ractiveString:string = _this._parts[index]?_this._parts[index].ractive:undefined;
+                        var name:string = _this._parts[index] && _this._parts[index].name?_this._parts[index].name:item.name();
+                        if(name == "cabinetcandidate")
+                        {
+                            debugger;
+                        }
+                        //models
+                        previous[name] = item.toRactive?item.toRactive(ractiveString):item instanceof Data?item.value:item.toObject();
+                    }
+                    return previous;
+                }, {} );   
+        }
+
         public render():void
         {
         	 var container:any = this.getContainer();
@@ -380,19 +470,32 @@ module ghost.mvc
                 };
                 //toRactive + listener on evnetdispatcher
 
-                this._data.forEach((item:any)=>
+                this._data.forEach((item:any, index:number)=>
                 {
-                    if(item instanceof ghost.mvc.Model)
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var event:string;
+                    for(var p in events)
                     {
-                        item.off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
-                        item.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, item, item.name());
+                        event = events[p];
+                        if(item instanceof ghost.events.EventDispatcher)
+                        {
+                            item.off(event, this._onModelChange, this);
+                            item.on(event, this._onModelChange, this, item, item.name());
+                        }else
+                        {
+                            for(var p in item)
+                            {
+                                if(item[p] instanceof ghost.events.EventDispatcher)
+                                {
+                                    item[p].off(event, this._onModelChange, this);
+                                    item[p].on(event, this._onModelChange, this, item[p], item[p].name());
+                                }
+                            }
+                        }
+                        
                     }
                 });
-                var data:any = this._data.reduce(function(previous:any, item:any)
-                {
-            		previous[item.name()] = item.toRactive?item.toRactive():item instanceof Data?item.value:item.toObject();
-            		return previous;
-            	}, {} );
+                var data:any = this.toRactive();
                 data.trans = ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance());
                 var binded:any = this.getBindedFunctions();
                 for(var p in binded)
@@ -409,6 +512,7 @@ module ghost.mvc
                 options.el = container;
 
 
+                ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
 
                 this.template = new Ractive(options);
 
@@ -426,6 +530,17 @@ module ghost.mvc
                 console.warn("no container for ", this);
             }
         }
+        private getTranslationTemplate():string
+        {
+            return this.getTemplate().split("/").slice(1, 2).join(".").toLowerCase();
+        }
+        private _onTranslationChange():void
+        {
+            if(this.template)
+            {
+                this.template.update();
+            }
+        }
         /**
          * List of functions to bind key/function
          * @return {any} [description]
@@ -435,4 +550,12 @@ module ghost.mvc
             return null;
         }
 	}
+    export interface IPart
+    {
+        data:any;
+        parts?:string[];
+        ractive?:string;
+        name?:string;
+        events?:string[];
+    }
 }

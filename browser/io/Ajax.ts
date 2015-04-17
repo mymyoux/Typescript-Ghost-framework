@@ -3,9 +3,9 @@
 module ghost.io
 {
 	export var RETRY_INFINITE:number = -1;
-	export function ajax(settings:AjaxOptions):Promise<Object>;
-	export function ajax(url:string, settings?:AjaxOptions):Promise<Object>;
-	export function ajax(url:any, settings?:AjaxOptions):Promise<Object>
+	export function ajax(settings:AjaxOptions, t?:any):CancelablePromise<Object>;
+	export function ajax(url:string, settings?:AjaxOptions):CancelablePromise<Object>;
+	export function ajax(url:any, settings?:AjaxOptions):CancelablePromise<Object>
 	{
 		if(typeof url == "string")
 		{
@@ -18,11 +18,24 @@ module ghost.io
 		{
 			settings = url;
 		}
-		var promise:Promise<Object> = new Promise<Object>(function(resolve, reject):void
+		var $ajax:any;
+		var promise:CancelablePromise<Object> = new CancelablePromise<Object>(function(resolve, reject):void
 		{
-			$.ajax(settings)
+			$ajax = $.ajax(settings)
 			.done(function(data, textStatus, jqXHR)
 			{
+				if(promise.canceled)
+				{
+					return;
+				}
+				promise.setAjax(null);
+
+				if(data && data.success === false)
+				{
+					reject(data.error?data.error:data);
+					return;
+				}
+
 				if(settings.asObject)
 				{
 					resolve({data:data, textStatus:textStatus, jqXHR: jqXHR});
@@ -33,6 +46,10 @@ module ghost.io
 			})
 			.fail(( jqXHR, textStatus, errorThrown )=>
 			{
+				if(promise.canceled)
+				{
+					return;
+				}
 				if(settings.retry)
 				{
 					if(settings.retry != RETRY_INFINITE)
@@ -45,6 +62,7 @@ module ghost.io
 					}, 500);
 				}else
 				{
+					promise.setAjax(null);
 					if(settings.asObject)
 					{
 						reject({errorThrown:errorThrown, textStatus:textStatus, jqXHR: jqXHR});
@@ -55,6 +73,7 @@ module ghost.io
 				}
 			});
 		});
+		promise.setAjax($ajax);
 		return promise;
 	}
 
@@ -63,6 +82,25 @@ module ghost.io
 	{
 		retry?:number;
 		asObject?:boolean;
+	}
+	export class CancelablePromise<T> extends Promise<T>
+	{
+		public canceled:boolean = false;
+		private $ajax:any;
+		public cancel():void
+		{
+			if(this.$ajax)
+			{
+				this.$ajax.abort();
+				this.setAjax(null);
+			}
+
+			this.canceled = true;
+		}
+		public setAjax($ajax:any):void
+		{
+			this.$ajax = $ajax;
+		}
 	}
 
 }
