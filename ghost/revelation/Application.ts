@@ -37,13 +37,13 @@ module ghost.revelation
 				database:"test"
 			});
 		}
-		public get name():string
+		private name():string
 		{
 			var name:string =  this.getClassName();
 			name = name.replace(/Application/ig, "");
 			return name.substring(0, 1).toLowerCase()+name.substring(1);
 		}
-		public get server():Server
+		private server():Server
 		{ 
 			return this._server;
 		}
@@ -59,17 +59,17 @@ module ghost.revelation
 		}
 		public ready():void
 		{
-			this._server.use("/" + this.name+"/?.*",function(request, response)
+			this._server.use("/" + this.name()+"/?.*",function(request, response)
 			{
-				console.log("REQ");
+				console.log("REQ");	
 			});
 		}
 		public setServer(server:Server):void
 		{
 			this._server = server;
-			this._io = this._server.io.of(this.name);
-			this._server.use("/" + this.name, this._http);
-			console.log("set new application:"+this.name);
+			this._io = this._server.io().of(this.name());
+			this._server.use("/" + this.name(), this._http);
+			console.log("set new application:"+this.name());
 		}
 		public addRouteController(controller:RouteController):void
 		{

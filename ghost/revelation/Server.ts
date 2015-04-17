@@ -46,11 +46,11 @@ module ghost.revelation
 				this.options[p] = options[p];
 			}
 		}
-		public get app():any
+		private app():any
 		{
 			return this._app;
 		}
-		public get io():any
+		public io():any
 		{
 			return this._io;
 		}
