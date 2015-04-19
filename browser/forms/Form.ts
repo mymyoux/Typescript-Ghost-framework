@@ -84,7 +84,9 @@ module ghost.browser.forms
 
             $forms.on("click", "[data-action]", (event)=>
             {
-                this[$(event.target).attr("data-action")]();//.submit();
+                //console.log("EVENT_TARGET",$(event.currentTarget).attr("data-action"),event.target, this);
+                this[$(event.currentTarget).attr("data-action")]();
+                //.submit();
             });
           /*   $forms.find("[data-field='cancel']").on("click", ()=>
             {
