@@ -447,10 +447,6 @@ module ghost.mvc
                     {
                         var ractiveString:string = _this._parts[index]?_this._parts[index].ractive:undefined;
                         var name:string = _this._parts[index] && _this._parts[index].name?_this._parts[index].name:item.name();
-                        if(name == "cabinetcandidate")
-                        {
-                            debugger;
-                        }
                         //models
                         previous[name] = item.toRactive?item.toRactive(ractiveString):item instanceof Data?item.value:item.toObject();
                     }
