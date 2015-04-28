@@ -24,11 +24,15 @@ module ghost.browser.forms
         private fields:Field[];
         protected data:any;
         protected promises:any;
-        public constructor()
+        public constructor(form?:any)
         {
             super();
             this.data = {};
             this.promises = {};
+            if(form)
+            {
+                this.attachForm(form);
+            }
         }
         public setAutosave(value:boolean):void
         {
@@ -118,7 +122,7 @@ module ghost.browser.forms
                 log.error(error);
             });*/
         }
-        protected submit():void
+        public submit():void
         {
             this.trigger(Form.EVENT_SUBMIT, this.toObject());
             if(!this.action)
@@ -135,7 +139,6 @@ module ghost.browser.forms
             var data:any = this.toObject();
             var action:string = this.getAction();
             data.action = "submit";
-
 
             ghost.io.ajax({
                     url:action,
