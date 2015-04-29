@@ -58,7 +58,7 @@ module ghost.mvc
                 } 
                 if(typeof name == "function")
                 {
-                    name = ghost.mvc.Model.get(name);
+                    name = ghost.mvc.Model.get(name, true);
                 }
 				this._data.push(name);
 			}

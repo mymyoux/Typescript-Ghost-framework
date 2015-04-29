@@ -42,9 +42,10 @@ module ghost.mvc
         /**
          * Gets or instanciate a model
          * @param cls Class's model
+         * @param searchForCollectionToo Will look for model or collection
          * @returns {Model}
          */
-        public static get(cls:any):Model
+        public static get(cls:any, searchForCollectionToo:boolean = true):Model
         {
             if(!cls)
             {
@@ -75,6 +76,10 @@ module ghost.mvc
             if(Model._instances[cls])
             {
                 return Model._instances[cls];
+            }
+            if(searchForCollectionToo)
+            {
+                return <any>Collection.get(cls);
             }
             return new cls();
         }
