@@ -466,23 +466,27 @@ module ghost.mvc
 
                 ///PROMISES PARTS
         protected _partsPromises:any = {};
-        protected hasPart(name:string):boolean
+        protected hasPart(name:string, params:any = null):boolean
         {
-            return this._partsPromises[name] || this.getPartRequest(name)!=null;//name == "default";
+            return this._partsPromises[name] || this.getPartRequest(name, params)!=null;//name == "default";
         }
-        protected getPartPromise(name:string):Promise<any>|boolean
+        protected getPartPromise(name:string, params:any = null):Promise<any>|boolean
         {
-            if(!this.hasPart(name))
+            if(!this.hasPart(name, params))
             {
                 return null;
             }
             if(!this._partsPromises[name])
             {
-                var request:any = this.getPartRequest(name);
+                var request:any = this.getPartRequest(name, params);
                 if(request === false)
                 {
                     this._partsPromises[name] = true;
                     return true;
+                }
+                if(request.reset === true)
+                {
+                    this.reset(name);
                 }
                this._partsPromises[name] = new Promise<any>((accept, reject)=>
                {
@@ -509,7 +513,13 @@ module ghost.mvc
                     })
                     .done(function()
                     {
-                        _self._partsPromises[name] = true;
+                        if(request.cache === false)
+                        {
+                            delete _self._partsPromises[name];
+                        }else
+                        {
+                            _self._partsPromises[name] = true;
+                        }
                         accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
                     })
                     .fail(reject);
@@ -517,7 +527,7 @@ module ghost.mvc
             }
             return this._partsPromises[name];
         }
-        protected getPartRequest(name:string):any
+        protected getPartRequest(name:string, params:any = null):IPartRequest
         {
             debugger;
             throw new Error("you must override getPartRequest function");
@@ -533,8 +543,12 @@ module ghost.mvc
             }
             return null;
         }
-        public retrieveData(data:string[] = [Collection.PART_DEFAULT]):Promise<any>
+        public retrieveData(data:string[] = [Collection.PART_DEFAULT], params:any = null):Promise<any>
         {
+            if(!data)
+            {
+                data = [Collection.PART_DEFAULT];
+            }
             var _this:Collection<any> = this;
             var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void
             {
@@ -542,9 +556,9 @@ module ghost.mvc
                 var failed:boolean = false;
                 var promises:Promise<any>[] = data.map(function(name:string)
                 {
-                    if(this.hasPart(name))
+                    if(this.hasPart(name, params))
                     {
-                        return this.getPartPromise(name);
+                        return this.getPartPromise(name, params);
                     }else
                     {
                         //reject Promise   
@@ -625,6 +639,10 @@ module ghost.mvc
                         }
                     }, this);
             }
+        }
+        protected reset(name:string):void
+        {
+            this._models = [];
         }
         protected getDefaultClass():any
         {

@@ -138,7 +138,7 @@ module ghost.mvc
         {
             return this._partsPromises[name] || this.getPartRequest(name)!=null;//name == "default";
         }
-        protected getPartPromise(name:string):Promise<any>|boolean
+        protected getPartPromise(name:string, params:any = null):Promise<any>|boolean
         {
             if(!this.hasPart(name))
             {
@@ -146,7 +146,7 @@ module ghost.mvc
             }
             if(!this._partsPromises[name])
             {
-                var request:any = this.getPartRequest(name);
+                var request:any = this.getPartRequest(name, params);
                 if(request === false)
                 {
                     this._partsPromises[name] = true;
@@ -186,7 +186,7 @@ module ghost.mvc
             }
             return this._partsPromises[name];
         }
-        protected getPartRequest(name:string):any
+        protected getPartRequest(name:string, params:any = null):IPartRequest
         {
             debugger;
              throw new Error("you must override getPartRequest function");
@@ -203,8 +203,12 @@ module ghost.mvc
             return null;
         }
         
-        public retrieveData(data:string[] = [Model.PART_DEFAULT]):Promise<any>
+        public retrieveData(data:string[] = [Model.PART_DEFAULT], params:any = null):Promise<any>
         {
+            if(!data)
+            {
+                data = [Model.PART_DEFAULT];
+            }
             var _this:Model = this;
             var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void
             {
@@ -214,7 +218,7 @@ module ghost.mvc
                 {
                     if(this.hasPart(name))
                     {
-                        return this.getPartPromise(name);
+                        return this.getPartPromise(name, params);
                     }else
                     {
                         //reject Promise   
@@ -540,6 +544,20 @@ module ghost.mvc
         isRetrieved():boolean;
     }
 
+    export interface IPartRequest
+    {
+        method?:string;
+        url?:string;
+        data?:any;
+        /**
+         * If set to false, it will replay the ajax request each times. default:true
+         */
+        cache?:boolean;
+        /**
+         * If set to true, it will erase data each times the part is requested. default:false
+         */
+        reset?:boolean;
+    }
    
 
 }

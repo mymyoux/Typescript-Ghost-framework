@@ -390,17 +390,33 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
-        }/*
-        public static match(element:any):boolean
+        }
+    }
+    export class TextareaField extends Field
+    {
+        public static selector:string = "textarea";
+        public constructor(name:string, data:any, element:any)
         {
+            super(name, data, element);
 
-            var selector:string = InputTextField.selector;
-            if($(element).find(selector).addBack(selector).length)
-            {
-                return true;
-            }
-            return false;
-        }*/
+        }
+        protected init():void
+        {
+            super.init();
+            this.validators.push(new TextValidator());
+        }
+        protected bindEvents():void
+        {
+            super.bindEvents();
+            if(this.$input)
+                this.$input.on("keyup", this.onChangeBinded);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            if(this.$input)
+                this.$input.off("keyup", this.onChangeBinded);
+        }
     }
 
     export class InputHiddenField extends Field

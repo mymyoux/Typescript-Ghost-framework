@@ -108,9 +108,36 @@ module ghost.mvc
 		{
 
 		}
-        public setParamaters(params:any):void
+
+        /**
+         * Override this function to enable params mapping
+         * @returns Array of string
+         */
+        protected getParamsMapping():string[]
         {
-            this.paramsFromActivation = params;
+            return null;
+        }
+        public setParameters(params:any):void
+        {
+            var mapping:string[] = this.getParamsMapping();
+            if(mapping)
+            {
+                if(!params)
+                {
+                    params = [];
+                }
+                this.paramsFromActivation = mapping.reduce(function(result:any, data:any, index:number):any
+                {
+                    if(params.length>index)
+                    {
+                        result[mapping[index]] = params[index];
+                    }
+                    return result;
+                }, {});
+            }else
+            {
+                this.paramsFromActivation = params;
+            }
         }
 
 		protected getInitialData():any[]
@@ -127,7 +154,7 @@ module ghost.mvc
          */
         public _preactivate(params?:any):void
         {
-            this.setParamaters(params);
+            this.setParameters(params);
         	if(this._activated)
         	{
         		//already activating/ed
@@ -267,15 +294,23 @@ module ghost.mvc
         }
         protected initializeData():Promise<any>|boolean
         {
-        	var promises:Promise<any>[] = this._data.map(function(item:any, index:number)
+            var params:any = this.getActivationParams();
+        	var promises:Promise<any>[] = this._data.map((item:any, index:number)=>
         	{	
                 if(item.retrieveData)
                 {
+                    if(this._parts[index] && this._parts[index].condition)
+                    {
+                        if(!this._parts[index].condition())
+                        {
+                            return null;
+                        }
+                    }
                     if(this._parts[index] && this._parts[index].parts)
                     {
-                        return item.retrieveData(this._parts[index].parts);
+                        return item.retrieveData(this._parts[index].parts, params);
                     }
-        		  return item.retrieveData();
+        		  return item.retrieveData(null, params);
                 }
                 return null;
     		}, this).filter(function(item:any)
@@ -553,5 +588,6 @@ module ghost.mvc
         ractive?:string;
         name?:string;
         events?:string[];
+        condition:Function;
     }
 }
