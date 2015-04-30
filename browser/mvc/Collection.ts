@@ -640,10 +640,19 @@ module ghost.mvc
                     }, this);
             }
         }
+        /**
+         * Override this function to modify how reset is handled
+         * @param name Part's name
+         */
         protected reset(name:string):void
         {
             this._models = [];
         }
+
+        /**
+         * Default's model class
+         * @returns Model class
+         */
         protected getDefaultClass():any
         {
             return Model;

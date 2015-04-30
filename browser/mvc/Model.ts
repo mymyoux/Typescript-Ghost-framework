@@ -152,6 +152,10 @@ module ghost.mvc
                     this._partsPromises[name] = true;
                     return true;
                 }
+                if(request.reset === true)
+                {
+                    this.reset(name);
+                }
                this._partsPromises[name] = new Promise<any>((accept, reject)=>
                {
                     var _self:any = this;
@@ -178,7 +182,13 @@ module ghost.mvc
                     })
                     .done(function()
                     {
-                        _self._partsPromises[name] = true;
+                        if(request.cache === false)
+                        {
+                            delete _self._partsPromises[name];
+                        }else
+                        {
+                            _self._partsPromises[name] = true;
+                        }
                         accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
                     })
                     .fail(reject);
@@ -488,6 +498,15 @@ module ghost.mvc
         {
             return null;
         }
+
+        /**
+         * Override this function to modify how reset is handled
+         * @param name Part's name
+         */
+        protected reset(name:string):void
+        {
+            this.data = {};
+        }
         //TODO:futur me, check if some models override toObject() function instead of this one for ractive templates
       /*  public toRactive():any
         {
@@ -536,6 +555,7 @@ module ghost.mvc
             }
             return super.toObject(keys);
         }
+
     }
 
     export interface IRetrievable
@@ -557,6 +577,7 @@ module ghost.mvc
          * If set to true, it will erase data each times the part is requested. default:false
          */
         reset?:boolean;
+
     }
    
 

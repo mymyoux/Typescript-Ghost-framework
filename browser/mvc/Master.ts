@@ -310,7 +310,12 @@ module ghost.mvc
                     {
                         return item.retrieveData(this._parts[index].parts, params);
                     }
-        		  return item.retrieveData(null, params);
+                    var promise:any = item.retrieveData(null, params);
+                    if(this._parts[index] && this._parts[index].async === true)
+                    {
+                        return true;
+                    }
+        		  return promise;
                 }
                 return null;
     		}, this).filter(function(item:any)
@@ -589,5 +594,10 @@ module ghost.mvc
         name?:string;
         events?:string[];
         condition:Function;
+        //TODO:add async options
+        /**
+         * Data loaded asynchrone
+         */
+        async?:boolean;
     }
 }
