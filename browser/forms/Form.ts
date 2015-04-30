@@ -124,7 +124,13 @@ module ghost.browser.forms
         }
         public submit():void
         {
-            this.trigger(Form.EVENT_SUBMIT, this.toObject());
+            var object:any = this.toObject();
+            var uniqueID:number = ghost.utils.Maths.getUniqueID();
+            if(object)
+            {
+                object.__uniqueID = uniqueID;
+            }
+            this.trigger(Form.EVENT_SUBMIT, object);
             if(!this.action)
             {
                 log.warn("unable to autosave the form - no action attribute found for the form");
@@ -148,10 +154,18 @@ module ghost.browser.forms
                 }).
             then((result:any):void=>
             {
+                if(result)
+                {
+                    result.__uniqueID = uniqueID;
+                }
                 this.trigger(Form.EVENT_SUBMITTED, result);
 
             }, (error:any):void=>
             {
+                if(error)
+                {
+                    error.__uniqueID = uniqueID;
+                }
                 this.trigger(Form.EVENT_SUBMIT_ERROR, error);
             });
         }   

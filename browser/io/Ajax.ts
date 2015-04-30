@@ -3,7 +3,7 @@
 module ghost.io
 {
 	export var RETRY_INFINITE:number = -1;
-	export function ajax(settings:AjaxOptions, t?:any):CancelablePromise<Object>;
+	export function ajax(settings:AjaxOptions):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:AjaxOptions):CancelablePromise<Object>;
 	export function ajax(url:any, settings?:AjaxOptions):CancelablePromise<Object>
 	{
@@ -32,6 +32,14 @@ module ghost.io
 
 				if(data && data.success === false)
 				{
+					if(settings.retry === true)
+					{
+						setTimeout(function()
+						{
+							ajax(settings).then(resolve, reject);
+						}, 500);
+						return;
+					}
 					reject(data.error?data.error:data);
 					return;
 				}
@@ -52,9 +60,9 @@ module ghost.io
 				}
 				if(settings.retry)
 				{
-					if(settings.retry != RETRY_INFINITE)
+					if(settings.retry !== RETRY_INFINITE && settings.retry!==true)
 					{
-						settings.retry--;
+						settings.retry = <any> settings.retry - 1;
 					}
 					setTimeout(function()
 					{
@@ -80,7 +88,20 @@ module ghost.io
 
 	export interface AjaxOptions extends JQueryAjaxSettings
 	{
-		retry?:number;
+		/**
+		 * Specifies how error will be handled
+		 * retry:number if the value is numeric, it will be the number of times
+		 * a retry will be done on network error. If the data is set with .success == false
+		 * the reject method will be called.
+		 * retry: ghost.io.RETRY_INFINITE It will always retry on network errors
+		 * retry: true It will always retry even if there is no network error but data set with success == false
+		 */
+		retry?:number|boolean;
+		/**
+		 * If set to true, result data will be encapsulated on an formatted object:
+		 * {data:data, textStatus:textStatus, jqXHR: jqXHR}
+		 * If set to false, result data will be return without modification
+		 */
 		asObject?:boolean;
 	}
 	export class CancelablePromise<T> extends Promise<T>

@@ -459,7 +459,7 @@ module ghost.mvc
                         this._retrieving = false;
                         this.retrieveFromServer(callback, times);
 
-                    },( error.status==500?(++times):1)*500);
+                    },( error.status==500  || error.status==404?(++times):1)*500);
                 });
             }else
             {
