@@ -48,9 +48,9 @@ module ghost.mvc
         }
         public preinit():void
         {
-            var package:any = this.getPackage();
-            if(package)
-                Controller.addPackage(package);
+            var pckg:any = this.getPackage();
+            if(pckg)
+                Controller.addPackage(pckg);
         }
         public postinit():void
         {

@@ -29,7 +29,7 @@ module ghost.browser.io
 					}
 					reader.onerror = function(e)
 					{
-						reject(e);
+						reject(<any>e);
 					}
 					reader.readAsText(file);	
 				} else {
