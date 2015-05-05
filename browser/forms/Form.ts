@@ -88,6 +88,7 @@ module ghost.browser.forms
 
             $forms.on("click", "[data-action]", (event)=>
             {
+
                 //console.log("EVENT_TARGET",$(event.currentTarget).attr("data-action"),event.target, this);
                 this[$(event.currentTarget).attr("data-action")]();
                 //.submit();
@@ -124,6 +125,7 @@ module ghost.browser.forms
         }
         public submit():void
         {
+            
             var object:any = this.toObject();
             var uniqueID:number = ghost.utils.Maths.getUniqueID();
             if(object)
