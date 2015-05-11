@@ -143,7 +143,7 @@ module ghost.browser.forms
                 if(this.promises[p])
                     this.promises[p].cancel();
             }
-            this.promises = {}; 
+            this.promises = {};
             var data:any = this.toObject();
             var action:string = this.getAction();
             data.action = "submit";
@@ -299,6 +299,10 @@ module ghost.browser.forms
         public constructor( protected name:string, protected data:any, protected element:any)
         {
             super();
+            if(!this.data)
+            {
+                this.data = {};
+            }
             this.onChangeBinded = this.onChange.bind(this);
             this.onChangeThrottle = ghost.utils.Buffer.throttle(this.triggerChange.bind(this), 500);
             this.validators = [];
@@ -327,6 +331,15 @@ module ghost.browser.forms
             if($(this.element).attr("data-require") == "true")
             {
                 this.required = true;
+            }
+            var category:string = $(this.element).attr("data-category") ||  $(this.element).parents("form,[data-category]").attr("data-category");
+            if(category)
+            {
+                if(!this.data[category])
+                {
+                    this.data[category] = {};
+                }
+                this.data = this.data[category];
             }
         }
         protected setInitialValue():void
