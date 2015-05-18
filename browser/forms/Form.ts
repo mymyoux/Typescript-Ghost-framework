@@ -14,6 +14,8 @@ module ghost.browser.forms
          * @type {string}
          */
         public static EVENT_CHANGE:string = "change";
+        public static EVENT_ADD_ITEM:string = "add_item";
+        public static EVENT_REMOVE_ITEM:string = "remove_item";
         public static EVENT_SUBMIT:string = "submit";
         public static EVENT_CANCEL:string = "cancel";
         public static EVENT_SUBMITTED:string = "submitted";
@@ -24,10 +26,16 @@ module ghost.browser.forms
         private fields:Field[];
         protected data:any;
         protected promises:any;
-        public constructor(form?:any)
+        protected _setInitialData:boolean = false;
+        public constructor(form?:any, data?:any)
         {
             super();
-            this.data = {};
+            if(!data)
+            {
+                data = {};
+                this._setInitialData = true;
+            }
+            this.data = data;
             this.promises = {};
             if(form)
             {
@@ -54,17 +62,29 @@ module ghost.browser.forms
             data[name] = this.data[name];
             return data;
         }
-        public attachForm(form:any):void
+        public retrieveFields(form:any, listname?:string)
         {
-            var fields:Field[] = <Field[]>$(form).find("[data-field]").toArray().map((element:any):Field=>
+            if(!listname)
             {
-                var name:string = $(element).attr("data-field");
-                var cls:any = this.getField(element);
+                listname = $(form).attr("data-list");
+            }
+            var fields:Field[] = <Field[]>$(form).find("[data-field],[data-list]").toArray().map((element:any):Field=>
+            {
+                var name:string = $(element).attr("data-field") ||$(element).attr("data-list");
+                if($(element).attr("data-field") && $(element).parents("form,[data-list]").attr("data-list") && $(element).parents("form,[data-list]").attr("data-list")!=listname)
+                {
+                    return null;
+                }
+                var cls:any = Form.getField(element);
                 var field:Field;
                 if(cls)
                 {
-                    field = new cls(name, this.data, element);
+                    field = new cls(name, this.data, element, this._setInitialData);
                     field.on(Field.EVENT_CHANGE, this.onChange, this, name);
+                    if(field instanceof ListField)
+                    {
+                        field.on(ListField.EVENT_ADD, this.onAdd, this, name, field);
+                    }
                 }
                 return field;
             }).filter(function(element:any):boolean
@@ -76,6 +96,10 @@ module ghost.browser.forms
                 return false;
             });
             this.fields = fields;
+        }
+        public attachForm(form:any):void
+        {
+            this.retrieveFields(form);
             var $forms:JQuery = $(form).find("form").addBack("form");
             this.$form = $forms;
             this.action = $forms.attr("action");
@@ -88,9 +112,14 @@ module ghost.browser.forms
 
             $forms.on("click", "[data-action]", (event)=>
             {
-
+                var $this:JQuery = $(event.currentTarget);
+                if($this.parents("[data-list],form").attr("data-list"))
+                {
+                    //inside data-list
+                    return;
+                }
                 //console.log("EVENT_TARGET",$(event.currentTarget).attr("data-action"),event.target, this);
-                this[$(event.currentTarget).attr("data-action")]();
+                this[$this.attr("data-action")]();
                 //.submit();
             });
           /*   $forms.find("[data-field='cancel']").on("click", ()=>
@@ -125,8 +154,8 @@ module ghost.browser.forms
         }
         public submit():void
         {
-            
             var object:any = this.toObject();
+            console.log(object);
             var uniqueID:number = ghost.utils.Maths.getUniqueID();
             if(object)
             {
@@ -219,7 +248,11 @@ module ghost.browser.forms
             });
             this.promises[name] = ajax;
         }
-        private getField(element):any
+        protected onAdd(name:string, list:ListField):void
+        {
+            this.trigger(Form.EVENT_ADD_ITEM, name, list);
+        }
+        private static getField(element):any
         {
             var cls:any;
             for(var p in ghost.browser.forms)
@@ -296,7 +329,7 @@ module ghost.browser.forms
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
 
-        public constructor( protected name:string, protected data:any, protected element:any)
+        public constructor( protected name:string, protected data:any, public element:any, protected _setInitialData:boolean)
         {
             super();
             if(!this.data)
@@ -344,7 +377,11 @@ module ghost.browser.forms
         }
         protected setInitialValue():void
         {
-            this.data[this.name] = this.getValue();
+            if(this._setInitialData || this.data[this.name] == undefined)
+            {
+
+                this.data[this.name] = this.getValue();
+            }
         }
         protected bindEvents():void
         {
@@ -395,14 +432,67 @@ module ghost.browser.forms
             return false;
         }
     }
+    export class ListField extends Field
+    {
+        public static selector:string = "[data-list]";
+        public static EVENT_ADD:string = "add_item";
+        private items:Field[];
+        public constructor(name:string, data:any, element:any, _setInitialData:boolean)
+        {
+            this.items = [];
+            super(name, data, element, _setInitialData);
+        }
+        public onChange(event:any):void
+        {
+            this.onChangeThrottle();
+        }
+        public init():void
+        {
+
+            $(this.element).find("[data-item]").toArray().map((item:any)=>
+            {
+                this.data[this.name].push({});
+                this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], item, this._setInitialData));
+            });
+            $(this.element).on("click","[data-action]", (event)=>
+            {
+                this[$(event.currentTarget).attr("data-action")]();
+            });
+        }
+        protected setInitialValue():void
+        {
+            if(this._setInitialData || this.data[this.name] == undefined) {
+                debugger;
+                this.data[this.name] = [];
+            }
+        }
+        public add():void
+        {
+            this.data[this.name].push({});
+            this.trigger(ListField.EVENT_ADD);
+            $(this.element).find("[data-item]").last().find("[data-focus]").focus();
+
+            //this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], null));
+        }
+    }
+    export class ItemField extends Field
+    {
+        public static selector:string = "[data-list]";
+        private fields:Field[];
+        public constructor(name:string, data:any, element:any, _setInitialData:boolean)
+        {
+            this.fields = [];
+            super(name, data, element, _setInitialData);
+        }
+        public init():void
+        {
+            Form.prototype.retrieveFields.call(this, this.element, this.name);
+        }
+    }
     export class InputTextField extends Field
     {
         public static selector:string = "input[type='text']";
-        public constructor(name:string, data:any, element:any)
-        {
-            super(name, data, element);
-    
-        }
+
         protected init():void
         {
             super.init();
@@ -424,11 +514,7 @@ module ghost.browser.forms
     export class TextareaField extends Field
     {
         public static selector:string = "textarea";
-        public constructor(name:string, data:any, element:any)
-        {
-            super(name, data, element);
 
-        }
         protected init():void
         {
             super.init();
@@ -451,11 +537,7 @@ module ghost.browser.forms
     export class InputHiddenField extends Field
     {
         public static selector:string = "input[type='hidden']";
-        public constructor(name:string, data:any, element:any)
-        {
-            super(name, data, element);
-    
-        }
+
         protected init():void
         {
             super.init();
@@ -477,11 +559,7 @@ module ghost.browser.forms
     export class InputListField extends Field
     {
         public static selector:string = "select";
-        public constructor(name:string, data:any, element:any)
-        {
-            super(name, data, element);
-    
-        }
+
         protected init():void
         {
             super.init();
