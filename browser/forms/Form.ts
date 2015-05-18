@@ -84,6 +84,7 @@ module ghost.browser.forms
                     if(field instanceof ListField)
                     {
                         field.on(ListField.EVENT_ADD, this.onAdd, this, name, field);
+                        field.on(ListField.EVENT_REMOVE, this.onRemove, this, name, field);
                     }
                 }
                 return field;
@@ -251,6 +252,10 @@ module ghost.browser.forms
         protected onAdd(name:string, list:ListField):void
         {
             this.trigger(Form.EVENT_ADD_ITEM, name, list);
+        }
+        protected onRemove(name:string, list:ListField):void
+        {
+            this.trigger(Form.EVENT_REMOVE_ITEM, name, list);
         }
         private static getField(element):any
         {
@@ -436,6 +441,7 @@ module ghost.browser.forms
     {
         public static selector:string = "[data-list]";
         public static EVENT_ADD:string = "add_item";
+        public static EVENT_REMOVE:string = "remove_item";
         private items:Field[];
         public constructor(name:string, data:any, element:any, _setInitialData:boolean)
         {
@@ -456,7 +462,7 @@ module ghost.browser.forms
             });
             $(this.element).on("click","[data-action]", (event)=>
             {
-                this[$(event.currentTarget).attr("data-action")]();
+                this[$(event.currentTarget).attr("data-action")](event.currentTarget);
             });
         }
         protected setInitialValue():void
@@ -471,8 +477,17 @@ module ghost.browser.forms
             this.data[this.name].push({});
             this.trigger(ListField.EVENT_ADD);
             $(this.element).find("[data-item]").last().find("[data-focus]").focus();
-
-            //this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], null));
+        }
+        public remove(element:HTMLElement):void
+        {
+            var $item:JQuery = $(element).parents("data-item");
+            var i:number = parseInt($item.attr("data-item"), 10);
+            if(!isNaN(i))
+            {
+                this.data[this.name].splice(i, 1);
+            }
+            this.trigger(ListField.EVENT_REMOVE);
+            $(this.element).find("[data-item]").last().find("[data-focus]").focus();
         }
     }
     export class ItemField extends Field
