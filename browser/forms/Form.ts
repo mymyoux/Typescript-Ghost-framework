@@ -455,9 +455,12 @@ module ghost.browser.forms
         public init():void
         {
 
-            $(this.element).find("[data-item]").toArray().map((item:any)=>
+            $(this.element).find("[data-item]").toArray().map((item:any, index:number)=>
             {
-                this.data[this.name].push({});
+                if(this._setInitialData || this.data[this.name].length<index)
+                {
+                    this.data[this.name].push({});
+                }
                 this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], item, this._setInitialData));
             });
             $(this.element).on("click","[data-action]", (event)=>
@@ -468,7 +471,6 @@ module ghost.browser.forms
         protected setInitialValue():void
         {
             if(this._setInitialData || this.data[this.name] == undefined) {
-                debugger;
                 this.data[this.name] = [];
             }
         }
@@ -476,7 +478,13 @@ module ghost.browser.forms
         {
             this.data[this.name].push({});
             this.trigger(ListField.EVENT_ADD);
-            $(this.element).find("[data-item]").last().find("[data-focus]").focus();
+            var $last:JQuery = $(this.element).find("[data-item]").last();
+            var $element:JQuery = $last.find("[data-focus]");
+            if(!$element.length && $last.is("[data-focus]"))
+            {
+                $element = $last;
+            }
+            $element.focus();
         }
         public remove(element:HTMLElement):void
         {
@@ -486,6 +494,7 @@ module ghost.browser.forms
             {
                 this.data[this.name].splice(i, 1);
             }
+
             this.trigger(ListField.EVENT_REMOVE);
             $(this.element).find("[data-item]").last().find("[data-focus]").focus();
         }
