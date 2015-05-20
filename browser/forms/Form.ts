@@ -42,6 +42,19 @@ module ghost.browser.forms
                 this.attachForm(form);
             }
         }
+        public static isSubList(element:any, listName:string, testSelf:boolean = true):boolean
+        {
+            var $item:JQuery = $(element);
+            if(testSelf && $item.is("[data-list") && $item.attr("data-list")!= listName)
+            {
+                return true;
+            }
+            if($item.parents("form,[data-list]").attr("data-list") && $item.parents("form,[data-list]").attr("data-list")!= listName)
+            {
+                return true;
+            }
+            return false;
+        }
         public setAutosave(value:boolean):void
         {
             this.autosave = value;
@@ -70,16 +83,23 @@ module ghost.browser.forms
             }
             var fields:Field[] = <Field[]>$(form).find("[data-field],[data-list]").toArray().map((element:any):Field=>
             {
-                var name:string = $(element).attr("data-field") ||$(element).attr("data-list");
-                if($(element).attr("data-field") && $(element).parents("form,[data-list]").attr("data-list") && $(element).parents("form,[data-list]").attr("data-list")!=listname)
+                var name:string = $(element).attr("data-field");
+                var list:boolean = false;
+                if(!name)
                 {
+                     name =$(element).attr("data-list");
+                    list = true;
+                }
+                if(($(element).attr("data-field") || $(element).attr("data-list")) && $(element).parents("form,[data-list]").attr("data-list") && $(element).parents("form,[data-list]").attr("data-list")!=listname)
+                {
+                    //debugger;
                     return null;
                 }
-                var cls:any = Form.getField(element);
+                var cls:any = list?ListField:Form.getField(element);
                 var field:Field;
                 if(cls)
                 {
-                    field = new cls(name, this.data, element, this._setInitialData);
+                    field = new cls(name, this.data, element, this._setInitialData, this["form"]?this["form"]:this);
                     field.on(Field.EVENT_CHANGE, this.onChange, this, name);
                     if(field instanceof ListField)
                     {
@@ -249,11 +269,11 @@ module ghost.browser.forms
             });
             this.promises[name] = ajax;
         }
-        protected onAdd(name:string, list:ListField):void
+        public onAdd(name:string, list:ListField):void
         {
             this.trigger(Form.EVENT_ADD_ITEM, name, list);
         }
-        protected onRemove(name:string, list:ListField):void
+        public onRemove(name:string, list:ListField):void
         {
             this.trigger(Form.EVENT_REMOVE_ITEM, name, list);
         }
@@ -334,7 +354,7 @@ module ghost.browser.forms
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
 
-        public constructor( protected name:string, protected data:any, public element:any, protected _setInitialData:boolean)
+        public constructor( protected name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
         {
             super();
             if(!this.data)
@@ -370,6 +390,10 @@ module ghost.browser.forms
             {
                 this.required = true;
             }
+            /*if(this.data && this.data.tags)
+            {
+                debugger;
+            }*/
             var category:string = $(this.element).attr("data-category") ||  $(this.element).parents("form,[data-category]").attr("data-category");
             if(category)
             {
@@ -395,6 +419,7 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
+            debugger;
             if( this.data[this.name]  != this.getValue())
             {
                 this.data[this.name] = this.getValue();
@@ -426,10 +451,15 @@ module ghost.browser.forms
             if(this.$input)
                 this.$input.off("change", this.onChangeBinded);
             this.onChangeThrottle.cancel();
+            this.form = null;
         }
         public static match(element:any):boolean
         {
             var selector:string = this.prototype.constructor["selector"];
+            if(!selector)
+            {
+                return false;
+            }
             if($(element).find(selector).addBack(selector).length)
             {
                 return true;
@@ -439,17 +469,23 @@ module ghost.browser.forms
     }
     export class ListField extends Field
     {
-        public static selector:string = "[data-list]";
+        public static selector:string = null;//"[data-list]";
         public static EVENT_ADD:string = "add_item";
         public static EVENT_REMOVE:string = "remove_item";
         private items:Field[];
-        public constructor(name:string, data:any, element:any, _setInitialData:boolean)
+        /**
+         * Sublist name to precreate item data
+         */
+        private sublist:string[];
+        public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form)
         {
             this.items = [];
-            super(name, data, element, _setInitialData);
+            //this.sublist = [];
+            super(name, data, element, _setInitialData, form);
         }
         public onChange(event:any):void
         {
+            debugger;
             this.onChangeThrottle();
         }
         public init():void
@@ -457,34 +493,110 @@ module ghost.browser.forms
 
             $(this.element).find("[data-item]").toArray().map((item:any, index:number)=>
             {
-                if(this._setInitialData || this.data[this.name].length<index)
+                var $item:JQuery = $(item);
+                if(this.isSubList(item))
                 {
-                    this.data[this.name].push({});
+                    return null;
                 }
-                this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], item, this._setInitialData));
+                this.addData(index);
+                this.addItem(index, item);
+                //this.items.push(new ItemField(this.name, this.data[this.name][index], item, this._setInitialData, this.form));
             });
             $(this.element).on("click","[data-action]", (event)=>
             {
+                if(this.isSubList(event.currentTarget))
+                {
+                    return;
+                }
                 this[$(event.currentTarget).attr("data-action")](event.currentTarget);
             });
+            this.sublist = this.getListItem("[data-list]", this.element, false).toArray().map(function(item:any):string
+            {
+                return $(item).attr("data-list");
+            });
+            if(!this.sublist.length)
+            {
+                this.sublist = null;
+            }
         }
         protected setInitialValue():void
         {
             if(this._setInitialData || this.data[this.name] == undefined) {
+                debugger;
                 this.data[this.name] = [];
             }
         }
         public add():void
         {
-            this.data[this.name].push({});
+            if(!this.data[this.name] || !this.data[this.name].push)
+            {
+                this.data[this.name] =  [];
+            }
+            debugger;
+            //this.data[this.name].push({name:"test", tags:[]});
             this.trigger(ListField.EVENT_ADD);
-            var $last:JQuery = $(this.element).find("[data-item]").last();
+            var index:number = this.addData();
+
+            var $last:JQuery = this.getListItem("[data-item]", this.element).last();//$(this.element).find("[data-item]").last();
+            this.addItem(index, $last);
+            //this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], $last, this._setInitialData, this.form));
             var $element:JQuery = $last.find("[data-focus]");
             if(!$element.length && $last.is("[data-focus]"))
             {
                 $element = $last;
             }
+            debugger;
             $element.focus();
+        }
+        protected addData(index?:number):number
+        {
+            if(!this.data[this.name] || !this.data[this.name].push)
+            {
+                this.data[this.name] =  [];
+            }
+            if(index == undefined)
+            {
+                index = this.data[this.name].length;
+            }
+
+            while(this.data[this.name].length<=index)
+            {
+                var newItem:any = {};
+                if(this.sublist)
+                {
+                    debugger;
+                    for(var p in this.sublist)
+                    {
+                        newItem[this.sublist[p]] = [];
+                    }
+                }
+                this.data[this.name].push(newItem);
+            }
+            return index;
+        }
+        protected addItem(index:number, item:any)
+        {
+            this.items.push(new ItemField(this.name, this.data[this.name][index], item, this._setInitialData, this.form));
+        }
+        protected getListItem(selector:string, root?:any, testSelf:boolean = true):JQuery
+        {
+            if(!root)
+            {
+                root = this.element;
+            }
+            var $root:JQuery = $(root);
+            return $root.find(selector).filter((index:number, item:any):boolean=>
+            {
+                return !this.isSubList(item, this.name, testSelf);
+            });
+        }
+        protected isSubList(element:any, listName?:string, testSelf:boolean = true):boolean
+        {
+            if(!listName)
+            {
+                listName = this.name;
+            }
+           return Form.isSubList(element, listName, testSelf);
         }
         public remove(element:HTMLElement):void
         {
@@ -496,21 +608,58 @@ module ghost.browser.forms
             }
 
             this.trigger(ListField.EVENT_REMOVE);
-            $(this.element).find("[data-item]").last().find("[data-focus]").focus();
+            this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
+        }
+        public dispose():void
+        {
+            if(this.items)
+            {
+                this.items.forEach(function(field:ItemField)
+                {
+                    field.dispose();
+                });
+                this.items = null;
+            }
+            this.off();
+            super.dispose();
         }
     }
     export class ItemField extends Field
     {
-        public static selector:string = "[data-list]";
+        public static selector:string = null;// "[data-list]";
         private fields:Field[];
-        public constructor(name:string, data:any, element:any, _setInitialData:boolean)
+        public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form)
         {
             this.fields = [];
-            super(name, data, element, _setInitialData);
+            super(name, data, element, _setInitialData, form);
         }
         public init():void
         {
             Form.prototype.retrieveFields.call(this, this.element, this.name);
+        }
+        protected onAdd(name:string, list:ListField):void
+        {
+            this.form.onAdd(name, list);
+        }
+        protected onRemove(name:string, list:ListField):void
+        {
+            this.form.onRemove(name, list);
+        }
+        public dispose():void
+        {
+            if(this.fields)
+            {
+                this.fields.forEach(function(field:Field)
+                {
+                    field.dispose();
+                });
+                this.fields = null;
+            }
+            this.off();
+            super.dispose();
+        }
+        public setInitialValue():void
+        {
         }
     }
     export class InputTextField extends Field

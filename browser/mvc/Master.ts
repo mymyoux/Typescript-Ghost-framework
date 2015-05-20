@@ -175,6 +175,8 @@ module ghost.mvc
     		 			this.activation();
                     }catch(error)
                     {
+                        console.error(error);
+                        debugger;
                         //disallow es6promise to catch this error
                         setTimeout(function()
                         {
@@ -549,8 +551,15 @@ module ghost.mvc
 
 
                 ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
+                try
+                {
 
-                this.template = new Ractive(options);
+                    this.template = new Ractive(options);
+                }catch(error)
+                {
+                    console.error(error);
+                    debugger;
+                }
 
                 var listener:any = this.getBindedFunctions(); //this.getBindedEventListeners();
                 if(listener)
