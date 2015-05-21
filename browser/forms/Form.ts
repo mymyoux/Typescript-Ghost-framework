@@ -92,7 +92,7 @@ module ghost.browser.forms
                 }
                 if(($(element).attr("data-field") || $(element).attr("data-list")) && $(element).parents("form,[data-list]").attr("data-list") && $(element).parents("form,[data-list]").attr("data-list")!=listname)
                 {
-                    //debugger;
+                    //
                     return null;
                 }
                 var cls:any = list?ListField:Form.getField(element);
@@ -139,7 +139,6 @@ module ghost.browser.forms
                     //inside data-list
                     return;
                 }
-                //console.log("EVENT_TARGET",$(event.currentTarget).attr("data-action"),event.target, this);
                 this[$this.attr("data-action")]();
                 //.submit();
             });
@@ -176,7 +175,6 @@ module ghost.browser.forms
         public submit():void
         {
             var object:any = this.toObject();
-            console.log(object);
             var uniqueID:number = ghost.utils.Maths.getUniqueID();
             if(object)
             {
@@ -233,7 +231,7 @@ module ghost.browser.forms
             }
              /*if(action.indexOf(":")!=-1)
              {
-                debugger;
+                
              }*/
             return action; 
         }
@@ -392,7 +390,7 @@ module ghost.browser.forms
             }
             /*if(this.data && this.data.tags)
             {
-                debugger;
+                
             }*/
             var category:string = $(this.element).attr("data-category") ||  $(this.element).parents("form,[data-category]").attr("data-category");
             if(category)
@@ -419,7 +417,7 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
-            debugger;
+            
             if( this.data[this.name]  != this.getValue())
             {
                 this.data[this.name] = this.getValue();
@@ -485,12 +483,14 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
-            debugger;
+            
             this.onChangeThrottle();
         }
         public init():void
         {
 
+            //don't count sublist
+            var i:number = 0;
             $(this.element).find("[data-item]").toArray().map((item:any, index:number)=>
             {
                 var $item:JQuery = $(item);
@@ -498,8 +498,9 @@ module ghost.browser.forms
                 {
                     return null;
                 }
-                this.addData(index);
-                this.addItem(index, item);
+                this.addData(i);
+                this.addItem(i, item);
+                i++;
                 //this.items.push(new ItemField(this.name, this.data[this.name][index], item, this._setInitialData, this.form));
             });
             $(this.element).on("click","[data-action]", (event)=>
@@ -522,7 +523,7 @@ module ghost.browser.forms
         protected setInitialValue():void
         {
             if(this._setInitialData || this.data[this.name] == undefined) {
-                debugger;
+              //  
                 this.data[this.name] = [];
             }
         }
@@ -532,7 +533,7 @@ module ghost.browser.forms
             {
                 this.data[this.name] =  [];
             }
-            debugger;
+            
             //this.data[this.name].push({name:"test", tags:[]});
             this.trigger(ListField.EVENT_ADD);
             var index:number = this.addData();
@@ -545,7 +546,7 @@ module ghost.browser.forms
             {
                 $element = $last;
             }
-            debugger;
+            
             $element.focus();
         }
         protected addData(index?:number):number
@@ -564,7 +565,7 @@ module ghost.browser.forms
                 var newItem:any = {};
                 if(this.sublist)
                 {
-                    debugger;
+                    
                     for(var p in this.sublist)
                     {
                         newItem[this.sublist[p]] = [];
