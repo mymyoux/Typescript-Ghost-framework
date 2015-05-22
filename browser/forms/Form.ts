@@ -471,6 +471,8 @@ module ghost.browser.forms
         public static EVENT_ADD:string = "add_item";
         public static EVENT_REMOVE:string = "remove_item";
         private items:Field[];
+        private max:number;
+        private min:number;
         /**
          * Sublist name to precreate item data
          */
@@ -478,6 +480,7 @@ module ghost.browser.forms
         public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form)
         {
             this.items = [];
+            this.min = this.max = -1;
             //this.sublist = [];
             super(name, data, element, _setInitialData, form);
         }
@@ -503,21 +506,29 @@ module ghost.browser.forms
                 i++;
                 //this.items.push(new ItemField(this.name, this.data[this.name][index], item, this._setInitialData, this.form));
             });
+            this.max = parseInt($(this.element).attr("data-max"), 10) || -1;
+            this.min = parseInt($(this.element).attr("data-min"), 10) || -1;
+
             $(this.element).on("click","[data-action]", (event)=>
             {
-                if(this.isSubList(event.currentTarget))
+                    if(this.isSubList(event.currentTarget))
                 {
-                    return;
+                        return;
                 }
-                this[$(event.currentTarget).attr("data-action")](event.currentTarget);
+                    this[$(event.currentTarget).attr("data-action")](event.currentTarget);
             });
             this.sublist = this.getListItem("[data-list]", this.element, false).toArray().map(function(item:any):string
             {
-                return $(item).attr("data-list");
+                    return $(item).attr("data-list");
             });
             if(!this.sublist.length)
             {
-                this.sublist = null;
+                    this.sublist = null;
+            }
+            
+            while(!this.data[this.name] || this.data[this.name].length<this.min)
+            {
+                this.add(false);
             }
         }
         protected setInitialValue():void
@@ -527,7 +538,7 @@ module ghost.browser.forms
                 this.data[this.name] = [];
             }
         }
-        public add():void
+        public add(focus:boolean = true):void
         {
             if(!this.data[this.name] || !this.data[this.name].push)
             {
@@ -541,13 +552,16 @@ module ghost.browser.forms
             var $last:JQuery = this.getListItem("[data-item]", this.element).last();//$(this.element).find("[data-item]").last();
             this.addItem(index, $last);
             //this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], $last, this._setInitialData, this.form));
-            var $element:JQuery = $last.find("[data-focus]");
-            if(!$element.length && $last.is("[data-focus]"))
+            if(focus)
             {
-                $element = $last;
+                var $element:JQuery = $last.find("[data-focus]");
+                if(!$element.length && $last.is("[data-focus]"))
+                {
+                    $element = $last;
+                }
+
+                $element.focus();
             }
-            
-            $element.focus();
         }
         protected addData(index?:number):number
         {
