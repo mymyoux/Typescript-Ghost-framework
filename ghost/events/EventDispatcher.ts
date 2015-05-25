@@ -454,6 +454,10 @@ module ghost.events
 
         constructor(public key1:string, public key2:string, public once:boolean, public callback:Function, public scope?:any, public parameters?:any[])
         {
+            if(!callback)
+            {
+                debugger;
+            }
         }
         public isScope(scope:any):boolean
         {

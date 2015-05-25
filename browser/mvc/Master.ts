@@ -58,7 +58,7 @@ module ghost.mvc
                 } 
                 if(typeof name == "function")
                 {
-                    name = ghost.mvc.Model.get(name);
+                    name = ghost.mvc.Model.get(name, true);
                 }
 				this._data.push(name);
 			}
@@ -108,9 +108,36 @@ module ghost.mvc
 		{
 
 		}
-        public setParamaters(params:any):void
+
+        /**
+         * Override this function to enable params mapping
+         * @returns Array of string
+         */
+        protected getParamsMapping():string[]
         {
-            this.paramsFromActivation = params;
+            return null;
+        }
+        public setParameters(params:any):void
+        {
+            var mapping:string[] = this.getParamsMapping();
+            if(mapping)
+            {
+                if(!params)
+                {
+                    params = [];
+                }
+                this.paramsFromActivation = mapping.reduce(function(result:any, data:any, index:number):any
+                {
+                    if(params.length>index)
+                    {
+                        result[mapping[index]] = params[index];
+                    }
+                    return result;
+                }, {});
+            }else
+            {
+                this.paramsFromActivation = params;
+            }
         }
 
 		protected getInitialData():any[]
@@ -127,7 +154,7 @@ module ghost.mvc
          */
         public _preactivate(params?:any):void
         {
-            this.setParamaters(params);
+            this.setParameters(params);
         	if(this._activated)
         	{
         		//already activating/ed
@@ -148,6 +175,8 @@ module ghost.mvc
     		 			this.activation();
                     }catch(error)
                     {
+                        console.error(error);
+                        debugger;
                         //disallow es6promise to catch this error
                         setTimeout(function()
                         {
@@ -267,15 +296,28 @@ module ghost.mvc
         }
         protected initializeData():Promise<any>|boolean
         {
-        	var promises:Promise<any>[] = this._data.map(function(item:any, index:number)
+            var params:any = this.getActivationParams();
+        	var promises:Promise<any>[] = this._data.map((item:any, index:number)=>
         	{	
                 if(item.retrieveData)
                 {
+                    if(this._parts[index] && this._parts[index].condition)
+                    {
+                        if(!this._parts[index].condition())
+                        {
+                            return null;
+                        }
+                    }
                     if(this._parts[index] && this._parts[index].parts)
                     {
-                        return item.retrieveData(this._parts[index].parts);
+                        return item.retrieveData(this._parts[index].parts, params);
                     }
-        		  return item.retrieveData();
+                    var promise:any = item.retrieveData(null, params);
+                    if(this._parts[index] && this._parts[index].async === true)
+                    {
+                        return true;
+                    }
+        		  return promise;
                 }
                 return null;
     		}, this).filter(function(item:any)
@@ -447,10 +489,6 @@ module ghost.mvc
                     {
                         var ractiveString:string = _this._parts[index]?_this._parts[index].ractive:undefined;
                         var name:string = _this._parts[index] && _this._parts[index].name?_this._parts[index].name:item.name();
-                        if(name == "cabinetcandidate")
-                        {
-                            debugger;
-                        }
                         //models
                         previous[name] = item.toRactive?item.toRactive(ractiveString):item instanceof Data?item.value:item.toObject();
                     }
@@ -513,8 +551,15 @@ module ghost.mvc
 
 
                 ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
+                try
+                {
 
-                this.template = new Ractive(options);
+                    this.template = new Ractive(options);
+                }catch(error)
+                {
+                    console.error(error);
+                    debugger;
+                }
 
                 var listener:any = this.getBindedFunctions(); //this.getBindedEventListeners();
                 if(listener)
@@ -557,5 +602,11 @@ module ghost.mvc
         ractive?:string;
         name?:string;
         events?:string[];
+        condition:Function;
+        //TODO:add async options
+        /**
+         * Data loaded asynchrone
+         */
+        async?:boolean;
     }
 }
