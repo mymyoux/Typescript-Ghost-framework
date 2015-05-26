@@ -6,6 +6,7 @@
 ///<module="framework/ghost/db"/>
 module ghost.revelation
 {
+	var path_module = require("path");
 	export class Application extends ghost.core.CoreObject
 	{
 
@@ -31,6 +32,47 @@ module ghost.revelation
 			});*/
 		//	this._server = new Server(); 
 		}
+        protected _initialize():void
+        {
+            var routes:any[] = this.getInitialRoutes();
+            if(routes)
+            {
+                routes.forEach((item:any):void=>
+                {
+                    if(!item)
+                    {
+                        return;
+                    }
+                    var options:any;
+                    if(typeof item == "function")
+                    {
+                        item = new item();
+                    }else
+                    {
+                        if(item.cls)
+                        {
+                            options = item.options?item.options:null;
+                            console.log(item);
+                            item = new item.cls();
+                        }
+                    }
+                    if(item)
+                    {
+                        if(item instanceof RouteController)
+                        {
+                            console.log("ADD ROUTE CONTROLLER" ,item.protype);
+                            this.addRouteController(item);
+                        }else
+                        {
+                            this.addMiddleWare(item, options);
+                        }
+
+                    }
+
+                })
+            }
+            this.initialize();
+        }
         protected initialize():void
         {
 
@@ -77,7 +119,7 @@ module ghost.revelation
 			this._io = this._server.io().of(this.name());
 			this._server.use("/" + this.name(), this._http);
 			console.log("set new application:"+this.name());
-            this.initialize();
+            this._initialize();
 		}
         public getServer():Server
         {
@@ -102,8 +144,21 @@ module ghost.revelation
 			var name:string;
 			var length:number;
 			controller.setApplication(this);
+			var prefix:string = controller.prefix();
+			if(!prefix)
+			{
+				prefix = "/";
+			}
+			if(prefix.substring(0, 1) != "/")
+			{
+				prefix = "/"+prefix;
+			}
 			for(var p in controller.constructor.prototype)
 			{
+				if(RouteController.IGNORED.indexOf(p)!=-1)
+				{
+					continue;
+				}
 				for(var m in Application.methods)
 				{
 					m = Application.methods[m];
@@ -113,10 +168,10 @@ module ghost.revelation
 							name = p.substring(length, length+1).toLowerCase()+p.substring(length+1);
 							if(name == "index")
 							{
-                                this.route(m, "/", controller.constructor.prototype[p].bind(controller));
+                                this.route(m, prefix, controller.constructor.prototype[p].bind(controller));
 								//this._http[m]("/", controller.constructor.prototype[p].bind(controller));
 							}
-                            this.route(m, "/"+name, controller.constructor.prototype[p].bind(controller));
+                            this.route(m, path_module.join(prefix,name), controller.constructor.prototype[p].bind(controller));
 							//this._http[m]("/"+name, controller.constructor.prototype[p].bind(controller));
 					}
 				}
@@ -129,7 +184,7 @@ module ghost.revelation
 					}
 					var func:Function = route.getCallback();
 					var method:string = route.getMethod();
-					var route_str:string = "/"+route.getRoute();
+					var route_str:string = path_module.join(prefix, route.getRoute());
                     this.route(method, route_str, func.bind(controller));
 					//this._http[method](route_str, func.bind(controller));
 				}
@@ -138,6 +193,10 @@ module ghost.revelation
 
 			this.controllers.push(controller);
 		}
+        protected getInitialRoutes():IRouteOptions[]|Function[]
+        {
+            return null;
+        }
         public route(method:string, path:string, callback:Function):void
         {
             console.log("ADD:"+method+":/"+this.name()+path);
@@ -151,4 +210,9 @@ module ghost.revelation
 		callback?:Function;
 		action?:string;
 	}
+    export interface IRouteOptions
+    {
+        cls:Function;
+        options?:any;
+    }
 }

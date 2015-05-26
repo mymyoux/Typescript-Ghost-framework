@@ -43,15 +43,17 @@ module ghost.revelation.middlewares
                 path =  path + ".ractive";
             }
             path = path_module.join(this.localPath,path);
-            console.log("path:"+path);
-
             var file:ghost.io.File = new ghost.io.File(path);
             file.read(function(success:boolean, data:any):void
             {
-               console.log(data);
-                response.send(data);
+               if(success)
+               {
+                   response.send(data);
+               }else
+               {
+                   response.sendStatus(404);
+               }
             });
-            console.log("request");
         }
     }
 }

@@ -75,9 +75,6 @@ module ghost.revelation
 			this.http.listen(this.options.port, ()=>{
 		  		console.log('listening on *:'+this.options.port);
 			});
-		
-
-			
 		}
 		public addApplication(prefix:string, application:Application):void
 		{

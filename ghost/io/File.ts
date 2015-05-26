@@ -112,7 +112,7 @@ module ghost.io
             return this.mime ;
         }
         public write(data:any, callback?:Function):void;
-        public write(data:any, encoding?:string, callback?:Function):void
+        public write(data:any, encoding?:string, callback?:Function):void;
         public write(data:any, encoding?:string|Function, callback?:Function):void
         {
             if(typeof encoding == "function")

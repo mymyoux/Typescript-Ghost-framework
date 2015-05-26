@@ -67,6 +67,7 @@ module ghost.mvc
         {
             return null;
         }
+
         public init():void
         {
 
