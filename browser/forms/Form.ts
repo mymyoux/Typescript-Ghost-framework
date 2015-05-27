@@ -470,8 +470,17 @@ module ghost.browser.forms
         public static selector:string = null;//"[data-list]";
         public static EVENT_ADD:string = "add_item";
         public static EVENT_REMOVE:string = "remove_item";
+        /**
+         * Item list
+         */
         private items:Field[];
+        /**
+         * Max items
+         */
         private max:number;
+        /**
+         * Min shown items
+         */
         private min:number;
         /**
          * Sublist name to precreate item data
@@ -525,11 +534,54 @@ module ghost.browser.forms
             {
                     this.sublist = null;
             }
-            
-            while(!this.data[this.name] || this.data[this.name].length<this.min)
+
+            while(this.length()<this.min)
             {
                 this.add(false);
             }
+            this.checkMinStatus();
+            this.checkMaxStatus();
+        }
+        protected length():number
+        {
+            return this.data[this.name]?this.data[this.name].length:0;
+        }
+        /**
+         * Check if the list has reach the maximum number of items
+         */
+        protected checkMaxStatus():void
+        {
+            if(this.isMaxReached())
+            {
+                $(this.element).addClass("max_reached");
+            }else
+            {
+                if(this.max != -1)
+                {
+                    $(this.element).removeClass("max_reached");
+                }
+            }
+        }
+        protected checkMinStatus():void
+        {
+            if(this.isMinReached())
+            {
+                $(this.element).addClass("min_reached");
+            }else
+            {
+                if(this.max != -1)
+                {
+                    $(this.element).removeClass("min_reached");
+                }
+            }
+        }
+        protected isMaxReached():boolean
+        {
+            return this.max!=-1 && this.length() >= this.max;
+        }
+        protected isMinReached():boolean
+        {
+            return this.min!=-1 && this.length() <= this.min;
         }
         protected setInitialValue():void
         {
@@ -540,11 +592,15 @@ module ghost.browser.forms
         }
         public add(focus:boolean = true):void
         {
+            if(this.isMaxReached())
+            {
+                return;
+            }
             if(!this.data[this.name] || !this.data[this.name].push)
             {
                 this.data[this.name] =  [];
             }
-            
+
             //this.data[this.name].push({name:"test", tags:[]});
             this.trigger(ListField.EVENT_ADD);
             var index:number = this.addData();
@@ -562,6 +618,8 @@ module ghost.browser.forms
 
                 $element.focus();
             }
+            this.checkMaxStatus();
+            this.checkMinStatus();
         }
         protected addData(index?:number):number
         {
@@ -615,7 +673,12 @@ module ghost.browser.forms
         }
         public remove(element:HTMLElement):void
         {
-            var $item:JQuery = $(element).parents("data-item");
+            if(this.isMinReached())
+            {
+                //no remove
+                return;
+            }
+            var $item:JQuery = $(element).parents("[data-item]");
             var i:number = parseInt($item.attr("data-item"), 10);
             if(!isNaN(i))
             {
@@ -624,6 +687,8 @@ module ghost.browser.forms
 
             this.trigger(ListField.EVENT_REMOVE);
             this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
+            this.checkMinStatus();
+            this.checkMaxStatus();
         }
         public dispose():void
         {
@@ -691,6 +756,87 @@ module ghost.browser.forms
             super.bindEvents();
             if(this.$input)
                 this.$input.on("keyup", this.onChangeBinded);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            if(this.$input)
+                this.$input.off("keyup", this.onChangeBinded);
+        }
+    }
+    export class InputFileField extends Field
+    {
+        public static selector:string = "[data-type='picture']";
+        private inputFile:HTMLInputElement;
+        private preview:HTMLImageElement;
+        protected init():void
+        {
+            super.init();
+            if(!$(this.element).find("input[type='file']").length)
+            {
+                $(this.element).append('<input type="file" name="'+$(this.element).attr("data-field")+'">');
+            }
+            this.inputFile = $(this.element).find("input[type='file']").get(0);
+            this.preview = $(this.element).find("[data-preview]").get(0);
+       //     this.validators.push(new TextValidator());
+        }
+        protected bindEvents():void
+        {
+            super.bindEvents();
+            if(this.$input)
+            {
+                this.$input.on("change", (event)=>
+                {
+                    ghost.browser.io.FileAPI.loadFile(this.inputFile).
+                        then((event:ProgressEvent):void=>
+                        {
+                            if(!event)
+                            {
+                                //empty file
+                                if(this.preview)
+                                {
+                                    this.preview.src = null;
+                                    this.$input.removeClass("preview");
+                                }
+                            }
+                              var file:FileReader = <FileReader>event.currentTarget;
+                              if(this.preview)
+                              {
+                                  this.preview.src = file.result;
+                                  this.$input.addClass("preview");
+                              }
+                            ghost.io.ajax(
+                                {
+                                    url:"/candidate/models/cv",
+                                    method:"POST",
+                                    data:{picture:file.result}
+                                }).then(function(data:any):void
+                                {
+                                    debugger;
+                                }, function(error:any):void
+                                {
+                                    debugger;
+                                });
+
+                        }, (error:any):void=>
+                        {
+                            if(this.preview)
+                            {
+                                this.preview.src = null;
+                                this.$input.removeClass("preview");
+                            }
+                        });
+                });
+                //this.$input.on("keyup", this.onChangeBinded);
+                this.$input.on("click", (event)=>
+                {
+                    if($(event.target).get(0) === this.inputFile)
+                    {
+                        return;
+                    }
+                    $(this.inputFile).trigger("click");
+                });
+            }
         }
         public dispose():void
         {

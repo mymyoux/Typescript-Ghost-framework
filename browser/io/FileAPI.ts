@@ -11,6 +11,8 @@ module ghost.browser.io
 				var file = input.files[0];
 				if(!file)
 				{
+					resolve(null);
+					return;
 					input.addEventListener("change", ()=>
 					{
 
@@ -33,8 +35,17 @@ module ghost.browser.io
 					}
 					reader.readAsText(file);	
 				} else {
-					reject(new Error( "format not readable: "+file.type));
-					//fileDisplayArea.innerText = "File not supported!"
+					var reader = new FileReader();
+
+					reader.onload = function(e) {
+						resolve(<ProgressEvent>e);
+						//	fileDisplayArea.innerText = reader.result;
+					}
+					reader.onerror = function(e)
+					{
+						reject(<any>e);
+					}
+					reader.readAsDataURL(file);
 				}
 
 
