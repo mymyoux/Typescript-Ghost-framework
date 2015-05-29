@@ -100,6 +100,7 @@ module ghost.mvc
 		protected _setData():void
 		{
 			var data:any[] = this.getInitialData();
+
             if(data)
 			 data.forEach(this.addData, this);
 			this.setData();
@@ -552,7 +553,7 @@ module ghost.mvc
                 ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
                 try
                 {
-
+                    console.log(options);
                     this.template = new Ractive(options);
                 }catch(error)
                 {
