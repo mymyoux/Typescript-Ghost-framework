@@ -291,7 +291,21 @@ module ghost.browser.forms
             });
             this.promises[name] = ajax;
         }
-        public onAdd(name:string, list:ListField):void
+        private getObjectID(data:any):string
+        {
+            if(data.id)
+            {
+                return data.id;
+            }
+            for(var p in data)
+            {
+                if(p.substring(0, 3) == "id_")
+                {
+                    return data[p];
+                }
+            }
+        }
+        public onAdd(name:string, list:ListField, itemfield?:ItemField):void
         {
             this.trigger(Form.EVENT_ADD_ITEM, name, list);
             if(!this.autosave)
@@ -302,9 +316,19 @@ module ghost.browser.forms
             {
                 this.promises[name].cancel();
             }
+            debugger;
             var action:string = this.getAction();
-            var data:any = this.toObject(name);
+            var data:any = {
+                name:name};//this.toObject(name);
             data.action = "add";
+            if(itemfield)
+            {
+                data.item =
+                {
+                    name:itemfield.name,
+                    id:this.getObjectID(itemfield.data)
+                };
+            }
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -322,9 +346,9 @@ module ghost.browser.forms
                 });
             this.promises[name] = ajax;
         }
-        public onRemove(name:string, list:ListField):void
+        public onRemove(name:string, list:ListField, itemField?:ItemField):void
         {
-            this.trigger(Form.EVENT_REMOVE_ITEM, name, list);
+            this.trigger(Form.EVENT_REMOVE_ITEM, name, list, itemField);
             if(!this.autosave)
             {
                 return;
@@ -407,7 +431,7 @@ module ghost.browser.forms
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
 
-        public constructor( protected name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+        public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
         {
             super();
             if(!this.data)
@@ -685,6 +709,7 @@ module ghost.browser.forms
             {
                 this.data[this.name] =  [];
             }
+            debugger;
 
             //this.data[this.name].push({name:"test", tags:[]});
             this.trigger(ListField.EVENT_ADD);
@@ -824,11 +849,11 @@ module ghost.browser.forms
         }
         protected onAdd(name:string, list:ListField):void
         {
-            this.form.onAdd(name, list);
+            this.form.onAdd(name, list, this);
         }
         protected onRemove(name:string, list:ListField):void
         {
-            this.form.onRemove(name, list);
+            this.form.onRemove(name, list, this);
         }
         public dispose():void
         {
@@ -851,10 +876,10 @@ module ghost.browser.forms
     export class InputTextField extends Field
     {
         public static selector:string = "input[type='text']";
-        public constructor( protected name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+        /*public constructor( public name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
         {
             super(name, data, element, _setInitialData, form);
-        }
+        }*/
         protected init():void
         {
             super.init();
