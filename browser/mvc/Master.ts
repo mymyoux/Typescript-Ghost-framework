@@ -550,7 +550,6 @@ module ghost.mvc
 
                 options.el = container;
 
-
                 ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
                 try
                 {
