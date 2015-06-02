@@ -81,7 +81,12 @@ module ghost.browser.forms
             {
                 listname = $(form).attr("data-list");
             }
-            var fields:Field[] = <Field[]>$(form).find("[data-field],[data-list]").toArray().map((element:any):Field=>
+            var $list:JQuery = $(form).find("[data-field],[data-list]");
+            if($(form).attr("data-field") || $(form).attr("data-list"))
+            {
+                $list = $list.addBack();
+            }
+            var fields:Field[] = <Field[]>$list.toArray().map((element:any):Field=>
             {
                 var name:string = $(element).attr("data-field");
                 var list:boolean = false;
@@ -99,6 +104,7 @@ module ghost.browser.forms
                 var field:Field;
                 if(cls)
                 {
+                    debugger;
                     field = new cls(name, this.data, element, this._setInitialData, this["form"]?this["form"]:this);
                     field.on(Field.EVENT_CHANGE, this.onChange, this, name);
                     if(field instanceof ListField)
@@ -116,6 +122,7 @@ module ghost.browser.forms
                 }
                 return false;
             });
+
             this.fields = fields;
         }
         public attachForm(form:any):void
@@ -236,8 +243,13 @@ module ghost.browser.forms
             return action; 
         }
 
-        protected onChange(value:string, name:string):void
+        protected onChange(value:string, index:number, name?:string):void
         {
+            if(!name && typeof index == "string")
+            {
+                name = <any>index;
+                index = null;
+            }
             this.trigger(Form.EVENT_CHANGE+":"+name, name, value);
             if(!this.autosave)
             {
@@ -248,8 +260,20 @@ module ghost.browser.forms
                 this.promises[name].cancel();
             }
             var action:string = this.getAction();
-             var data:any = this.toObject(name);
-             data.action = "autosave";
+            var data:any;
+            if(index != null)
+            {
+                data = {};
+                data[name] = value;
+                data.index = index;
+            }else
+            {
+                data = this.toObject(name);
+            }
+
+            data.action = "autosave";
+            console.log(data);
+            debugger;
              var ajax:any = ghost.io.ajax({
                     url:action,
                     data:data,
@@ -270,10 +294,42 @@ module ghost.browser.forms
         public onAdd(name:string, list:ListField):void
         {
             this.trigger(Form.EVENT_ADD_ITEM, name, list);
+            if(!this.autosave)
+            {
+                return;
+            }
+            if(this.promises[name])
+            {
+                this.promises[name].cancel();
+            }
+            var action:string = this.getAction();
+            var data:any = this.toObject(name);
+            data.action = "add";
+            debugger;
+            var ajax:any = ghost.io.ajax({
+                url:action,
+                data:data,
+                retry:ghost.io.RETRY_INFINITE,
+                method:"POST"
+            }).
+                then((result:any):void=>
+                {
+                    delete this.promises[name];
+
+                }, (error:any):void=>
+                {
+                    delete this.promises[name];
+                    log.error(error);
+                });
+            this.promises[name] = ajax;
         }
         public onRemove(name:string, list:ListField):void
         {
             this.trigger(Form.EVENT_REMOVE_ITEM, name, list);
+            if(!this.autosave)
+            {
+                return;
+            }
         }
         private static getField(element):any
         {
@@ -417,15 +473,22 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
-            
-            if( this.data[this.name]  != this.getValue())
+        /*    if( this.data[this.name]  != this.getValue())
             {
                 this.data[this.name] = this.getValue();
                 this.onChangeThrottle();
-            }
+            }*/
+            this.data[this.name] = this.getValue();
+            this.onChangeThrottle();
+
+
+            //dispatch event change for item
+
+        //    this.trigger(Field.EVENT_CHANGE, this.data,
         }
         protected triggerChange():void
         {
+            debugger;
             this.trigger(Field.EVENT_CHANGE, this.data[this.name]);
         }
         public getValue():any
@@ -493,10 +556,13 @@ module ghost.browser.forms
             //this.sublist = [];
             super(name, data, element, _setInitialData, form);
         }
-        public onChange(event:any):void
+        public onChange(data:any, itemField?:ItemField):void
         {
-            
-            this.onChangeThrottle();
+           // this.onChangeThrottle(data, itemField);
+            this.triggerChange(data, itemField);
+        }
+        protected triggerChange (data?:any, itemField?:ItemField) {
+            this.trigger(Field.EVENT_CHANGE, data, itemField.getItemIndex());
         }
         public init():void
         {
@@ -649,7 +715,12 @@ module ghost.browser.forms
         }
         protected addItem(index:number, item:any)
         {
-            this.items.push(new ItemField(this.name, this.data[this.name][index], item, this._setInitialData, this.form));
+            var lastItem:any = this.getListItem("[data-item]").last();
+            var name:string = lastItem.attr("data-i")
+            debugger;
+            var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem.get(0), this._setInitialData, this.form);
+            itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
+            this.items.push(itemField);
         }
         protected getListItem(selector:string, root?:any, testSelf:boolean = true):JQuery
         {
@@ -713,9 +784,27 @@ module ghost.browser.forms
             this.fields = [];
             super(name, data, element, _setInitialData, form);
         }
+        public getItemIndex():number
+        {
+            return parseInt($(this.element).attr("data-item"), 10);
+        }
+        public onChange(event:any):void
+        {
+            debugger;
+            super.onChange(event);
+        }
+        protected triggerChange () {
+            this.trigger(Field.EVENT_CHANGE, this.data);
+        }
         public init():void
         {
+            debugger;
             Form.prototype.retrieveFields.call(this, this.element, this.name);
+            this.fields.forEach(function(item:Field):void
+            {
+                console.log("on change",item);
+                item.on(Field.EVENT_CHANGE, this.onChange, this);
+            }, this);
         }
         protected onAdd(name:string, list:ListField):void
         {
@@ -740,12 +829,16 @@ module ghost.browser.forms
         }
         public setInitialValue():void
         {
+
         }
     }
     export class InputTextField extends Field
     {
         public static selector:string = "input[type='text']";
-
+        public constructor( protected name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+        {
+            super(name, data, element, _setInitialData, form);
+        }
         protected init():void
         {
             super.init();
