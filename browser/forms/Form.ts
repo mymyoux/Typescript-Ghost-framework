@@ -104,7 +104,6 @@ module ghost.browser.forms
                 var field:Field;
                 if(cls)
                 {
-                    debugger;
                     field = new cls(name, this.data, element, this._setInitialData, this["form"]?this["form"]:this);
                     field.on(Field.EVENT_CHANGE, this.onChange, this, name);
                     if(field instanceof ListField)
@@ -251,6 +250,7 @@ module ghost.browser.forms
                 index = null;
             }
             this.trigger(Form.EVENT_CHANGE+":"+name, name, value);
+            console.log(Form.EVENT_CHANGE+":"+name, name, value);
             if(!this.autosave)
             {
                 return;
@@ -305,7 +305,6 @@ module ghost.browser.forms
             var action:string = this.getAction();
             var data:any = this.toObject(name);
             data.action = "add";
-            debugger;
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -403,7 +402,7 @@ module ghost.browser.forms
         public required:boolean = false;
         protected $input:any;
         protected inputSelector:any;
-
+        protected data_saved:any;
         protected validators:Validator[];
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
@@ -414,6 +413,14 @@ module ghost.browser.forms
             if(!this.data)
             {
                 this.data = {};
+            }
+            try
+            {
+
+                this.data_saved = ghost.utils.Objects.clone(this.data, "data", true);
+            }catch(error)
+            {
+                debugger;
             }
             this.onChangeBinded = this.onChange.bind(this);
             this.onChangeThrottle = ghost.utils.Buffer.throttle(this.triggerChange.bind(this), 500);
@@ -469,17 +476,29 @@ module ghost.browser.forms
         protected bindEvents():void
         {
             if(this.$input)
+            {
+
                 this.$input.on("change", this.onChangeBinded);
+
+            }
         }
         public onChange(event:any):void
         {
+
         /*    if( this.data[this.name]  != this.getValue())
             {
                 this.data[this.name] = this.getValue();
                 this.onChangeThrottle();
             }*/
             this.data[this.name] = this.getValue();
-            this.onChangeThrottle();
+            console.log(this.name, this.data[this.name], this.data_saved[this.name]);
+            if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
+            {
+                debugger;
+                this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
+
+                this.onChangeThrottle();
+            }
 
 
             //dispatch event change for item
@@ -715,10 +734,9 @@ module ghost.browser.forms
         }
         protected addItem(index:number, item:any)
         {
-            var lastItem:any = this.getListItem("[data-item]").last();
-            var name:string = lastItem.attr("data-i")
-            debugger;
-            var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem.get(0), this._setInitialData, this.form);
+            var lastItem:any = this.getListItem("[data-item]").eq(index);
+
+            var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
             this.items.push(itemField);
         }
@@ -798,11 +816,9 @@ module ghost.browser.forms
         }
         public init():void
         {
-            debugger;
             Form.prototype.retrieveFields.call(this, this.element, this.name);
             this.fields.forEach(function(item:Field):void
             {
-                console.log("on change",item);
                 item.on(Field.EVENT_CHANGE, this.onChange, this);
             }, this);
         }

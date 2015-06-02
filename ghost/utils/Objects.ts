@@ -30,8 +30,18 @@ module ghost.utils
                 return a == b;
             }
         }
-        public static clone(obj:any):any 
+        public static clone(obj:any, ignore?:string, hidePrivate?:boolean):any;
+        public static clone(obj:any, ignore?:string[], hidePrivate?:boolean):any;
+        public static clone(obj:any, ignore?:any, hidePrivate:boolean = false):any
         {
+            //console.log(obj);
+            if(ignore)
+            {
+                if(typeof ignore == "string")
+                {
+                    ignore = [ignore];
+                }
+            }
             // Handle the 3 simple types, and null or undefined
             if (null == obj || "object" != typeof obj) return obj;
         
@@ -46,7 +56,7 @@ module ghost.utils
             if (obj instanceof Array) {
                 var copy_array:any[] = [];
                 for (var i = 0, len = obj.length; i < len; i++) {
-                    copy_array[i] = Objects.clone(obj[i]);
+                    copy_array[i] = Objects.clone(obj[i], null, hidePrivate);
                 }
                 return copy_array;
             }
@@ -55,7 +65,16 @@ module ghost.utils
             if (obj instanceof Object) {
                 var copy_object:any = {};
                 for (var attr in obj) {
-                    if (obj.hasOwnProperty(attr)) copy_object[attr] = Objects.clone(obj[attr]);
+
+                    if (obj.hasOwnProperty(attr) && (!ignore || ignore.indexOf(attr)==-1) && (!hidePrivate || attr.substring(0, 1) != "_"))
+                    {
+                        if(attr == "data")
+                        {
+                            debugger;
+                        }
+
+                        copy_object[attr] = Objects.clone(obj[attr], null, hidePrivate);
+                    }
                 }
                 return copy_object;
             }
