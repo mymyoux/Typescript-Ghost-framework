@@ -346,13 +346,46 @@ module ghost.browser.forms
                 });
             this.promises[name] = ajax;
         }
-        public onRemove(name:string, list:ListField, itemField?:ItemField):void
+        public onRemove(name:string, list:ListField, itemfield?:ItemField):void
         {
-            this.trigger(Form.EVENT_REMOVE_ITEM, name, list, itemField);
+            this.trigger(Form.EVENT_REMOVE_ITEM, name, list);
             if(!this.autosave)
             {
                 return;
             }
+            if(this.promises[name])
+            {
+                this.promises[name].cancel();
+            }
+            debugger;
+            var action:string = this.getAction();
+            var data:any = {
+                name:name};//this.toObject(name);
+            data.action = "remove";
+            if(itemfield)
+            {
+                data.item =
+                {
+                    name:itemfield.name,
+                    id:this.getObjectID(itemfield.data)
+                };
+            }
+            var ajax:any = ghost.io.ajax({
+                url:action,
+                data:data,
+                retry:ghost.io.RETRY_INFINITE,
+                method:"POST"
+            }).
+                then((result:any):void=>
+                {
+                    delete this.promises[name];
+
+                }, (error:any):void=>
+                {
+                    delete this.promises[name];
+                    log.error(error);
+                });
+            this.promises[name] = ajax;
         }
         private static getField(element):any
         {
