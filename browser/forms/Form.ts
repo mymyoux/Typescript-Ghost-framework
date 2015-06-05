@@ -4,6 +4,10 @@
 ///<module="framework/ghost/events"/>
 module ghost.browser.forms
 {
+
+
+    //EVENT_CHANGE => moins de data remontée (juste id/name parent => si retour autocomplete appeler la fonction .setAutocomplete())s
+
     /**
      * Form managment
      */
@@ -121,7 +125,10 @@ module ghost.browser.forms
                 }
                 return false;
             });
-
+            if(this instanceof ItemField && (!fields || fields.length==0))
+            {
+                debugger;
+            }
             this.fields = fields;
         }
         public attachForm(form:any):void
@@ -224,7 +231,7 @@ module ghost.browser.forms
                 }
                 this.trigger(Form.EVENT_SUBMIT_ERROR, error);
             });
-        }   
+        }
         protected getAction():string
         {
             var action:string = this.action;
@@ -242,7 +249,7 @@ module ghost.browser.forms
             return action; 
         }
 
-        protected onChange(value:string, input:Field, index:number, name?:string):void
+        protected onChange(value:string, input:Field, index:number, name?:string, name_parent?:Field):void
         {
             debugger;
             if(!name && typeof index == "string")
@@ -260,7 +267,6 @@ module ghost.browser.forms
             {
                 this.promises[name].cancel();
             }
-            debugger;
             var action:string = this.getAction();
             var data:any;
             if(index != null)
@@ -452,6 +458,7 @@ module ghost.browser.forms
             return !field.required || field.getValue().length>0;
         }
     }
+
     export class Field extends ghost.events.EventDispatcher
     {
         /**
@@ -556,7 +563,6 @@ module ghost.browser.forms
             console.log(this.name, this.data[this.name], this.data_saved[this.name]);
             if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
             {
-                debugger;
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
 
                 this.onChangeThrottle();
@@ -569,7 +575,8 @@ module ghost.browser.forms
         }
         protected triggerChange():void
         {
-            this.trigger(Field.EVENT_CHANGE, this.data[this.name], this);
+            //this.trigger(Field.EVENT_CHANGE, this.data[this.name], this);
+            this.trigger(Field.EVENT_CHANGE, [{value:this.data[this.name], input:this, name:this.name}]);
         }
         public getValue():any
         {
@@ -636,14 +643,16 @@ module ghost.browser.forms
             //this.sublist = [];
             super(name, data, element, _setInitialData, form);
         }
-        public onChange(data:any, itemField?:ItemField):void
+        public onChange(data:any, input?:Field, name?:string, itemField?:ItemField):void
         {
+            data[data.length-1].name = this.name;
+            data[data.length-1].list = this;
+
            // this.onChangeThrottle(data, itemField);
-            this.triggerChange(data, itemField);
+            this.triggerChange(data, input, name, itemField);
         }
-        protected triggerChange (data?:any, itemField?:ItemField) {
-            debugger;
-            this.trigger(Field.EVENT_CHANGE, data, itemField.getItemIndex());
+        protected triggerChange (data?:any, input?:Field, name?:string, itemField?:ItemField) {
+            this.trigger(Field.EVENT_CHANGE, data, input, itemField.getItemIndex(), name);
         }
         public init():void
         {
@@ -747,7 +756,6 @@ module ghost.browser.forms
             {
                 this.data[this.name] =  [];
             }
-            debugger;
 
             //this.data[this.name].push({name:"test", tags:[]});
 
@@ -802,6 +810,7 @@ module ghost.browser.forms
 
             var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
+
             this.items.push(itemField);
             return itemField;
         }
@@ -858,16 +867,26 @@ module ghost.browser.forms
             super.dispose();
         }
     }
+    interface IItemValue
+    {
+        name:string;
+        value:any;
+    }
     export class ItemField extends Field
     {
         public static selector:string = null;// "[data-list]";
         private fields:Field[];
         private id_name:string;
         private change_timeout:number = -1;
+        private initialized:boolean;
+
+        private _inputs:Field[];
+        //TODO:change to IChangeData
+
+        private _values:IChangeData[][] = [];
         public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form)
         {
             super(name, data, element, _setInitialData, form);
-            this.fields = [];
         }
         public getID():string
         {
@@ -890,12 +909,24 @@ module ghost.browser.forms
         }
         public init():void
         {
+            if(this.initialized)
+            {
+                debugger;
+            }
+            this.fields = [];
+            this._inputs = [];
+            this._values = [];
+            this.initialized = true;
             Form.prototype.retrieveFields.call(this, this.element, this.name);
             this.fields.forEach(function(item:Field):void
             {
-                item.on(Field.EVENT_CHANGE, this.onChange, this);
+              //  item.on(Field.EVENT_CHANGE, this.onChange, this);
             }, this);
             this.id_name = $(this.element).attr("data-id-name")?$(this.element).attr("data-id-name"):"id";
+            if(this.fields.length == 0)
+            {
+                debugger;
+            }
         }
         protected onAdd(newItem:ItemField, name:string, list:ListField):void
         {
@@ -903,6 +934,8 @@ module ghost.browser.forms
         }
         protected onRemove(name:string, list:ListField):void
         {
+            console.warn("Hey developer YOU MUST REMOVE _values and _inputs linked");
+            debugger;
             if(this.change_timeout != -1)
             {
                 clearTimeout(this.change_timeout);
@@ -926,7 +959,7 @@ module ghost.browser.forms
         {
 
         }
-        public onChange(event:any):void
+        public onChange(value:IChangeData[], input?:Field, name?:string):void
         {
 
             /*    if( this.data[this.name]  != this.getValue())
@@ -934,29 +967,60 @@ module ghost.browser.forms
              this.data[this.name] = this.getValue();
              this.onChangeThrottle();
              }*/
-            this.data[this.name] = this.getValue();
-            if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
+            /*var name:string = value[value.length-1].name;
+           // this.data[this.name] = this.getValue();
+            /*debugger;
+            if(!ghost.utils.Objects.deepEquals(this.data_saved[name],this.data[name]))
             {
-                debugger;
-                this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
-                this.delayChange();
-            }
+                this.data_saved[name] = ghost.utils.Objects.clone(this.data[name], null, true);
+                this.delayChange(value);
+            }*/
+            this.delayChange(value);
         }
-        private delayChange():void
+        private delayChange(value?:IChangeData[]):void
         {
             if(this.change_timeout != -1)
             {
                 clearTimeout(this.change_timeout);
             }
+            debugger;
+            if(value)
+            {
+                var item:IChangeData = value[0];
+                var input:Field = item.input;
+                var index:number;
+                if((index = this._inputs.indexOf(input))==-1)
+                {
+                    index = this._inputs.length;
+                    this._inputs.push(input);
+                }
+                this._values[index] = value;
+
+            }
             if(this.hasID())
             {
                 this.change_timeout = -1;
-                this.onChangeThrottle();
+                //this.onChangeThrottle();
+                this._inputs.forEach(function(item:Field, index:number):void
+                {
+                    this._values[index].push({input:this, id:this.getID()});
+                    this.trigger(Form.EVENT_CHANGE, this._values[index], item, this._values[index].name);
+                }, this);
+                this._inputs.length = this._values.length = 0;
             }else
             {
+
                 this.change_timeout = setTimeout(this.delayChange.bind(this), 500);
             }
         }
+    }
+    export interface IChangeData
+    {
+        name?:string;
+        value?:any;
+        input:Field;
+        list?:ListField;
+        id?:string;
     }
     export class InputTextField extends Field
     {
@@ -1096,16 +1160,6 @@ module ghost.browser.forms
             super.init();
             //this.validators.push(new TextValidator());
         }
-        /*
-        public static match(element:any):boolean
-        {
-            var selector:string = this.prototype.constructor["selector"];
-            if($(element).find(selector).addBack(selector).length)
-            {
-                return true;
-            }
-            return false;
-        }*/
     }
 
 
@@ -1128,16 +1182,6 @@ module ghost.browser.forms
             super.dispose();
          
         }
-        /*
-        public static match(element:any):boolean
-        {
-            var selector:string = InputListField.selector;
-            if($(element).find(selector).addBack(selector).length)
-            {
-                return true;
-            }
-            return false;
-        }*/
     }
 }
 
