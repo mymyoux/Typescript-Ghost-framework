@@ -312,30 +312,51 @@ module ghost.browser.forms
                 }
             }
         }
-        public onAdd(newItem:ItemField, name:string, list:ListField, itemfield?:ItemField):void
+        public onAdd(dataItems:IChangeData[]/*newItem:ItemField, name:string, list:ListField, itemfield?:ItemField*/):void
         {
-            this.trigger(Form.EVENT_ADD_ITEM, name, list);
+            var name = dataItems.reduce(function(previous:any, item:IChangeData):string
+            {
+                if(previous)
+                {
+                    previous = "/"+previous;
+                }else
+                {
+                    previous = "";
+                }
+                return item.name+(item.id != undefined?item.id:"")+previous;
+            }, null);
+            var item:ItemField = <ItemField>dataItems[0].input;
+            //this.trigger(Form.EVENT_ADD_ITEM, name, list);
+            this.trigger(Form.EVENT_ADD_ITEM, dataItems);
             if(!this.autosave)
             {
                 return;
             }
-            if(this.promises[name])
+           /* if(this.promises[name])
             {
                 this.promises[name].cancel();
-            }
+            }*/
             debugger;
             var action:string = this.getAction();
             var data:any = {
                 name:name};//this.toObject(name);
             data.action = "add";
-            if(itemfield)
+            //TODO: remplacer les anciennes variables par le nouveau tableau
+            //TODO: faire avec remove comme add
+            /*if(itemfield)
             {
                 data.item =
                 {
                     name:itemfield.name,
                     id:this.getObjectID(itemfield.data)
                 };
-            }
+            }*/
+            data.value = dataItems.map(function(item:IChangeData):IChangeData
+            {
+                delete item.list;
+                delete item.input;
+                return item;
+            });
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -344,10 +365,12 @@ module ghost.browser.forms
             }).
                 then((result:any):void=>
                 {
+                    debugger;
                     delete this.promises[name];
                     if(result.id != undefined)
                     {
-                        newItem.setID(result.id);
+                        debugger;
+                        item.setID(result.id);
                     }
 
                 }, (error:any):void=>
@@ -645,6 +668,10 @@ module ghost.browser.forms
         }
         public onChange(data:any, input?:Field, name?:string, itemField?:ItemField):void
         {
+            if(!data)
+            {
+                debugger;
+            }
             data[data.length-1].name = this.name;
             data[data.length-1].list = this;
 
@@ -763,7 +790,8 @@ module ghost.browser.forms
 
             var $last:JQuery = this.getListItem("[data-item]", this.element).last();//$(this.element).find("[data-item]").last();
             var item = this.addItem(index, $last);
-            this.trigger(ListField.EVENT_ADD, item);
+          //  this.trigger(ListField.EVENT_ADD, item);
+            this.trigger(ListField.EVENT_ADD, [{name:this.name, list:this, input:item}]);
             //this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], $last, this._setInitialData, this.form));
             if(focus)
             {
@@ -810,10 +838,19 @@ module ghost.browser.forms
 
             var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
+            itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
 
             this.items.push(itemField);
             return itemField;
         }
+        protected onAdd(data:IChangeData[]/*newItem:ItemField, name:string, list:ListField*/):void
+        {
+            // this.form.onAdd(newItem, name, list, this);
+            data[data.length-1].name = this.name;
+            data[data.length-1].list = this;
+            this.trigger(ListField.EVENT_ADD, data);
+        }
+
         protected getListItem(selector:string, root?:any, testSelf:boolean = true):JQuery
         {
             if(!root)
@@ -898,6 +935,7 @@ module ghost.browser.forms
         }
         public setID(id:string):void
         {
+            debugger;
             this.data[this.id_name] = id;
         }
         public getItemIndex():number
@@ -928,9 +966,11 @@ module ghost.browser.forms
                 debugger;
             }
         }
-        protected onAdd(newItem:ItemField, name:string, list:ListField):void
+        protected onAdd(value:IChangeData[]/*newItem:ItemField, name:string, list:ListField*/):void
         {
-            this.form.onAdd(newItem, name, list, this);
+           // this.form.onAdd(newItem, name, list, this);
+            value.push({input:this, id:this.getID()});
+            this.trigger(ListField.EVENT_ADD, value);
         }
         protected onRemove(name:string, list:ListField):void
         {
