@@ -333,7 +333,7 @@ module ghost.browser.forms
         }
         public onAdd(dataItems:IChangeData[]):void
         {
-            var name = this._getDataItemName(dataItems);
+            var name:string = this._getDataItemName(dataItems);
 
             this.trigger(Form.EVENT_ADD_ITEM, dataItems);
             if(!this.autosave)
@@ -369,9 +369,10 @@ module ghost.browser.forms
                 });
             this.promises[name] = ajax;
         }
-        public onRemove(name:string, list:ListField, itemfield?:ItemField):void
+        public onRemove(dataItems:IChangeData[]):void
         {
-            this.trigger(Form.EVENT_REMOVE_ITEM, name, list);
+            var name:string = this._getDataItemName(dataItems);
+            this.trigger(Form.EVENT_REMOVE_ITEM, dataItems);
             if(!this.autosave)
             {
                 return;
@@ -380,19 +381,11 @@ module ghost.browser.forms
             {
                 this.promises[name].cancel();
             }
-            debugger;
-            var action:string = this.getAction();
             var data:any = {
-                name:name};//this.toObject(name);
-            data.action = "remove";
-            if(itemfield)
-            {
-                data.item =
-                {
-                    name:itemfield.name,
-                    id:this.getObjectID(itemfield.data)
-                };
-            }
+                action:"remove",
+                value:this._getDataItemData(dataItems)
+            };
+            var action:string = this.getAction();
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -401,10 +394,12 @@ module ghost.browser.forms
             }).
                 then((result:any):void=>
                 {
+                    debugger;
                     delete this.promises[name];
 
                 }, (error:any):void=>
                 {
+                    debugger;
                     delete this.promises[name];
                     log.error(error);
                 });
@@ -828,6 +823,7 @@ module ghost.browser.forms
             var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
             itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
+            itemField.on(ListField.EVENT_REMOVE, this.onRemove, this, itemField);
 
             this.items.push(itemField);
             return itemField;
@@ -838,6 +834,12 @@ module ghost.browser.forms
             data[data.length-1].name = this.name;
             data[data.length-1].list = this;
             this.trigger(ListField.EVENT_ADD, data);
+        }
+        protected onRemove(data:IChangeData[]):void
+        {
+            data[data.length-1].name = this.name;
+            data[data.length-1].list = this;
+            this.trigger(ListField.EVENT_REMOVE, data);
         }
 
         protected getListItem(selector:string, root?:any, testSelf:boolean = true):JQuery
@@ -874,8 +876,17 @@ module ghost.browser.forms
                 this.data[this.name].splice(i, 1);
             }
 
-            this.trigger(ListField.EVENT_REMOVE);
+
+            //this.trigger(ListField.EVENT_REMOVE, [{name:this.name, list:this, input:this.items[i], id:(<ItemField>this.items[i]).getID()}]);
+            //this.items.splice(i, 1);
+
+            (<ItemField>this.items[i]).remove();
+            this.items.splice(i, 1);
+
             this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
+
+
+
             this.checkMinStatus();
             this.checkMaxStatus();
         }
@@ -904,6 +915,7 @@ module ghost.browser.forms
         private fields:Field[];
         private id_name:string;
         private change_timeout:number = -1;
+        private remove_timeout:number = -1;
         private initialized:boolean;
 
         private _inputs:Field[];
@@ -960,15 +972,38 @@ module ghost.browser.forms
             value.push({input:this, id:this.getID()});
             this.trigger(ListField.EVENT_ADD, value);
         }
-        protected onRemove(name:string, list:ListField):void
+        protected onRemove(value:IChangeData[]):void
         {
-            console.warn("Hey developer YOU MUST REMOVE _values and _inputs linked");
+            /*console.warn("Hey developer YOU MUST REMOVE _values and _inputs linked");
             debugger;
             if(this.change_timeout != -1)
             {
                 clearTimeout(this.change_timeout);
             }
-            this.form.onRemove(name, list, this);
+            this.form.onRemove(name, list, this);*/
+            value.push({input:this, id:this.getID()});
+            this.trigger(ListField.EVENT_REMOVE, value);
+        }
+        public remove():void
+        {
+            if( this.remove_timeout != -1)
+            {
+                clearTimeout(this.remove_timeout);
+            }
+            if(this.change_timeout != -1)
+            {
+                clearTimeout(this.change_timeout);
+                this.change_timeout = -1;
+            }
+            if(this.hasID())
+            {
+                this.remove_timeout = -1;
+                this.trigger(ListField.EVENT_REMOVE, [{input:this, id:this.getID()}]);
+                this.dispose();
+            }else
+            {
+                this.remove_timeout =setTimeout(this.remove.bind(this), 500);
+            }
         }
         public dispose():void
         {
@@ -979,7 +1014,10 @@ module ghost.browser.forms
                     field.dispose();
                 });
                 this.fields = null;
+
             }
+            this._inputs = null;
+            this._values = null;
             this.off();
             super.dispose();
         }
@@ -1022,7 +1060,6 @@ module ghost.browser.forms
                     this._inputs.push(input);
                 }
                 this._values[index] = value;
-
             }
             if(this.hasID())
             {
