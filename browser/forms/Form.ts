@@ -249,14 +249,9 @@ module ghost.browser.forms
             return action; 
         }
 
-        protected onChange(value:string, input:Field, index:number, name?:string, name_parent?:Field):void
+        protected onChange(value:IChangeData[]):void
         {
-            debugger;
-            if(!name && typeof index == "string")
-            {
-                name = <any>index;
-                index = null;
-            }
+            var name:string = this._getDataItemName(value);
             this.trigger(Form.EVENT_CHANGE+":"+name, name, value);
             console.log(Form.EVENT_CHANGE+":"+name, name, value);
             if(!this.autosave)
@@ -268,18 +263,9 @@ module ghost.browser.forms
                 this.promises[name].cancel();
             }
             var action:string = this.getAction();
-            var data:any;
-            if(index != null)
-            {
-                data = {};
-                data[name] = value;
-                data.index = index;
-            }else
-            {
-                data = this.toObject(name);
-            }
-            data.action = "autosave";
-
+            var data:any = {action:"autosave",
+            value: this._getDataItemData(value)
+            };
             var ajax:any = ghost.io.ajax({
                     url:action,
                     data:data,
@@ -293,7 +279,6 @@ module ghost.browser.forms
             }, (error:any):void=>
             {
                delete this.promises[name];
-                log.error(error);
             });
 
             this.promises[name] = ajax;
@@ -312,9 +297,9 @@ module ghost.browser.forms
                 }
             }
         }
-        public onAdd(dataItems:IChangeData[]/*newItem:ItemField, name:string, list:ListField, itemfield?:ItemField*/):void
+        private _getDataItemName(dataItems:IChangeData[]):string
         {
-            var name = dataItems.reduce(function(previous:any, item:IChangeData):string
+            return dataItems.reduce(function(previous:any, item:IChangeData):string
             {
                 if(previous)
                 {
@@ -325,38 +310,44 @@ module ghost.browser.forms
                 }
                 return item.name+(item.id != undefined?item.id:"")+previous;
             }, null);
-            var item:ItemField = <ItemField>dataItems[0].input;
-            //this.trigger(Form.EVENT_ADD_ITEM, name, list);
+        }
+        private _getDataItemData(dataItems:IChangeData[]):any
+        {
+            return dataItems.map(function(item:IChangeData):IChangeData
+            {
+                var data:any = {};
+                if(item.id != undefined)
+                {
+                    data.id = item.id;
+                }
+                if(item.name)
+                {
+                    data.name = item.name;
+                }
+                if(item.value)
+                {
+                    data.value = item.value;
+                }
+                return data;
+            });
+        }
+        public onAdd(dataItems:IChangeData[]):void
+        {
+            var name = this._getDataItemName(dataItems);
+
             this.trigger(Form.EVENT_ADD_ITEM, dataItems);
             if(!this.autosave)
             {
                 return;
             }
-           /* if(this.promises[name])
-            {
-                this.promises[name].cancel();
-            }*/
-            debugger;
+            var item:ItemField = <ItemField>dataItems[0].input;
+
             var action:string = this.getAction();
             var data:any = {
-                name:name};//this.toObject(name);
-            data.action = "add";
-            //TODO: remplacer les anciennes variables par le nouveau tableau
-            //TODO: faire avec remove comme add
-            /*if(itemfield)
-            {
-                data.item =
-                {
-                    name:itemfield.name,
-                    id:this.getObjectID(itemfield.data)
-                };
-            }*/
-            data.value = dataItems.map(function(item:IChangeData):IChangeData
-            {
-                delete item.list;
-                delete item.input;
-                return item;
-            });
+                action:"add",
+                value:this._getDataItemData(dataItems)
+            };
+
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -365,11 +356,9 @@ module ghost.browser.forms
             }).
                 then((result:any):void=>
                 {
-                    debugger;
                     delete this.promises[name];
                     if(result.id != undefined)
                     {
-                        debugger;
                         item.setID(result.id);
                     }
 
@@ -935,7 +924,6 @@ module ghost.browser.forms
         }
         public setID(id:string):void
         {
-            debugger;
             this.data[this.id_name] = id;
         }
         public getItemIndex():number
@@ -1023,7 +1011,6 @@ module ghost.browser.forms
             {
                 clearTimeout(this.change_timeout);
             }
-            debugger;
             if(value)
             {
                 var item:IChangeData = value[0];
