@@ -4,9 +4,17 @@
 ///<module="framework/ghost/events"/>
 module ghost.browser.forms
 {
+//Gérer le choix par autocomplete (tjs id (du model auquel on lie pas de la relation)? )
+//comme ça l'id de la relation ne change pas c'est + simple
+//gérer la disparition de la liste ? et là les mixins manquent :(
+
+//verifier les images
+//PHP :'(
+    
 
 
-    //EVENT_CHANGE => moins de data remontée (juste id/name parent => si retour autocomplete appeler la fonction .setAutocomplete())s
+
+
 
     /**
      * Form managment
@@ -28,7 +36,7 @@ module ghost.browser.forms
         protected action:string;
         protected $form:JQuery;
         private fields:Field[];
-        protected data:any;
+        public data:any;
         protected promises:any;
         protected _setInitialData:boolean = false;
         public constructor(form?:any, data?:any)
@@ -291,7 +299,10 @@ module ghost.browser.forms
                 then((result:any):void=>
                 {
                     delete this.promises[name];
-                    value[0].input.setAutocomplete(result);
+                    value[0].input.setAutocomplete(result.autocomplete);
+                    this.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                    console.log(value[value.length-1].name);
+                   // debugger;
 
                 }, (error:any):void=>
                 {
@@ -563,6 +574,7 @@ module ghost.browser.forms
         protected validators:Validator[];
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
+        protected itemAutocomplete:ItemAutocomplete
 
         public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
         {
@@ -587,9 +599,19 @@ module ghost.browser.forms
             this.bindEvents();
             this.setInitialValue();
         }
+        public chooseAutocomplete(index:number):void
+        {
+            if(this.data["autocompletion"] && this.data["autocompletion"].length>index)
+            {
+                this.data[this.name] = this.data["autocompletion"][index]["name"];
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+            }
+        }
         public setAutocomplete(data:any):void
         {
-            debugger;
+            this.data["autocompletion"] = data;
+
+            //debugger;
         }
         public addValidator(validator:Validator):void
         {
@@ -615,6 +637,10 @@ module ghost.browser.forms
             if($(this.element).attr("data-autocomplete") != undefined)
             {
                 this.autocomplete = true;
+                this.data["autocomplete"]=[];
+                this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
+//                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
+
             }
             /*if(this.data && this.data.tags)
             {
@@ -656,9 +682,11 @@ module ghost.browser.forms
                 this.onChangeThrottle();
             }*/
             this.data[this.name] = this.getValue();
-            console.log(this.name, this.data[this.name], this.data_saved[this.name]);
+            //console.log(this.name, this.data[this.name], this.data_saved[this.name]);
             if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
             {
+                this.data["autocompletion"] = [];
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
 
                 this.onChangeThrottle();
@@ -714,6 +742,25 @@ module ghost.browser.forms
                 return true;
             }
             return false;
+        }
+    }
+    export class ItemAutocomplete
+    {
+        public constructor(protected field:Field, protected $list:JQuery)
+        {
+            this.init();
+        }
+        protected init():void
+        {
+            var _this:ItemAutocomplete = this;
+            this.$list.on("click","[data-autocomplete-item]", function(event)
+            {
+                var id:number = parseInt($(this).attr("data-autocomplete-item"), 10);
+                if(!isNaN(id))
+                {
+                    _this.field.chooseAutocomplete(id);
+                }
+            });
         }
     }
     export class ListField extends Field
@@ -943,7 +990,7 @@ module ghost.browser.forms
             this.trigger(ListField.EVENT_REMOVE, data);
         }
 
-        protected getListItem(selector:string, root?:any, testSelf:boolean = true):JQuery
+        public getListItem(selector:string, root?:any, testSelf:boolean = true):JQuery
         {
             if(!root)
             {
