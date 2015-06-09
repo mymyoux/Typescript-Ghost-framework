@@ -46,6 +46,14 @@ module ghost.browser.forms
                 this.attachForm(form);
             }
         }
+        public prefix():string
+        {
+            if(this.$form.attr("data-prefix"))
+            {
+                return this.$form.attr("data-prefix");
+            }
+            return null;
+        }
         public static isSubList(element:any, listName:string, testSelf:boolean = true):boolean
         {
             var $item:JQuery = $(element);
@@ -77,6 +85,13 @@ module ghost.browser.forms
                 return this.data;
             var data:any = {};
             data[name] = this.data[name];
+            var prefix:string = this.prefix();
+            if(prefix)
+            {
+                var tmp:any = {};
+                tmp[prefix] = data;
+                data = tmp;
+            }
             return data;
         }
         public retrieveFields(form:any, listname?:string)
@@ -152,7 +167,7 @@ module ghost.browser.forms
                     //inside data-list
                     return;
                 }
-                this[$this.attr("data-action")]();
+                this[$this.attr("data-action")](event.currentTarget);
                 //.submit();
             });
           /*   $forms.find("[data-field='cancel']").on("click", ()=>
@@ -266,6 +281,13 @@ module ghost.browser.forms
             var data:any = {action:"autosave",
             value: this._getDataItemData(value)
             };
+            var prefix:string = this.prefix();
+            if(prefix)
+            {
+                var tmp:any = {};
+                tmp[prefix] = data;
+                data = tmp;
+            }
             var ajax:any = ghost.io.ajax({
                     url:action,
                     data:data,
@@ -316,6 +338,13 @@ module ghost.browser.forms
             return dataItems.map(function(item:IChangeData):IChangeData
             {
                 var data:any = {};
+                for(var p in item)
+                {
+                    if(p!="input" && p!="list" && item.hasOwnProperty(p))
+                    {
+                        data[p] = item[p];
+                    }
+                }/*
                 if(item.id != undefined)
                 {
                     data.id = item.id;
@@ -327,7 +356,7 @@ module ghost.browser.forms
                 if(item.value)
                 {
                     data.value = item.value;
-                }
+                }*/
                 return data;
             });
         }
@@ -347,7 +376,13 @@ module ghost.browser.forms
                 action:"add",
                 value:this._getDataItemData(dataItems)
             };
-
+            var prefix:string = this.prefix();
+            if(prefix)
+            {
+                var tmp:any = {};
+                tmp[prefix] = data;
+                data = tmp;
+            }
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -371,6 +406,7 @@ module ghost.browser.forms
         }
         public onRemove(dataItems:IChangeData[]):void
         {
+
             var name:string = this._getDataItemName(dataItems);
             this.trigger(Form.EVENT_REMOVE_ITEM, dataItems);
             if(!this.autosave)
@@ -385,6 +421,13 @@ module ghost.browser.forms
                 action:"remove",
                 value:this._getDataItemData(dataItems)
             };
+            var prefix:string = this.prefix();
+            if(prefix)
+            {
+                var tmp:any = {};
+                tmp[prefix] = data;
+                data = tmp;
+            }
             var action:string = this.getAction();
             var ajax:any = ghost.io.ajax({
                 url:action,
@@ -917,6 +960,7 @@ module ghost.browser.forms
         private change_timeout:number = -1;
         private remove_timeout:number = -1;
         private initialized:boolean;
+        private additionals:string[];
 
         private _inputs:Field[];
         //TODO:change to IChangeData
@@ -961,6 +1005,16 @@ module ghost.browser.forms
               //  item.on(Field.EVENT_CHANGE, this.onChange, this);
             }, this);
             this.id_name = $(this.element).attr("data-id-name")?$(this.element).attr("data-id-name"):"id";
+
+
+            this.additionals = $(this.element).attr("data-additionals")? $(this.element).attr("data-additionals").split(","):null;
+            if(this.additionals)
+            {
+                //NOT WORKING
+                debugger;
+            }
+
+
             if(this.fields.length == 0)
             {
                 debugger;
@@ -1068,6 +1122,14 @@ module ghost.browser.forms
                 this._inputs.forEach(function(item:Field, index:number):void
                 {
                     this._values[index].push({input:this, id:this.getID()});
+                    if(this.additionals)
+                    {
+                        debugger;
+                        for(var p in this.additionals)
+                        {
+                            this._values[index][0][this.additionals[p]] = this.data[this.additionals[p]];
+                        }
+                    }
                     this.trigger(Form.EVENT_CHANGE, this._values[index], item, this._values[index].name);
                 }, this);
                 this._inputs.length = this._values.length = 0;
