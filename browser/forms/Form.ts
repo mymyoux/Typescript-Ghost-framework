@@ -125,6 +125,7 @@ module ghost.browser.forms
                 {
                     field = new cls(name, this.data, element, this._setInitialData, this["form"]?this["form"]:this);
                     field.on(Field.EVENT_CHANGE, this.onChange, this, name);
+                    field.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, name);
                     if(field instanceof ListField)
                     {
                         field.on(ListField.EVENT_ADD, this.onAdd, this, name, field);
@@ -263,7 +264,42 @@ module ghost.browser.forms
              }*/
             return action; 
         }
+        protected onAutocomplete(value:IChangeData[]):void
+        {
+            var name:string = "___autocomplete"+this._getDataItemName(value);
+            if(this.promises[name])
+            {
+                this.promises[name].cancel();
+            }
+            var action:string = this.getAction();
+            var data:any = {action:"autocomplete",
+                value: this._getDataItemData(value)
+            };
+            var prefix:string = this.prefix();
+            if(prefix)
+            {
+                var tmp:any = {};
+                tmp[prefix] = data;
+                data = tmp;
+            }
+            var ajax:any = ghost.io.ajax({
+                url:action,
+                data:data,
+                retry:3,
+                method:"POST"
+            }).
+                then((result:any):void=>
+                {
+                    delete this.promises[name];
+                    value[0].input.setAutocomplete(result);
 
+                }, (error:any):void=>
+                {
+                    delete this.promises[name];
+                });
+
+            this.promises[name] = ajax;
+        }
         protected onChange(value:IChangeData[]):void
         {
             var name:string = this._getDataItemName(value);
@@ -516,9 +552,11 @@ module ghost.browser.forms
          * @type {string}
          */
         public static EVENT_CHANGE:string = "change";
+        public static EVENT_AUTOCOMPLETE:string = "autocomplete";
 
         public state:string;
         public required:boolean = false;
+        protected autocomplete:boolean;
         protected $input:any;
         protected inputSelector:any;
         protected data_saved:any;
@@ -549,6 +587,10 @@ module ghost.browser.forms
             this.bindEvents();
             this.setInitialValue();
         }
+        public setAutocomplete(data:any):void
+        {
+            debugger;
+        }
         public addValidator(validator:Validator):void
         {
             this.validators.push(validator);
@@ -569,6 +611,10 @@ module ghost.browser.forms
             if($(this.element).attr("data-require") == "true")
             {
                 this.required = true;
+            }
+            if($(this.element).attr("data-autocomplete") != undefined)
+            {
+                this.autocomplete = true;
             }
             /*if(this.data && this.data.tags)
             {
@@ -625,6 +671,11 @@ module ghost.browser.forms
         }
         protected triggerChange():void
         {
+            if(this.autocomplete)
+            {
+                this.trigger(Field.EVENT_AUTOCOMPLETE, [{value:this.data[this.name], input:this, name:this.name}]);
+
+            }
             //this.trigger(Field.EVENT_CHANGE, this.data[this.name], this);
             this.trigger(Field.EVENT_CHANGE, [{value:this.data[this.name], input:this, name:this.name}]);
         }
@@ -865,6 +916,7 @@ module ghost.browser.forms
 
             var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
+            itemField.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, itemField);
             itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
             itemField.on(ListField.EVENT_REMOVE, this.onRemove, this, itemField);
 
@@ -877,6 +929,12 @@ module ghost.browser.forms
             data[data.length-1].name = this.name;
             data[data.length-1].list = this;
             this.trigger(ListField.EVENT_ADD, data);
+        }
+        protected onAutocomplete(data:IChangeData[]):void
+        {
+            data[data.length-1].name = this.name;
+            data[data.length-1].list = this;
+            this.trigger(Field.EVENT_AUTOCOMPLETE, data);
         }
         protected onRemove(data:IChangeData[]):void
         {
@@ -1008,23 +1066,18 @@ module ghost.browser.forms
 
 
             this.additionals = $(this.element).attr("data-additionals")? $(this.element).attr("data-additionals").split(","):null;
-            if(this.additionals)
-            {
-                //NOT WORKING
-                debugger;
-            }
 
-
-            if(this.fields.length == 0)
-            {
-                debugger;
-            }
         }
         protected onAdd(value:IChangeData[]/*newItem:ItemField, name:string, list:ListField*/):void
         {
            // this.form.onAdd(newItem, name, list, this);
             value.push({input:this, id:this.getID()});
             this.trigger(ListField.EVENT_ADD, value);
+        }
+        protected onAutocomplete(value:IChangeData[]):void
+        {
+            value.push({input:this, id:this.getID()});
+            this.trigger(Field.EVENT_AUTOCOMPLETE, value);
         }
         protected onRemove(value:IChangeData[]):void
         {
@@ -1124,7 +1177,6 @@ module ghost.browser.forms
                     this._values[index].push({input:this, id:this.getID()});
                     if(this.additionals)
                     {
-                        debugger;
                         for(var p in this.additionals)
                         {
                             this._values[index][0][this.additionals[p]] = this.data[this.additionals[p]];
