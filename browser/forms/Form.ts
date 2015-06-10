@@ -10,7 +10,7 @@ module ghost.browser.forms
 
 //verifier les images
 //PHP :'(
-    
+
 
 
 
@@ -574,7 +574,8 @@ module ghost.browser.forms
         protected validators:Validator[];
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
-        protected itemAutocomplete:ItemAutocomplete
+        protected itemAutocomplete:ItemAutocomplete;
+       // protected autocompleted:boolean;
 
         public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
         {
@@ -603,7 +604,26 @@ module ghost.browser.forms
         {
             if(this.data["autocompletion"] && this.data["autocompletion"].length>index)
             {
-                this.data[this.name] = this.data["autocompletion"][index]["name"];
+                console.log("autocomplete");
+                var value:any;
+                for(var p in this.data["autocompletion"][index])
+                {
+                    if(p == "id")
+                    {
+                        continue;
+                    }
+                    value = this.data["autocompletion"][index][p];
+                    if(value != null)
+                    {
+                        this.data[p] = value;
+                    }
+                }
+                this.data["autocompleted"] = true;
+                this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
+                this.onChangeThrottle();
+            //    debugger;
+                //this.data[this.name] = this.data["autocompletion"][index]["name"];
+                //debugger;
                 this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
             }
         }
@@ -637,7 +657,7 @@ module ghost.browser.forms
             if($(this.element).attr("data-autocomplete") != undefined)
             {
                 this.autocomplete = true;
-                this.data["autocomplete"]=[];
+                this.data["autocompletion"]=[];
                 this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
 
@@ -675,7 +695,7 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
-
+            console.log("on change");
         /*    if( this.data[this.name]  != this.getValue())
             {
                 this.data[this.name] = this.getValue();
@@ -685,8 +705,20 @@ module ghost.browser.forms
             //console.log(this.name, this.data[this.name], this.data_saved[this.name]);
             if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
             {
-                this.data["autocompletion"] = [];
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                if(this.data["autocompletion"])
+                {
+                    if(this.data["autocompletion"].length)
+                    {
+                        this.data["autocompletion"].length = 0;
+                        this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                    }
+                    var resets:string[] = this.itemAutocomplete.getReset();
+                    for(var p in resets)
+                    {
+                        delete this.data[resets[p]];
+                    }
+                    this.data["autocompleted"] = false;
+                }
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
 
                 this.onChangeThrottle();
@@ -699,7 +731,7 @@ module ghost.browser.forms
         }
         protected triggerChange():void
         {
-            if(this.autocomplete)
+            if(this.autocomplete && !this.data["autocompleted"])
             {
                 this.trigger(Field.EVENT_AUTOCOMPLETE, [{value:this.data[this.name], input:this, name:this.name}]);
 
@@ -746,13 +778,20 @@ module ghost.browser.forms
     }
     export class ItemAutocomplete
     {
+        private reset:string[];
         public constructor(protected field:Field, protected $list:JQuery)
         {
             this.init();
         }
         protected init():void
         {
+            this.reset = [];
             var _this:ItemAutocomplete = this;
+            this.reset = <any>this.$list.attr("data-autocomplete-reset");
+            if(this.reset)
+            {
+                this.reset = (<any>this.reset).split(",");
+            }
             this.$list.on("click","[data-autocomplete-item]", function(event)
             {
                 var id:number = parseInt($(this).attr("data-autocomplete-item"), 10);
@@ -761,6 +800,10 @@ module ghost.browser.forms
                     _this.field.chooseAutocomplete(id);
                 }
             });
+        }
+        public getReset():string[]
+        {
+            return this.reset;
         }
     }
     export class ListField extends Field
