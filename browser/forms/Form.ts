@@ -574,6 +574,7 @@ module ghost.browser.forms
         protected validators:Validator[];
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
+        protected onAutocompleteThrottle:ghost.utils.BufferFunction;
         protected itemAutocomplete:ItemAutocomplete;
        // protected autocompleted:boolean;
 
@@ -660,7 +661,7 @@ module ghost.browser.forms
                 this.data["autocompletion"]=[];
                 this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
-
+                this.onAutocompleteThrottle = this.triggerAutocomplete.bind(this);//ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 0);
             }
             /*if(this.data && this.data.tags)
             {
@@ -718,9 +719,9 @@ module ghost.browser.forms
                         delete this.data[resets[p]];
                     }
                     this.data["autocompleted"] = false;
+                    this.onAutocompleteThrottle();
                 }
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
-
                 this.onChangeThrottle();
             }
 
@@ -729,13 +730,16 @@ module ghost.browser.forms
 
         //    this.trigger(Field.EVENT_CHANGE, this.data,
         }
-        protected triggerChange():void
+        protected triggerAutocomplete():void
         {
             if(this.autocomplete && !this.data["autocompleted"])
             {
                 this.trigger(Field.EVENT_AUTOCOMPLETE, [{value:this.data[this.name], input:this, name:this.name}]);
-
             }
+        }
+        protected triggerChange():void
+        {
+
             //this.trigger(Field.EVENT_CHANGE, this.data[this.name], this);
             this.trigger(Field.EVENT_CHANGE, [{value:this.data[this.name], input:this, name:this.name}]);
         }
