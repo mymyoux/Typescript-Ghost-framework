@@ -661,7 +661,7 @@ module ghost.browser.forms
                 this.data["autocompletion"]=[];
                 this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
-                this.onAutocompleteThrottle = this.triggerAutocomplete.bind(this);//ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 0);
+                this.onAutocompleteThrottle = ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 50);
             }
             /*if(this.data && this.data.tags)
             {
