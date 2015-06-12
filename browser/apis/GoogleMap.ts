@@ -11,7 +11,7 @@ module ghost.browser.apis
 		 * Geocoder instance
 		 * @type {google.maps.Geocoder}
 		 */
-		private _geocoder:google.maps.Geocoder;
+		private static _geocoder:google.maps.Geocoder;
 		/**
 		 * Specifies if the google maps API is enabled
 		 * @return {boolean}
@@ -20,17 +20,34 @@ module ghost.browser.apis
 		{
 			return window["google"] && window["google"].maps && window["google"].maps.Geocoder;
 		}
+		private static init():Promise<any>
+		{
+			var promise:Promise<any> = new Promise((resolve, reject)=>
+			{
+				if(GMap.isEnabled())
+				{
+					resolve();
+					return;
+				}
+				__initialize__gmap["resolve"] = resolve;
+				var script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.src =  'https://maps.googleapis.com/maps/api/js?v=3.exp&' + 'libraries=places'+'&callback=__initialize__gmap';
+				document.body.appendChild(script);
+			});
+			return promise;
+		}
 		/**
 		 * Gets geocoder instance
 		 * @return {google.maps.Geocoder} Geocoder instance
 		 */
-		public geocoder():google.maps.Geocoder
+		public static geocoder():google.maps.Geocoder
 		{
-			if(!this._geocoder)
+			if(!GMap._geocoder)
 			{
-				this._geocoder = new google.maps.Geocoder();
+				GMap._geocoder = new google.maps.Geocoder();
 			}
-			return this._geocoder;
+			return GMap._geocoder;
 		}
 		/**
 		 * Geocodes an address to lattitude and longitude
@@ -38,15 +55,15 @@ module ghost.browser.apis
 		 * @param  {boolean}                     simplified if false, will send the complete google response
 		 * @return {Promise<google.maps.LatLng>}            [description]
 		 */
-		public geocode(address:string, simplified?:boolean):Promise<google.maps.LatLng>
+		public static geocode(address:string, simplified?:boolean):Promise<google.maps.LatLng|any[]>;
 		/**
 		 * Geocodes an address to lattitude and longitude
 		 * @param  {google.maps.GeocoderRequest}                      address    Options
 		 * @param  {boolean}                     simplified if false, will send the complete google response
 		 * @return {Promise<google.maps.LatLng>}            [description]
 		 */
-		public geocode(params:google.maps.GeocoderRequest, simplified?:boolean):Promise<google.maps.LatLng>
-		public geocode(params:any, simplified:boolean = true):Promise<google.maps.LatLng>
+		public  static geocode(params:google.maps.GeocoderRequest, simplified?:boolean):Promise<google.maps.LatLng|any[]>;
+		public  static geocode(params:any, simplified:boolean = true):Promise<google.maps.LatLng|any[]>
 		{
 			if(typeof params == "string")
 			{
@@ -54,7 +71,15 @@ module ghost.browser.apis
 			}
 			var promise:Promise<google.maps.LatLng> = new Promise((resolve, reject)=>
 			{
-				this.geocoder().geocode(params, function(results, status)
+				if(!GMap.isEnabled())
+				{
+					GMap.init().then(()=>
+					{
+						this.geocode(params, simplified).then(resolve, reject);
+					});
+					return;
+				}
+				GMap.geocoder().geocode(params, function(results, status)
 				{
 					if (status == google.maps.GeocoderStatus.OK) 
 					{
@@ -74,4 +99,9 @@ module ghost.browser.apis
 			return promise;
 		}
 	}
+}
+
+function __initialize__gmap()
+{
+	__initialize__gmap["resolve"]();
 }

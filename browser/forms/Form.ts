@@ -1,4 +1,5 @@
 ///<module="mvc"/>
+///<module="apis"/>
 ///<module="framework/ghost/utils"/>
 ///<module="framework/browser/io"/>
 ///<module="framework/ghost/events"/>
@@ -17,7 +18,7 @@ module ghost.browser.forms
 
 
     /**
-     * Form managment
+     * Form management
      */
     export class Form extends ghost.events.EventDispatcher
     {
@@ -706,29 +707,37 @@ module ghost.browser.forms
             //console.log(this.name, this.data[this.name], this.data_saved[this.name]);
             if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
             {
-                if(this.data["autocompletion"])
-                {
-                    if(this.data["autocompletion"].length)
-                    {
-                        this.data["autocompletion"].length = 0;
-                        this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
-                    }
-                    var resets:string[] = this.itemAutocomplete.getReset();
-                    for(var p in resets)
-                    {
-                        delete this.data[resets[p]];
-                    }
-                    this.data["autocompleted"] = false;
-                    this.onAutocompleteThrottle();
-                }
-                this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
-                this.onChangeThrottle();
+                this.onChangeValidated();
             }
 
 
             //dispatch event change for item
 
         //    this.trigger(Field.EVENT_CHANGE, this.data,
+        }
+        protected onChangeValidated():void
+        {
+            if(this.data["autocompletion"])
+            {
+                if(this.data["autocompletion"].length)
+                {
+                    this.data["autocompletion"].length = 0;
+                    this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                }
+                var resets:string[] = this.itemAutocomplete.getReset();
+                for(var p in resets)
+                {
+                    delete this.data[resets[p]];
+                }
+                this.data["autocompleted"] = false;
+                //TODO:mode where autocompletion is on with empty string + on start
+                if(this.data[this.name] != "")
+                {
+                    this.onAutocompleteThrottle();
+                }
+            }
+            this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
+            this.onChangeThrottle();
         }
         protected triggerAutocomplete():void
         {
@@ -1132,6 +1141,7 @@ module ghost.browser.forms
         }
         public setID(id:string):void
         {
+            debugger;
             this.data[this.id_name] = id;
         }
         public getItemIndex():number
@@ -1294,6 +1304,62 @@ module ghost.browser.forms
         list?:ListField;
         id?:string;
     }
+
+    export class GMapField extends Field
+    {
+        public static selector:string = "[data-type='gmap']";
+        /*public constructor( public name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+         {
+         super(name, data, element, _setInitialData, form);
+         }*/
+        protected init():void
+        {
+
+            super.init();
+            this.validators.push(new TextValidator());
+        }
+        protected bindEvents():void
+        {
+            super.bindEvents();
+            if(this.$input)
+                this.$input.on("keyup", this.onChangeBinded);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            if(this.$input)
+                this.$input.off("keyup", this.onChangeBinded);
+        }
+        public setAutocomplete(data:any):void
+        {
+            if(data)
+            {
+                this.data["autocompletion"] = data;
+            }
+
+            //debugger;
+        }
+        protected onChangeValidated():void
+        {
+            super.onChangeValidated();
+            if(!this.data[this.name] || this.data[this.name].length<3)
+            {
+                return ;
+            }
+            ghost.browser.apis.GMap.geocode(this.data[this.name], false).then((result:any[])=>{
+                result = result.map(function(item:any):any
+                {
+                    item.name = item.formatted_address;
+                    return item;
+                });
+                this.setAutocomplete(result);
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                console.log("MAP");
+
+            },function(){debugger;});
+        }
+    }
+
     export class InputTextField extends Field
     {
         public static selector:string = "input[type='text']";
@@ -1319,6 +1385,8 @@ module ghost.browser.forms
                 this.$input.off("keyup", this.onChangeBinded);
         }
     }
+
+
     export class InputFileField extends Field
     {
         public static selector:string = "[data-type='picture']";
