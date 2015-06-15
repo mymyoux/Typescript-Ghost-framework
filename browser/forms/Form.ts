@@ -485,7 +485,6 @@ module ghost.browser.forms
             }).
                 then((result:any):void=>
                 {
-                    debugger;
                     delete this.promises[name];
 
                 }, (error:any):void=>
@@ -1141,7 +1140,6 @@ module ghost.browser.forms
         }
         public setID(id:string):void
         {
-            debugger;
             this.data[this.id_name] = id;
         }
         public getItemIndex():number
