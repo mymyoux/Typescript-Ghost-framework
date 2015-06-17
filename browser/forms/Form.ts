@@ -967,15 +967,39 @@ module ghost.browser.forms
             }
 
             //this.data[this.name].push({name:"test", tags:[]});
-
+            var model:any;
+            //hack of ractive => use previous data to set the new item
             if(!isInit)
             {
-                debugger;
+                if(this.items.length)
+                {
+                    model = (<ItemField>this.items[this.items.length-1]).cloneData();
+                }
             }
-            var index:number = this.addData();
+            var index:number = this.addData(this.data[this.name].length, model);
 
             var $last:JQuery = this.getListItem("[data-item]", this.element).last();//$(this.element).find("[data-item]").last();
             var item = this.addItem(index, $last);
+            ///hack of ractive => use constructed data to rebuild the first item
+            if(!isInit && this.items.length == 1)
+            {
+                model= item.cloneData();
+                this.data[this.name].splice(0, 1);
+                //this.data[this.name].push(item.data);
+                this.items[0].dispose();
+                this.items.splice(0, 1);
+
+                var index:number = this.addData(this.data[this.name].length, model);
+
+                var $last:JQuery = this.getListItem("[data-item]", this.element).last();//$(this.element).find("[data-item]").last();
+                var item = this.addItem(index, $last);
+
+            }
+            /*if(!isInit) {
+                item.cloneData();
+                this.data[this.name].splice(index, 1);
+                this.data[this.name].push(item.data);
+            }*/
           //  this.trigger(ListField.EVENT_ADD, item);
             this.trigger(ListField.EVENT_ADD, [{name:this.name, list:this, input:item}]);
             //this.items.push(new ItemField(this.name, this.data[this.name][this.data[this.name].length-1], $last, this._setInitialData, this.form));
@@ -992,7 +1016,7 @@ module ghost.browser.forms
             this.checkMaxStatus();
             this.checkMinStatus();
         }
-        protected addData(index?:number):number
+        protected addData(index?:number, model?:any):number
         {
             if(!this.data[this.name] || !this.data[this.name].push)
             {
@@ -1002,10 +1026,14 @@ module ghost.browser.forms
             {
                 index = this.data[this.name].length;
             }
+            if(!model)
+            {
+                model = {};
+            }
 
             while(this.data[this.name].length<=index)
             {
-                var newItem:any = {};
+                var newItem:any = this.data[this.name].length==index?model:ghost.utils.Objects.clone(model);//{};
                 if(this.sublist)
                 {
                     
@@ -1154,6 +1182,30 @@ module ghost.browser.forms
         }
         protected triggerChange () {
             this.trigger(Field.EVENT_CHANGE, this.data);
+        }
+        public cloneData(data?:any):any
+        {
+            var clone:any = {};
+            if(!data)
+            {
+                data = this.data;
+            }
+            for(var p in data)
+            {
+                if(data.hasOwnProperty(p) && data[p]!==null)
+                {
+                    if(typeof data[p] == "object")
+                    {
+                        if(ghost.utils.Arrays.isArray(data[p]))
+                        {
+
+                            clone[p] = [];
+                        }else
+                        clone[p] = this.cloneData(data[p]);
+                    }
+                }
+            }
+            return clone;
         }
         public init():void
         {
