@@ -303,10 +303,11 @@ module ghost.browser.forms
                     value[0].input.setAutocomplete(result.autocomplete);
                     this.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
                     console.log(value[value.length-1].name);
-                   // debugger;
+
 
                 }, (error:any):void=>
                 {
+                    debugger;
                     delete this.promises[name];
                 });
 
@@ -630,6 +631,7 @@ module ghost.browser.forms
         }
         public setAutocomplete(data:any):void
         {
+            //debugger;
             this.data["autocompletion"] = data;
 
             //debugger;
@@ -900,7 +902,7 @@ module ghost.browser.forms
 
             while(this.length()<this.min)
             {
-                this.add(false);
+                this.add(false, true);
             }
             this.checkMinStatus();
             this.checkMaxStatus();
@@ -953,7 +955,7 @@ module ghost.browser.forms
                 this.data[this.name] = [];
             }
         }
-        public add(focus:boolean = true):void
+        public add(focus:boolean = true, isInit:boolean = false):void
         {
             if(this.isMaxReached())
             {
@@ -966,6 +968,10 @@ module ghost.browser.forms
 
             //this.data[this.name].push({name:"test", tags:[]});
 
+            if(!isInit)
+            {
+                debugger;
+            }
             var index:number = this.addData();
 
             var $last:JQuery = this.getListItem("[data-item]", this.element).last();//$(this.element).find("[data-item]").last();
