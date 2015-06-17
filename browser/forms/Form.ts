@@ -577,6 +577,7 @@ module ghost.browser.forms
         protected onChangeThrottle:ghost.utils.BufferFunction;
         protected onAutocompleteThrottle:ghost.utils.BufferFunction;
         protected itemAutocomplete:ItemAutocomplete;
+        protected prefix_autocomplete:string = "";
        // protected autocompleted:boolean;
 
         public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
@@ -604,23 +605,23 @@ module ghost.browser.forms
         }
         public chooseAutocomplete(index:number):void
         {
-            if(this.data["autocompletion"] && this.data["autocompletion"].length>index)
+            if(this.data[this.prefix_autocomplete+"autocompletion"] && this.data[this.prefix_autocomplete+"autocompletion"].length>index)
             {
                 console.log("autocomplete");
                 var value:any;
-                for(var p in this.data["autocompletion"][index])
+                for(var p in this.data[this.prefix_autocomplete+"autocompletion"][index])
                 {
                     if(p == "id")
                     {
                         continue;
                     }
-                    value = this.data["autocompletion"][index][p];
+                    value = this.data[this.prefix_autocomplete+"autocompletion"][index][p];
                     if(value != null)
                     {
                         this.data[p] = value;
                     }
                 }
-                this.data["autocompleted"] = true;
+                this.data[this.prefix_autocomplete+"autocompleted"] = true;
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
                 this.onChangeThrottle();
             //    debugger;
@@ -632,7 +633,7 @@ module ghost.browser.forms
         public setAutocomplete(data:any):void
         {
             //debugger;
-            this.data["autocompletion"] = data;
+            this.data[this.prefix_autocomplete+"autocompletion"] = data;
 
             //debugger;
         }
@@ -659,8 +660,9 @@ module ghost.browser.forms
             }
             if($(this.element).attr("data-autocomplete") != undefined)
             {
+                this.prefix_autocomplete = $(this.element).attr("data-autocomplete");
                 this.autocomplete = true;
-                this.data["autocompletion"]=[];
+                this.data[this.prefix_autocomplete+"autocompletion"]=[];
                 this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
                 this.onAutocompleteThrottle = ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 50);
@@ -718,11 +720,11 @@ module ghost.browser.forms
         }
         protected onChangeValidated():void
         {
-            if(this.data["autocompletion"])
+            if(this.data[this.prefix_autocomplete+"autocompletion"])
             {
-                if(this.data["autocompletion"].length)
+                if(this.data[this.prefix_autocomplete+"autocompletion"].length)
                 {
-                    this.data["autocompletion"].length = 0;
+                    this.data[this.prefix_autocomplete+"autocompletion"].length = 0;
                     this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
                 }
                 var resets:string[] = this.itemAutocomplete.getReset();
@@ -730,7 +732,7 @@ module ghost.browser.forms
                 {
                     delete this.data[resets[p]];
                 }
-                this.data["autocompleted"] = false;
+                this.data[this.prefix_autocomplete+"autocompleted"] = false;
                 //TODO:mode where autocompletion is on with empty string + on start
                 if(this.data[this.name] != "")
                 {
@@ -742,7 +744,7 @@ module ghost.browser.forms
         }
         protected triggerAutocomplete():void
         {
-            if(this.autocomplete && !this.data["autocompleted"])
+            if(this.autocomplete && !this.data[this.prefix_autocomplete+"autocompleted"])
             {
                 this.trigger(Field.EVENT_AUTOCOMPLETE, [{value:this.data[this.name], input:this, name:this.name}]);
             }
