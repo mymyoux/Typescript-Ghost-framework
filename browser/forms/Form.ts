@@ -33,6 +33,8 @@ module ghost.browser.forms
         public static EVENT_CANCEL:string = "cancel";
         public static EVENT_SUBMITTED:string = "submitted";
         public static EVENT_SUBMIT_ERROR:string = "submit_error";
+        private static customClasses:any[] = [];
+
         protected autosave:boolean = false;
         protected action:string;
         protected $form:JQuery;
@@ -54,7 +56,9 @@ module ghost.browser.forms
             {
                 this.attachForm(form);
             }
+            window["f"] = this;
         }
+
         public prefix():string
         {
             if(this.$form.attr("data-prefix"))
@@ -155,6 +159,18 @@ module ghost.browser.forms
                 debugger;
             }
             this.fields = fields;
+        }
+        public getField(name:string):Field
+        {
+            var fields:Field[] = this.fields.filter(function(field:Field)
+            {
+                return field.name == name;
+            }, this);
+            if(!fields.length)
+            {
+                return null;
+            }
+            return fields[0];
         }
         public attachForm(form:any):void
         {
@@ -496,9 +512,23 @@ module ghost.browser.forms
                 });
             this.promises[name] = ajax;
         }
+        public static addFieldClass(cls):void
+        {
+            Form.customClasses.push(cls);
+        }
         private static getField(element):any
         {
             var cls:any;
+            for(var p in Form.customClasses)
+            {
+                if(Form.customClasses[p].match)
+                {
+                    if(Form.customClasses[p].match(element))
+                    {
+                        return Form.customClasses[p];
+                    }
+                }
+            }
             for(var p in ghost.browser.forms)
             {
                 if(p == "Field")
@@ -631,6 +661,8 @@ module ghost.browser.forms
                 this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
             }
         }
+
+
         public setAutocomplete(data:any):void
         {
             //debugger;
@@ -875,6 +907,10 @@ module ghost.browser.forms
         }
         protected triggerChange (data?:any, input?:Field, name?:string, itemField?:ItemField) {
             this.trigger(Field.EVENT_CHANGE, data, input, itemField.getItemIndex(), name);
+        }
+        public getFields():Field[]
+        {
+            return this.items;
         }
         public init():void
         {
@@ -1196,6 +1232,14 @@ module ghost.browser.forms
         protected triggerChange () {
             this.trigger(Field.EVENT_CHANGE, this.data);
         }
+        public getField(name:string):Field
+        {
+            return Form.prototype.getField.call(this, name);
+        }
+        public getFields():Field[]
+        {
+            return this.fields;
+        }
         public cloneData(data?:any):any
         {
             var clone:any = {};
@@ -1426,6 +1470,49 @@ module ghost.browser.forms
                 console.log("MAP");
 
             },function(){debugger;});
+        }
+    }
+    export class CheckboxField extends Field
+    {
+        public static selector:string = "[data-type='checkbox']";
+        /*public constructor( public name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+         {
+         super(name, data, element, _setInitialData, form);
+         }*/
+        protected init():void
+        {
+            window["c"] = this;
+            super.init();
+
+        }
+        public onChange(event:any):void
+        { 
+            if(this.data[this.name] == 1)
+            {
+                this.data[this.name] = 0;
+            }else
+            {
+                this.data[this.name] = 1;
+            }
+            this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+            this.data_saved[this.name] = this.data[this.name];
+            this.triggerChange();
+        }
+        public getValue():any
+        {
+            return this.data[this.name];
+        }
+        protected bindEvents():void
+        {
+            super.bindEvents();
+            if(this.$input)
+                this.$input.on("click", this.onChangeBinded);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            if(this.$input)
+                this.$input.off("click", this.onChangeBinded);
         }
     }
 
