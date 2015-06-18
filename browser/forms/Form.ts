@@ -514,7 +514,8 @@ module ghost.browser.forms
         }
         public static addFieldClass(cls):void
         {
-            Form.customClasses.push(cls);
+            if(Form.customClasses.indexOf(cls) == -1)
+                Form.customClasses.push(cls);
         }
         private static getField(element):any
         {
@@ -762,6 +763,7 @@ module ghost.browser.forms
                     this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
                 }
                 var resets:string[] = this.itemAutocomplete.getReset();
+                debugger;
                 for(var p in resets)
                 {
                     delete this.data[resets[p]];
@@ -788,6 +790,7 @@ module ghost.browser.forms
             var data = {value:this.data[this.name], input:this, name:this.name};
             if(this.additionals)
             {
+                debugger;
                 data = this.additionals.reduce((previous:any, item:string):any=>
                 {
                     previous[item] = this.data[item];
@@ -1431,6 +1434,12 @@ module ghost.browser.forms
             super.init();
             this.validators.push(new TextValidator());
         }
+        protected initializeInput():void
+        {
+            var selector:string = "input[type='text']";
+           this.$input = $(this.element).find(selector).addBack(selector);
+
+        }
         protected bindEvents():void
         {
             super.bindEvents();
@@ -1447,7 +1456,7 @@ module ghost.browser.forms
         {
             if(data)
             {
-                this.data["autocompletion"] = data;
+                this.data[this.prefix_autocomplete +  "autocompletion"] = data;
             }
 
             //debugger;
@@ -1486,7 +1495,7 @@ module ghost.browser.forms
 
         }
         public onChange(event:any):void
-        { 
+        {
             if(this.data[this.name] == 1)
             {
                 this.data[this.name] = 0;
