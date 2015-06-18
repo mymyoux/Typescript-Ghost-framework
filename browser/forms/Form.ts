@@ -578,6 +578,7 @@ module ghost.browser.forms
         protected onAutocompleteThrottle:ghost.utils.BufferFunction;
         protected itemAutocomplete:ItemAutocomplete;
         protected prefix_autocomplete:string = "";
+        protected additionals:string[];
        // protected autocompleted:boolean;
 
         public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
@@ -667,6 +668,7 @@ module ghost.browser.forms
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
                 this.onAutocompleteThrottle = ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 50);
             }
+            this.additionals = $(this.element).attr("data-additionals")? $(this.element).attr("data-additionals").split(","):null;
             /*if(this.data && this.data.tags)
             {
                 
@@ -751,9 +753,18 @@ module ghost.browser.forms
         }
         protected triggerChange():void
         {
-
+            var data = {value:this.data[this.name], input:this, name:this.name};
+            if(this.additionals)
+            {
+                data = this.additionals.reduce((previous:any, item:string):any=>
+                {
+                    previous[item] = this.data[item];
+                    return previous;
+                }, data);
+            }
             //this.trigger(Field.EVENT_CHANGE, this.data[this.name], this);
-            this.trigger(Field.EVENT_CHANGE, [{value:this.data[this.name], input:this, name:this.name}]);
+            //{value:this.data[this.name], input:this, name:this.name}]
+            this.trigger(Field.EVENT_CHANGE, [data]);
         }
         public getValue():any
         {
@@ -1156,7 +1167,7 @@ module ghost.browser.forms
         private change_timeout:number = -1;
         private remove_timeout:number = -1;
         private initialized:boolean;
-        private additionals:string[];
+
 
         private _inputs:Field[];
         //TODO:change to IChangeData
