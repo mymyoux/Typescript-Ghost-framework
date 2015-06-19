@@ -249,7 +249,7 @@ module ghost.browser.forms
             var data:any = this.toObject();
             var action:string = this.getAction();
             data.action = "submit";
-
+            console.log("SUBMIT", this, data);
             ghost.io.ajax({
                     url:action,
                     data:data,
@@ -823,6 +823,7 @@ module ghost.browser.forms
                 this.$input.off("change", this.onChangeBinded);
             this.onChangeThrottle.cancel();
             this.form = null;
+            this.off();
         }
         public static match(element:any):boolean
         {
