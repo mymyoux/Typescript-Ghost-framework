@@ -562,6 +562,7 @@ module ghost.browser.forms
         {
             if(this.$form)
             {
+                this.$form.off("click", "[data-action]");
                 this.$form.off("submit");
                 this.$form.find("[data-action]").off("click");
             }
