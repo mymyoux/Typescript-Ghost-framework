@@ -657,9 +657,7 @@ module ghost.browser.forms
                 this.data[this.prefix_autocomplete+"autocompleted"] = true;
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
                 this.onChangeThrottle();
-            //    debugger;
                 //this.data[this.name] = this.data["autocompletion"][index]["name"];
-                //debugger;
                 this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
             }
         }
@@ -667,10 +665,8 @@ module ghost.browser.forms
 
         public setAutocomplete(data:any):void
         {
-            //debugger;
             this.data[this.prefix_autocomplete+"autocompletion"] = data;
 
-            //debugger;
         }
         public addValidator(validator:Validator):void
         {
@@ -764,7 +760,6 @@ module ghost.browser.forms
                     this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
                 }
                 var resets:string[] = this.itemAutocomplete.getReset();
-                debugger;
                 for(var p in resets)
                 {
                     delete this.data[resets[p]];
@@ -791,7 +786,6 @@ module ghost.browser.forms
             var data = {value:this.data[this.name], input:this, name:this.name};
             if(this.additionals)
             {
-                debugger;
                 data = this.additionals.reduce((previous:any, item:string):any=>
                 {
                     previous[item] = this.data[item];
@@ -1304,7 +1298,6 @@ module ghost.browser.forms
         protected onRemove(value:IChangeData[]):void
         {
             /*console.warn("Hey developer YOU MUST REMOVE _values and _inputs linked");
-            debugger;
             if(this.change_timeout != -1)
             {
                 clearTimeout(this.change_timeout);
@@ -1364,7 +1357,6 @@ module ghost.browser.forms
              }*/
             /*var name:string = value[value.length-1].name;
            // this.data[this.name] = this.getValue();
-            /*debugger;
             if(!ghost.utils.Objects.deepEquals(this.data_saved[name],this.data[name]))
             {
                 this.data_saved[name] = ghost.utils.Objects.clone(this.data[name], null, true);
@@ -1461,15 +1453,19 @@ module ghost.browser.forms
                 this.data[this.prefix_autocomplete +  "autocompletion"] = data;
             }
 
-            //debugger;
         }
         protected onChangeValidated():void
         {
             super.onChangeValidated();
-            if(!this.data[this.name] || this.data[this.name].length<3)
+            if(!this.data[this.name] || this.data[this.name].length<1/* || this.data[this.name].length<3*/)
             {
                 return ;
             }
+            this.geocode();
+
+        }
+        protected geocode():void
+        {
             ghost.browser.apis.GMap.geocode(this.data[this.name], false).then((result:any[])=>{
                 result = result.map(function(item:any):any
                 {

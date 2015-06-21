@@ -49,6 +49,39 @@ module ghost.browser.apis
 			}
 			return GMap._geocoder;
 		}
+		public static autocomplete(data:any):Promise<any>
+		{
+			if(typeof data == "string")
+			{
+				data = {
+					input:data
+				};
+			}
+
+			var promise:Promise<any> = new Promise((resolve, reject):void=>
+			{
+				if(!GMap.isEnabled())
+				{
+					GMap.init().then(()=>
+					{
+						this.autocomplete(data).then(resolve, reject);
+					});
+					return;
+				}
+				var service:any = new google.maps.places["AutocompleteService"]();
+				service.getPlacePredictions(data,
+					function(result, status){
+						if(status === google.maps.GeocoderStatus.OK)
+						{
+							resolve(result);
+						}else
+						{
+							reject(result);
+						}
+					});
+			});
+			return promise;
+		}
 		/**
 		 * Geocodes an address to lattitude and longitude
 		 * @param  {string}                      address    Address
