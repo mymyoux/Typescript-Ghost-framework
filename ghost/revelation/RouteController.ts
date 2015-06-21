@@ -31,6 +31,7 @@ module ghost.revelation
 	export class Route
 	{
 		public static METHOD_GET:string = "get";
+		public static METHOD_ALL:string = "all";
 		private callback:(request:any, response:any)=>void;
 		private method:string;
 		private route:string;

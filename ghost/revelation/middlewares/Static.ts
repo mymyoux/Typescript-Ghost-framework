@@ -33,11 +33,13 @@ module ghost.revelation.middlewares
                 }
             }
         }
-        public setApplication(application:Application):void
+        public setApplication(application:Application):boolean
         {
+            console.log("set application static");
             console.log("USE EXPRESS:"+this.localPath);
             //application.getServer().use(express_module.static(this.localPath));
             application.route("use", this.path, express_module.static(this.localPath));
+            return true;
         }
     }
 }

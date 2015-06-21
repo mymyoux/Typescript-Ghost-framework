@@ -4,6 +4,7 @@
 ///<module="framework/ghost/core"/>
 ///<module="framework/ghost/utils"/>
 ///<module="framework/ghost/db"/>
+///<module="promises"/>
 module ghost.revelation
 {
 	var path_module = require("path");
@@ -34,6 +35,7 @@ module ghost.revelation
 		}
         protected _initialize():void
         {
+			this.initialize();
             var routes:any[] = this.getInitialRoutes();
             if(routes)
             {
@@ -71,7 +73,7 @@ module ghost.revelation
 
                 })
             }
-            this.initialize();
+
         }
         protected initialize():void
         {
@@ -96,15 +98,57 @@ module ghost.revelation
 		{ 
 			return this._server;
 		}
-		public start():void
+
+		/**
+		 * Preload middle wares  in order
+		 * @param index Index of middleware
+		 */
+		protected preloadMiddleware(index:number):void
 		{
-			//this._server.listen();
-			console.log("Application start");
+			if(index>=this.middlewares.length)
+			{
+				this.setControllersReady();
+				return;
+			}
+			var promise:boolean|Promise<any> = this.middlewares[index].setApplication(this);
+			if(typeof promise == "boolean")
+			{
+				if(promise)
+				{
+					this.preloadMiddleware(index+1);
+				}else
+				{
+					console.error("An error happend during middle ware initialization", this.middlewares[index]);
+				}
+			}else{
+				(<Promise<any>>promise).then(()=>
+				{
+					this.preloadMiddleware(index+1);
+				}).catch((error)=>
+				{
+					console.error("An error happend during middle ware initialization", this.middlewares[index], error, error.stack);
+				});
+			}
+		}
+
+		/**
+		 * Sets each controllers ready
+		 */
+		protected setControllersReady():void
+		{
 			this.controllers.forEach(function(controller:RouteController):void
 			{
 				controller.ready();
 			}, this);
 			this.ready();
+		}
+
+		/**
+		 * Start application
+		 */
+		public start():void
+		{
+			this.preloadMiddleware(0);
 		}
 		public ready():void
 		{
@@ -134,11 +178,36 @@ module ghost.revelation
                 return this.addMiddleWare(new middle(), options);
             }
             middle.setOptions(options);
-            middle.setApplication(this);
+
             this.middlewares.push(middle);
-
-
         }
+		public getMiddleWare(cls:any):IMiddleWare;
+		public getMiddleWare(name:string):IMiddleWare;
+		public getMiddleWare(name:any):IMiddleWare
+		{
+			if(typeof name == "string")
+			{
+				for(var p in this.middlewares)
+				{
+					if(this.middlewares[p]["name"] && this.middlewares[p]["name"] == name)
+					{
+						return this.middlewares[p];
+					}
+
+				}
+			}
+			else
+			{
+				for(var p in this.middlewares)
+				{
+					if(this.middlewares[p] instanceof name)
+					{
+						return this.middlewares[p];
+					}
+
+				}
+			}
+		}
 		public addRouteController(controller:RouteController):void
 		{
 			var name:string;
@@ -197,6 +266,10 @@ module ghost.revelation
         {
             return null;
         }
+		protected http():any
+		{
+			return this._http;
+		}
         public route(method:string, path:string, callback:Function):void
         {
             console.log("ADD:"+method+":/"+this.name()+path);

@@ -450,6 +450,10 @@ module ghost.mvc
             var name = arguments[arguments.length - 1];
             var model = arguments[arguments.length - 2];
             var data:any;
+            if(!model)
+            {
+                debugger;
+            }
             if(model.toRactive)
             {
                 data = model.toRactive();

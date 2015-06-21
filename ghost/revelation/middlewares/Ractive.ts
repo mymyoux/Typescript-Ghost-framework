@@ -10,6 +10,7 @@ module ghost.revelation.middlewares
         public path:string = "/views/*";
         public localPath:string = "public/templates";
         public method:string = "get";
+        public loading:boolean = true;
         public constructor()
         {
 
@@ -31,9 +32,11 @@ module ghost.revelation.middlewares
                 }
             }
         }
-        public setApplication(application:Application):void
+        public setApplication(application:Application):boolean
         {
+            console.log("set application ractive");
             application.route(this.method, this.path, this.onRequest.bind(this));
+            return true;
         }
         protected onRequest(request:any, response:any):void
         {

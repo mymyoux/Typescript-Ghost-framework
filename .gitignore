@@ -22,7 +22,9 @@ docscss
 public/ts/**/*.js
 *.class.ts
 *.js.map
+framework/**/*.d.ts
 *.d.ts
+**/*.d.ts
 *.class.js
 .pythoncompile.json
 #react
