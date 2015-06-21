@@ -4,6 +4,6 @@ module ghost.revelation
     {
         path:string;
         setOptions(data:any):void;
-        setApplication(application:Application);
+        setApplication(application:Application):boolean|Promise<any>;
     }
 }

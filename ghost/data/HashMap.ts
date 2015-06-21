@@ -55,6 +55,10 @@ module ghost.data
         {
             return this.keys.length;
         }
+        public toArray():VALUE[]
+        {
+            return this.values.slice();
+        }
     }
 }
 

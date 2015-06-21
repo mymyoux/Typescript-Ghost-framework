@@ -142,7 +142,7 @@ module ghost.browser.navigation
                 }
                 if(page)
                 {
-                    _this.pushPage($(this).attr("data-scope"), page);
+                    _this.pushPage($(this).attr("data-scope"), page, hash[scope]?hash[scope].params:null, hash[scope]?true:false);
                 }else
                 {
                     log.warn("No child with data-name inside a data-scope element and no default page for scope["+scope+"]");
@@ -176,7 +176,6 @@ module ghost.browser.navigation
                         console.log(hash);
                         console.log(hashSplit);
                         console.warn("Uncaught Error: Navigation._DEFAULT_SCOPE not set!");
-                        //debugger;
                         return previous;
                     }
                     scope = this._DEFAULT_SCOPE;
@@ -216,6 +215,7 @@ module ghost.browser.navigation
                 }
                 if(first === true)
                 {
+
                     $("#"+scope).attr("first",page);
                     this.pushPage(scope, page, params);
                 }else

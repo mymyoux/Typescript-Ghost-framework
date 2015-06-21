@@ -46,7 +46,7 @@ module ghost.db.mongo
 			this.hashTables[table.getName()] = table;
 			this.tables.push(table);
 		}
-		public getTable(name:string):Table
+		public table(name:string):Table
 		{
 			if(!this.hashTables[name])
 			{
