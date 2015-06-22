@@ -49,6 +49,52 @@ module ghost.browser.apis
 			}
 			return GMap._geocoder;
 		}
+		/**
+		 * Autocomplete google maps places
+		 * @param data
+		 * @returns {Promise<any>}
+		 * @see https://developers.google.com/maps/documentation/javascript/places-autocomplete
+		 */
+		public static getDetails(data:any):Promise<any>
+		{
+			if(typeof data == "string")
+			{
+				data = {
+					placeId:data
+				};
+			}
+
+			var promise:Promise<any> = new Promise((resolve, reject):void=>
+			{
+				if(!GMap.isEnabled())
+				{
+					GMap.init().then(()=>
+					{
+						this.autocomplete(data).then(resolve, reject);
+					});
+					return;
+				}
+				var obj=$('<div>').appendTo('body');
+				var service:any = new google.maps.places["PlacesService"](obj.get(0));
+				service.getDetails(data,
+					function(result, status){
+						if(status === google.maps.places.PlacesServiceStatus.OK)
+						{
+							resolve(result);
+						}else
+						{
+							reject(result);
+						}
+					});
+			});
+			return promise;
+		}
+		/**
+		 * Autocomplete google maps places
+		 * @param data
+		 * @returns {Promise<any>}
+		 * @see https://developers.google.com/maps/documentation/javascript/places-autocomplete
+		 */
 		public static autocomplete(data:any):Promise<any>
 		{
 			if(typeof data == "string")

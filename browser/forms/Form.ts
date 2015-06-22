@@ -1446,6 +1446,52 @@ module ghost.browser.forms
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
         }
+        public chooseAutocomplete(index:number):void
+        {
+            if(this.data[this.prefix_autocomplete+"autocompletion"] && this.data[this.prefix_autocomplete+"autocompletion"].length>index)
+            {
+                var value:any;
+                var data:any = this.data[this.prefix_autocomplete+"autocompletion"][index];
+                for(var p in this.data[this.prefix_autocomplete+"autocompletion"][index])
+                {
+                    if(p == "id")
+                    {
+                        continue;
+                    }
+                    value = this.data[this.prefix_autocomplete+"autocompletion"][index][p];
+                    if(value != null)
+                    {
+                        this.data[p] = ghost.utils.Objects.clone(value);
+                    }
+                }
+                this.data[this.prefix_autocomplete+"autocompleted"] = true;
+                this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
+
+                //this.onChangeThrottle();
+
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                ghost.browser.apis.GMap.getDetails(data.place_id).then((data:any):void=>
+                {
+                    if(this.data["place_id"] != data.place_id)
+                    {
+                        debugger;
+                        return;
+                    }
+                    var keys:string[] = ["address_components", "formatted_address","geometry","place_id","types"];
+                    var key:string;
+                    for(var p in keys)
+                    {
+                       key = keys[p];
+                       this.data[key] = ghost.utils.Objects.clone(data[key]);
+                    }
+                    this.triggerChange();
+                }, function(error:any):void
+                {
+                    debugger;
+                });
+
+            }
+        }
         public setAutocomplete(data:any):void
         {
             if(data)
@@ -1466,16 +1512,16 @@ module ghost.browser.forms
         }
         protected geocode():void
         {
-            ghost.browser.apis.GMap.geocode(this.data[this.name], false).then((result:any[])=>{
+            ghost.browser.apis.GMap.autocomplete({input:this.data[this.name],
+                types:["(cities)"]
+            }).then((result:any[])=>{
                 result = result.map(function(item:any):any
-                {
-                    item.name = item.formatted_address;
-                    return item;
-                });
+                    {
+                        item.name = item.description;
+                        return item;
+                    });
                 this.setAutocomplete(result);
                 this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
-                console.log("MAP");
-
             },function(){debugger;});
         }
     }
