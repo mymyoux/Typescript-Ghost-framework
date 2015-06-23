@@ -74,9 +74,77 @@ module ghost.browser.apis
 					});
 					return;
 				}
-				var obj=$('<div>').appendTo('body');
+				var obj= $(".gmap").length?$(".gmap"):$('<div class="g_map hidden">').appendTo('body');
 				var service:any = new google.maps.places["PlacesService"](obj.get(0));
 				service.getDetails(data,
+					function(result, status){
+						if(status === google.maps.places.PlacesServiceStatus.OK)
+						{
+							resolve(result);
+						}else
+						{
+							reject(result);
+						}
+					});
+			});
+			return promise;
+		}
+		public static textSearch(data:any):Promise<any>
+		{
+			if(typeof data == "string")
+			{
+				data = {
+					query:data
+				};
+			}
+
+			var promise:Promise<any> = new Promise((resolve, reject):void=>
+			{
+				if(!GMap.isEnabled())
+				{
+					GMap.init().then(()=>
+					{
+						this.textSearch(data).then(resolve, reject);
+					});
+					return;
+				}
+				var obj= $(".gmap").length?$(".gmap"):$('<div class="g_map hidden">').appendTo('body');
+				var service:any = new google.maps.places["PlacesService"](obj.get(0));
+				service.textSearch(data,
+					function(result, status){
+						if(status === google.maps.places.PlacesServiceStatus.OK)
+						{
+							resolve(result);
+						}else
+						{
+							reject(result);
+						}
+					});
+			});
+			return promise;
+		}
+		public static nearbySearch(data:any):Promise<any>
+		{
+			if(typeof data == "string")
+			{
+				data = {
+					name:data
+				};
+			}
+
+			var promise:Promise<any> = new Promise((resolve, reject):void=>
+			{
+				if(!GMap.isEnabled())
+				{
+					GMap.init().then(()=>
+					{
+						this.nearbySearch(data).then(resolve, reject);
+					});
+					return;
+				}
+				var obj= $(".gmap").length?$(".gmap"):$('<div class="g_map hidden">').appendTo('body');
+				var service:any = new google.maps.places["PlacesService"](obj.get(0));
+				service.nearbySearch(data,
 					function(result, status){
 						if(status === google.maps.places.PlacesServiceStatus.OK)
 						{
