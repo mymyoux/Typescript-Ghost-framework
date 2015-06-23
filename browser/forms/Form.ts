@@ -752,12 +752,16 @@ module ghost.browser.forms
         }
         protected onChangeValidated():void
         {
-            if(this.data[this.prefix_autocomplete+"autocompletion"])
+            if(this.itemAutocomplete && this.data[this.prefix_autocomplete+"autocompletion"])
             {
                 if(this.data[this.prefix_autocomplete+"autocompletion"].length)
                 {
                     this.data[this.prefix_autocomplete+"autocompletion"].length = 0;
                     this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                }
+                if(!this.itemAutocomplete)
+                {
+                    debugger;
                 }
                 var resets:string[] = this.itemAutocomplete.getReset();
                 for(var p in resets)
