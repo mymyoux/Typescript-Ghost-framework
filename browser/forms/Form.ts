@@ -1605,6 +1605,7 @@ module ghost.browser.forms
         public static selector:string = "[data-type='picture']";
         private inputFile:HTMLInputElement;
         private preview:HTMLImageElement;
+        private picture:string;
         protected init():void
         {
             super.init();
@@ -1615,6 +1616,7 @@ module ghost.browser.forms
             this.inputFile = $(this.element).find("input[type='file']").get(0);
             this.preview = $(this.element).find("[data-preview]").get(0);
        //     this.validators.push(new TextValidator());
+            this.picture = this.data[this.name];
         }
         protected bindEvents():void
         {
@@ -1641,6 +1643,8 @@ module ghost.browser.forms
                                   this.preview.src = file.result;
                                   this.$input.addClass("preview");
                               }
+                            this.picture = file.result;
+                            this.onChangeBinded();/*
                             ghost.io.ajax(
                                 {
                                     url:"/candidate/models/cv",
@@ -1652,7 +1656,7 @@ module ghost.browser.forms
                                 }, function(error:any):void
                                 {
                                     debugger;
-                                });
+                                });*/
 
                         }, (error:any):void=>
                         {
@@ -1679,6 +1683,11 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
+        }
+        public getValue():string
+        {
+            debugger;
+            return this.picture;
         }
     }
     export class TextareaField extends Field
