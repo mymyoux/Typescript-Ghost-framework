@@ -88,7 +88,7 @@ module ghost.browser.forms
         {
             return this.autosave;
         }
-       
+
         /**
          * Export data into object
          */
@@ -285,9 +285,9 @@ module ghost.browser.forms
             }
              /*if(action.indexOf(":")!=-1)
              {
-                
+
              }*/
-            return action; 
+            return action;
         }
         protected onAutocomplete(value:IChangeData[]):void
         {
@@ -551,7 +551,7 @@ module ghost.browser.forms
                     }
                 }
             }
-           
+
             return cls;
         }
         public toRactive():any
@@ -701,7 +701,7 @@ module ghost.browser.forms
             this.additionals = $(this.element).attr("data-additionals")? $(this.element).attr("data-additionals").split(","):null;
             /*if(this.data && this.data.tags)
             {
-                
+
             }*/
             var category:string = $(this.element).attr("data-category") ||  $(this.element).parents("form,[data-category]").attr("data-category");
             if(category)
@@ -1003,7 +1003,7 @@ module ghost.browser.forms
         protected setInitialValue():void
         {
             if(this._setInitialData || this.data[this.name] == undefined) {
-              //  
+              //
                 this.data[this.name] = [];
             }
         }
@@ -1088,7 +1088,7 @@ module ghost.browser.forms
                 var newItem:any = this.data[this.name].length==index?model:ghost.utils.Objects.clone(model);//{};
                 if(this.sublist)
                 {
-                    
+
                     for(var p in this.sublist)
                     {
                         newItem[this.sublist[p]] = [];
@@ -1728,13 +1728,40 @@ module ghost.browser.forms
         protected bindEvents():void
         {
             super.bindEvents();
-          
+
         }
         public dispose():void
         {
             super.dispose();
-         
+
+        }
+    }
+
+    export class InputCheckboxField extends Field
+    {
+        public static selector:string = "input[type='checkbox']";
+
+        protected init():void
+        {
+            super.init();
+            //this.validators.push(new TextValidator());
+        }
+        protected bindEvents():void
+        {
+            super.bindEvents();
+            if(this.$input)
+                this.$input.on("change", this.onChangeBinded);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            if(this.$input)
+                this.$input.off("change", this.onChangeBinded);
+        }
+
+        public getValue():any
+        {
+            return this.$input?this.$input.prop("checked"):false;
         }
     }
 }
-
