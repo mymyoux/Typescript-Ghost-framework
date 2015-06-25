@@ -1734,17 +1734,36 @@ module ghost.browser.forms
             super.init();
             this.validators.push(new TextValidator());
         }
+
+    }
+
+
+    export class CustomInputListField extends Field
+    {
+        public static selector:string = "[data-type='list']";
+
+        protected init():void
+        {
+            super.init();
+        }
         protected bindEvents():void
         {
-            super.bindEvents();
+            if(this.$input)
+                this.$input.on("change", this.onChangeBinded);
 
+        }
+        public getValue():any
+        {
+            return this.$input?this.$input.find("p[value]").attr("value"):null;
         }
         public dispose():void
         {
             super.dispose();
-
+            if(this.$input)
+                this.$input.off("change", this.onChangeBinded);
         }
     }
+
 
     export class InputCheckboxField extends Field
     {
