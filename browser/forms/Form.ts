@@ -136,7 +136,7 @@ module ghost.browser.forms
                 var field:Field;
                 if(cls)
                 {
-                    field = new cls(name, this.data, element, this._setInitialData, this["form"]?this["form"]:this);
+                    field = new cls(name, this.data, element, this._setInitialData, this["form"]?this["form"]:this, this);
                     field.on(Field.EVENT_CHANGE, this.onChange, this, name);
                     field.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, name);
                     if(field instanceof ListField)
@@ -333,6 +333,10 @@ module ghost.browser.forms
         {
             var name:string = this._getDataItemName(value);
             this.trigger(Form.EVENT_CHANGE+":"+name, name, value);
+            if(value[0].input && value[0].input.constructor && value[0].input.constructor["force_trigger"])
+            {
+                this.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+            }
             console.log(Form.EVENT_CHANGE+":"+name, name, value);
             if(!this.autosave)
             {
@@ -603,7 +607,7 @@ module ghost.browser.forms
         protected autocomplete:boolean;
         protected $input:any;
         protected inputSelector:any;
-        protected data_saved:any;
+        public data_saved:any;
         protected validators:Validator[];
         protected onChangeBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
@@ -613,7 +617,7 @@ module ghost.browser.forms
         protected additionals:string[];
        // protected autocompleted:boolean;
 
-        public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+        public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form, protected parent:Field|Form)
         {
             super();
             if(!this.data)
@@ -822,6 +826,7 @@ module ghost.browser.forms
                 this.$input.off("change", this.onChangeBinded);
             this.onChangeThrottle.cancel();
             this.form = null;
+            this.parent = null;
             this.off();
         }
         public static match(element:any):boolean
@@ -889,12 +894,12 @@ module ghost.browser.forms
          * Sublist name to precreate item data
          */
         private sublist:string[];
-        public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form)
+        public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form, parent:Field|Form)
         {
             this.items = [];
             this.min = this.max = -1;
             //this.sublist = [];
-            super(name, data, element, _setInitialData, form);
+            super(name, data, element, _setInitialData, form, parent);
         }
         public onChange(data:any, input?:Field, name?:string, itemField?:ItemField):void
         {
@@ -1102,7 +1107,7 @@ module ghost.browser.forms
         {
             var lastItem:any = this.getListItem("[data-item]").eq(index);
 
-            var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form);
+            var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form, this);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
             itemField.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, itemField);
             itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
@@ -1212,9 +1217,9 @@ module ghost.browser.forms
         //TODO:change to IChangeData
 
         private _values:IChangeData[][] = [];
-        public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form)
+        public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form, parent:Field|Form)
         {
-            super(name, data, element, _setInitialData, form);
+            super(name, data, element, _setInitialData, form, parent);
         }
         public getID():string
         {
@@ -1741,7 +1746,13 @@ module ghost.browser.forms
     export class CustomInputListField extends Field
     {
         public static selector:string = "[data-type='list']";
-
+        /**
+         * Force form to trigger ghost.mvc.Model.EVENT_CHANGE from the data
+         * Required when ractive doesn't handle two ways binding
+         * @type {boolean}
+         */
+            //replaced by overrided onChangeValidated method
+        public static force_trigger:boolean = false;
         protected init():void
         {
             super.init();
@@ -1761,6 +1772,13 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("change", this.onChangeBinded);
+        }
+        protected onChangeValidated():void
+        {
+            super.onChangeValidated();
+
+            if(this.form.data && this.form.data.trigger)
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
         }
     }
 
