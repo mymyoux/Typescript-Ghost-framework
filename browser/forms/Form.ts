@@ -1691,7 +1691,6 @@ module ghost.browser.forms
         }
         public getValue():string
         {
-            debugger;
             return this.picture;
         }
     }
