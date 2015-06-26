@@ -1697,11 +1697,62 @@ module ghost.browser.forms
     export class TextareaField extends Field
     {
         public static selector:string = "textarea";
-
+        private max:number;
+        private force_max:boolean;
+        private $counter:JQuery;
         protected init():void
         {
             super.init();
+            this.max = -1;
+            this.force_max = false;
             this.validators.push(new TextValidator());
+            var $max:JQuery;
+            if(($max = $(this.element).find("[data-max]")).length)
+            {
+                this.$counter = $max;
+                this.max = parseInt($max.attr("data-max"),10);
+                if(isNaN(this.max))
+                {
+                    this.max = -1;
+                    console.warn("TextArea with data-max attribute but no correct value");
+                }else
+                {
+                    if($(this.element).find("[data-force],.force").addBack("[data-force],.force").length)
+                    {
+                        this.force_max = true;
+                    }
+                    this.checkLimits();
+                }
+            }
+        }
+        public onChange(event:any):void
+        {
+            super.onChange(event);
+            this.checkLimits();
+        }
+        private checkLimits():void
+        {
+
+            if(this.max > 0)
+            {
+                var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
+                if(count<0)
+                {
+                    if(this.force_max)
+                    {
+                        this.$input.val(this.$input.val().substring(0, this.max));
+                        count = 0;
+                    }else
+                    {
+                        $(this.element).addClass("counter_error");
+                    }
+                }else
+                {
+                    $(this.element).removeClass("counter_error");
+                }
+                this.$counter.text(""+count);
+            }
+            console.log(this, "check limits:"+this.max+"=>"+count);
         }
         protected bindEvents():void
         {
@@ -1714,6 +1765,8 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
+            if(this.$counter)
+                this.$counter = null;
         }
     }
 
@@ -1809,4 +1862,6 @@ module ghost.browser.forms
             return this.$input?this.$input.prop("checked"):false;
         }
     }
+
+
 }
