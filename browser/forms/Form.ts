@@ -329,6 +329,10 @@ module ghost.browser.forms
 
             this.promises[name] = ajax;
         }
+        protected additionalData():any
+        {
+            return null;
+        }
         protected onChange(value:IChangeData[]):void
         {
             var name:string = this._getDataItemName(value);
@@ -350,6 +354,14 @@ module ghost.browser.forms
             var data:any = {action:"autosave",
             value: this._getDataItemData(value)
             };
+            var add:any = this.additionalData();
+            if(add)
+            {
+                for(var p in add)
+                {
+                    data[p] = add[p];
+                }
+            }
             var prefix:string = this.prefix();
             if(prefix)
             {
@@ -964,6 +976,18 @@ module ghost.browser.forms
             this.checkMinStatus();
             this.checkMaxStatus();
         }
+        public reset():void
+        {
+            if(this.items)
+            {
+                this.items.forEach(function(field:ItemField)
+                {
+                    field.dispose();
+                });
+                this.items.length = 0;
+            }
+            this.init();
+        }
         protected length():number
         {
             return this.data[this.name]?this.data[this.name].length:0;
@@ -1358,7 +1382,6 @@ module ghost.browser.forms
         }
         public onChange(value:IChangeData[], input?:Field, name?:string):void
         {
-
             /*    if( this.data[this.name]  != this.getValue())
              {
              this.data[this.name] = this.getValue();
@@ -1410,7 +1433,7 @@ module ghost.browser.forms
                 this._inputs.length = this._values.length = 0;
             }else
             {
-
+                console.warn("no id yet", this);
                 this.change_timeout = setTimeout(this.delayChange.bind(this), 500);
             }
         }
