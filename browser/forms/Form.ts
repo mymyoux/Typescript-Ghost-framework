@@ -295,7 +295,7 @@ module ghost.browser.forms
                 this.trigger(Form.EVENT_SUBMIT_ERROR, error);
             });
         }
-        protected getAction():string
+        public getAction():string
         {
             var action:string = this.action;
             if(action.indexOf(":")!=-1)
