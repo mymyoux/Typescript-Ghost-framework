@@ -15,7 +15,23 @@ module ghost.browser.forms
 
 
 
-
+    export class CancelableEvent
+    {
+        public type:string;
+        private _cancelled:boolean;
+        public constructor()
+        {
+            this._cancelled = false;
+        }
+        public cancel():void
+        {
+            this._cancelled = true;
+        }
+        public cancelled():boolean
+        {
+            return this._cancelled;
+        }
+    }
 
     /**
      * Form management
@@ -234,7 +250,13 @@ module ghost.browser.forms
             {
                 object.__uniqueID = uniqueID;
             }
-            this.trigger(Form.EVENT_SUBMIT, object);
+            var event:CancelableEvent = new CancelableEvent();
+            event.type = Form.EVENT_SUBMIT;
+            this.trigger(Form.EVENT_SUBMIT, object, event);
+            if(event.cancelled())
+            {
+                return;
+            }
             if(!this.action)
             {
                 log.warn("unable to autosave the form - no action attribute found for the form");
