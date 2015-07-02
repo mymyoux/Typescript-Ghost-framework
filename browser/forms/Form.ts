@@ -72,7 +72,7 @@ module ghost.browser.forms
             {
                 this.attachForm(form);
             }
-            window["f"] = this;
+           // window["f"] = this;
         }
 
         public prefix():string
@@ -160,6 +160,7 @@ module ghost.browser.forms
                         field.on(ListField.EVENT_ADD, this.onAdd, this, name, field);
                         field.on(ListField.EVENT_REMOVE, this.onRemove, this, name, field);
                     }
+                    field.initialize();
                 }
                 return field;
             }).filter(function(element:any):boolean
@@ -212,6 +213,14 @@ module ghost.browser.forms
                 this[$this.attr("data-action")](event.currentTarget);
                 //.submit();
             });
+           // console.log($(form).find("[data-focus]").eq(0));
+           // debugger;
+            $(form).find("[data-focus]").eq(0).focus();
+            setTimeout(function()
+            {
+                $(form).find("[data-focus]").eq(0).focus();
+            }, 0);
+
           /*   $forms.find("[data-field='cancel']").on("click", ()=>
             {
                 this.cancel();
@@ -297,6 +306,10 @@ module ghost.browser.forms
         }
         public getAction():string
         {
+            if(!this.action)
+            {
+                return null;
+            }
             var action:string = this.action;
             if(action.indexOf(":")!=-1)
             {
@@ -368,11 +381,20 @@ module ghost.browser.forms
             {
                 return;
             }
+
             if(this.promises[name])
             {
                 this.promises[name].cancel();
             }
             var action:string = this.getAction();
+            if(!action)
+            {
+                setTimeout(()=>
+                {
+                    this.onChange(value);
+                }, 500);
+                return;
+            }
             var data:any = {action:"autosave",
             value: this._getDataItemData(value)
             };
@@ -465,9 +487,10 @@ module ghost.browser.forms
         }
         public onAdd(dataItems:IChangeData[]):void
         {
+            console.log("on add");
             var name:string = this._getDataItemName(dataItems);
-
             this.trigger(Form.EVENT_ADD_ITEM, dataItems);
+
             if(!this.autosave)
             {
                 return;
@@ -475,6 +498,15 @@ module ghost.browser.forms
             var item:ItemField = <ItemField>dataItems[0].input;
 
             var action:string = this.getAction();
+            if(!action)
+            {
+                setTimeout(()=>
+                {
+                    this.onAdd(dataItems);
+                }, 500);
+                return;
+            }
+
             var data:any = {
                 action:"add",
                 value:this._getDataItemData(dataItems)
@@ -532,6 +564,14 @@ module ghost.browser.forms
                 data = tmp;
             }
             var action:string = this.getAction();
+            if(!action)
+            {
+                setTimeout(()=>
+                {
+                    this.onRemove(dataItems);
+                }, 500);
+                return;
+            }
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -669,6 +709,11 @@ module ghost.browser.forms
             this.onChangeBinded = this.onChange.bind(this);
             this.onChangeThrottle = ghost.utils.Buffer.throttle(this.triggerChange.bind(this), 500);
             this.validators = [];
+
+
+        }
+        public initialize():void
+        {
             this.initializeInput();
             this.init();
             this.bindEvents();
@@ -1158,7 +1203,7 @@ module ghost.browser.forms
             itemField.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, itemField);
             itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
             itemField.on(ListField.EVENT_REMOVE, this.onRemove, this, itemField);
-
+            itemField.initialize();
             this.items.push(itemField);
             return itemField;
         }
