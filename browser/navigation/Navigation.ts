@@ -124,14 +124,13 @@ module ghost.browser.navigation
                 var $child = $(this).children("[data-name]");
                 var page:string;
                 var scope:string = $(this).attr("data-scope");
-                
+
                 if(hash[scope])
                 {
                     page = hash[scope].page;
                 }
                 if(!page)
                 {
-
                     if($child.length == 0)
                     {
                         page = _this.getDefaultPage(scope);

@@ -191,6 +191,7 @@ module ghost.mvc
                         Controller._sShortname.push(name);
                     else
                     {
+                        log.warn(name+" is used several times as a controller's name");
                         Controller._sShortname.splice(index, 1);
                         Controller._sConflictsShortnames.push(name);
                     }
