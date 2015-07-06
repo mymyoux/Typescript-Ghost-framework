@@ -259,6 +259,33 @@ module ghost.browser.forms
             {
                 object.__uniqueID = uniqueID;
             }
+            if(this.$form.attr("data-validate")!= undefined)
+            {
+                var error:string;
+                var focused:boolean = false;
+                for(var p in this.fields){
+
+                    if(!this.fields[p].validate())
+                    {
+                       error = this.fields[p].getError();
+                        if(!error)
+                        {
+                            debugger;
+                        }
+                        console.error("An error occured when form submitted:", error);
+                        if(!focused)
+                        {
+                            this.fields[p].focus();
+                            focused = true;
+                        }
+
+                    }
+                }
+                if(error)
+                {
+                    return;
+                }
+            }
             var event:CancelableEvent = new CancelableEvent();
             event.type = Form.EVENT_SUBMIT;
             this.trigger(Form.EVENT_SUBMIT, object, event);
@@ -278,6 +305,14 @@ module ghost.browser.forms
             }
             this.promises = {};
             var data:any = this.toObject();
+            if(data instanceof ghost.mvc.Model)
+            {
+                var tmp:any = data.toObject();
+                if(tmp)
+                {
+                    data = tmp;
+                }
+            }
             var action:string = this.getAction();
             data.action = "submit";
             console.log("SUBMIT", this, data);
@@ -654,16 +689,49 @@ module ghost.browser.forms
     }
     export class Validator
     {
-        public isValid(value:any):boolean
+        protected error:string;
+        public getError():string
         {
-            return true;
+            return this.error;
+        }
+        public isValid(field:Field):boolean
+        {
+            this.error = this.validate(field);
+            return this.error == null;
+        }
+        public validate(field:Field):string
+        {
+            return null;
         }
     }
     export class TextValidator extends Validator
     {
-        public isValid(field:Field):boolean
-        {
-            return !field.required || field.getValue().length>0;
+        public validate(field:Field):string{
+            if(!field.required)
+            {
+                return null;
+            }
+
+            if(field.getValue().length>0)
+            {
+                return null;
+            }
+            return "required";
+        }
+    }
+    export class CheckboxValidator extends Validator
+    {
+        public validate(field:Field):string{
+            if(!field.required)
+            {
+                return null;
+            }
+
+            if(field.getValue()==1)
+            {
+                return null;
+            }
+            return "required";
         }
     }
 
@@ -689,11 +757,16 @@ module ghost.browser.forms
         protected itemAutocomplete:ItemAutocomplete;
         protected prefix_autocomplete:string = "";
         protected additionals:string[];
+        protected useValidator:boolean;
+        protected $error:JQuery;
+        protected error:string;
        // protected autocompleted:boolean;
 
         public constructor( public name:string, public data:any, public element:any, protected _setInitialData:boolean, protected form:Form, protected parent:Field|Form)
         {
             super();
+            if(!this.useValidator)
+                this.useValidator = false;
             if(!this.data)
             {
                 this.data = {};
@@ -718,6 +791,12 @@ module ghost.browser.forms
             this.init();
             this.bindEvents();
             this.setInitialValue();
+            this.initialValidate();
+        }
+        public focus():void
+        {
+            if(this.$input)
+                this.$input.focus();
         }
         public chooseAutocomplete(index:number):void
         {
@@ -754,6 +833,7 @@ module ghost.browser.forms
         public addValidator(validator:Validator):void
         {
             this.validators.push(validator);
+            this.useValidator = true;
         }
         protected initializeInput():void
         {
@@ -781,6 +861,14 @@ module ghost.browser.forms
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
                 this.onAutocompleteThrottle = ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 50);
             }
+            if($(this.element).attr("data-success") != undefined)
+            {
+                this.useValidator = true;
+            }
+            if($(this.element).find("data-error").length)
+            {
+                this.$error = $(this.element).find("data-error");
+            }
             this.additionals = $(this.element).attr("data-additionals")? $(this.element).attr("data-additionals").split(","):null;
             /*if(this.data && this.data.tags)
             {
@@ -795,6 +883,7 @@ module ghost.browser.forms
                 }
                 this.data = this.data[category];
             }
+
         }
         protected setInitialValue():void
         {
@@ -813,8 +902,10 @@ module ghost.browser.forms
 
             }
         }
+
         public onChange(event:any):void
         {
+
             console.log("on change");
         /*    if( this.data[this.name]  != this.getValue())
             {
@@ -825,13 +916,74 @@ module ghost.browser.forms
             //console.log(this.name, this.data[this.name], this.data_saved[this.name]);
             if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
             {
+                this.unvalidate();
                 this.onChangeValidated();
+
             }
 
 
             //dispatch event change for item
 
         //    this.trigger(Field.EVENT_CHANGE, this.data,
+        }
+        protected unvalidate():void
+        {
+            if(!this.useValidator)
+            {
+                return;
+            }
+            this.error = null;
+            $(this.element).attr("data-success","");
+            if(this.$error)
+            {
+                this.$error.text("");
+            }
+        }
+        public validate():boolean
+        {
+            if(!this.useValidator)
+            {
+                return true;
+            }
+            if(this.isValid())
+            {
+                $(this.element).attr("data-success", "success");
+                return true;
+            }else
+            {
+                $(this.element).attr("data-success", "error");
+                if(this.$error && this.getError())
+                {
+                    this.$error.text(this.getError());
+                }
+                return false;
+            }
+        }
+        protected initialValidate():void
+        {
+            if(!this.useValidator)
+            {
+                return;
+            }
+            if(this.isValid())
+            {
+                $(this.element).attr("data-success", "success");
+            }else
+            {
+                if(this.getValue()!=undefined && this.getValue()!="")
+                {
+
+                    $(this.element).attr("data-success", "error");
+                    if(this.$error && this.getError())
+                    {
+                        this.$error.text(this.getError());
+                    }
+                }
+            }
+        }
+        public getError():string
+        {
+           return this.error;
         }
         protected onChangeValidated():void
         {
@@ -870,6 +1022,7 @@ module ghost.browser.forms
         }
         protected triggerChange():void
         {
+            this.validate();
             var data = {value:this.data[this.name], input:this, name:this.name};
             if(this.additionals)
             {
@@ -892,8 +1045,10 @@ module ghost.browser.forms
             var value:any = this.getValue();
             for(var p in this.validators)
             {
+
                 if(!this.validators[p].isValid(this))
                 {
+                    this.error = this.validators[p].getError();
                     return false;
                 }
             }
@@ -1525,7 +1680,7 @@ module ghost.browser.forms
         {
 
             super.init();
-            this.validators.push(new TextValidator());
+            this.addValidator(new TextValidator());
         }
         protected initializeInput():void
         {
@@ -1633,9 +1788,8 @@ module ghost.browser.forms
          }*/
         protected init():void
         {
-            window["c"] = this;
             super.init();
-
+            this.addValidator(new CheckboxValidator());
         }
         public onChange(event:any):void
         {
@@ -1646,7 +1800,14 @@ module ghost.browser.forms
             {
                 this.data[this.name] = 1;
             }
-            this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+            if(this.form.data && this.form.data.trigger)
+            {
+
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+            }else
+            {
+                console.warn("CheckboxField can't enable two ways binding if form data is not an EventDispatcher");
+            }
             this.data_saved[this.name] = this.data[this.name];
             this.triggerChange();
         }
@@ -1678,7 +1839,7 @@ module ghost.browser.forms
         protected init():void
         {
             super.init();
-            this.validators.push(new TextValidator());
+            this.addValidator(new TextValidator());
         }
         protected bindEvents():void
         {
@@ -1795,7 +1956,7 @@ module ghost.browser.forms
             super.init();
             this.max = -1;
             this.force_max = false;
-            this.validators.push(new TextValidator());
+            this.addValidator(new TextValidator());
             var $max:JQuery;
             if(($max = $(this.element).find("[data-max]")).length)
             {
@@ -1879,7 +2040,7 @@ module ghost.browser.forms
         protected init():void
         {
             super.init();
-            this.validators.push(new TextValidator());
+            this.addValidator(new TextValidator());
         }
 
     }
