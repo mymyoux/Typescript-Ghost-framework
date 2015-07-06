@@ -112,7 +112,7 @@ module ghost.browser.navigation
         public static changeHash(hash:string):void
         {
             log.info("Change hash:"+hash);
-            if(hash.split("_")[0] == Navigation._DISPLAYED_SCOPE)
+            if(hash.split("/")[0] == Navigation._DISPLAYED_SCOPE || hash.split("_")[0] == Navigation._DISPLAYED_SCOPE)
                 window.location.hash = "#"+hash;
         }
         private _detectScope():void
@@ -189,6 +189,7 @@ module ghost.browser.navigation
                     params = split.slice(2);   
                 }else
                 {
+                    //NOT SURE
                     page = split.slice(1).join("_");
                 }
                 previous[scope] = {page:page, params:params};
@@ -231,9 +232,11 @@ module ghost.browser.navigation
                 }
             }   
             if(this._last)
-            window.location.hash = "#"+this._last;
+            {
+                window.location.hash = "#"+this._last;
+            }
         }
-        private getDefaultPage(scope:string):string
+        public getDefaultPage(scope:string):string
         {
             if(this._defaultsPages)
             {
@@ -594,13 +597,13 @@ module ghost.browser.navigation
                    if(!fromHash)
                    {
                     log.info("not from hash:"+this._key+":"+this._current.page);
-                    Navigation.changeHash(this._key+"_"+this._current.page);
+                    Navigation.changeHash(this._key+"/"+this._current.page);
                    }
                    this._pageChange(Navigation.PUSH, old, this._current.page, params);
     
                }else
                {
-                    Navigation.changeHash(this._key+"_"+(this._current?this._current.page:""));
+                    Navigation.changeHash(this._key+"/"+(this._current?this._current.page:Navigation.instance.getDefaultPage(this._key)));
                }
             }
         }
@@ -627,7 +630,7 @@ module ghost.browser.navigation
                     };
                     this._current = ipage;
                     this._history[this._history.length-1] = ipage;
-                     Navigation.changeHash(this._key+"_"+this._current.page);
+                     Navigation.changeHash(this._key+"/"+this._current.page);
                     this._pageChange(Navigation.REPLACE, old, this._current.page);
                 }
             }
@@ -659,7 +662,7 @@ module ghost.browser.navigation
                 {
                     this._history.splice(this._history.length-count, count);
                    // this._current = this._history.length>0?this._history[this._history.length-1]:null;
-                    Navigation.changeHash(this._key+"_"+(this._current?this._current.page:""));
+                    Navigation.changeHash(this._key+"/"+(this._current?this._current.page:""));
                     this._pageChange(Navigation.POP, old, (this._current?this._current.page:""));
                 }
             }else
