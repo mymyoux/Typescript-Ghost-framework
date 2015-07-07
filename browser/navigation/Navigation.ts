@@ -74,6 +74,7 @@ module ghost.browser.navigation
          * @type {boolean}
          */
         private _listening:boolean = false;
+        private _last:string;
         /**
          * Constructor
          * @param ready If true, will be active as soon as possible otherwise will wait for #listen() to be call
@@ -197,7 +198,7 @@ module ghost.browser.navigation
             }, {});
             return hashes;
         }
-        private _last:string;
+
         ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
@@ -230,10 +231,11 @@ module ghost.browser.navigation
                     }
 
                 }
+                console.log("end boucle", p, hashes);
             }   
             if(this._last)
             {
-                window.location.hash = "#"+this._last;
+               // window.location.hash = "#"+this._last;
             }
         }
         public getDefaultPage(scope:string):string
@@ -600,7 +602,7 @@ module ghost.browser.navigation
                     Navigation.changeHash(this._key+"/"+this._current.page);
                    }
                    this._pageChange(Navigation.PUSH, old, this._current.page, params);
-    
+
                }else
                {
                     Navigation.changeHash(this._key+"/"+(this._current?this._current.page:Navigation.instance.getDefaultPage(this._key)));
