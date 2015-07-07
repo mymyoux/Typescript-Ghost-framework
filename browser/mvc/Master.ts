@@ -445,10 +445,12 @@ module ghost.mvc
         }
         protected _onModelChange(/*model:any, name:string*/):void
         {
+            console.log("MODEL CHANGE", arguments);
             //console.log(arguments);
             //required due to custom events
-            var name = arguments[arguments.length - 1];
-            var model = arguments[arguments.length - 2];
+            var ractive = arguments[arguments.length - 1];
+            var name = arguments[arguments.length - 2];
+            var model = arguments[arguments.length - 3];
             var data:any;
             if(!model)
             {
@@ -456,7 +458,7 @@ module ghost.mvc
             }
             if(model.toRactive)
             {
-                data = model.toRactive();
+                data = model.toRactive(ractive);
             }else
             {
                 if(model instanceof Data)
@@ -476,6 +478,7 @@ module ghost.mvc
                     }
                 }
             }
+            console.log("SET SET ", name, data);
             this.template.set(name, data);
         }
         protected toRactive():any
@@ -523,7 +526,7 @@ module ghost.mvc
                         if(item instanceof ghost.events.EventDispatcher)
                         {
                             item.off(event, this._onModelChange, this);
-                            item.on(event, this._onModelChange, this, item, item.name());
+                            item.on(event, this._onModelChange, this, item,this._parts[index] && this._parts[index].name?this._parts[index].name:item.name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
                         }else
                         {
                             for(var p in item)
@@ -531,7 +534,7 @@ module ghost.mvc
                                 if(item[p] instanceof ghost.events.EventDispatcher)
                                 {
                                     item[p].off(event, this._onModelChange, this);
-                                    item[p].on(event, this._onModelChange, this, item[p], item[p].name());
+                                    item[p].on(event, this._onModelChange, this, item[p], this._parts[index] && this._parts[index].name?this._parts[index].name:item[p].name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
                                 }
                             }
                         }

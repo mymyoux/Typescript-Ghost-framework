@@ -379,6 +379,10 @@ module ghost.mvc
         {
             return this._models.reduce(callback, initialValue);
         }
+        public toArray():T[]
+        {
+            return this._models.slice();
+        }
 
         /**
          * Gets Root URL for data URL (prefix if no / first from  #getDataURLForServer()
