@@ -1855,6 +1855,31 @@ module ghost.browser.forms
         }
     }
 
+    export class InputNumberField extends Field
+    {
+        public static selector:string = "input[type='number']";
+        /*public constructor( public name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
+        {
+            super(name, data, element, _setInitialData, form);
+        }*/
+        protected init():void
+        {
+            super.init();
+            this.addValidator(new TextValidator());
+        }
+        protected bindEvents():void
+        {
+            super.bindEvents();
+            if(this.$input)
+                this.$input.on("change", this.onChangeBinded);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            if(this.$input)
+                this.$input.off("change", this.onChangeBinded);
+        }
+    }
 
     export class InputFileField extends Field
     {
