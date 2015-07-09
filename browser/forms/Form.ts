@@ -679,12 +679,14 @@ module ghost.browser.forms
                 this.$form.off("submit");
                 this.$form.find("[data-action]").off("click");
             }
-            this.fields.forEach(function(field:Field)
-            {
-                field.dispose();
-            });
-            this.off();
-            this.fields = null;
+            if(this.fields) {
+                this.fields.forEach(function(field:Field)
+                {
+                    field.dispose();
+                });
+                this.off();
+                this.fields = null;
+            }
         }
     }
     export class Validator
