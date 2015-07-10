@@ -336,7 +336,7 @@ module ghost.browser.i18n
 		//       language: "JavaScript"
 		//     });
 		//     => "I like to write in JavaScript."
-		public t(key:string, options:any):string
+		public t(key:string, options?:any):string
 		{
 			
 			debugger;

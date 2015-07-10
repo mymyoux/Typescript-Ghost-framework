@@ -557,9 +557,11 @@ module ghost.mvc
 
                 options.el = container;
 
-                ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
+                //ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
+                ghost.browser.i18n.Polyglot.instance().on("resolved", this._onTranslationChange, this);
                 try
                 {
+
                     console.log(options);
                     this.template = new Ractive(options);
                 }catch(error)
@@ -590,7 +592,40 @@ module ghost.mvc
         {
             if(this.template)
             {
-                this.template.update();
+                //ghost.browser.i18n.Polyglot.instance().off("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
+                ghost.browser.i18n.Polyglot.instance().off("resolved", this._onTranslationChange, this);
+                this._data.forEach((item:any, index:number)=>
+                {
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var event:string;
+                    for(var p in events)
+                    {
+                        event = events[p];
+                        if(item instanceof ghost.events.EventDispatcher)
+                        {
+                            item.off(event, this._onModelChange, this);
+                        }else
+                        {
+                            for(var p in item)
+                            {
+                                if(item[p] instanceof ghost.events.EventDispatcher)
+                                {
+                                    item[p].off(event, this._onModelChange, this);
+                                }
+                            }
+                        }
+
+                    }
+                });
+                this.template.teardown();
+                this.template = null;
+                setTimeout(()=>
+                {
+                    this.render();
+                }, 0);
+                //this.render();
+                console.log("TRANSLATION", this, ghost.browser.i18n.Polyglot.instance().t("components.marketplace.yes"));
+                debugger;
             }
         }
         /**

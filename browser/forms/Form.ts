@@ -1844,7 +1844,7 @@ module ghost.browser.forms
 
     export class InputTextField extends Field
     {
-        public static selector:string = "input[type='text']";
+        public static selector:string = "input[type='text'],input[type='search']";
         /*public constructor( public name:string, protected data:any, public element:any, protected _setInitialData:boolean, protected form:Form)
         {
             super(name, data, element, _setInitialData, form);
