@@ -1676,17 +1676,28 @@ module ghost.browser.forms
          {
          super(name, data, element, _setInitialData, form);
          }*/
+        protected types:string[];
         protected init():void
         {
 
             super.init();
             this.addValidator(new TextValidator());
+            //force no autocomplete request
+            this.onAutocompleteThrottle = <any>function(){};
         }
         protected initializeInput():void
         {
             var selector:string = "input[type='text']";
            this.$input = $(this.element).find(selector).addBack(selector);
-
+            var types:any = $(this.element).find("[data-types]").addBack("[data-types]").attr("data-types");
+            if(!types || types.length==0)
+            {
+                types = ["(cities)"];
+            }else
+            {
+                types = types.split(",");
+            }
+            this.types = types;
         }
         protected bindEvents():void
         {
@@ -1767,7 +1778,7 @@ module ghost.browser.forms
         protected geocode():void
         {
             ghost.browser.apis.GMap.autocomplete({input:this.data[this.name],
-                types:["(cities)"]
+                types:this.types
             }).then((result:any[])=>{
                 result = result.map(function(item:any):any
                     {
