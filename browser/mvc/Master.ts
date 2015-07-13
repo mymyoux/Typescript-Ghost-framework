@@ -624,8 +624,6 @@ module ghost.mvc
                     this.render();
                 }, 0);
                 //this.render();
-                console.log("TRANSLATION", this, ghost.browser.i18n.Polyglot.instance().t("components.marketplace.yes"));
-                debugger;
             }
         }
         /**
