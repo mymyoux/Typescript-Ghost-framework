@@ -75,6 +75,8 @@ module ghost.browser.navigation
          */
         private _listening:boolean = false;
         private _last:string;
+
+        private _currentHash:string;
         /**
          * Constructor
          * @param ready If true, will be active as soon as possible otherwise will wait for #listen() to be call
@@ -202,8 +204,45 @@ module ghost.browser.navigation
         ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
+            if(window.location.hash == this._currentHash)
+            {
+                return;
+            }
             var hashes:any = this.parseHash();
-
+            var different:boolean = false;
+            var len:number;
+            var ipage:IPage;
+            all:for(var p in hashes)
+            {
+                if(!this._scopes[p] || !(ipage = this._scopes[p].getCurrentPage()) || ipage.page != hashes[p].page)
+                {
+                    different = true;
+                    break;
+                }
+                len = hashes[p].params.length;
+                if(len && (!ipage.params || ipage.params.length!=len))
+                {
+                    different = true;
+                    break;
+                }
+                for(var q in hashes[p].params)
+                {
+                    if(ipage.params[q] != hashes[p].params[q])
+                    {
+                        different = true;
+                        break all;
+                    }
+                }
+            }
+            if(!different)
+            {
+                if(!this._currentHash)
+                {
+                    this._currentHash = this._buildCurrentHash();
+                }
+                window.location.hash = this._currentHash;
+                return;
+            }
             var scope:string, page:string, params:any;
             for(var p in hashes)
             {
@@ -232,11 +271,47 @@ module ghost.browser.navigation
 
                 }
                 console.log("end boucle", p, hashes);
-            }   
+            }
+            this._currentHash = this._buildCurrentHash();
+            window.location.hash = this._currentHash;
+            console.log("CURRENT", this._currentHash);
             if(this._last)
             {
                // window.location.hash = "#"+this._last;
             }
+        }
+        private _buildCurrentHash():string
+        {
+            var hash:string = "";
+            var navigationScope:NavigationScope;
+            for(var p in this._scopes)
+            {
+                navigationScope =  this._scopes[p];
+                if(!navigationScope)
+                {
+                    continue;
+                }
+                if(!navigationScope.getCurrentPage())
+                {
+                    continue;
+                }
+                if(navigationScope.getKey().substring(0, 1) == "_")
+                {
+                    //hidden;
+                    continue;
+                }
+                if(hash.length)
+                {
+                    hash+="+";
+                }
+
+                hash+=navigationScope.getKey()+"/"+navigationScope.getCurrentPage().page;
+                if(navigationScope.hasParameters())
+                {
+                    hash+= navigationScope.getCurrentPage().params.join("/");
+                }
+            }
+            return "#"+hash;
         }
         public getDefaultPage(scope:string):string
         {
@@ -262,6 +337,11 @@ module ghost.browser.navigation
         public pushPage(scope:string, page:string, params:any = null, fromHash:boolean = false):void
         {
             this.getScope(scope).pushPage(page, params, fromHash);
+            if(!fromHash)
+            {
+                this._currentHash = this._buildCurrentHash();
+                window.location.href = this._currentHash;
+            }
         }
         /**
          * Replaces a page of a scope
@@ -271,6 +351,8 @@ module ghost.browser.navigation
         public replacePage(scope:string, page:string):void
         {
             this.getScope(scope).replacePage(page);
+            this._currentHash = this._buildCurrentHash();
+            window.location.href = this._currentHash;
         }
         /**
          * Gets current page's name of a scope
@@ -289,6 +371,8 @@ module ghost.browser.navigation
         {
             log.warn("pop page:"+ scope);
             this.getScope(scope).popPage(count);
+            this._currentHash = this._buildCurrentHash();
+            window.location.href = this._currentHash;
         }
         /**
          * Pops all page of a scope
@@ -297,6 +381,8 @@ module ghost.browser.navigation
         public popAll(scope:string):void
         {
             this.getScope(scope).popAll();
+            this._currentHash = this._buildCurrentHash();
+            window.location.href = this._currentHash;
         }
         /**
          * Gets scope
@@ -396,6 +482,31 @@ module ghost.browser.navigation
             this._current = null;
             this._event = new NavigationEvent();
         }
+
+         /**
+          * Get scope's key
+          * @returns {string}
+          */
+         public getKey():string
+         {
+            return this._key;
+         }
+
+         /**
+          * Has current controller any parameters
+          * @returns {boolean}
+          */
+         public hasParameters():boolean
+         {
+             if(this._current)
+             {
+                 if(this._current.params && this._current.params.length)
+                 {
+                     return true;
+                 }
+             }
+             return false;
+         }
         /**
          * Checks if the change is cancelled
          * @param type type of change
