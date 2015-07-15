@@ -2105,14 +2105,12 @@ module ghost.browser.forms
         protected bindEvents():void
         {
             if(this.$input)
+            {
                 this.$input.on("change", this.onChangeBinded);
 
+            }
         }
-        public onChange(event:any):void
-        {
-            debugger;
-            super.onChange(event);
-        }
+
 
         public getValue():any
         {
