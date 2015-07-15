@@ -189,6 +189,10 @@ module ghost.browser.forms
             }
             return fields[0];
         }
+        public getFields():Field[]
+        {
+            return this.fields;
+        }
         public attachForm(form:any):void
         {
             this.retrieveFields(form);
@@ -2104,6 +2108,12 @@ module ghost.browser.forms
                 this.$input.on("change", this.onChangeBinded);
 
         }
+        public onChange(event:any):void
+        {
+            debugger;
+            super.onChange(event);
+        }
+
         public getValue():any
         {
             return this.$input?this.$input.find("p[value]").attr("value"):null;
