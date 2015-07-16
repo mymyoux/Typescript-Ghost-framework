@@ -592,6 +592,10 @@ module ghost.mvc
         {
             if(this.template)
             {
+                this.template.update();
+                //as it destroy everything it break jquery binding
+
+                /*
                 //ghost.browser.i18n.Polyglot.instance().off("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
                 ghost.browser.i18n.Polyglot.instance().off("resolved", this._onTranslationChange, this);
                 this._data.forEach((item:any, index:number)=>
@@ -624,6 +628,7 @@ module ghost.mvc
                     this.render();
                 }, 0);
                 //this.render();
+                */
             }
         }
         /**
