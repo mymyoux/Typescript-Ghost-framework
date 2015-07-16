@@ -576,7 +576,6 @@ module ghost.browser.forms
         }
         public onRemove(dataItems:IChangeData[]):void
         {
-
             var name:string = this._getDataItemName(dataItems);
             this.trigger(Form.EVENT_REMOVE_ITEM, dataItems);
             if(!this.autosave)
@@ -1114,6 +1113,7 @@ module ghost.browser.forms
         public static selector:string = null;//"[data-list]";
         public static EVENT_ADD:string = "add_item";
         public static EVENT_REMOVE:string = "remove_item";
+        private actionListener:Function;
         /**
          * Item list
          */
@@ -1176,14 +1176,15 @@ module ghost.browser.forms
             this.max = parseInt($(this.element).attr("data-max"), 10) || -1;
             this.min = parseInt($(this.element).attr("data-min"), 10) || -1;
 
-            $(this.element).on("click","[data-action]", (event)=>
+            this.actionListener = (event)=>
             {
                     if(this.isSubList(event.currentTarget))
                 {
                         return;
                 }
                     this[$(event.currentTarget).attr("data-action")](event.currentTarget);
-            });
+            };
+            $(this.element).on("click","[data-action]", <any>this.actionListener);
             this.sublist = this.getListItem("[data-list]", this.element, false).toArray().map(function(item:any):string
             {
                     return $(item).attr("data-list");
@@ -1417,23 +1418,18 @@ module ghost.browser.forms
             {
                 this.data[this.name].splice(i, 1);
             }
-
-
             //this.trigger(ListField.EVENT_REMOVE, [{name:this.name, list:this, input:this.items[i], id:(<ItemField>this.items[i]).getID()}]);
             //this.items.splice(i, 1);
-
             (<ItemField>this.items[i]).remove();
             this.items.splice(i, 1);
-
             this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
-
-
-
             this.checkMinStatus();
             this.checkMaxStatus();
         }
         public dispose():void
         {
+            $(this.element).off("click","[data-action]", <any>this.actionListener);
+
             if(this.items)
             {
                 this.items.forEach(function(field:ItemField)
