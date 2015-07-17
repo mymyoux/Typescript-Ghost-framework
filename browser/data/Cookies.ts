@@ -43,7 +43,14 @@ module ghost.data
                 }
                 c_value = decodeURI(c_value.substring(c_start,c_end));
             }
-            return c_value!=null?JSON.parse(c_value):c_value;
+            try
+            {
+
+                return c_value!=null?JSON.parse(c_value):c_value;
+            }catch(exception)
+            {
+                return null;
+            }
         }
     }
 }
