@@ -144,13 +144,15 @@ module ghost.browser.navigation
                 }
                 if(page)
                 {
-                    _this.pushPage($(this).attr("data-scope"), page, hash[scope]?hash[scope].params:null, hash[scope]?true:false);
+                    _this.pushPage($(this).attr("data-scope"), page, hash[scope]?hash[scope].params:null, true/* hash[scope]?true:false*/);
                 }else
                 {
                     log.warn("No child with data-name inside a data-scope element and no default page for scope["+scope+"]");
                     log.warn(this);
                 }
             });
+            this._currentHash = this._buildCurrentHash();
+            window.location.href = this._currentHash;
         }
         private parseHash():any
         {
