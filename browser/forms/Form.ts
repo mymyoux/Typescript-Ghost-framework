@@ -1896,6 +1896,9 @@ module ghost.browser.forms
         public static selector:string = "[data-type='picture']";
         private inputFile:HTMLInputElement;
         private preview:HTMLImageElement;
+        private $triggerInput:JQuery;
+        private $triggerRemove:JQuery;
+        private preview_type:string;
         private picture:string;
         protected init():void
         {
@@ -1905,8 +1908,19 @@ module ghost.browser.forms
                 $(this.element).append('<input type="file" name="'+$(this.element).attr("data-field")+'">');
             }
             this.inputFile = $(this.element).find("input[type='file']").get(0);
+            this.$triggerInput = $(this.element).find("[data-trigger]").addBack("[data-trigger]");
+            if(!this.$triggerInput.length)
+            {
+                this.$triggerInput = this.$input;
+            }
             this.preview = $(this.element).find("[data-preview]").get(0);
-       //     this.validators.push(new TextValidator());
+            if(this.preview)
+            {
+
+                this.preview_type = ($(this.preview).prop("tagName")+"").toLowerCase();
+            }
+            this.$triggerRemove = $(this.element).find("[data-remove]").addBack("[data-remove]");
+            //     this.validators.push(new TextValidator());
             this.picture = this.data[this.name];
         }
         protected bindEvents():void
@@ -1914,24 +1928,27 @@ module ghost.browser.forms
             super.bindEvents();
             if(this.$input)
             {
-                this.$input.on("change", (event)=>
+
+                $(this.inputFile).on("change", (event)=>
                 {
                     ghost.browser.io.FileAPI.loadFile(this.inputFile).
                         then((event:ProgressEvent):void=>
                         {
                             if(!event)
                             {
-                                //empty file
-                                if(this.preview)
-                                {
-                                    this.preview.src = null;
-                                    this.$input.removeClass("preview");
-                                }
+                                return;
                             }
                               var file:FileReader = <FileReader>event.currentTarget;
                               if(this.preview)
                               {
-                                  this.preview.src = file.result;
+                                  if(this.preview_type == "img")
+                                  {
+                                      this.preview.src = file.result;
+                                  }else
+                                  {
+                                      $(this.preview).css("background-image", 'url("'+file.result+'"),url("css/img/default-avatar.svg")');
+                                      $(this.preview).removeClass("no-picture");
+                                  }
                                   this.$input.addClass("preview");
                               }
                             this.picture = file.result;
@@ -1959,13 +1976,32 @@ module ghost.browser.forms
                         });
                 });
                 //this.$input.on("keyup", this.onChangeBinded);
-                this.$input.on("click", (event)=>
+                this.$triggerInput.on("click", (event)=>
                 {
                     if($(event.target).get(0) === this.inputFile)
                     {
                         return;
                     }
                     $(this.inputFile).trigger("click");
+                });
+                this.$triggerRemove.on("click", ()=>
+                {
+                    if(this.preview)
+                    {
+                        if(this.preview_type == "img")
+                        {
+                            $(this.preview).removeAttr("src");
+                        }
+                        else
+                        {
+                            $(this.preview).addClass("no-picture");
+                            $(this.preview).css("background-image", "");
+                        }
+                        this.preview.src = null;
+                        this.$input.removeClass("preview");
+                        this.picture = null;
+                        this.onChangeBinded();
+                    }
                 });
             }
         }
@@ -1974,6 +2010,15 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
+            if(this.$triggerInput)
+            {
+                this.$triggerInput.off("click");
+            }
+            if(this.$triggerRemove)
+            {
+                this.$triggerRemove.off("click");
+            }
+            $(this.inputFile).off("change");
         }
         public getValue():string
         {
