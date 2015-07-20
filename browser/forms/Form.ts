@@ -1473,7 +1473,7 @@ module ghost.browser.forms
             //this.items.splice(i, 1);
             (<ItemField>this.items[i]).remove();
             this.items.splice(i, 1);
-            this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
+          //  this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
             this.checkMinStatus();
             this.checkMaxStatus();
         }
