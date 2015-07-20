@@ -219,10 +219,19 @@ module ghost.browser.forms
             });
            // console.log($(form).find("[data-focus]").eq(0));
            // debugger;
-            $(form).find("[data-focus]").eq(0).focus();
-            setTimeout(function()
+           // $(form).find("[data-focus]").eq(0).focus();
+            setTimeout(()=>
             {
-                $(form).find("[data-focus]").eq(0).focus();
+                var len:number = this.fields.length;
+                for(var i:number=0; i<len ;i++)
+                {
+                    if(!this.fields[i].getValue())
+                    {
+                        this.fields[i].focus();
+                        return;
+                    }
+                }
+                //$(form).find("[data-field]").eq(0).focus();
             }, 0);
 
           /*   $forms.find("[data-field='cancel']").on("click", ()=>
