@@ -69,6 +69,21 @@ module ghost.core
          * @type {string}
          */
         public static OS_OTHER:string = "Other OS";
+        /**
+         * Mac OS X
+         * @type {string}
+         */
+        public static OS_MAC_OS_X:string = "Mac OS X";
+        /**
+         * Linux
+         * @type {string}
+         */
+        public static OS_LINUX:string = "Linux";
+        /**
+         * Desktop Windows
+         * @type {string}
+         */
+        public static OS_WINDOW_DESKTOP:string = "Windows Desktop";
     
         /**
          * Get the version of Cordova running on the device.
@@ -96,6 +111,7 @@ module ghost.core
                 return ROOT.device.platform;
             }
             var agent = ROOT && ROOT.navigator && ROOT.navigator.userAgent?navigator.userAgent.toLowerCase():"node";
+            console.log(agent);
             if(agent.indexOf("android")!=-1)
             {
                 return Hardware.OS_ANDROID;
@@ -120,10 +136,39 @@ module ghost.core
             {
                 return Hardware.OS_NODE;
             }else
+            if(agent.indexOf("mac os x")!=-1)
+            {
+                return Hardware.OS_MAC_OS_X;
+            }else
+            if(agent.indexOf("linux")!=-1)
+            {
+                return Hardware.OS_LINUX;
+            }else
+            if(agent.indexOf("windows nt")!=-1)
+            {
+                return Hardware.OS_WINDOW_DESKTOP;
+            }else
             {
                 return  Hardware.OS_Website;
             }
             return null;
+        }
+        public static getBrowser():string
+        {
+            var ua= navigator.userAgent, tem,
+                M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+            if(/trident/i.test(M[1])){
+                tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
+                return 'IE '+(tem[1] || '');
+            }
+            if(M[1]=== 'Chrome'){
+                tem= ua.match(/\bOPR\/(\d+)/);
+                if(tem!= null) return 'Opera '+tem[1];
+            }
+            M= M[2]? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
+            if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+            return M.join(' ');
+
         }
         //TODO:correct these
         public static getLocale():string
@@ -180,7 +225,8 @@ module ghost.core
          */
         public static isWebsite():boolean
         {
-            return Hardware.getOS() == Hardware.OS_Website;
+            var os:string =  Hardware.getOS();
+            return os == Hardware.OS_Website || os == Hardware.OS_LINUX || os == Hardware.OS_WINDOW_DESKTOP || os == Hardware.OS_MAC_OS_X;
         }
         /**
          * Specifies if the current device is BlackBerry Device
