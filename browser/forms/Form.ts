@@ -1510,14 +1510,21 @@ module ghost.browser.forms
             }
            return Form.isSubList(element, listName, testSelf);
         }
-        public remove(element:HTMLElement):void
+        public remove(element:HTMLElement|ItemField):void
         {
             if(this.isMinReached())
             {
                 //no remove
                 return;
             }
-            var $item:JQuery = $(element).parents("[data-item]").addBack("[data-item]");
+            var $item:JQuery;
+            if(element instanceof ItemField)
+            {
+                $item = $(element.element);
+            }else
+            {
+                $item = $(element).parents("[data-item]").addBack("[data-item]");
+            }
             var i:number = parseInt($item.attr("data-item"), 10);
             if(!isNaN(i))
             {
@@ -1659,7 +1666,7 @@ module ghost.browser.forms
             var value = item.getValue();
             if(!value)
             {
-                (<ListField>this.parent).remove(this.element);
+                (<ListField>this.parent).remove(this);
             }
         }
         protected onAdd(value:IChangeData[]/*newItem:ItemField, name:string, list:ListField*/):void
