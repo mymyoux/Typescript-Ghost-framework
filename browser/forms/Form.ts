@@ -757,6 +757,7 @@ module ghost.browser.forms
         public data_saved:any;
         protected validators:Validator[];
         protected onChangeBinded:any;
+        protected onBlurBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
         protected onAutocompleteThrottle:ghost.utils.BufferFunction;
         protected itemAutocomplete:ItemAutocomplete;
@@ -785,6 +786,7 @@ module ghost.browser.forms
                 debugger;
             }
             this.onChangeBinded = this.onChange.bind(this);
+            this.onBlurBinded = this.onBlur.bind(this);
             this.onChangeThrottle = ghost.utils.Buffer.throttle(this.triggerChange.bind(this), 500);
             this.validators = [];
 
@@ -832,7 +834,17 @@ module ghost.browser.forms
 
         public setAutocomplete(data:any):void
         {
-            this.data[this.prefix_autocomplete+"autocompletion"] = data;
+            if(this.$input)
+            {
+                if(!this.$input.is(":focus"))
+                {
+                    return this.clearAutocomplete();
+                }
+            }
+            if(data)
+            {
+                this.data[this.prefix_autocomplete+"autocompletion"] = data;
+            }
 
         }
         public addValidator(validator:Validator):void
@@ -904,10 +916,14 @@ module ghost.browser.forms
             {
 
                 this.$input.on("change", this.onChangeBinded);
+                this.$input.on("blur", this.onBlurBinded);
 
             }
         }
-
+        public onBlur():void
+        {
+            this.clearAutocomplete();
+        }
         public onChange(event:any):void
         {
 
@@ -990,9 +1006,35 @@ module ghost.browser.forms
         {
            return this.error;
         }
-        protected onChangeValidated():void
+        protected clearAutocomplete(trigger:boolean = false):void
         {
             if(this.itemAutocomplete && this.data[this.prefix_autocomplete+"autocompletion"])
+            {
+                if(this.data[this.prefix_autocomplete+"autocompletion"].length)
+                {
+                    this.data[this.prefix_autocomplete+"autocompletion"].length = 0;
+                    this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                }
+                if(!this.itemAutocomplete)
+                {
+                    debugger;
+                }
+                var resets:string[] = this.itemAutocomplete.getReset();
+                for(var p in resets)
+                {
+                    delete this.data[resets[p]];
+                }
+                this.data[this.prefix_autocomplete+"autocompleted"] = false;
+                //TODO:mode where autocompletion is on with empty string + on start
+                if(trigger && this.data[this.name] != "")
+                {
+                    this.onAutocompleteThrottle();
+                }
+            }
+        }
+        protected onChangeValidated():void
+        {
+            /*if(this.itemAutocomplete && this.data[this.prefix_autocomplete+"autocompletion"])
             {
                 if(this.data[this.prefix_autocomplete+"autocompletion"].length)
                 {
@@ -1014,7 +1056,8 @@ module ghost.browser.forms
                 {
                     this.onAutocompleteThrottle();
                 }
-            }
+            }*/
+            this.clearAutocomplete(true);
             this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
             this.onChangeThrottle();
         }
@@ -1062,7 +1105,11 @@ module ghost.browser.forms
         public dispose():void
         {
             if(this.$input)
+            {
                 this.$input.off("change", this.onChangeBinded);
+                this.$input.off("blur", this.onBlurBinded);
+
+            }
             this.onChangeThrottle.cancel();
             this.form = null;
             this.parent = null;
@@ -1759,14 +1806,16 @@ module ghost.browser.forms
 
             }
         }
+        /*
         public setAutocomplete(data:any):void
         {
+
             if(data)
             {
                 this.data[this.prefix_autocomplete +  "autocompletion"] = data;
             }
 
-        }
+        }*/
         protected onChangeValidated():void
         {
             super.onChangeValidated();
