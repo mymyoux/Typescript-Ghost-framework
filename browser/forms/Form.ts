@@ -748,6 +748,8 @@ module ghost.browser.forms
          */
         public static EVENT_CHANGE:string = "change";
         public static EVENT_AUTOCOMPLETE:string = "autocomplete";
+        public static EVENT_VALIDATE:string = "validate";
+        public static EVENT_BLUR:string = "blur";
 
         public state:string;
         public required:boolean = false;
@@ -923,6 +925,7 @@ module ghost.browser.forms
         public onBlur():void
         {
             this.clearAutocomplete();
+            this.trigger(Field.EVENT_BLUR);
         }
         public onChange(event:any):void
         {
@@ -1108,7 +1111,11 @@ module ghost.browser.forms
             {
                 this.$input.off("change", this.onChangeBinded);
                 this.$input.off("blur", this.onBlurBinded);
-
+            }
+            if(this.itemAutocomplete)
+            {
+                this.itemAutocomplete.dispose();
+                this.itemAutocomplete = null;
             }
             this.onChangeThrottle.cancel();
             this.form = null;
@@ -1132,12 +1139,14 @@ module ghost.browser.forms
     export class ItemAutocomplete
     {
         private reset:string[];
+        private onClickBind:any;
         public constructor(protected field:Field, protected $list:JQuery)
         {
             this.init();
         }
         protected init():void
         {
+            this.onClickBind = this.onClick.bind(this);
             this.reset = [];
             var _this:ItemAutocomplete = this;
             this.reset = <any>this.$list.attr("data-autocomplete-reset");
@@ -1145,14 +1154,27 @@ module ghost.browser.forms
             {
                 this.reset = (<any>this.reset).split(",");
             }
-            this.$list.on("click","[data-autocomplete-item]", function(event)
+            this.$list.on("mousedown","[data-autocomplete-item]", this.onClickBind);
+        }
+        protected onClick(event:any):boolean
+        {
+            var id:number = parseInt($(event.currentTarget).attr("data-autocomplete-item"), 10);
+            if(!isNaN(id))
             {
-                var id:number = parseInt($(this).attr("data-autocomplete-item"), 10);
-                if(!isNaN(id))
-                {
-                    _this.field.chooseAutocomplete(id);
-                }
-            });
+                this.field.chooseAutocomplete(id);
+            }
+            this.field.focus();
+            event.stopImmediatePropagation();
+            return false;
+
+        }
+        public dispose():void
+        {
+            if(this.$list)
+            {
+                this.$list.off("mousedown","[data-autocomplete-item]", this.onClickBind);
+                this.$list = null;
+            }
         }
         public getReset():string[]
         {
@@ -1412,9 +1434,32 @@ module ghost.browser.forms
             itemField.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, itemField);
             itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
             itemField.on(ListField.EVENT_REMOVE, this.onRemove, this, itemField);
+            itemField.on(Field.EVENT_VALIDATE, this.onValidate, this, itemField);
             itemField.initialize();
             this.items.push(itemField);
             return itemField;
+        }
+        protected onValidate(field:ItemField):void
+        {
+            var index:number = this.items.indexOf(field);
+            if(index == -1)
+            {
+                //should not happend
+                debugger;
+                return;
+            }
+            if(index == this.items.length-1)
+            {
+             //   debugger;
+                this.add(true);
+            }else
+            {
+                //not working
+               /* setTimeout(()=>
+                {
+                    this.items[index+1].focus();
+                }, 0);*/
+            }
         }
         protected onAdd(data:IChangeData[]/*newItem:ItemField, name:string, list:ListField*/):void
         {
@@ -1463,7 +1508,7 @@ module ghost.browser.forms
                 //no remove
                 return;
             }
-            var $item:JQuery = $(element).parents("[data-item]");
+            var $item:JQuery = $(element).parents("[data-item]").addBack("[data-item]");
             var i:number = parseInt($item.attr("data-item"), 10);
             if(!isNaN(i))
             {
@@ -1506,6 +1551,7 @@ module ghost.browser.forms
         private change_timeout:number = -1;
         private remove_timeout:number = -1;
         private initialized:boolean;
+        private validateBinded:Function;
 
 
         private _inputs:Field[];
@@ -1515,6 +1561,7 @@ module ghost.browser.forms
         public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form, parent:Field|Form)
         {
             super(name, data, element, _setInitialData, form, parent);
+            this.validateBinded = this.onValidate.bind(this);
         }
         public getID():string
         {
@@ -1587,6 +1634,24 @@ module ghost.browser.forms
 
             this.additionals = $(this.element).attr("data-additionals")? $(this.element).attr("data-additionals").split(","):null;
 
+            if(this.fields.length == 1)
+            {
+                //one field only => listen to validate
+                this.fields[0].on(Field.EVENT_VALIDATE, this.validateBinded);
+               this.fields[0].on(Field.EVENT_BLUR, this.onItemBlur, this, this.fields[0]);
+            }
+        }
+        protected onValidate():void
+        {
+            this.trigger(Field.EVENT_VALIDATE);
+        }
+        protected onItemBlur(item:Field):void
+        {
+            var value = item.getValue();
+            if(!value)
+            {
+                (<ListField>this.parent).remove(this.element);
+            }
         }
         protected onAdd(value:IChangeData[]/*newItem:ItemField, name:string, list:ListField*/):void
         {
@@ -1635,6 +1700,12 @@ module ghost.browser.forms
         {
             if(this.fields)
             {
+                if(this.fields.length == 1)
+                {
+                    //one field only => listen to validate
+                    this.fields[0].off(Field.EVENT_VALIDATE, this.validateBinded);
+                    this.fields[0].off(Field.EVENT_BLUR, this.onItemBlur, this);
+                }
                 this.fields.forEach(function(field:Field)
                 {
                     field.dispose();
@@ -1914,6 +1985,15 @@ module ghost.browser.forms
             super.dispose();
             if(this.$input)
                 this.$input.off("keyup", this.onChangeBinded);
+        }
+        public onChange(event:any):void
+        {
+
+            super.onChange(event);
+            if(event && (event.keyCode == 13|| event.keyCode == 9) && this.data[this.name] && this.data[this.name] != "")
+            {
+                this.trigger(Field.EVENT_VALIDATE);
+            }
         }
     }
 
