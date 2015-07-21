@@ -16,7 +16,7 @@ module ghost.browser.data
             return {
                 trackEvent:function(){},
                 trackSiteSearch:function(){},
-                setVariable:function(){},
+                setCustomVariable:function(){},
                 setUserId:function(){}
             };
         }
@@ -25,7 +25,6 @@ module ghost.browser.data
             return function(){};
         }
 
-        protected _ga:any;
         protected _piwik:IPiwik;
 
         public constructor()
@@ -35,11 +34,7 @@ module ghost.browser.data
 
         protected ga():any
         {
-            if(!this._ga)
-            {
-                this._ga = window["ga"]?window["ga"]:Analytics.fakeGA();
-            }
-            return this._ga;
+            return window["ga"]?window["ga"]:Analytics.fakeGA();
         }
         protected piwik():IPiwik
         {
@@ -49,10 +44,10 @@ module ghost.browser.data
             }
             return this._piwik;
         }
-        public trackEvent(category:string, action:string, label:string, value:any):void
+        public trackEvent(category:string, action:string, label?:string, value?:number):void
         {
             this.piwik().trackEvent.apply(this.piwik(), Array.prototype.slice.call(arguments));
-            this.ga().apply(this.ga(), ["send, event"].concat(Array.prototype.slice.call(arguments)));
+            this.ga().apply(null, ["send", "event"].concat(Array.prototype.slice.call(arguments)));
         }
         public trackSearch(keyword:string, category?:string, resultsCount?:number):void
         {
@@ -61,7 +56,6 @@ module ghost.browser.data
         }
         public setUserID(id:string):void
         {
-            debugger;
             this.piwik().setUserId(id);
         }
         public setVariable(index, value, name?:string, scope?:string):void
@@ -72,7 +66,7 @@ module ghost.browser.data
                 {
                     scope = "visit";
                 }
-                this.piwik().setVariable(index+1, name, value, scope);
+                this.piwik().setCustomVariable(index+1, name, value, scope);
             }
             if(index<20)
             {
@@ -81,14 +75,14 @@ module ghost.browser.data
                 data[key] = value;
                 this.ga()("set", data);
             }
-        }
+            }
 
     }
     export interface IPiwik
     {
-        trackEvent(category:string, action:string, name?:string, value?:string);
+        trackEvent(category:string, action:string, name?:string, value?:number);
         trackSiteSearch(keyword:string, category?:string, resultsCount?:number);
-        setVariable(index:number, name:string, value:string, scope:string);
+        setCustomVariable(index:number, name:string, value:string, scope:string);
         setUserId(id:string);
     }
 

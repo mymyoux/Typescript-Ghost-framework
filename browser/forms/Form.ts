@@ -42,7 +42,7 @@ module ghost.browser.forms
          * CHANGE
          * @type {string}
          */
-        public static EVENT_CHANGE:string = "change";
+        public static EVENT_CHANGE:string = "change_form";
         public static EVENT_ADD_ITEM:string = "add_item";
         public static EVENT_REMOVE_ITEM:string = "remove_item";
         public static EVENT_SUBMIT:string = "submit";

@@ -64,6 +64,8 @@ module ghost.events
         }
         public trigger(name:string, ...data:any[]):void
         {
+
+
             if(this._muted)
             {
                 return;
@@ -97,10 +99,6 @@ module ghost.events
             //console.log("TT_TRIGGER_=>"+name+"     |      "+key1+":"+key2);
             var once:Listener[] = [];
             var listener:Listener;
-            if(key1 == "page_changed" && key2 != "all")
-            {
-                //debugger;
-            }
 
             if(this._eventsK1[key1])
             {
@@ -118,6 +116,24 @@ module ghost.events
                         once.push(listener);
                     }
                     listener.execute(data);
+                }
+            }
+            if(this._eventsK1[EventDispatcher.EVENTS.ALL])
+            {
+                for(var p in this._eventsK1[EventDispatcher.EVENTS.ALL])
+                {
+                    listener = this._eventsK1[EventDispatcher.EVENTS.ALL][p];
+                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
+                    {
+                        continue;
+                    }
+                    //  if(key1 == "page_changed")
+                    //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
+                    if(listener.once)
+                    {
+                        once.push(listener);
+                    }
+                    listener.execute(data,  [key1]);
                 }
             }
             if(this._eventsK2[key2])
@@ -151,45 +167,11 @@ module ghost.events
                     listener.execute(data);
                 }
             }
-            return;
-
-
-
-            if(this._events[name])
+            while(once.length)
             {
-               for(var p in this._events[name])
-               {
-                //console.log("TT_execute=>"+name+":"+p);
-                   this._events[name][p].execute(data);
-               }
+                this.off(once[0].key1+":"+once[0].key2, once[0].callback, once[0].scope);
+                once.shift();
             }
-            if(this._eventsOnce[name])
-            {
-                while(this._eventsOnce[name].length>0)
-                {
-                    //console.log("TT_execute-once=>"+name+":"+p);
-                    this._eventsOnce[name].shift().execute(data);
-                }
-                delete this._eventsOnce[name];
-            }
-            var index:number;
-            if((index = name.indexOf(":"))!=-1)
-            {
-                var params:any = [name.substring(0, index), name.substring(index+1)];
-                if(name && name != "")
-                    this.trigger.apply(this, [name.substring(0, index), name.substring(index+1)].concat(data));
-                else
-                {
-                       for(var n in this._events)
-                           for(var p in this._events[n])
-                           {
-                                //console.log("__execute=>"+n+":"+p);
-                               this._events[n][p].execute(data);
-                           }
-                }
-            }
-            if(name != EventDispatcher.EVENTS.ALL)
-                this.trigger.apply(this, [EventDispatcher.EVENTS.ALL, name].concat(data));
         }
 
         public on(name:string, callback:Function, scope?:any, ...parameters:any[]):void
@@ -467,9 +449,12 @@ module ghost.events
         {
             return callback === this.callback;
         }
-        public execute(parameters?:any[])
+        public execute(parameters?:any[], prefixParams?:any[])
         {
             var params:any[] = parameters.length?parameters.concat(this.parameters):this.parameters;
+            if(prefixParams){
+                params = prefixParams.concat(params);
+            }
             this.callback.apply(this.scope, params/*parameters.concat(params)*/);
         }
         public dispose():void
