@@ -51,6 +51,13 @@ module ghost.browser.forms
         public static EVENT_SUBMIT_ERROR:string = "submit_error";
         private static customClasses:any[] = [];
 
+        public static instances:Form[] = [];
+        public static debug():void
+        {
+            console.log(Form.instances);
+        }
+
+
         protected autosave:boolean = false;
         protected action:string;
         protected $form:JQuery;
@@ -72,6 +79,7 @@ module ghost.browser.forms
             {
                 this.attachForm(form);
             }
+            Form.instances.push(this);
            // window["f"] = this;
         }
 
@@ -698,6 +706,11 @@ module ghost.browser.forms
                 });
                 this.off();
                 this.fields = null;
+            }
+            var index:number = Form.instances.indexOf(this);
+            if(index != -1)
+            {
+                Form.instances.splice(index, 1);
             }
         }
     }
