@@ -222,7 +222,7 @@ module ghost.browser.navigation
                     break;
                 }
                 len = hashes[p].params.length;
-                if(len && (!ipage.params || ipage.params.length!=len))
+                if((len && (!ipage.params || ipage.params.length!=len)) || (!len && ipage.params && ipage.params.length))
                 {
                     different = true;
                     break;
@@ -310,7 +310,7 @@ module ghost.browser.navigation
                 hash+=navigationScope.getKey()+"/"+navigationScope.getCurrentPage().page;
                 if(navigationScope.hasParameters())
                 {
-                    hash+= navigationScope.getCurrentPage().params.join("/");
+                    hash+= "/"+navigationScope.getCurrentPage().params.join("/");
                 }
             }
             return "#"+hash;
@@ -695,6 +695,7 @@ module ghost.browser.navigation
          */
         public pushPage(page:string, params:any = null, fromHash:boolean = false):void
         {
+
             if(!this._current || this._current.page != page || !this._areEquals(this._current.params,params))
             {
                 var old:string = this._current?this._current.page:null;
