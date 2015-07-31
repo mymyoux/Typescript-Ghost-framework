@@ -768,7 +768,7 @@ module ghost.browser.forms
          * CHANGE
          * @type {string}
          */
-        public static EVENT_CHANGE:string = "change";
+        public static EVENT_CHANGE:string = Form.EVENT_CHANGE;
         public static EVENT_AUTOCOMPLETE:string = "autocomplete";
         public static EVENT_VALIDATE:string = "validate";
         public static EVENT_BLUR:string = "blur";
@@ -953,6 +953,7 @@ module ghost.browser.forms
         {
 
             console.log("on change");
+
         /*    if( this.data[this.name]  != this.getValue())
             {
                 this.data[this.name] = this.getValue();
