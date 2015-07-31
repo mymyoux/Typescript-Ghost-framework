@@ -772,6 +772,11 @@ module ghost.browser.forms
         public static EVENT_AUTOCOMPLETE:string = "autocomplete";
         public static EVENT_VALIDATE:string = "validate";
         public static EVENT_BLUR:string = "blur";
+        private static KEY_UP:number = 38;
+        private static KEY_DOWN:number = 40;
+        private static KEY_ENTER:number = 13;
+        private static KEY_ESCAPE:number = 27;
+        private static KEYS_AUTOCOMPLETION:number[] = [Field.KEY_UP, Field.KEY_DOWN, Field.KEY_ENTER, Field.KEY_ESCAPE];
 
         public state:string;
         public required:boolean = false;
@@ -782,10 +787,12 @@ module ghost.browser.forms
         protected validators:Validator[];
         protected onChangeBinded:any;
         protected onBlurBinded:any;
+        protected onFocusBinded:any;
+        protected onKeyBinded:any;
         protected onChangeThrottle:ghost.utils.BufferFunction;
         protected onAutocompleteThrottle:ghost.utils.BufferFunction;
         protected itemAutocomplete:ItemAutocomplete;
-        protected prefix_autocomplete:string = "";
+        public prefix_autocomplete:string = "";
         protected additionals:string[];
         protected useValidator:boolean;
         protected $error:JQuery;
@@ -811,6 +818,8 @@ module ghost.browser.forms
             }
             this.onChangeBinded = this.onChange.bind(this);
             this.onBlurBinded = this.onBlur.bind(this);
+            this.onFocusBinded = this.onFocus.bind(this);
+            this.onKeyBinded = this.onKeyDown.bind(this);
             this.onChangeThrottle = ghost.utils.Buffer.throttle(this.triggerChange.bind(this), 500);
             this.validators = [];
 
@@ -828,6 +837,18 @@ module ghost.browser.forms
         {
             if(this.$input)
                 this.$input.focus();
+        }
+        public focusAutocomplete(index:number):void
+        {
+            for(var p in this.data[this.prefix_autocomplete+"autocompletion"])
+            {
+                this.data[this.prefix_autocomplete+"autocompletion"][p].selected = false;
+            }
+            if(this.data[this.prefix_autocomplete+"autocompletion"][index])
+            {
+                this.data[this.prefix_autocomplete+"autocompletion"][index].selected = true;
+            }
+            this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
         }
         public chooseAutocomplete(index:number):void
         {
@@ -868,6 +889,7 @@ module ghost.browser.forms
             if(data)
             {
                 this.data[this.prefix_autocomplete+"autocompletion"] = data;
+                this.itemAutocomplete.resetSelected();
             }
 
         }
@@ -941,13 +963,55 @@ module ghost.browser.forms
 
                 this.$input.on("change", this.onChangeBinded);
                 this.$input.on("blur", this.onBlurBinded);
+                this.$input.on("focus", this.onFocusBinded);
 
             }
         }
         public onBlur():void
         {
+            //return;
             this.clearAutocomplete();
             this.trigger(Field.EVENT_BLUR);
+            if(this.autocomplete)
+            {
+                $(document).off("keydown", this.onKeyBinded);
+            }
+        }
+        public onFocus():void
+        {
+            if(this.autocomplete)
+            {
+                $(document).on("keydown", this.onKeyBinded);
+            }
+        }
+
+        public onKeyDown(event:any):void
+        {
+            if(!this.itemAutocomplete || !this.data[this.prefix_autocomplete+"autocompletion"])
+            {
+                return;
+            }
+            if(Field.KEYS_AUTOCOMPLETION.indexOf(event.keyCode) == -1 )
+            {
+                return;
+            }
+            switch(event.keyCode)
+            {
+                case Field.KEY_ENTER:
+                    this.itemAutocomplete.selectCurrent();
+                    break;
+                case Field.KEY_DOWN:
+                    this.itemAutocomplete.selectUp();
+                    break;
+                case Field.KEY_UP:
+                    this.itemAutocomplete.selectDown();
+                    break;
+                case Field.KEY_ESCAPE:
+                    this.itemAutocomplete.resetSelected();
+                    break;
+            }
+            event.preventDefault();
+
         }
         public onChange(event:any):void
         {
@@ -1134,11 +1198,16 @@ module ghost.browser.forms
             {
                 this.$input.off("change", this.onChangeBinded);
                 this.$input.off("blur", this.onBlurBinded);
+                this.$input.off("focus", this.onFocusBinded);
             }
             if(this.itemAutocomplete)
             {
                 this.itemAutocomplete.dispose();
                 this.itemAutocomplete = null;
+            }
+            if(this.autocomplete)
+            {
+                $(document).off("keydown", this.onKeyBinded);
             }
             this.onChangeThrottle.cancel();
             this.form = null;
@@ -1163,6 +1232,7 @@ module ghost.browser.forms
     {
         private reset:string[];
         private onClickBind:any;
+        private selected:number = -1;
         public constructor(protected field:Field, protected $list:JQuery)
         {
             this.init();
@@ -1171,13 +1241,35 @@ module ghost.browser.forms
         {
             this.onClickBind = this.onClick.bind(this);
             this.reset = [];
-            var _this:ItemAutocomplete = this;
+            //var _this:ItemAutocomplete = this;
             this.reset = <any>this.$list.attr("data-autocomplete-reset");
             if(this.reset)
             {
                 this.reset = (<any>this.reset).split(",");
             }
             this.$list.on("mousedown","[data-autocomplete-item]", this.onClickBind);
+        }
+        public selectDown():void
+        {
+            this.selected--;
+            if(this.selected<0)
+            {
+                this.selected = this.field.data[this.field.prefix_autocomplete+"autocompletion"].length-1;
+            }
+            this.field.focusAutocomplete(this.selected);
+        }
+        public selectUp():void
+        {
+            this.selected++;
+            if(this.selected>=this.field.data[this.field.prefix_autocomplete+"autocompletion"].length)
+            {
+                this.selected = 0;
+            }
+            this.field.focusAutocomplete(this.selected);
+        }
+        public selectCurrent():void
+        {
+            this.field.chooseAutocomplete(this.selected);
         }
         protected onClick(event:any):boolean
         {
@@ -1198,6 +1290,11 @@ module ghost.browser.forms
                 this.$list.off("mousedown","[data-autocomplete-item]", this.onClickBind);
                 this.$list = null;
             }
+        }
+        public resetSelected():void
+        {
+            this.selected = -1;
+            this.field.focusAutocomplete(this.selected);
         }
         public getReset():string[]
         {
