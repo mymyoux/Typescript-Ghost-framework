@@ -1574,6 +1574,12 @@ module ghost.browser.forms
                 this.add(true);
             }else
             {
+                console.log("focus");
+                setTimeout(()=>
+                {
+
+                    this.items[index+1].focus();
+                }, 0);
                 //not working
                /* setTimeout(()=>
                 {
@@ -1716,6 +1722,13 @@ module ghost.browser.forms
         public getFields():Field[]
         {
             return this.fields;
+        }
+        public focus():void
+        {
+            if(this.fields && this.fields.length)
+            {
+                this.fields[0].focus();
+            }
         }
         public cloneData(data?:any):any
         {
