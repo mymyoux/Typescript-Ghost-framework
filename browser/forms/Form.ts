@@ -1460,6 +1460,7 @@ module ghost.browser.forms
             {
                 return;
             }
+
             if(!this.data[this.name] || !this.data[this.name].push)
             {
                 this.data[this.name] =  [];
