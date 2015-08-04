@@ -848,7 +848,8 @@ module ghost.browser.forms
             {
                 this.data[this.prefix_autocomplete+"autocompletion"][index].selected = true;
             }
-            this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+            if(this.form.data && this.form.data.trigger)
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
         }
         public chooseAutocomplete(index:number):void
         {
@@ -879,10 +880,12 @@ module ghost.browser.forms
 
         public setAutocomplete(data:any):void
         {
+
             if(this.$input)
             {
                 if(!this.$input.is(":focus"))
                 {
+
                     return this.clearAutocomplete();
                 }
             }
@@ -890,6 +893,7 @@ module ghost.browser.forms
             {
                 this.data[this.prefix_autocomplete+"autocompletion"] = data;
                 this.itemAutocomplete.resetSelected();
+                console.log(this.data[this.prefix_autocomplete+"autocompletion"], ghost.mvc.Model.get(window["mobiskill"].models.CabinetsModel)["cabinet"].place_autocompletion);
             }
 
         }
@@ -920,9 +924,11 @@ module ghost.browser.forms
                 this.prefix_autocomplete = $(this.element).attr("data-autocomplete");
                 this.autocomplete = true;
                 this.data[this.prefix_autocomplete+"autocompletion"]=[];
+                this.data[this.prefix_autocomplete+"autocompleted"]=false;
                 this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
                 this.onAutocompleteThrottle = ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 50);
+                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
             }
             if($(this.element).attr("data-success") != undefined)
             {
@@ -969,7 +975,10 @@ module ghost.browser.forms
         }
         public onBlur():void
         {
-            //return;
+            if(window["form_debug"])
+            {
+                return;
+            }
             this.clearAutocomplete();
             this.trigger(Field.EVENT_BLUR);
             if(this.autocomplete)
@@ -2048,6 +2057,7 @@ module ghost.browser.forms
                         item.name = item.description;
                         return item;
                     });
+
                 this.setAutocomplete(result);
                 this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
             },function(){debugger;});
