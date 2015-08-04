@@ -893,7 +893,6 @@ module ghost.browser.forms
             {
                 this.data[this.prefix_autocomplete+"autocompletion"] = data;
                 this.itemAutocomplete.resetSelected();
-                console.log(this.data[this.prefix_autocomplete+"autocompletion"], ghost.mvc.Model.get(window["mobiskill"].models.CabinetsModel)["cabinet"].place_autocompletion);
             }
 
         }
