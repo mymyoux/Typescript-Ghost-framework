@@ -68,12 +68,15 @@ module ghost.utils
 
                     if (obj.hasOwnProperty(attr) && (!ignore || ignore.indexOf(attr)==-1) && (!hidePrivate || attr.substring(0, 1) != "_"))
                     {
-                        if(attr == "data")
+                        if(obj[attr] === obj)
                         {
-                            debugger;
+                            //circular
+                            copy_object[attr] =  copy_object;
+                        }else
+                        {
+                            copy_object[attr] = Objects.clone(obj[attr], null, hidePrivate);
                         }
 
-                        copy_object[attr] = Objects.clone(obj[attr], null, hidePrivate);
                     }
                 }
                 return copy_object;
