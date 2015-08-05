@@ -478,6 +478,10 @@ module ghost.browser.forms
             then((result:any):void=>
             {
                delete this.promises[name];
+                if(value[0] && value[0].input && value[0].input["handleAutosave"])
+                {
+                    value[0].input["handleAutosave"](result);
+                }
 
             }, (error:any):void=>
             {
