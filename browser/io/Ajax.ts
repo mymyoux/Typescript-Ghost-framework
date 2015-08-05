@@ -24,11 +24,12 @@ module ghost.io
 			$ajax = $.ajax(settings)
 			.done(function(data, textStatus, jqXHR)
 			{
-				if(promise.canceled)
+				if(promise && promise.canceled)
 				{
 					return;
 				}
-				promise.setAjax(null);
+				if(promise)
+					promise.setAjax(null);
 
 				if(data && data.success === false)
 				{
@@ -54,7 +55,7 @@ module ghost.io
 			})
 			.fail(( jqXHR, textStatus, errorThrown )=>
 			{
-				if(promise.canceled)
+				if(promise && promise.canceled)
 				{
 					return;
 				}
@@ -70,7 +71,8 @@ module ghost.io
 					}, 500);
 				}else
 				{
-					promise.setAjax(null);
+					if(promise)
+						promise.setAjax(null);
 					if(settings.asObject)
 					{
 						reject({errorThrown:errorThrown, textStatus:textStatus, jqXHR: jqXHR});
