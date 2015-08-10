@@ -445,7 +445,6 @@ module ghost.mvc
         }
         protected _onModelChange(/*model:any, name:string*/):void
         {
-            console.log("MODEL CHANGE", arguments);
             //console.log(arguments);
             //required due to custom events
             var ractive = arguments[arguments.length - 1];
@@ -478,7 +477,6 @@ module ghost.mvc
                     }
                 }
             }
-            console.log("SET SET ", name, data);
             this.template.set(name, data);
         }
         protected toRactive():any

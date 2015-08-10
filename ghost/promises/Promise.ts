@@ -13,10 +13,8 @@ module ghost.promises
 			}
 			promises.forEach(function(promise:any, index:number):void
 			{
-				console.log("promise", index);
 				sequence = sequence.then(function()
 				{
-					console.log("promise done", index);
 					if(promise instanceof Function)
 					{
 						promise = promise();
