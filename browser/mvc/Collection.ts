@@ -427,11 +427,11 @@ module ghost.mvc
                     url = this.getRootURL()+url;
                 }
                 var data:any = this.getDataForServer();
-                $.ajax(url,
+                ghost.io.ajax(url,
                     {
                         data:data,
-                        "type":this.getMethodForServer()
-                    }).done((result:any)=> {
+                        "method":this.getMethodForServer()
+                    }).then((result:any)=> {
                         this._retrieved = true;
                         this._retrieving = true;
                         this.readExternal(result);
@@ -440,8 +440,7 @@ module ghost.mvc
                         {
                             callback();
                         }
-                    })
-                    .fail((error)=> {
+                    },(error)=> {
                         if(error.status == 404)
                         {
                             console.error("Data: "+url+" not found");
@@ -510,12 +509,12 @@ module ghost.mvc
                     {
                         data[p] = server_data[p];
                     }
-                    $.ajax(url,
+                    ghost.io.ajax(url,
                     {
                         data:data,
-                        "type":request.method?request.method:this.getMethodForServer()
+                        "method":request.method?request.method:this.getMethodForServer()
                     })
-                    .done(function()
+                    .then(function()
                     {
                         if(request.cache === false)
                         {
@@ -525,8 +524,7 @@ module ghost.mvc
                             _self._partsPromises[name] = true;
                         }
                         accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
-                    })
-                    .fail(reject);
+                    },reject);
                });
             }
             return this._partsPromises[name];

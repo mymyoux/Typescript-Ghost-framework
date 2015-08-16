@@ -26,7 +26,14 @@ module ghost.io
 						result = middlewares[p][type](data[middlewares[p].keyword]);
 						if(result !== undefined)
 						{
-							data[middlewares[p].keyword] = result;
+							if(result === null)
+							{
+								//if null remove the property
+								delete data[middlewares[p].keyword];
+							}else
+							{
+								data[middlewares[p].keyword] = result;
+							}
 						}
 					}else
 					{
