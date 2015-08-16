@@ -2,6 +2,71 @@
 ///<lib="es6-promise"/>
 module ghost.io
 {
+	var middlewares:any[] = [];
+	function middleware(data:any, type:string):any
+	{
+		if(!data)
+		{
+			return data;
+		}
+		var useKeyword:boolean = type == "success";
+		var result:any;
+		try{
+
+			for(var p in middlewares)
+			{
+				if(middlewares[p][type] && (!middlewares[p].keyword || !useKeyword || data[middlewares[p].keyword]))
+				{
+					if(middlewares[p].onlyJSON !== false && typeof data != "object")
+					{
+						continue;
+					}
+					if(middlewares[p].keyword && useKeyword)
+					{
+						result = middlewares[p][type](data[middlewares[p].keyword]);
+						if(result !== undefined)
+						{
+							data[middlewares[p].keyword] = result;
+						}
+					}else
+					{
+						result = middlewares[p][type](data);
+						if(result !== undefined)
+						{
+							data = result;
+						}
+					}
+				}
+			}
+		}catch(error)
+		{
+			console.error("Error during middleware", error);
+			debugger;
+		}
+		return data;
+	}
+	export function addMiddleware(middleware:IMiddleWare|Function):void
+	{
+		if(typeof middleware == "function")
+		{
+			middleware = {success:<any>middleware};
+		}
+		middlewares.push(middleware);
+	}
+	export function removeMiddleware(middleware:IMiddleWare):void
+	{
+
+		for(var p in middlewares)
+		{
+			if((<IMiddleWare>middleware).id)
+			{
+				if(middlewares[p].id == (<IMiddleWare>middleware).id)
+				{
+					middlewares.splice(p, 1);
+				}
+			}
+		}
+	}
 	export var RETRY_INFINITE:number = -1;
 	export function ajax(settings:AjaxOptions):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:AjaxOptions):CancelablePromise<Object>;
@@ -21,6 +86,7 @@ module ghost.io
 		var $ajax:any;
 		var promise:CancelablePromise<Object> = new CancelablePromise<Object>(function(resolve, reject):void
 		{
+			settings = middleware(settings, "settings");
 			$ajax = $.ajax(settings)
 			.done(function(data, textStatus, jqXHR)
 			{
@@ -30,7 +96,7 @@ module ghost.io
 				}
 				if(promise)
 					promise.setAjax(null);
-
+				data = middleware(data, "success");
 				if(data && data.success === false)
 				{
 					if(settings.retry === true)
@@ -125,5 +191,29 @@ module ghost.io
 			this.$ajax = $ajax;
 		}
 	}
-
+	export interface IMiddleWare
+	{
+		/**
+		 * If set it will only be called if the variable exists in data
+		 */
+		keyword?:string;
+		/**
+		 * Callback called before the ajax call is done. settings will be given. keyword is ignored for this callback
+		 * @param data
+		 */
+		settings?:(data:any)=>any|void;
+		/**
+		 * Calback called with result data. If keyword is set, only this part of the data will be given.
+		 * @param data
+		 */
+		success?:(data:any)=>any|void;
+		/**
+		 * If set it will be used to remove the middleware from the list
+		 */
+		id?:string;
+		/**
+		 * Default to true
+		 */
+		onlyJSON?:boolean;
+	}
 }

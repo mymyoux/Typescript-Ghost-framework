@@ -175,12 +175,12 @@ module ghost.mvc
                     {
                         data[p] = server_data[p];
                     }
-                    $.ajax(url,
+                    ghost.io.ajax(url,
                     {
                         data:data,
-                        "type":request.method?request.method:this.getMethodForServer()
+                        "method":request.method?request.method:this.getMethodForServer()
                     })
-                    .done(function()
+                    .then(function()
                     {
                         if(request.cache === false)
                         {
@@ -190,8 +190,7 @@ module ghost.mvc
                             _self._partsPromises[name] = true;
                         }
                         accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
-                    })
-                    .fail(reject);
+                    },reject);
                });
             }
             return this._partsPromises[name];
