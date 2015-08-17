@@ -2231,6 +2231,38 @@ module ghost.browser.forms
                                   {
                                       $(this.preview).css("background-image", 'url("'+file.result+'"),url("css/img/default-avatar.svg")');
                                       $(this.preview).removeClass("no-picture");
+                                      var pwidth:number = $(this.preview).width();
+                                      var pheight:number = $(this.preview).height();
+
+                                      var image = new Image();
+                                      image.src = file.result;
+
+                                      image.onload = ()=> {
+
+                                          if(!image.width || !image.height)
+                                          {
+                                              return;
+                                          }
+                                          var ratio:number = image.width/image.height;
+                                          if(image.width!=pwidth)
+                                          {
+                                              image.width = pwidth;
+                                              image.height = image.width/ratio;
+                                          }
+                                          if(image.height<pheight)
+                                          {
+                                              image.height = pheight;
+                                              image.width = image.height * ratio;
+                                          }
+                                          //position
+
+                                          var positionX:number = (image.width-pwidth)/2;
+                                          var positionY:number = (image.height-pheight)/2;
+                                          $(this.preview).css("background-size", image.width+"px "+image.height+"px");
+                                          $(this.preview).css("background-position", (-positionX)+"px "+(-positionY)+"px");
+
+                                          // access image size here
+                                      };
                                   }
                                   this.$input.addClass("preview");
                               }
