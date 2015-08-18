@@ -21,6 +21,11 @@ module ghost.promises
 					}
 					if(!(promise instanceof Promise))
 					{
+						if(!promise)
+						{
+							console.error(promise);
+							debugger;
+						}
 						promise = promise?Promise.resolve():Promise.reject(new Error(promise));
 					}
 					return promise;
