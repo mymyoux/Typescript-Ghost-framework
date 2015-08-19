@@ -1027,27 +1027,13 @@ module ghost.browser.forms
         }
         public onChange(event:any):void
         {
-
-            console.log("on change");
-
-        /*    if( this.data[this.name]  != this.getValue())
-            {
-                this.data[this.name] = this.getValue();
-                this.onChangeThrottle();
-            }*/
             this.data[this.name] = this.getValue();
-            //console.log(this.name, this.data[this.name], this.data_saved[this.name]);
             if(!ghost.utils.Objects.deepEquals(this.data_saved[this.name],this.data[this.name]))
             {
                 this.unvalidate();
                 this.onChangeValidated();
 
             }
-
-
-            //dispatch event change for item
-
-        //    this.trigger(Field.EVENT_CHANGE, this.data,
         }
         protected unvalidate():void
         {
