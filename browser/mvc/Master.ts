@@ -590,7 +590,8 @@ module ghost.mvc
         {
             if(this.template)
             {
-                this.template.update();
+                //this.template.set("t",)
+                this.template.set("trans",ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance()));
                 //as it destroy everything it break jquery binding
 
                 /*
