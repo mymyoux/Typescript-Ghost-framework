@@ -38,6 +38,7 @@ module ghost.browser.forms
      */
     export class Form extends ghost.events.EventDispatcher
     {
+        public static fieldCrop:InputFileField;
         /**
          * CHANGE
          * @type {string}
@@ -2283,6 +2284,8 @@ module ghost.browser.forms
                     {
                         return;
                     }
+                    Form.fieldCrop = this;
+                    window.location.href="#crop/crop";
                     $(this.inputFile).trigger("click");
                 });
                 this.$triggerRemove.on("click", ()=>
