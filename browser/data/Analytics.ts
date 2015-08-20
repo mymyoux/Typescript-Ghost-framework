@@ -60,12 +60,13 @@ module ghost.browser.data
         }
         public setVariable(index, value, name?:string, scope?:string):void
         {
-            if(name && index<4)
+            if(name && index<=4)
             {
                 if(!scope)
                 {
                     scope = "visit";
                 }
+                debugger;
                 this.piwik().setCustomVariable(index+1, name, value, scope);
             }
             if(index<20)
