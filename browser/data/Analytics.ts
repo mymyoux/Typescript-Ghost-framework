@@ -42,6 +42,7 @@ module ghost.browser.data
             {
                 this._piwik = window["Piwik"]?window["Piwik"].getAsyncTracker():Analytics.fakePiwik();
             }
+            window["p"] = this._piwik;
             return this._piwik;
         }
         public trackEvent(category:string, action:string, label?:string, value?:number):void
@@ -66,7 +67,6 @@ module ghost.browser.data
                 {
                     scope = "visit";
                 }
-                debugger;
                 this.piwik().setCustomVariable(index+1, name, value, scope);
             }
             if(index<20)
