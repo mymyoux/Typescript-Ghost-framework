@@ -2285,7 +2285,7 @@ module ghost.browser.forms
                         return;
                     }
                     Form.fieldCrop = this;
-                    window.location.href="#crop/crop";
+                    //window.location.href="#crop/crop";
                     $(this.inputFile).trigger("click");
                 });
                 this.$triggerRemove.on("click", ()=>
