@@ -896,7 +896,10 @@ module ghost.browser.forms
             }
             if(data)
             {
-                this.data[this.prefix_autocomplete+"autocompletion"] = data;
+
+                var current:any = {};
+                current[this.name] = this.getValue();
+                this.data[this.prefix_autocomplete+"autocompletion"] = [current].concat(data);
                 this.itemAutocomplete.resetSelected();
             }
 
