@@ -119,9 +119,15 @@ module ghost.mvc
                     }else
                     {
                         event.cancel();
+
+                        //Scope.navigation().pushPage(scope, canActivate);
                         setTimeout(()=>
                         {
-                            debugger;
+                            var page: ghost.browser.navigation.IPage = Scope.navigation().getScope(scope).getCurrentPage();
+                            if(page && page.page == canActivate)
+                            {
+                                return;
+                            }
                             Scope.navigation().pushPage(scope, canActivate);
                         },0);
                     }
