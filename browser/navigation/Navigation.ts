@@ -107,6 +107,7 @@ module ghost.browser.navigation
                 if(!this._listening)
                 {
                     this._listening = true;
+                    debugger;
                     this._detectScope();
                     this._onHashChange(true);
                 }
@@ -206,6 +207,7 @@ module ghost.browser.navigation
         ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
+
             if(window.location.hash == this._currentHash)
             {
                 return;
@@ -214,6 +216,7 @@ module ghost.browser.navigation
             var different:boolean = false;
             var len:number;
             var ipage:IPage;
+            debugger;
             all:for(var p in hashes)
             {
                 if(!this._scopes[p] || !(ipage = this._scopes[p].getCurrentPage()) || ipage.page != hashes[p].page)
@@ -313,6 +316,7 @@ module ghost.browser.navigation
                     hash+= "/"+navigationScope.getCurrentPage().params.join("/");
                 }
             }
+            debugger;
             return "#"+hash;
         }
         public getDefaultPage(scope:string):string
@@ -523,9 +527,20 @@ module ghost.browser.navigation
             this._event.params = params;
             this._event.previous = previous;
             this._event.next = next;
+            if(next == "home") {
+                debugger;
+            }
             this.trigger(previous+":"+next, type, previous, next, this._event );
+            if(next == "home")
+            {
+                debugger;
+            }
             if(!this._event.isCancelled())
             {
+                if(next == "home")
+                {
+                    debugger;
+                }
                 this.trigger("from:"+previous, type, previous, next, this._event );
                 if(!this._event.isCancelled())
                 {
@@ -696,11 +711,13 @@ module ghost.browser.navigation
         public pushPage(page:string, params:any = null, fromHash:boolean = false):void
         {
 
+            debugger;
             if(!this._current || this._current.page != page || !this._areEquals(this._current.params,params))
             {
                 var old:string = this._current?this._current.page:null;
                if(!this._isCancelled(Navigation.PUSH, old, page, params))
                {
+                   debugger;
                 console.log("PUSH : "+old+" => "+page, (this._current?this._current.params:null), params);
                     var ipage:IPage = 
                     {
@@ -719,7 +736,13 @@ module ghost.browser.navigation
 
                }else
                {
-                    Navigation.changeHash(this._key+"/"+(this._current?this._current.page:Navigation.instance.getDefaultPage(this._key)));
+                   debugger;
+                   if(!this._current)
+                   {
+
+                   }
+                   if(!fromHash)
+                        Navigation.changeHash(this._key+"/"+(this._current?this._current.page:Navigation.instance.getDefaultPage(this._key)));
                }
             }
         }
