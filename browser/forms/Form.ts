@@ -2219,7 +2219,7 @@ module ghost.browser.forms
                                       this.preview.src = file.result;
                                   }else
                                   {
-                                      $(this.preview).css("background-image", 'url("'+file.result+'"),url("css/img/default-avatar.svg")');
+                                      $(this.preview).css("background-image", 'url("'+file.result+'")');
                                       $(this.preview).removeClass("no-picture");
                                       var pwidth:number = $(this.preview).width();
                                       var pheight:number = $(this.preview).height();
