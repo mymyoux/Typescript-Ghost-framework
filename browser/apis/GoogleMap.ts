@@ -32,7 +32,7 @@ module ghost.browser.apis
 				__initialize__gmap["resolve"] = resolve;
 				var script = document.createElement('script');
 				script.type = 'text/javascript';
-				script.src =  'https://maps.googleapis.com/maps/api/js?v=3.exp&' + 'libraries=places'+'&callback=__initialize__gmap';
+				script.src =  'https://maps.googleapis.com/maps/api/js?v=3.exp&' + 'libraries=places'+'&callback=__initialize__gmap&language=en';
 				document.body.appendChild(script);
 			});
 			return promise;
@@ -171,7 +171,6 @@ module ghost.browser.apis
 					input:data
 				};
 			}
-
 			var promise:Promise<any> = new Promise((resolve, reject):void=>
 			{
 				if(!GMap.isEnabled())
@@ -185,6 +184,7 @@ module ghost.browser.apis
 				var service:any = new google.maps.places["AutocompleteService"]();
 				service.getPlacePredictions(data,
 					function(result, status){
+
 						if(status === google.maps.GeocoderStatus.OK)
 						{
 							resolve(result);
