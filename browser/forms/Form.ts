@@ -1637,13 +1637,14 @@ module ghost.browser.forms
                 //no remove
                 return;
             }
+            //debugger;
             var $item:JQuery;
             if(element instanceof ItemField)
             {
                 $item = $(element.element);
             }else
             {
-                $item = $(element).parents("[data-item]").addBack("[data-item]");
+                $item = $(element).closest("[data-item]");
             }
             var i:number = parseInt($item.attr("data-item"), 10);
             if(!isNaN(i))
