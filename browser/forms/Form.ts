@@ -294,7 +294,7 @@ module ghost.browser.forms
                         {
                             debugger;
                         }
-                        console.error("An error occured when form submitted:", error);
+                        console.error("An error occured when form submitted:", error, p , this.fields[p]);
                         if(!focused)
                         {
                             this.fields[p].focus();
