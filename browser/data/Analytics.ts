@@ -14,27 +14,57 @@ module ghost.browser.data
         private static fakePiwik():IPiwik
         {
             return {
+                requests:[],
                 trackEvent:function(){
 
                     console.log("[FAKEPIWIK] track event", arguments);
+                    this.track("trackEvent", arguments);
                 }
 
                 ,
                 trackSiteSearch:function(){
                     console.log("[FAKEPIWIK] track site search", arguments);
-
+                    this.track("trackSiteSearch", arguments);
                 },
                 setCustomVariable:function(){
                     console.log("[FAKEPIWIK] set custom variable", arguments);
+                    this.track("setCustomVariable", arguments);
 
                 },
                 setUserId:function(){
                     console.log("[FAKEPIWIK] set user id", arguments);
+                    this.track("setUserId", arguments);
                 },
                 trackPageView:function()
                 {
                     console.log("[FAKEPIWIK] track page view");
+
+                },
+                track: function(name, args)
+                {
+                    this.requests.push({name:name, args:args});
+                    this.checkPiwik();
+                },
+                checkPiwik:function()
+                {
+                    console.log("[FAKEPIWIK] Check real piwik");
+                    if( window["Piwik"])
+                    {
+                        console.log("[FAKEPIWIK] Piwik detected");
+                        var tracker:any = window["Piwik"].getTracker();
+                        while(this.requests.length)
+                        {
+                            var request:any = this.requests.shift();
+                            console.log("[FAKEPIWIK] Piwik reload: ", request.name, request.args);
+                            tracker[request.name].call(tracker, Array.prototype.slice.call(request.args));
+                        }
+                        tracker.trackPageView();
+
+                        Analytics.instance()._piwik = tracker;
+                    }
+
                 }
+
             };
         }
         private static fakeGA():any
@@ -58,6 +88,16 @@ module ghost.browser.data
             if(!this._piwik)
             {
                 this._piwik = window["Piwik"]?window["Piwik"].getTracker()/*getAsyncTracker()*/:Analytics.fakePiwik();
+                if(!window["Piwik"])
+                {
+                    setTimeout(()=>
+                    {
+                        if(this._piwik["checkPiwik"])
+                        {
+                            this._piwik["checkPiwik"]();
+                        }
+                    }, 5000);
+                }
             }
             window["p"] = this._piwik;
             return this._piwik;
@@ -78,7 +118,7 @@ module ghost.browser.data
         }
         public setVariable(index, value, name?:string, scope?:string):void
         {
-            if(name && index<=4)
+            if(name && index<=9)
             {
                 if(!scope)
                 {
