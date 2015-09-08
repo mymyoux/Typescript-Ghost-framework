@@ -14,10 +14,27 @@ module ghost.browser.data
         private static fakePiwik():IPiwik
         {
             return {
-                trackEvent:function(){},
-                trackSiteSearch:function(){},
-                setCustomVariable:function(){},
-                setUserId:function(){}
+                trackEvent:function(){
+
+                    console.log("[FAKEPIWIK] track event", arguments);
+                }
+
+                ,
+                trackSiteSearch:function(){
+                    console.log("[FAKEPIWIK] track site search", arguments);
+
+                },
+                setCustomVariable:function(){
+                    console.log("[FAKEPIWIK] set custom variable", arguments);
+
+                },
+                setUserId:function(){
+                    console.log("[FAKEPIWIK] set user id", arguments);
+                },
+                trackPageView:function()
+                {
+                    console.log("[FAKEPIWIK] track page view");
+                }
             };
         }
         private static fakeGA():any
@@ -40,7 +57,7 @@ module ghost.browser.data
         {
             if(!this._piwik)
             {
-                this._piwik = window["Piwik"]?window["Piwik"].getAsyncTracker():Analytics.fakePiwik();
+                this._piwik = window["Piwik"]?window["Piwik"].getTracker()/*getAsyncTracker()*/:Analytics.fakePiwik();
             }
             window["p"] = this._piwik;
             return this._piwik;
@@ -67,7 +84,9 @@ module ghost.browser.data
                 {
                     scope = "visit";
                 }
+                console.log("[PIWIK] set Custom Variable", index+1, name, value, scope);
                 this.piwik().setCustomVariable(index+1, name, value, scope);
+                this.piwik().trackPageView();
             }
             if(index<20)
             {
@@ -85,6 +104,7 @@ module ghost.browser.data
         trackSiteSearch(keyword:string, category?:string, resultsCount?:number);
         setCustomVariable(index:number, name:string, value:string, scope:string);
         setUserId(id:string);
+        trackPageView();
     }
 
 }
