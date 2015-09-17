@@ -103,7 +103,7 @@ module ghost.io
 				}
 				if(promise)
 					promise.setAjax(null);
-				data = middleware(data, "success");
+
 				if(data && data.success === false)
 				{
 					if(settings.retry === true)
@@ -114,10 +114,12 @@ module ghost.io
 						}, 500);
 						return;
 					}
+					data = middleware(data, "error");
 					reject(data.error?data.error:data);
 					return;
 				}
 
+				data = middleware(data, "success");
 				if(settings.asObject)
 				{
 					resolve({data:data, textStatus:textStatus, jqXHR: jqXHR});
@@ -146,6 +148,7 @@ module ghost.io
 				{
 					if(promise)
 						promise.setAjax(null);
+					middleware(errorThrown, "error");
 					if(settings.asObject)
 					{
 						reject({errorThrown:errorThrown, textStatus:textStatus, jqXHR: jqXHR});
