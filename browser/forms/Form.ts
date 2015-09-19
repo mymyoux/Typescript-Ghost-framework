@@ -2164,7 +2164,10 @@ module ghost.browser.forms
                 this.$input.off("change keyup", this.onChangeBinded);
         }
     }
-
+    export class EmailTextField extends InputTextField
+    { 
+        public static selector:string = "input[type='email']";
+    }
     export class InputFileField extends Field
     {
         public static selector:string = "[data-type='picture']";
