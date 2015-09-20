@@ -2165,7 +2165,7 @@ module ghost.browser.forms
         }
     }
     export class EmailTextField extends InputTextField
-    { 
+    {
         public static selector:string = "input[type='email']";
     }
     export class InputFileField extends Field
