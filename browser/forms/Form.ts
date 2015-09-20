@@ -95,7 +95,7 @@ module ghost.browser.forms
         public static isSubList(element:any, listName:string, testSelf:boolean = true):boolean
         {
             var $item:JQuery = $(element);
-            if(testSelf && $item.is("[data-list") && $item.attr("data-list")!= listName)
+            if(testSelf && $item.is("[data-list]") && $item.attr("data-list")!= listName)
             {
                 return true;
             }
