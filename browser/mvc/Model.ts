@@ -83,7 +83,45 @@ module ghost.mvc
             }
             return new cls();
         }
+        public static has(cls:any, searchForCollectionToo:boolean = true):boolean
+        {
+            if(!cls)
+            {
+                throw new Error("You can't instantiate null class");
+            }
+            if(cls instanceof Model)
+            {
+                return true;
+            }
+            if(typeof cls == "string")
+            {
+                ///model from string
+                var model:Model = cls.split(".").reduce(function(previous:any, next:string):Model
+                {
+                    if(previous)
+                        return previous[next];
+                    return null;
+                }, this);
+                if(!model)
+                {
 
+                    throw new Error("No Model named "+cls);
+                }else
+                {
+                    cls = model;
+                }
+            }
+
+            if(Model._instances[cls])
+            {
+                return true;
+            }
+            if(searchForCollectionToo)
+            {
+                return <any>Collection.has(cls);
+            }
+            return false;
+        }
         /**
          * Save instance for further get operations
          * @param instance Instance's to save
