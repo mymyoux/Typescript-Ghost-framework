@@ -9,7 +9,7 @@ module ghost.io
 		{
 			return data;
 		}
-		var useKeyword:boolean = type == "success";
+		var useKeyword:boolean = type == "success" || type == "success_always";
 		var result:any;
 		try{
 
@@ -104,6 +104,7 @@ module ghost.io
 				if(promise)
 					promise.setAjax(null);
 
+				data = middleware(data, "success_always");
 				if(data && data.success === false)
 				{
 					if(settings.retry === true)
