@@ -54,9 +54,9 @@ module ghost.browser.data
                         var tracker:any = window["Piwik"].getTracker();
                         while(this.requests.length)
                         {
-                            var request:any = this.requests.shift();
+                            var request:any = this.requests.shift(); 
                             console.log("[FAKEPIWIK] Piwik reload: ", request.name, request.args);
-                            tracker[request.name].call(tracker, Array.prototype.slice.call(request.args));
+                            tracker[request.name].apply(tracker, Array.prototype.slice.call(request.args));
                         }
                         tracker.trackPageView();
 
