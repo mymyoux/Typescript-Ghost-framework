@@ -830,6 +830,10 @@ module ghost.browser.forms
 
 
         }
+        public get$Input():JQuery
+        {
+            return this.$input;
+        }
         public initialize():void
         {
             this.initializeInput();
