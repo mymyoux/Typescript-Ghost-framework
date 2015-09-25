@@ -1,6 +1,9 @@
 ///<lib="jquery"/>
 module ghost.browser.notifications
 {
+    /**
+     * Manage notifications
+     */
     export class NotificationsManager
     {
         private static _instance:NotificationsManager;
