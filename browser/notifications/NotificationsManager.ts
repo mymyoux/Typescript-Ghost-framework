@@ -19,26 +19,45 @@ module ghost.browser.notifications
 
         protected notifications:any;
         protected _listenClick:any;
+        protected _listenAdd:any;
 
         public constructor()
         {
             NotificationsManager._instance = this;
             this.notifications = {};
             this._listenClick = this.listenClick.bind(this);
+            this._listenAdd = this.listenAdd.bind(this);
             this.listen();
         }
         public listen():void
         {
             $(document).on("mousedown","[data-notification]", this._listenClick);
+            $(document).on("DOMNodeInserted","*", this._listenAdd);
         }
         public unlisten():void
         {
             $(document).off("mousedown","[data-notification]", this._listenClick);
+            $(document).off("DOMNodeInserted","[data-notification]", this._listenAdd);
         }
         protected listenClick(event:any):void
         {
-            console.log("click:"+$(event.currentTarget).attr("data-notification"), event);
             this.clearNotification($(event.currentTarget).attr("data-notification"));
+        }
+        protected listenAdd(event:any):void
+        {
+            var $target:JQuery = $(event.currentTarget);
+            if($target.prop("tagName")=="BODY")
+            {
+                return;
+            }
+            var $notications:JQuery = $target.find("[data-notification]").addBack("[notification]");
+            var name:string = $notications.attr("data-notification");
+
+            if(name)
+            {
+                debugger;
+                this.notification(name).update();
+            }
         }
         public config(name:string, config:IConfigNotification):void
         {
@@ -58,9 +77,17 @@ module ghost.browser.notifications
             return this.notifications[name];
         }
 
-        public addNotification(name:string, inc:number = 1):void
+        public addNotification(name:string, object:any):void;
+        public addNotification(name:string, inc:number):void;
+        public addNotification(name:string, inc:any = 1):void
         {
             return this.notification(name).add(inc);
+        }
+        public removeNotification(name:string, object:any):void;
+        public removeNotification(name:string, inc:number):void;
+        public removeNotification(name:string, inc:any = 1):void
+        {
+            return this.notification(name).remove(inc);
         }
         public setNotification(name:string, value:any):void
         {
@@ -85,6 +112,8 @@ module ghost.browser.notifications
     {
         public static TYPE_NUMERIC:string = "numeric";
         public static TYPE_STRING:string = "string";
+        public static VALUE_CONTAINER:string = "container";
+        public static VALUE_SIMPLE:string = "simple";
         public value:any;
         public name:string;
         public min:number = null;
@@ -92,6 +121,8 @@ module ghost.browser.notifications
         public last:any;
         public diff:any;
         public type:string;
+        public value_system:string;
+        protected container:any[];
         public static getDefault(name:string, type:string = Notification.TYPE_NUMERIC):Notification
         {
             var notification:Notification = new Notification();
@@ -105,7 +136,12 @@ module ghost.browser.notifications
             {
                 notification.type = Notification.TYPE_STRING;
             }
+            notification.value_system = Notification.VALUE_SIMPLE;
             return notification;
+        }
+        public constructor()
+        {
+            this.container = [];
         }
         public config(config:IConfigNotification):void
         {
@@ -114,16 +150,39 @@ module ghost.browser.notifications
                 this[p] = config[p];
             }
         }
-        public add(value:number):void
+        public add(value:any):void;
+        public add(value:number):void;
+        public add(value:any):void
         {
+            if(typeof value == "object")
+            {
+                if(this.container.indexOf(value)==-1)
+                {
+                    this.container.push(value);
+                    this.set(this.value+1);
+                }
+                return;
+            }
             if(this.type != Notification.TYPE_NUMERIC)
             {
                 throw new Error("Add function can only be used on numeric notifications");
             }
             this.set(this.value+value);
         }
-        public remove(value:number):void
+        public remove(value:any):void;
+        public remove(value:number):void;
+        public remove(value:any):void
         {
+            if(this.value_system == Notification.VALUE_CONTAINER)
+            {
+                var index:number;
+                if((index=this.container.indexOf(value))!=-1)
+                {
+                    this.container.splice(index, 1);
+                    this.set(this.value-1);
+                }
+                return;
+            }
             if(this.type != Notification.TYPE_NUMERIC)
             {
                 throw new Error("Add function can only be used on numeric notifications");
@@ -145,28 +204,20 @@ module ghost.browser.notifications
                 }
                 this.diff = value - this.value;
                 this.value = value;
-                if(this.value == 0)
-                {
-                    this.clear();
-                }else
-                {
-                    this.update();
-                }
+                this.update();
             }else if(this.type == Notification.TYPE_STRING)
             {
                 this.last = this.value;
                 this.value = value;
-                if(this.value == null)
-                {
-                    this.clear();
-                }else
-                {
-                    this.update();
-                }
+                this.update();
             }
         }
         public update():void
         {
+            if(this.value == 0 || this.value == null)
+            {
+                return this.clear();
+            }
             var $notifications:JQuery = $(document).find("[data-notification='"+this.name+"']");
             $notifications.attr("data-notification-value", this.value);
 
@@ -181,6 +232,7 @@ module ghost.browser.notifications
         }
         public clear():void
         {
+            this.container.length = 0;
             if(this.type == Notification.TYPE_NUMERIC)
             {
                 this.value = 0;
@@ -201,5 +253,6 @@ module ghost.browser.notifications
         max?:number;
         type?:string;
         name?:string;
+        value_system?:string;
     }
 }
