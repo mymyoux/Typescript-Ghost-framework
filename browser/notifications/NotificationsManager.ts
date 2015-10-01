@@ -46,7 +46,7 @@ module ghost.browser.notifications
         protected listenAdd(event:any):void
         {
             var $target:JQuery = $(event.currentTarget);
-            if($target.prop("tagName")=="BODY")
+            if($target.prop("tagName")=="BODY" || $target.prop("tagName")=="HTML")
             {
                 return;
             }
