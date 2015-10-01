@@ -55,7 +55,6 @@ module ghost.browser.notifications
 
             if(name)
             {
-                debugger;
                 this.notification(name).update();
             }
         }
