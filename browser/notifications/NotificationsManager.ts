@@ -217,9 +217,11 @@ module ghost.browser.notifications
             {
                 return this.clear();
             }
-            var $notifications:JQuery = $(document).find("[data-notification='"+this.name+"']");
-            $notifications.attr("data-notification-value", this.value);
 
+            var $notifications:JQuery = $(document).find("[data-notification='"+this.name+"']");
+            var $notificationClasses:JQuery = $notifications.find(".data-notification-value");
+            $notifications.attr("data-notification-value", this.value);
+            $notificationClasses.text(this.value);
             if(this.last != null)
             {
                 $notifications.attr("data-notification-last", this.last);
@@ -241,6 +243,8 @@ module ghost.browser.notifications
             }
             this.last = null;
             var $notifications:JQuery = $(document).find("[data-notification='"+this.name+"']");
+            var $notificationClasses:JQuery = $notifications.find(".data-notification-value");
+            $notificationClasses.text("");
             $notifications.removeAttr("data-notification-value");
             $notifications.removeAttr("data-notification-last")
             $notifications.removeAttr("data-notification-diff")
