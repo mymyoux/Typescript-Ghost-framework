@@ -21,8 +21,10 @@ module ghost.browser.notifications
         protected _listenClick:any;
         protected _listenAdd:any;
 
+        protected _muted:boolean;
         public constructor()
         {
+            this._muted = false;
             NotificationsManager._instance = this;
             this.notifications = {};
             this._listenClick = this.listenClick.bind(this);
@@ -45,6 +47,10 @@ module ghost.browser.notifications
         }
         protected listenAdd(event:any):void
         {
+            if(this._muted)
+            {
+                return;
+            }
             var $target:JQuery = $(event.currentTarget);
             if($target.prop("tagName")=="BODY" || $target.prop("tagName")=="HTML")
             {
@@ -55,7 +61,9 @@ module ghost.browser.notifications
 
             if(name)
             {
+                this._muted = true;
                 this.notification(name).update();
+                this._muted = false;
             }
         }
         public config(name:string, config:IConfigNotification):void
@@ -80,24 +88,33 @@ module ghost.browser.notifications
         public addNotification(name:string, inc:number):void;
         public addNotification(name:string, inc:any = 1):void
         {
-            return this.notification(name).add(inc);
+            this._muted = true;
+            this.notification(name).add(inc);
+            this._muted = false;
         }
         public removeNotification(name:string, object:any):void;
         public removeNotification(name:string, inc:number):void;
         public removeNotification(name:string, inc:any = 1):void
         {
-            return this.notification(name).remove(inc);
+            this._muted = true;
+            this.notification(name).remove(inc);
+            this._muted = false;
         }
         public setNotification(name:string, value:any):void
         {
-            return this.notification(name).add(value);
+            this._muted = true;
+             this.notification(name).add(value);
+            this._muted = false;
         }
         public clearNotification(name:string):void
         {
-            return this.notification(name).clear();
+            this._muted = true;
+            this.notification(name).clear();
+            this._muted = false;
         }
         public dispose():void
         {
+            this._muted = true;
             this.unlisten();
             this.notifications = null;
             this._listenClick = null;
@@ -221,6 +238,7 @@ module ghost.browser.notifications
             var $notifications:JQuery = $(document).find("[data-notification='"+this.name+"']");
             var $notificationClasses:JQuery = $notifications.find(".data-notification-value").addBack(".data-notification-value");
             $notifications.attr("data-notification-value", this.value);
+            debugger;
             $notificationClasses.text(this.value);
             if(this.last != null)
             {
