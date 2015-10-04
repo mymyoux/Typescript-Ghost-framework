@@ -84,6 +84,10 @@ module ghost.browser.forms
            // window["f"] = this;
         }
 
+        public get$Form():JQuery
+        {
+            return this.$form;
+        }
         public prefix():string
         {
             if(this.$form.attr("data-prefix"))
@@ -272,6 +276,30 @@ module ghost.browser.forms
             {
                 log.error(error);
             });*/
+        }
+
+        /**
+         * Return error fields or true if no error
+         * @returns {string[]|boolean}
+         */
+        public validate():Field[]|boolean
+        {
+            var errors:Field[] = [];
+
+            for(var p in this.fields){
+
+                if(!this.fields[p].validate())
+                {
+                    var error:Field|Field[] = this.fields[p].getErrorFields();
+                    if(error instanceof Field)
+                    {
+                        errors.push(error);
+                    }
+                    errors = errors.concat(<Field[]>error);
+                }
+            }
+
+            return errors.length?errors:true;
         }
         public submit():void
         {
@@ -1056,9 +1084,17 @@ module ghost.browser.forms
                 this.$error.text("");
             }
         }
+        public getErrorFields():Field|Field[]
+        {
+            if(this.error )
+            {
+                return this;
+            }
+            return null;
+        }
         public validate():boolean
         {
-            if(!this.useValidator)
+            if(false && !this.useValidator)
             {
                 return true;
             }
@@ -1186,7 +1222,17 @@ module ghost.browser.forms
         }
         public isValid():boolean
         {
+            if(!this.required && this.$input.attr("required")!=undefined)
+            {
+                this.required = true;
+            }
+
             var value:any = this.getValue();
+            if(!value && this.required)
+            {
+                this.error = "required";
+                return false;
+            }
             for(var p in this.validators)
             {
 
@@ -1336,6 +1382,15 @@ module ghost.browser.forms
             //this.sublist = [];
             super(name, data, element, _setInitialData, form, parent);
         }
+        public validate():boolean
+        {
+            var success:boolean = true;
+            for(var p in this.items)
+            {
+                success = success && this.items[p].validate();
+            }
+            return success;
+        }
         public onChange(data:any, input?:Field, name?:string, itemField?:ItemField):void
         {
             if(!data)
@@ -1354,6 +1409,22 @@ module ghost.browser.forms
         public getFields():Field[]
         {
             return this.items;
+        }
+        public getErrorFields():Field|Field[]
+        {
+            var errors:Field[] = [];
+            for(var p in this.items)
+            {
+                var error:Field|Field[] = this.items[p].getErrorFields();
+                if(error instanceof Field)
+                {
+                    errors.push(error);
+                }else
+                {
+                    errors = errors.concat(<Field[]>error);
+                }
+            }
+            return errors;
         }
         public init():void
         {
@@ -1731,12 +1802,37 @@ module ghost.browser.forms
         {
             return this.fields;
         }
+        public validate():boolean
+        {
+            var success:boolean = true;
+            for(var p in this.fields)
+            {
+                success = success && this.fields[p].validate();
+            }
+            return success;
+        }
         public focus():void
         {
             if(this.fields && this.fields.length)
             {
                 this.fields[0].focus();
             }
+        }
+        public getErrorFields():Field|Field[]
+        {
+            var errors:Field[] = [];
+            for(var p in this.fields)
+            {
+                var error:Field|Field[] = this.fields[p].getErrorFields();
+                if(error instanceof Field)
+                {
+                    errors.push(error);
+                }else
+                {
+                    errors = errors.concat(<Field[]>error);
+                }
+            }
+            return errors;
         }
         public cloneData(data?:any):any
         {
@@ -2375,6 +2471,20 @@ module ghost.browser.forms
         {
             super.onChange(event);
             this.checkLimits();
+        }
+        public isValid():boolean
+        {
+            if(super.isValid())
+            {
+                var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
+                if(count<0)
+                {
+                    this.error = "too_long";
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
         private checkLimits():void
         {
