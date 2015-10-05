@@ -1202,7 +1202,8 @@ module ghost.browser.forms
         }
         protected triggerChange():void
         {
-            this.validate();
+            //TODO:perhaps consequences
+           // this.validate();
             var data = {value:this.data[this.name], input:this, name:this.name};
             if(this.additionals)
             {
