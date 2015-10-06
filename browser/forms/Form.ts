@@ -683,7 +683,7 @@ module ghost.browser.forms
             if(Form.customClasses.indexOf(cls) == -1)
                 Form.customClasses.push(cls);
         }
-        private static getField(element):any
+        public static getField(element):any
         {
             var cls:any;
             for(var p in Form.customClasses)
@@ -1627,8 +1627,12 @@ module ghost.browser.forms
         protected addItem(index:number, item:any):ItemField
         {
             var lastItem:any = this.getListItem("[data-item]").eq(index);
-
-            var itemField:ItemField = new ItemField(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form, this);
+            var cls:any = ItemField;
+            if($(lastItem).attr("data-type"))
+            {
+                cls = Form.getField(lastItem);
+            }
+            var itemField:ItemField = new cls(this.name, this.data[this.name][index], lastItem, this._setInitialData, this.form, this);
             itemField.on(Field.EVENT_CHANGE, this.onChange, this, itemField);
             itemField.on(Field.EVENT_AUTOCOMPLETE, this.onAutocomplete, this, itemField);
             itemField.on(ListField.EVENT_ADD, this.onAdd, this, itemField);
@@ -1825,12 +1829,15 @@ module ghost.browser.forms
             for(var p in this.fields)
             {
                 var error:Field|Field[] = this.fields[p].getErrorFields();
-                if(error instanceof Field)
+                if(error)
                 {
-                    errors.push(error);
-                }else
-                {
-                    errors = errors.concat(<Field[]>error);
+                    if(error instanceof Field)
+                    {
+                        errors.push(error);
+                    }else
+                    {
+                        errors = errors.concat(<Field[]>error);
+                    }
                 }
             }
             return errors;
@@ -2477,6 +2484,10 @@ module ghost.browser.forms
         {
             if(super.isValid())
             {
+                if(this.max == -1)
+                {
+                    return true;
+                }
                 var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
                 if(count<0)
                 {
