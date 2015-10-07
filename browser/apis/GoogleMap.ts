@@ -20,7 +20,7 @@ module ghost.browser.apis
 		{
 			return window["google"] && window["google"].maps && window["google"].maps.Geocoder;
 		}
-		private static init():Promise<any>
+		public static init(key:string = null):Promise<any>
 		{
 			var promise:Promise<any> = new Promise((resolve, reject)=>
 			{
@@ -32,7 +32,7 @@ module ghost.browser.apis
 				__initialize__gmap["resolve"] = resolve;
 				var script = document.createElement('script');
 				script.type = 'text/javascript';
-				script.src =  'https://maps.googleapis.com/maps/api/js?v=3.exp&' + 'libraries=places'+'&callback=__initialize__gmap&language=en';
+				script.src =  'https://maps.googleapis.com/maps/api/js?'+(key?'key='+key+'&':'')+'v=3.exp&' + 'libraries=places'+'&callback=__initialize__gmap&language=en';
 				document.body.appendChild(script);
 			});
 			return promise;
