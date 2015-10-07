@@ -51,6 +51,7 @@ module ghost.browser.forms
         public static EVENT_SUBMITTED:string = "submitted";
         public static EVENT_SUBMIT_ERROR:string = "submit_error";
         private static customClasses:any[] = [];
+        private static customListClasses:any[] = [];
 
         public static instances:Form[] = [];
         public static debug():void
@@ -161,7 +162,7 @@ module ghost.browser.forms
                     //
                     return null;
                 }
-                var cls:any = list?ListField:Form.getField(element);
+                var cls:any = list?Form.getFieldList(element):Form.getField(element);
                 var field:Field;
                 if(cls)
                 {
@@ -680,8 +681,33 @@ module ghost.browser.forms
         }
         public static addFieldClass(cls):void
         {
+            var name:string = ghost.utils.Classes.getName(cls);
+            if(name && name.indexOf("ListField")!=-1)
+            {
+                if(Form.customListClasses.indexOf(cls) == -1)
+                    Form.customListClasses.push(cls);
+
+                return;
+            }
             if(Form.customClasses.indexOf(cls) == -1)
                 Form.customClasses.push(cls);
+        }
+        public static getFieldList(element):any
+        {
+
+            var cls:any = ListField;
+            for(var p in Form.customListClasses)
+            {
+                if(Form.customListClasses[p].match)
+                {
+                    if(Form.customListClasses[p].match(element))
+                    {
+
+                        return Form.customListClasses[p];
+                    }
+                }
+            }
+            return cls;
         }
         public static getField(element):any
         {
@@ -1363,7 +1389,7 @@ module ghost.browser.forms
         /**
          * Item list
          */
-        private items:Field[];
+        protected items:Field[];
         /**
          * Max items
          */
@@ -1999,6 +2025,11 @@ module ghost.browser.forms
             if(value)
             {
                 var item:IChangeData = value[0];
+                if(!item)
+                {
+                    //weird
+                    return;
+                }
                 var input:Field = item.input;
                 var index:number;
                 if((index = this._inputs.indexOf(input))==-1)
