@@ -65,7 +65,7 @@ module ghost.mvc
                 ).done((result)=> {
                     this.options = 
                     {
-                        template:result,
+                        template:result.template.content,
 
                     }; 
                     if(callback)
