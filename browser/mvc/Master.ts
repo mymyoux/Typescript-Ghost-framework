@@ -1,6 +1,8 @@
 ///<module="io"/>
 ///<file="IData"/>
 ///<file="Controller"/>
+///<file="Template"/>
+
 
 ///<lib="ractive"/>
 ///<module="framework/ghost/promises"/>
@@ -298,7 +300,7 @@ module ghost.mvc
         protected initializeData():Promise<any>|boolean
         {
             var params:any = this.getActivationParams();
-        	var promises:Promise<any>[] = this._data.map((item:any, index:number)=>
+        	var promises:Promise<any>[] = <any>this._data.map((item:any, index:number)=>
         	{	
                 if(item.retrieveData)
                 {
