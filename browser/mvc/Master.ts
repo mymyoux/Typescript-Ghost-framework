@@ -282,9 +282,9 @@ module ghost.mvc
         		{
 					ghost.io.ajax({url:template, retry:ghost.io.RETRY_INFINITE})
 	        		.then(
-        			function(result:string)
+        			function(result:any)
         			{	
-        				_this.templateString = result;
+        				_this.templateString = result.template.content;
         				resolve();
     				},
     				reject
