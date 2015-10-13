@@ -112,6 +112,17 @@ module ghost.browser.notifications
             this.notification(name).clear();
             this._muted = false;
         }
+        public updateNotification(name:string):void
+        {
+            this.notification(name).update();
+        }
+        public updateNotifications():void
+        {
+            for(var p in this.notifications)
+            {
+                this.notifications[p].update();
+            }
+        }
         public dispose():void
         {
             this._muted = true;
@@ -239,6 +250,11 @@ module ghost.browser.notifications
             var $notificationClasses:JQuery = $notifications.find(".data-notification-value").addBack(".data-notification-value");
             $notifications.attr("data-notification-value", this.value);
             $notificationClasses.text(this.value);
+            $notifications.addClass("animated");
+            setTimeout(function()
+            {
+                $notifications.removeClass("animated");
+            }, 500);
             if(this.last != null)
             {
                 $notifications.attr("data-notification-last", this.last);
