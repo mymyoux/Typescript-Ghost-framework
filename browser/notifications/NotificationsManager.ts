@@ -43,6 +43,7 @@ module ghost.browser.notifications
         }
         protected listenClick(event:any):void
         {
+            debugger;
             this.clearNotification($(event.currentTarget).attr("data-notification"));
         }
         protected listenAdd(event:any):void
@@ -238,7 +239,6 @@ module ghost.browser.notifications
             var $notifications:JQuery = $(document).find("[data-notification='"+this.name+"']");
             var $notificationClasses:JQuery = $notifications.find(".data-notification-value").addBack(".data-notification-value");
             $notifications.attr("data-notification-value", this.value);
-            debugger;
             $notificationClasses.text(this.value);
             if(this.last != null)
             {
