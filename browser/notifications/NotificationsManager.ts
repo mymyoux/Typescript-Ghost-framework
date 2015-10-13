@@ -43,7 +43,6 @@ module ghost.browser.notifications
         }
         protected listenClick(event:any):void
         {
-            debugger;
             this.clearNotification($(event.currentTarget).attr("data-notification"));
         }
         protected listenAdd(event:any):void
