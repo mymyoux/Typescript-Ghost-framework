@@ -61,6 +61,8 @@ module ghost.mvc
             }
             this.navigation().listen();
 
+            ghost.mvc.Template.sync();
+
 
         }
         public getDefaultPages():any

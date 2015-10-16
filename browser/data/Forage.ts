@@ -7,7 +7,7 @@ module ghost.data
     {
         debug?:boolean;
     }
-    var _log:any = function(){console.log("mute function")};
+    var _log:any = function(){};
     export class LocalForage
     {
         private _storage:any;
@@ -53,13 +53,6 @@ module ghost.data
             this._data = {};
             this._sync = {};
             this._allSync = false;
-        }
-        public init():Promise<any>
-        {
-            return new Promise<any>(function(resolve,reject):void
-            {
-                resolve();
-            });
         }
         /**
          * Gets Item by key
@@ -245,23 +238,18 @@ module ghost.data
             });
             return promise;
         }
-        public warehouse(name:string):Promise<LocalForage>
+        public warehouse(name:string):LocalForage
         {
             return this.war(name);
         }
-        public war(name:string):Promise<LocalForage>
+        public war(name:string):LocalForage
         {
-            var promise:Promise<LocalForage> = new Promise<LocalForage>((resolve:any, reject:any):void=>
+
+            if(!this._warehouses[name])
             {
-                if(!this._warehouses[name])
-                {
-                    this._warehouses[name] = new LocalForage(this._name+"/"+name);
-                    this._warehouses[name].init().then(resolve, reject);
-                    return;
-                }
-                resolve(this._warehouses[name]);
-            });
-            return promise;
+                this._warehouses[name] = new LocalForage(this._name+"/"+name);
+            }
+            return this._warehouses[name];
         }
     }
 }
