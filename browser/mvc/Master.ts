@@ -16,7 +16,8 @@ module ghost.mvc
          * @type {{ACTIVATED: (ACTIVATED), DISACTIVATED: (DISACTIVATED)}}
          */
         public static EVENTS:any = Controller.EVENTS;
-		private templateString:string;
+		//private templateString:string;
+        private templateData:Template;
 		protected template:Ractive;
 		private templateOptions:IRactiveOptions;
 		protected _firstActivation:boolean = true;
@@ -271,26 +272,46 @@ module ghost.mvc
         }
         protected initializeView():Promise<any>|boolean
         {
-        	if(!this.templateString)
+        	if(!this.templateData)
         	{
-        		var _this:Master = this;
+        		//var _this:Master = this;
         		var template:string = this._getTemplate();
         		if(!template)
         		{
         			 console.warn("no template for master:", this);
                     return true;
         		}
-        		var promise:Promise<void> = new Promise<void>(function(resolve, reject):void
+               var temp = Template.getTemplate(template);
+               if(temp)
+               {
+                    return true;
+               }
+
+        		var promise:Promise<void> = new Promise<void>((resolve, reject):void=>
         		{
-					ghost.io.ajax({url:template, retry:ghost.io.RETRY_INFINITE})
+                    Template.load(template).then((template:Template)=>
+                    {
+                        this.templateData = template;
+                        resolve();
+                    }, reject);
+					/*ghost.io.ajax({url:template, retry:ghost.io.RETRY_INFINITE})
 	        		.then(
         			function(result:any)
-        			{	
-        				_this.templateString = result.template.content;
-        				resolve();
+        			{
+                        if(result.template)
+                        {
+                            result.template.url = template;
+                            _this.templateData = Template.setTemplate(result.template);
+
+                            resolve();
+
+                        }else
+                        {
+                            reject("no template");
+                        }
     				},
     				reject
-	    			);
+	    			);*/
         		});
         		
                 return promise;
@@ -512,7 +533,7 @@ module ghost.mvc
         		this.showContainer();
                 var options:any = 
                 {
-                	template:this.templateString
+
                 };
                 //toRactive + listener on evnetdispatcher
 
@@ -562,7 +583,12 @@ module ghost.mvc
                 try
                 {
 
-                    console.log(options);
+                    if(!this.templateData.isParsed())
+                    {
+                        this.templateData.parse(options);
+                    }
+                    options.template = JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
+                    //debugger;
                     this.template = new Ractive(options);
                 }catch(error)
                 {
