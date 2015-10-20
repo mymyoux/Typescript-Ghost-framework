@@ -39,6 +39,16 @@ module ghost.mvc
         {
             return Template.cache().keys();
         }
+        private static getRootURL():string
+        {
+            var pathname:string = window.location.pathname;
+            var index:number = pathname.indexOf("/",1);
+            if(index > -1)
+            {
+                pathname = pathname.substring(0, index);
+            }
+            return window.location.protocol+"//"+window.location.host+(pathname.length>1?pathname+"/":pathname);
+        }
         public static sync():void{
             var templates:any[] = [];
             ghost.mvc.Template.iterate(function(template:ghost.mvc.Template):void{
@@ -48,7 +58,7 @@ module ghost.mvc
                 ghost.io.ajax(
                     {
                         ///ad prefix
-                        url:"integration-sync",
+                        url:Template.getRootURL()+"integration-sync",
                         data:{
                             templates:templates
                         },
