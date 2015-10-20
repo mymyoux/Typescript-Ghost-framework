@@ -284,6 +284,8 @@ module ghost.mvc
                var temp = Template.getTemplate(template);
                if(temp)
                {
+                   this.templateData = temp;
+                   console.log("already loaded:", this.name());
                     return true;
                }
 
@@ -292,6 +294,11 @@ module ghost.mvc
                     Template.load(template).then((template:Template)=>
                     {
                         this.templateData = template;
+                        if(!this.templateData)
+                        {
+                            debugger;
+                        }
+                        console.log("loaded:", this.name());
                         resolve();
                     }, reject);
 					/*ghost.io.ajax({url:template, retry:ghost.io.RETRY_INFINITE})
@@ -582,6 +589,12 @@ module ghost.mvc
                 ghost.browser.i18n.Polyglot.instance().on("resolved", this._onTranslationChange, this);
                 try
                 {
+
+                    console.log("render:", this.name());
+                    if(!this.templateData)
+                    {
+                        debugger;
+                    }
 
                     if(!this.templateData.isParsed())
                     {
