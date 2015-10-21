@@ -117,7 +117,6 @@ module ghost.data
             return new Promise<any[]>((resolve:any, reject:any):void=>
             {
 
-                debugger;
                 if(this._allSync)
                 {
                     _log("iterate from cache");
@@ -138,7 +137,6 @@ module ghost.data
                    return result;
                }).then((data:any)=>
                {
-                   debugger;
                    if(data === undefined)
                    {
                        this._allSync = true;

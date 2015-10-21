@@ -1,8 +1,10 @@
 ///<lib="es6-promise"/>
+///<module="events"/>
 module ghost.mvc
 {
-    export class Template
+    export class Template extends ghost.events.EventDispatcher
     {
+        public static EVENT_EXPIRED:string = "expired";
         protected static _instance:Template;
         public static instance():Template
         {
@@ -65,6 +67,10 @@ module ghost.mvc
          */
         public md5:string;
         /**
+         * Version
+         */
+        public version:number;
+        /**
          * Parsed template
          */
         public parsed:any;
@@ -88,8 +94,9 @@ module ghost.mvc
             Template.cache().setItem(this.url, {
                 url:this.url,
                 md5:this.md5,
+                version:this.version,
                 parsed:this.parsed
-            })
+            });
 
         }
 
@@ -122,6 +129,7 @@ module ghost.mvc
             }
 
             template.url = rawTemplate.url;
+            template.version = rawTemplate.version;
             template.md5 = rawTemplate.md5;
             Template._templates[template.url] = template;
             return template;
@@ -144,10 +152,16 @@ module ghost.mvc
         }
 
         protected sync():void{
-            debugger;
             var templates:any[] = [];
             this.iterate(function(template:ghost.mvc.Template):void{
-                templates.push({url:template.url,md5:template.md5});
+                var requestTemplate:any ={url:template.url};
+                if(template.version)
+                {
+                    requestTemplate.version = template.version
+                }else {
+                    requestTemplate.md5 = template.md5;
+                }
+                templates.push(requestTemplate);
             }).then(()=>
             {
                 ghost.io.ajax(
@@ -158,9 +172,23 @@ module ghost.mvc
                             templates:templates
                         },
                         method:"POST"
-                    }).then(function(data:any):void
+                    }).then((data:any):void=>
                 {
-                    debugger;
+                   if(data && data.expired)
+                   {
+                       var expired;
+                       for(var p in data.expired)
+                       {
+                           expired = data.expired[p];
+                           if(Template._templates[expired])
+                           {
+                               Template._templates[expired].expired();
+                           }else
+                           {
+                               this.cache().removeItem(expired);
+                           }
+                       }
+                   }
                 }, function(error:any):void
                 {
                     debugger;
@@ -173,34 +201,27 @@ module ghost.mvc
             {
                 this.cache().iterate((rawTemplate:IRawTemplate, url:string, index:number):any=>
                 {
-                    debugger;
                     var result:any = iterator(this.setTemplate(rawTemplate));
                     return result;
-                }).then(function()
-                {
-                    debugger;resolve();
-                }, function()
-                {
-                    debugger; reject();
-                });
+                }).then(resolve, reject);
             });
             return promise;
         }
-        protected load(url:string, forceReload:boolean = false):Promise<any>
+        protected load(name:string, forceReload:boolean = false):Promise<any>
         {
             var promise:Promise<void> = new Promise<void>((resolve:any, reject):void=>
             {
-                this.cache().getItem(url).then((template:IRawTemplate)=>
+                this.cache().getItem(name).then((template:IRawTemplate)=>
                 {
                     if(!template || forceReload)
                     {
-                        ghost.io.ajax({url:url, retry:ghost.io.RETRY_INFINITE})
+                        ghost.io.ajax({url:this.getURLFromTemplatename(name), retry:ghost.io.RETRY_INFINITE})
                             .then(
                                 (result:any)=>
                                 {
                                     if(result.template)
                                     {
-                                        result.template.url = url;
+                                        result.template.url = name;
                                         resolve(this.setTemplate(result.template));
 
                                     }else
@@ -215,25 +236,32 @@ module ghost.mvc
                         resolve(this.setTemplate(template));
                     }
                 });
-
-                /*ghost.io.ajax({url:url, retry:ghost.io.RETRY_INFINITE})
-                 .then(
-                 function(result:any)
-                 {
-                 if(result.template)
-                 {
-                 result.template.url = url;
-                 resolve(Template.setTemplate(result.template));
-
-                 }else
-                 {
-                 reject("no template");
-                 }
-                 },
-                 reject
-                 );*/
             });
             return promise;
+        }
+        protected getURLFromTemplatename(name:string):string
+        {
+            return "integration/"+name;//this.getRootURL()+"integration/"+name;
+        }
+        protected expired():void
+        {
+            this.md5 = null;
+            this.content = null;
+            this.parsed = null;
+            Template.cache().removeItem(this.url);
+            this.trigger(Template.EVENT_EXPIRED);
+        }
+        public loaded():boolean
+        {
+            if(!this.parsed && !this.content)
+            {
+                return false;
+            }
+            return true;
+        }
+        public retrieve():Promise<any>
+        {
+            return Template.instance().load(this.url);
         }
     }
     export interface IRawTemplate
@@ -242,5 +270,6 @@ module ghost.mvc
         content:string;
         url:string;
         parsed:string;
+        version:number;
     }
 }
