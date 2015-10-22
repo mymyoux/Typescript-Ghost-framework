@@ -164,6 +164,10 @@ module ghost.mvc
                 templates.push(requestTemplate);
             }).then(()=>
             {
+                if(!templates.length)
+                {
+                    return;
+                }
                 ghost.io.ajax(
                     {
                         ///ad prefix
