@@ -91,12 +91,15 @@ module ghost.mvc
         public parse(options:any):void
         {
             this.parsed = Ractive["parse"](this.content, options);
-            Template.cache().setItem(this.url, {
-                url:this.url,
-                md5:this.md5,
-                version:this.version,
-                parsed:this.parsed
-            });
+            if(window.location.host.indexOf(".local")==-1)
+            {
+                Template.cache().setItem(this.url, {
+                    url:this.url,
+                    md5:this.md5,
+                    version:this.version,
+                    parsed:this.parsed
+                });
+            }
 
         }
 
