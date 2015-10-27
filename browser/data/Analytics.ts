@@ -40,7 +40,7 @@ module ghost.browser.data
                     console.log("[FAKEPIWIK] track page view");
 
                 },
-                track: function(name, args)
+                track: function(name:any, args:any):void
                 {
                     this.requests.push({name:name, args:args});
                     this.checkPiwik();
@@ -144,7 +144,10 @@ module ghost.browser.data
         trackSiteSearch(keyword:string, category?:string, resultsCount?:number);
         setCustomVariable(index:number, name:string, value:string, scope:string);
         setUserId(id:string);
-        trackPageView();
+        track(name:any, args:any):void;
+        trackPageView():void;
+        checkPiwik():void;
+        requests:any;
     }
 
 }

@@ -76,7 +76,9 @@ module ghost.io
 	}
 	export var RETRY_INFINITE:number = -1;
 	export function ajax(settings:AjaxOptions):CancelablePromise<Object>;
+	export function ajax(settings:any):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:AjaxOptions):CancelablePromise<Object>;
+	export function ajax(url:string, settings?:any):CancelablePromise<Object>;
 	export function ajax(url:any, settings?:AjaxOptions):CancelablePromise<Object>
 	{
 		if(typeof url == "string")
@@ -226,5 +228,6 @@ module ghost.io
 		 * Default to true
 		 */
 		onlyJSON?:boolean;
+		success_always?:Function;
 	}
 }
