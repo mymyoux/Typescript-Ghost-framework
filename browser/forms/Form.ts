@@ -1423,6 +1423,12 @@ namespace ghost.browser.forms
             if(!data)
             {
                 debugger;
+                return;
+            }
+            if(!data[data.length-1])
+            {
+                debugger;
+                return;
             }
             data[data.length-1].name = this.name;
             data[data.length-1].list = this;
