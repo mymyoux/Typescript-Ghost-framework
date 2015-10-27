@@ -1,6 +1,6 @@
 ///<lib="jquery"/>
 ///<module="navigation"/>
-module ghost.transitions
+namespace ghost.transitions
 {
     
     

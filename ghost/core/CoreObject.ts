@@ -7,7 +7,7 @@
 window.onerror = function(err, url, line){
     alert(err + '\n on page: ' + url + '\n on line: ' + line);
 };*/
-module ghost.core
+namespace ghost.core
 {
     /**
      * CoreObject

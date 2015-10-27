@@ -1,4 +1,4 @@
-module ghost.validators
+namespace ghost.validators
 {
     export class Validator
     {

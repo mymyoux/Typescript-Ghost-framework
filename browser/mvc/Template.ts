@@ -1,6 +1,6 @@
 ///<lib="es6-promise"/>
 ///<module="events"/>
-module ghost.mvc
+namespace ghost.mvc
 {
     export class Template extends ghost.events.EventDispatcher
     {

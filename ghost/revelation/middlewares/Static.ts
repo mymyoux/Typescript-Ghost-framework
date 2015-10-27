@@ -2,7 +2,7 @@
 ///<file="IMiddleWare"/>
 ///<module="io"/>
 ///<lib="node"/>
-module ghost.revelation.middlewares
+namespace ghost.revelation.middlewares
 {
     var express_module = require("express");
     export class Static implements ghost.revelation.IMiddleWare

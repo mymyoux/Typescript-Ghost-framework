@@ -1,5 +1,5 @@
 ///<module="io"/>
-module ghost.browser.apis.smartplace
+namespace ghost.browser.apis.smartplace
 {
     export class Smartplace
     {

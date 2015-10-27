@@ -1,5 +1,5 @@
 ///<module="ghost/core"/>
-module ghost.data
+namespace ghost.data
 {
     class LocalStorage
     {
@@ -170,7 +170,7 @@ module ghost.data
     }
 
 }
-module ghost
+namespace ghost
 {
     export var cache:ghost.data.Warehouse = new ghost.data.Warehouse("root");
 }

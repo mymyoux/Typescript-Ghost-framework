@@ -1,4 +1,4 @@
-module ghost.core
+namespace ghost.core
 {
     
     //TODO:try to removes phonegap dependency

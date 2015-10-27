@@ -1,5 +1,5 @@
 
-module ghost.utils
+namespace ghost.utils
 {
     /**
      * Cryptography

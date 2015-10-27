@@ -14,7 +14,7 @@ colors.setTheme({
   debug: 'blue',
   error: 'red'
 });
-module ghost.revelation
+namespace ghost.revelation
 {
 	export class Server
 	{

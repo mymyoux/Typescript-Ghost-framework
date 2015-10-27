@@ -1,5 +1,5 @@
 ///<lib="jquery"/>
-module ghost.browser.notifications
+namespace ghost.browser.notifications
 {
     /**
      * Manage notifications

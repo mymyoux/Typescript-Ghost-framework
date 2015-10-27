@@ -1,4 +1,4 @@
-module ghost.browser.data
+namespace ghost.browser.data
 {
     export class Analytics
     {

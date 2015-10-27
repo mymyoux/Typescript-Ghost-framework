@@ -3,7 +3,7 @@
 ///<module="io"/>
 
 ///<lib="node"/>
-module ghost.revelation.middlewares
+namespace ghost.revelation.middlewares
 {
     var path_module = require("path");
     var fs_module = require("fs");

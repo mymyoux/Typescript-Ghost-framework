@@ -1,4 +1,4 @@
-module ghost.data
+namespace ghost.data
 {
     /**
      * HashMap

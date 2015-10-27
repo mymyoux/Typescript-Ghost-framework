@@ -1,5 +1,5 @@
 ///<reference path="../../ghost/core/core.class.d.ts"/>
-module ghost.phonegap
+namespace ghost.phonegap
 {
 
     //TODO:remove this as it has been integrated into Eventer

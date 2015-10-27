@@ -1,7 +1,7 @@
 ///<lib="facebook"/>    
 ///<lib="jquery"/>    
 ///<module="ghost/core"/>    
-module ghost.browser.apis
+namespace ghost.browser.apis
 {
  
     export interface IFacebookInitParameters {

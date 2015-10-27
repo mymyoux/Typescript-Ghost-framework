@@ -1,7 +1,7 @@
 ///<module="events"/>
 ///<module="debug"/>
 ///<lib="jquery"/>
-module ghost.browser.navigation
+namespace ghost.browser.navigation
 {
  //   export var Navigation:Navigation;
     /**

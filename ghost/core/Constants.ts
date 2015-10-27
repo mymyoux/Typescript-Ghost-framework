@@ -1,4 +1,4 @@
-module ghost
+namespace ghost
 {
     export class _Constant
     {

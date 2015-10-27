@@ -1,7 +1,7 @@
 ///<module="ghost/events"/>
 ///<module="ghost/utils"/>
 ///<file="IData"/>
-module ghost.mvc
+namespace ghost.mvc
 {
 
     //TODO:controller(view) => preload models=> load data from ajax or memory

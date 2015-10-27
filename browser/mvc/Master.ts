@@ -7,7 +7,7 @@
 ///<lib="ractive"/>
 ///<module="framework/ghost/promises"/>
 ///<module="framework/browser/debug"/>
-module ghost.mvc
+namespace ghost.mvc
 {
 	export class Master extends Controller
 	{

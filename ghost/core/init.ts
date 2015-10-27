@@ -18,7 +18,7 @@ try
     ROOT._isNode = true;
 }
 
-module ghost
+namespace ghost
 {
     export function hasClass(name?:string):boolean
     {

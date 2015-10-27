@@ -1,5 +1,5 @@
 ///<lib="es6-promise"/>
-module ghost.browser.io
+namespace ghost.browser.io
 {
 	export class FileAPI
 	{

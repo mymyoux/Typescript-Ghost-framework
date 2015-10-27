@@ -1,6 +1,6 @@
 ///<lib="jquery"/>
 ///<lib="es6-promise"/>
-module ghost.io
+namespace ghost.io
 {
 	var middlewares:any[] = [];
 	function middleware(data:any, type:string):any

@@ -1,5 +1,5 @@
 ///<module="framework/ghost/events"/>
-module ghost.browser.i18n
+namespace ghost.browser.i18n
 {
 //  Work based on : 
 //     (c) 2012 Airbnb, Inc.

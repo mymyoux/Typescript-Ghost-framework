@@ -1,5 +1,5 @@
 ///<lib="node"/>
-module ghost.io
+namespace ghost.io
 {
     var mime = require("mime");
     var fs = require("fs");

@@ -1,7 +1,7 @@
 ///<module="utils"/>
 ///<lib="es6-promise"/>
 ///<file="mongo/Model"/>
-module ghost.db.mongo
+namespace ghost.db.mongo
 {
 	export class Table
 	{

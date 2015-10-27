@@ -1,5 +1,5 @@
 ///<lib="es6-promise"/>
-module ghost.performance
+namespace ghost.performance
 {
     export class Watch
     {

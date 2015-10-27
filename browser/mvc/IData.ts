@@ -1,4 +1,4 @@
-module ghost.mvc
+namespace ghost.mvc
 {
 	export interface IData
 	{

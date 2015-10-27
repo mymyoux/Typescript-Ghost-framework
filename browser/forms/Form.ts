@@ -3,7 +3,7 @@
 ///<module="framework/ghost/utils"/>
 ///<module="framework/browser/io"/>
 ///<module="framework/ghost/events"/>
-module ghost.browser.forms
+namespace ghost.browser.forms
 {
 //Gérer le choix par autocomplete (tjs id (du model auquel on lie pas de la relation)? )
 //comme ça l'id de la relation ne change pas c'est + simple

@@ -2,7 +2,7 @@
 ///<module="ghost/utils"/>
 ///<file="Model.ts"/>
 ///<file="IData.ts"/>
-module ghost.mvc
+namespace ghost.mvc
 {
     /**
      * Collection class

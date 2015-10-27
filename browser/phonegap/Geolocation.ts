@@ -1,4 +1,4 @@
-module ghost.phonegap
+namespace ghost.phonegap
 {
     export interface IDataPosition
     {

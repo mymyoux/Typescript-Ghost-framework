@@ -3,7 +3,7 @@
 ///<module="browser/navigation"/>
 ///<module="browser/i18n"/>
 ///<file="Controller.ts"/>
-module ghost.mvc
+namespace ghost.mvc
 {
     export class Application extends ghost.core.CoreObject
     {

@@ -4,7 +4,7 @@
 ///<file="ControllerView.ts"/>
 ///<lib="ractive"/>
 ///
-module ghost.mvc
+namespace ghost.mvc
 {
     export class View extends ghost.core.CoreObject
     {

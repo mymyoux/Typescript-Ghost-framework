@@ -3,7 +3,7 @@
 
 ///<file="Model.ts"/>
 ///<file="Collection.ts"/>
-module ghost.mvc
+namespace ghost.mvc
 {
     /**
      * Controller

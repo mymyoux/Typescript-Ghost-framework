@@ -1,7 +1,7 @@
 ///<file="EventDispatcher"/>
 ///<module="core"/>
 ///<module="utils"/>
-module ghost.events
+namespace ghost.events
 {
     
     /**

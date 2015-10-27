@@ -2,7 +2,7 @@
 ///<file="IMiddleWare"/>
 ///<module="io"/>
 ///<lib="node"/>
-module ghost.revelation.middlewares
+namespace ghost.revelation.middlewares
 {
     var path_module = require("path");
     export class Ractive implements ghost.revelation.IMiddleWare

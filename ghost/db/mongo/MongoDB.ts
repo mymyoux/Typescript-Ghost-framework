@@ -1,6 +1,6 @@
 ///<file="mongo/Table"/>
 ///<module="framework/ghost/utils"/>
-module ghost.db.mongo
+namespace ghost.db.mongo
 {
 	export class MongoDB
 	{

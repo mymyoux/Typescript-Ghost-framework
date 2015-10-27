@@ -5,7 +5,7 @@
 ///<module="framework/ghost/utils"/>
 ///<module="framework/ghost/db"/>
 ///<module="promises"/>
-module ghost.revelation
+namespace ghost.revelation
 {
 	var path_module = require("path");
 	export class Application extends ghost.core.CoreObject

@@ -1,6 +1,6 @@
 ///<lib="es6-promise"/>
 
-module ghost.promises
+namespace ghost.promises
 {
 	export class _Promise
 	{

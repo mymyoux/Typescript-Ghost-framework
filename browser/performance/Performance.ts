@@ -1,6 +1,6 @@
 ///<module="ghost/core"/>
 
-module ghost.performance
+namespace ghost.performance
 {
     export class Performance
     {

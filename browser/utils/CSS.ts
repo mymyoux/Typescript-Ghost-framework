@@ -1,6 +1,6 @@
 ///<module="ghost/core"/>
 ///<lib="jquery"/>
-module ghost.utils
+namespace ghost.utils
 {
 	export class CSS
 	{

@@ -1,4 +1,4 @@
-module ghost.revelation
+namespace ghost.revelation
 {
 	export class RouteController extends ghost.core.CoreObject
 	{

@@ -1,6 +1,6 @@
 ///<lib="googlemaps"/>
 ///<lib="es6-promise"/>
-module ghost.browser.apis
+namespace ghost.browser.apis
 {
 	/**
 	 * Google Map API wrapper

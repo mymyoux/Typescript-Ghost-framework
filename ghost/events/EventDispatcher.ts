@@ -1,6 +1,6 @@
 
 
-module ghost.events
+namespace ghost.events
 {
     /**
      * Event Dispatcher

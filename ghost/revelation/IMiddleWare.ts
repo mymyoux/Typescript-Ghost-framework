@@ -1,4 +1,4 @@
-module ghost.revelation
+namespace ghost.revelation
 {
     export interface IMiddleWare
     {

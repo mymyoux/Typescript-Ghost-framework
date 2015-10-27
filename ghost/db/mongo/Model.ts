@@ -1,4 +1,4 @@
-module ghost.db.mongo
+namespace ghost.db.mongo
 {
 	export class Model
 	{

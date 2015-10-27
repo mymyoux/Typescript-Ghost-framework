@@ -1,6 +1,6 @@
 ///<lib="jquery"/>
 ///<module="navigation"/>
-module ghost.phonegap
+namespace ghost.phonegap
 {
     
     

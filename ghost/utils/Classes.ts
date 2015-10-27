@@ -1,5 +1,5 @@
 ///<reference path="../core/core.class.d.ts"/>
-module ghost.utils
+namespace ghost.utils
 {
     export class Classes
     {

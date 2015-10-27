@@ -1,7 +1,7 @@
 ///<module="data"/>
 ///<module="framework/ghost/utils"/>
 
-module ghost.debug
+namespace ghost.debug
 {
     /**
      * Logger

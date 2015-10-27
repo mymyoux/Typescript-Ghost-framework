@@ -1,5 +1,5 @@
 
-module ghost.phonegap
+namespace ghost.phonegap
 {
     /**
      * @private

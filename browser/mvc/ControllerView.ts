@@ -2,7 +2,7 @@
 
 ///<lib="jquery"/>
 ///<module="browser/navigation"/>
-module ghost.mvc
+namespace ghost.mvc
 {
     /**
      * Controller with views

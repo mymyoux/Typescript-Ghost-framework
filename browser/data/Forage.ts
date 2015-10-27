@@ -1,7 +1,7 @@
 ///<module="ghost/core"/>
 ///<lib="es6-promise"/>
 //TODO:add mozilla API and converts with Promises
-module ghost.data
+namespace ghost.data
 {
     export interface ILocalForageOptions
     {
@@ -254,7 +254,7 @@ module ghost.data
         }
     }
 }
-module ghost
+namespace ghost
 {
    // export var forage:ghost.data.Foragehouse = new ghost.data.Foragehouse("root");
     export var forage:ghost.data.LocalForage = new ghost.data.LocalForage({debug:false});

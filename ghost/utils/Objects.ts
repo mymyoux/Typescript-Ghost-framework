@@ -1,4 +1,4 @@
-module ghost.utils
+namespace ghost.utils
 {
     export class Objects
     {

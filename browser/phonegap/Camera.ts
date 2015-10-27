@@ -1,4 +1,4 @@
-module ghost.phonegap
+namespace ghost.phonegap
 {
     var _Camera:any;
     if(!ROOT.Camera)

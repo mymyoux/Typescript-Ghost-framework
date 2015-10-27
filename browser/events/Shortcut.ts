@@ -1,5 +1,5 @@
 ///<module="ghost/events"/>
-module ghost
+namespace ghost
 {  
 
     export function ready(callback:Function):void
