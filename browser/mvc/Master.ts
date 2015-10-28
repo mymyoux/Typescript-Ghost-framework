@@ -630,8 +630,9 @@ namespace ghost.mvc
                     {
                         this.templateData.parse(options);
                     }
-                    options.template = JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
+                    options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
                     //debugger;
+                    console.log("TEMPLATE", options);
                     this.template = new Ractive(options);
                 }catch(error)
                 {

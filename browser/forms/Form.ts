@@ -174,6 +174,7 @@ namespace ghost.browser.forms
                         field.on(ListField.EVENT_ADD, this.onAdd, this, name, field);
                         field.on(ListField.EVENT_REMOVE, this.onRemove, this, name, field);
                     }
+
                     field.initialize();
                 }
                 return field;
@@ -694,7 +695,6 @@ namespace ghost.browser.forms
         }
         public static getFieldList(element):any
         {
-
             var cls:any = ListField;
             for(var p in Form.customListClasses)
             {
@@ -702,7 +702,6 @@ namespace ghost.browser.forms
                 {
                     if(Form.customListClasses[p].match(element))
                     {
-
                         return Form.customListClasses[p];
                     }
                 }
@@ -1404,11 +1403,13 @@ namespace ghost.browser.forms
         private sublist:string[];
         public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form, parent:Field|Form)
         {
+            console.log("LISTFIELD:"+name, this.$input);
             this.items = [];
             this.min = this.max = -1;
             //this.sublist = [];
             super(name, data, element, _setInitialData, form, parent);
         }
+
         public validate():boolean
         {
             var success:boolean = true;
@@ -1420,6 +1421,7 @@ namespace ghost.browser.forms
         }
         public onChange(data:any, input?:Field, name?:string, itemField?:ItemField):void
         {
+            console.log("CHANGE-LISTFIELD:",this,this.$input);
             if(!data)
             {
                 debugger;
@@ -1628,6 +1630,10 @@ namespace ghost.browser.forms
         }
         protected addData(index?:number, model?:any):number
         {
+            if(this.name == "tags")
+            {
+                debugger;
+            }
             if(!this.data[this.name] || !this.data[this.name].push)
             {
                 this.data[this.name] =  [];
@@ -1640,6 +1646,7 @@ namespace ghost.browser.forms
             {
                 model = {};
             }
+
 
             while(this.data[this.name].length<=index)
             {
