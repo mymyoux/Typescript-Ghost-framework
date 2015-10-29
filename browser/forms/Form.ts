@@ -956,6 +956,14 @@ namespace ghost.browser.forms
 
                 var current:any = {};
                 current[this.name] = this.getValue();
+                for(var p in data)
+                {
+                    if(data[p][this.name] == current[this.name])
+                    {
+                        data.splice(p, 1);
+                        break;
+                    }
+                }
                 this.data[this.prefix_autocomplete+"autocompletion"] = [current].concat(data);
                 this.itemAutocomplete.resetSelected();
             }
