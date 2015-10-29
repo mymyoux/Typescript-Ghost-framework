@@ -1630,10 +1630,6 @@ namespace ghost.browser.forms
         }
         protected addData(index?:number, model?:any):number
         {
-            if(this.name == "tags")
-            {
-                debugger;
-            }
             if(!this.data[this.name] || !this.data[this.name].push)
             {
                 this.data[this.name] =  [];
