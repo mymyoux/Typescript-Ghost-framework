@@ -2496,11 +2496,13 @@ namespace ghost.browser.forms
     {
         public static selector:string = "textarea";
         private max:number;
+        private min:number;
         private force_max:boolean;
         private $counter:JQuery;
         protected init():void
         {
             super.init();
+            this.min = -1;
             this.max = -1;
             this.force_max = false;
             this.addValidator(new TextValidator());
@@ -2519,6 +2521,19 @@ namespace ghost.browser.forms
                     {
                         this.force_max = true;
                     }
+                    this.checkLimits();
+                }
+            }
+            var $min:JQuery;
+            if (($min = $(this.element).find("[data-min]")).length) 
+            {
+                this.$counter = $min;
+                this.min = parseInt($min.attr("data-min"), 10);
+                if (isNaN(this.min)) {
+                    this.min = -1;
+                    console.warn("TextArea with data-min attribute but no correct value");
+                } else {
+                  
                     this.checkLimits();
                 }
             }
@@ -2567,6 +2582,16 @@ namespace ghost.browser.forms
                     $(this.element).removeClass("counter_error");
                 }
                 this.$counter.text(""+count);
+            }
+            if (this.min>0)
+            {
+                var count: number = (this.data[this.name] ? this.data[this.name].length : 0);
+                if (count >= this.min) {
+                        $(this.element).addClass("counter_success");
+                } else {
+                    $(this.element).removeClass("counter_success");
+                }
+                this.$counter.text("" + count);
             }
             console.log(this, "check limits:"+this.max+"=>"+count);
         }
