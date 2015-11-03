@@ -555,7 +555,7 @@ namespace ghost.debug
                 //console.log(data+"");
             }
         }
-        private static getStackTrace(line:number = 0):any
+        public static getStackTrace(line:number = 0):any
         {
             line++;
             var stack:string = (<any>new Error()).stack;

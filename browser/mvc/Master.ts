@@ -192,6 +192,7 @@ namespace ghost.mvc
 		 		}
 	 		},(error)=>
 	 		{
+                ghost.debug.ErrorLogger.instance().addError("master_activation_failed",error);
 	 			console.error("Master failed during preactivation", this, error);
  			});
         }
