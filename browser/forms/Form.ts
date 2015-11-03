@@ -2547,16 +2547,27 @@ namespace ghost.browser.forms
         {
             if(super.isValid())
             {
-                if(this.max == -1)
+                if(this.max == -1 && this.min == -1)
                 {
                     return true;
                 }
-                var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
-                if(count<0)
+                if(this.max>-1)
                 {
-                    this.error = "too_long";
-                    return false;
+                    var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
+                    if(count<0)
+                    {
+                        this.error = "too_long";
+                        return false;
+                    }
                 }
+                if (this.min > -1) {
+                    var count: number = (this.data[this.name] ? this.data[this.name].length : 0);
+                    if (count < this.min) {
+                        this.error = "too_short";
+                        return false;
+                    }
+                }
+
                 return true;
             }
             return false;
