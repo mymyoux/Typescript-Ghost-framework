@@ -18,6 +18,7 @@ namespace ghost.core
         orientation:number;
         landscape:boolean;
         portrait:boolean;
+        browser:string;
     }
     /**
      * Hardware manager
@@ -329,7 +330,8 @@ namespace ghost.core
                 screenHeight:Hardware.getScreenHeight(),
                 orientation:Hardware.getOrientation(),
                 landscape:Hardware.isLandscape(),
-                portrait:Hardware.isPortrait()
+                portrait:Hardware.isPortrait(),
+                browser: Hardware.getBrowser()
             };
             return data;
         }

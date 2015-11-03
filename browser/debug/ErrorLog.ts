@@ -62,7 +62,6 @@ namespace ghost.debug {
 	    		if(!(error instanceof Error))
 	    		{
 					
-					debugger;
 		    		try
 		    		{
 		    			window["___Catcherror"]();
