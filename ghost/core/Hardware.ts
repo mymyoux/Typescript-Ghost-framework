@@ -111,7 +111,6 @@ namespace ghost.core
                 return ROOT.device.platform;
             }
             var agent = ROOT && ROOT.navigator && ROOT.navigator.userAgent?navigator.userAgent.toLowerCase():"node";
-            console.log(agent);
             if(agent.indexOf("android")!=-1)
             {
                 return Hardware.OS_ANDROID;
