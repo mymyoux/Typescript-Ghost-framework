@@ -175,10 +175,17 @@ namespace ghost.mvc
 		 		{
                     try
                     {
-    		 			this.render();
-    		 			this.activation();
-                        if(this.templateData)
-                            this.templateData.on(Template.EVENT_EXPIRED, this._onTemplateExpired, this);
+    		 			this.render().then(()=>
+                        {
+                            this.activation();
+                            if(this.templateData)
+                                this.templateData.on(Template.EVENT_EXPIRED, this._onTemplateExpired, this);
+                        }, (error)=>
+                        {
+                            ghost.debug.ErrorLogger.instance().addError(error);
+                            throw new Error(error);
+                        });
+
                     }catch(error)
                     {
                         console.error(error);
@@ -537,126 +544,139 @@ namespace ghost.mvc
                 }, {} );   
         }
 
-        public render():void
+        public render():Promise<any>
         {
-            if(!this.templateData) {
-                debugger;
-            }
-            if(this.templateData.loaded())
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
             {
-                this.templateRender();
-            }else
-            {
-                this.templateData.retrieve().then(()=>
+                if(!this.templateData) {
+                   reject("no template data");
+                    return;
+                }
+                if(!this.templateData.loaded())
                 {
-                    this.templateRender();
-                },function()
+                    this.templateRender().then(resolve, reject);
+                }else
                 {
-                    debugger;
-                });
-            }
+                    this.templateData.retrieve().then(()=>
+                    {
+                        this.templateRender().then(resolve, reject);
+                    },function(error)
+                    {
+                        return reject(error);
+                    });
+                }
+            });
+
+
+
+            return promise;
 
         }
-        protected templateRender():void{
-            var container:any = this.getContainer();
-            if(container)
+        protected templateRender():Promise<any>{
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
             {
-                this.showContainer();
-                var options:any =
+                var container:any = this.getContainer();
+                if(container)
                 {
-
-                };
-                //toRactive + listener on evnetdispatcher
-
-                this._data.forEach((item:any, index:number)=>
-                {
-                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
-                    var event:string;
-                    for(var p in events)
+                    this.showContainer();
+                    var options:any =
                     {
-                        event = events[p];
-                        if(item instanceof ghost.events.EventDispatcher)
+
+                    };
+                    //toRactive + listener on evnetdispatcher
+
+                    this._data.forEach((item:any, index:number)=>
+                    {
+                        var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                        var event:string;
+                        for(var p in events)
                         {
-                            //         item.off(event, this._onModelChange, this);
-                            item.on(event, this._onModelChange, this, item,this._parts[index] && this._parts[index].name?this._parts[index].name:item.name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
-                        }else
-                        {
-                            for(var p in item)
+                            event = events[p];
+                            if(item instanceof ghost.events.EventDispatcher)
                             {
-                                if(item[p] instanceof ghost.events.EventDispatcher)
+                                //         item.off(event, this._onModelChange, this);
+                                item.on(event, this._onModelChange, this, item,this._parts[index] && this._parts[index].name?this._parts[index].name:item.name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
+                            }else
+                            {
+                                for(var p in item)
                                 {
-                                    //   item[p].off(event, this._onModelChange, this);
-                                    item[p].on(event, this._onModelChange, this, item[p], this._parts[index] && this._parts[index].name?this._parts[index].name:item[p].name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
+                                    if(item[p] instanceof ghost.events.EventDispatcher)
+                                    {
+                                        //   item[p].off(event, this._onModelChange, this);
+                                        item[p].on(event, this._onModelChange, this, item[p], this._parts[index] && this._parts[index].name?this._parts[index].name:item[p].name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
+                                    }
                                 }
                             }
+
+                        }
+                    });
+                    var data:any = this.toRactive();
+                    data.trans = ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance());
+                    var binded:any = this.getBindedFunctions();
+                    for(var p in binded)
+                    {
+                        data[p] = binded[p];
+                    }
+                    //not sure
+                    for(var p in binded)
+                    {
+                        options[p] = binded[p];
+                    }
+                    options.data = data;
+
+                    options.el = container;
+
+                    //ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
+                    ghost.browser.i18n.Polyglot.instance().on("resolved", this._onTranslationChange, this);
+
+                    try
+                    {
+
+                        if(!this.isActivated())
+                        {
+                            //disactivated during the load
+                            debugger;
+                            return;
+                        }
+                        console.log("render:", this.name());
+                        if(!this.templateData)
+                        {
+                            debugger;
                         }
 
-                    }
-                });
-                var data:any = this.toRactive();
-                data.trans = ghost.browser.i18n.Polyglot.instance().t.bind(ghost.browser.i18n.Polyglot.instance());
-                var binded:any = this.getBindedFunctions();
-                for(var p in binded)
-                {
-                    data[p] = binded[p];
-                }
-                //not sure
-                for(var p in binded)
-                {
-                    options[p] = binded[p];
-                }
-                options.data = data;
-
-                options.el = container;
-
-                //ghost.browser.i18n.Polyglot.instance().on("resolved:"+this.getTranslationTemplate(), this._onTranslationChange, this);
-                ghost.browser.i18n.Polyglot.instance().on("resolved", this._onTranslationChange, this);
-
-                try
-                {
-
-                    if(!this.isActivated())
+                        if(!this.templateData.isParsed())
+                        {
+                            this.templateData.parse(options);
+                        }
+                        options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
+                        //debugger;
+                        console.log("TEMPLATE", options);
+                        this.template = new Ractive(options);
+                    }catch(error)
                     {
-                        //disactivated during the load
+                        console.error(error);
+                        reject(error);
                         debugger;
                         return;
                     }
-                    console.log("render:", this.name());
-                    if(!this.templateData)
-                    {
-                        debugger;
-                    }
 
-                    if(!this.templateData.isParsed())
+                    var listener:any = this.getBindedFunctions(); //this.getBindedEventListeners();
+                    if(listener)
                     {
-                        this.templateData.parse(options);
+                        for(var p in listener)
+                        {
+                            this.template.on(p, listener[p]);
+
+                        }
                     }
-                    options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
-                    //debugger;
-                    console.log("TEMPLATE", options);
-                    this.template = new Ractive(options);
-                }catch(error)
+                    resolve();
+                }else
                 {
-                    console.error(error);
-                    debugger;
+                    console.warn("no container for ", this);
+                    reject("no container for "+this);
                 }
-
-                var listener:any = this.getBindedFunctions(); //this.getBindedEventListeners();
-                if(listener)
-                {
-                    for(var p in listener)
-                    {
-                        this.template.on(p, listener[p]);
-
-                    }
-                }
-            }else
-            {
-                console.warn("no container for ", this);
-            }
-
-
-
+            });
+            return promise;
         }
         protected rerender():void
         {
