@@ -552,7 +552,7 @@ namespace ghost.mvc
                    reject("no template data");
                     return;
                 }
-                if(!this.templateData.loaded())
+                if(this.templateData.loaded())
                 {
                     this.templateRender().then(resolve, reject);
                 }else
