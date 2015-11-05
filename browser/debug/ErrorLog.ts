@@ -42,7 +42,7 @@ namespace ghost.debug {
     		{
 
     		
-				if (!error)
+				if (error == undefined)
 				{
 					error = message;
 					message = "";
