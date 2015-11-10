@@ -119,6 +119,7 @@ module ghost.browser.apis
     {
 
     }
+    /*
     APICustom.instance((new APICustom()).config({url:window.location.href}));
     APICustom.instance().echo().then(function()
     {
@@ -126,7 +127,7 @@ module ghost.browser.apis
     }, function()
     {
         debugger;
-    });
+    });*/
     /*
     var custom:APICustom = new APICustom();
     custom.controller("test").config({}).then(function()
