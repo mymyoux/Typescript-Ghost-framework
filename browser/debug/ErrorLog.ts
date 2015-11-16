@@ -100,6 +100,7 @@ namespace ghost.debug {
 		protected dispatch(error: UncaughtError): void
 		{
 			this.trigger(ErrorLogger.EVENT_ERROR, error);
+			console.error(error);
 		}
     }
     export class UncaughtError
