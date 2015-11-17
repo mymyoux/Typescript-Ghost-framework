@@ -132,7 +132,7 @@ namespace ghost.mvc
          * @protected
          */
         public _name:string;
-        private _timeout:NodeTimer = <any>-1;
+        private _timeout:any = <any>-1;
 
         /**
          * Constructor

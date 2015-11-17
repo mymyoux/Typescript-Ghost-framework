@@ -153,7 +153,7 @@ namespace ghost.mvc
          * @type {any}
          */
         public data:any;
-        private _timeout:NodeTimer = <any>-1;
+        private _timeout:any = <any>-1;
         private _changed:string[];
         public _name:string;
         constructor()

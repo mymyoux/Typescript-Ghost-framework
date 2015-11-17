@@ -330,13 +330,14 @@ namespace ghost.utils
         }
 
 
-        public addFunction(func:any, scope?:any, ...params:any[]):void
+        public addFunction(func:any, scope?:any, ...params:any[]):MFunction
         {
             var mfunc = new MFunction();
             mfunc.setFunction(func);
             mfunc.setScope(scope);
             mfunc.setParams(Array.prototype.slice.call(arguments, 2));
             this.add(mfunc);
+            return mfunc;
         }
         public addFunctionAt(index:number, func:any, scope?:any, ...params:any[]):void
         {
@@ -362,6 +363,10 @@ namespace ghost.utils
             {
                 this.callNext(scope);
             }
+        }
+        public current():MFunction
+        {
+            return this._listFunctions[0];
         }
         /**
          * Gets next waiting function and removes it from the buffer list
