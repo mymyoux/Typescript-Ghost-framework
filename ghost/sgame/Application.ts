@@ -117,6 +117,8 @@ namespace ghost.sgame
                 this.users.splice(index, 1);
             }
         }
+        //TODO:rooms => only commmunication user->user user->all
+        //fonctions dans app (pareil côté client)
     }
 
 
