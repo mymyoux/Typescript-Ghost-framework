@@ -4,5 +4,6 @@ namespace ghost.sgamecommon
     {
         command:string;
         data:any;
+        room?:string
     }
 }

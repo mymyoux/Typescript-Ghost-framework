@@ -114,20 +114,16 @@ namespace ghost.sgameclient
         }
         public internalData(source:Application, application:string, command:string, data:any):void
         {
-            console.log("trigger "+Const.MSG_APPLICATION+":"+application);
+            console.log("trigger "+Const.MSG_APPLICATION+":"+application, command, data);
             this.trigger(Const.MSG_APPLICATION_INTERNAL+":"+application, source, command, data);
 
         }
         private _onData(channel:string, data:IApplicationData & {app:string}):void
         {
-            console.log("data:", channel, data);
+            console.log("[data]", channel, data);
             if(data && data.app)
             {
-                console.log("trigger "+channel+":"+data.app);
-                this.trigger(channel+":"+data.app, data.command, data);
-            }else
-            {
-                console.log("no trigger");
+                this.trigger(channel+":"+data.app, data.command, data.data);
             }
         }
         private _onError(error:any):void

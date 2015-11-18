@@ -50,24 +50,42 @@ namespace ghost.sgame
         }
         private _onData(command:string, data:any, callback:Function, user:User):void
         {
-            console.log(command+" from "+user["login"]);
             var icallback:ICallback;
             if(callback)
             {
-                icallback = {
+                icallback = <any>{
                     called : false,
                     handled : false,
+                    _error : null,
+                    success:function()
+                    {
+                        if(!this.called)
+                            this._error = null;
+                        this.execute.apply(this, Array.prototype.slice.call(arguments));
+                    },
+                    error:function(raison:string, data:any)
+                    {
+                        if(!this.called)
+                            this._error = raison;
+                        this.execute.apply(this, Array.prototype.slice.call(arguments));
+                    },
                     execute:function()
                     {
                         if(!this.called)
                         {
-                            console.log("call callback");
                             this.handled = true;
                             this.called = true;
-                            callback.apply(null, arguments);
+                            if(this._error)
+                            {
+                                callback(false, this._error, Array.prototype.slice.call(arguments));
+                            }else
+                            {
+                                callback(true, null, Array.prototype.slice.call(arguments));
+                            }
                         }else
                         {
-                            console.warn("try to callback twice");
+                            console.warn("try to callback twice", arguments);
+                            throw new Error("twice");
                         }
                     }
                 };
@@ -77,13 +95,12 @@ namespace ghost.sgame
 
                 if(data && data.app)
                 {
-                    console.log("trigger "+command+":"+data.app);
                     this.trigger(command+":"+data.app, data, user, icallback);
                     if(icallback)
                     {
                         if(!icallback.handled)
                         {
-                            icallback.execute();
+                            icallback.success();
                         }
                     }
                     return;
@@ -96,7 +113,6 @@ namespace ghost.sgame
         }
         public destroy():void
         {
-            console.error("destroying server");
             this.trigger(Server.EVENT_DESTROYED);
             while(this.users.length)
             {
@@ -110,7 +126,8 @@ namespace ghost.sgame
     {
         called:boolean;
         handled:boolean;
-        execute:Function;
+        success:Function;
+        error:Function;
     }
 
 

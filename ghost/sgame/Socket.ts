@@ -34,7 +34,6 @@ namespace ghost.sgame
             var onevent:any = this.socket["onevent"];
             var _this:Socket = this;
             this.socket["onevent"] =  function(packet) {
-                console.log("args:",arguments);
                 var args = packet.data || [];
                 onevent.call(_this.socket, packet);    // original call
                 _this._onData.apply(_this,args);
@@ -42,7 +41,11 @@ namespace ghost.sgame
         }
         private _onError(error:any):void
         {
-            console.log("error", error);
+            console.log("socketerror", error);
+            if(error && error.stack)
+            {
+                console.log(error.stack);
+            }
         }
         private _onDisconnect():void
         {
@@ -50,6 +53,7 @@ namespace ghost.sgame
         }
         private _onData(command:string, data:any):void
         {
+            console.log("[DATA]", command, data);
             var callback:Function = null;
             if(typeof arguments[arguments.length-1] == "function")
             {

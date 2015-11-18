@@ -19,15 +19,18 @@ namespace ghost.sgameclient
                 console.warn("user doesn't have token", this.user);
                 return;
             }
-            this.write(Const.LOGIN_COMMAND, {token:this.user.token}, (success:boolean, error:any = null)=>
+            this.write(Const.LOGIN_COMMAND, {token:this.user.token}, (success:boolean, data:any = null)=>
             {
                 if(success)
                 {
-                    console.log("login success");
+                    if(data.id)
+                        this.user.id = data.id;
+                    if(data.login)
+                        this.user.login = data.login;
                     this.writeInternalData(Const.ALL_APP, Const.LOGIN_COMMAND, success);
                 }else
                 {
-                    console.warn("LOGIN FAILED", error);
+                    console.warn("LOGIN FAILED", data);
                 }
             });
         }
