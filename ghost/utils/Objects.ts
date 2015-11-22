@@ -98,5 +98,32 @@ namespace ghost.utils
             }
             return data;
         }
+        public static  mergeProperties(propertyKey:string, firstObject:any, secondObject:any):any {
+        var propertyValue:any = firstObject[propertyKey];
+
+        if (typeof(propertyValue) === "object") {
+            return Objects.mergeObjects(firstObject[propertyKey], secondObject[propertyKey]);
+        } else if (secondObject[propertyKey] === undefined) {
+            return firstObject[propertyKey];
+        }
+
+        return secondObject[propertyKey];
+    }
+
+        public static mergeObjects(firstObject:any, secondObject:any):any {
+            var finalObject:any = {};
+
+            // Merge first object and its properties.
+            for (var propertyKey in firstObject) {
+                finalObject[propertyKey] = Objects.mergeProperties(propertyKey, firstObject, secondObject);
+            }
+
+            // Merge second object and its properties.
+            for (var propertyKey in secondObject) {
+                finalObject[propertyKey] = Objects.mergeProperties(propertyKey, secondObject, firstObject);
+            }
+
+        return finalObject;
+    }
     }
 }

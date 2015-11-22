@@ -373,6 +373,20 @@ namespace ghost.mvc
             }
         }
 
+        public executePartRequest(name:string, params:any = null, ajaxOptions:any = null):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                var request:any = this.getPartRequest(name, params);
+                request.retry = ghost.io.RETRY_INFINITE;
+                request.url = this.getRootURL()+request.url;
+                request = ghost.utils.Objects.mergeObjects(request, ajaxOptions);
+                ghost.io.ajax(request).then(resolve, reject);
+
+            });
+
+            return promise;
+        }
         /**
          * Get's model's name
          * @returns {string}
