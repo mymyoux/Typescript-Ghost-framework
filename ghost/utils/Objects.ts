@@ -111,6 +111,14 @@ namespace ghost.utils
     }
 
         public static mergeObjects(firstObject:any, secondObject:any):any {
+            if(!firstObject)
+            {
+                return secondObject;
+            }
+            if(!secondObject)
+            {
+                return firstObject;
+            }
             var finalObject:any = {};
 
             // Merge first object and its properties.

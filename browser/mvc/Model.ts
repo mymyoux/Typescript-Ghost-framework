@@ -382,7 +382,6 @@ namespace ghost.mvc
                 request.url = this.getRootURL()+request.url;
                 request = ghost.utils.Objects.mergeObjects(request, ajaxOptions);
                 ghost.io.ajax(request).then(resolve, reject);
-
             });
 
             return promise;
