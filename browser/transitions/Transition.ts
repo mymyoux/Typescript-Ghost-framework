@@ -504,6 +504,10 @@ namespace ghost.transitions
             this._stop(skipToEnd, callback);
         }
     }
+    export class NoViewTransition extends ViewTransition
+    {
+
+    }
     /**
      * Slide transition
      * @type {SlideViewTransition}
@@ -916,6 +920,14 @@ namespace ghost.transitions
         public setDefaultTransition(transition)
         {
             this._defaultTransition = transition;
+        }
+        /**
+         * Sets Default transition used when no transition is specified
+         * @param transition {ViewTransition}
+         */
+        public setNoTransition()
+        {
+            this._defaultTransition = this._noTransition;
         }
         /**
          * Gets default transition used when no transition is specified
