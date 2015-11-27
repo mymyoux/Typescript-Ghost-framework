@@ -1671,7 +1671,7 @@ namespace ghost.browser.forms
         {
             var lastItem:any = this.getListItem("[data-item]").eq(index);
             var cls:any = ItemField;
-            if($(lastItem).attr("data-type"))
+            if($(lastItem).attr("data-item-type"))
             {
                 cls = Form.getField(lastItem);
             }
@@ -2525,7 +2525,7 @@ namespace ghost.browser.forms
                 }
             }
             var $min:JQuery;
-            if (($min = $(this.element).find("[data-min]")).length) 
+            if (($min = $(this.element).find("[data-min]")).length)
             {
                 this.$counter = $min;
                 this.min = parseInt($min.attr("data-min"), 10);
@@ -2533,7 +2533,7 @@ namespace ghost.browser.forms
                     this.min = -1;
                     console.warn("TextArea with data-min attribute but no correct value");
                 } else {
-                  
+
                     this.checkLimits();
                 }
             }
