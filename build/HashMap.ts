@@ -19,7 +19,7 @@ namespace ghost.level.data.sub
         }
         public has(key:KEY):boolean
         {
-           return this.keys.indexOf(key)!=-1;
+            return this.keys.indexOf(key)!=-1;
         }
         public get(key:KEY):VALUE
         {

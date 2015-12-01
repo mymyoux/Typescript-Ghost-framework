@@ -16,6 +16,28 @@ if(process.argv.length>2)
 }
 
 
+function Debug()
+{
+
+}
+Debug.inspect = function(object)
+{
+    for(var p in object)
+    {
+        if(typeof object[p] == "function")
+        {
+            if(p.substring(0, 3) == "get")
+            {
+                console.log(colors.red(p));
+            }else
+            {
+                console.log(colors.cyan(p));
+            }
+        }else
+            console.log(p);
+    }
+};
+
 function die(message)
 {
     console.error(colors.red("FATAL"));
@@ -449,6 +471,8 @@ function File(folder, file)
     this.file = file;
     this.parseInfomation = null;
 
+    this.state = "not_ready";
+
     this.updated = false;
     this.updating = false;
 
@@ -456,10 +480,14 @@ function File(folder, file)
     this.content = null;
 
     this.importInvalidated = true;
-    this.parseInvalidated = true;
+    //this.parseInvalidated = true;
 
     this.imports = [];
     this.classes = [];
+
+    this.version = 0;
+
+    this.source = null;
 }
 
 File.EVENT_PARSED = "file_event_parsed";
@@ -482,6 +510,7 @@ File.prototype.init = function()
 File.prototype.onReady = function()
 {
     this.ready = true;
+    this.state = "ready";
     this.emit(File.EVENT_READY, this.content);
 };
 File.prototype.inspect = function()
@@ -513,6 +542,7 @@ File.prototype.readFromDisk = function(callback)
                 return callback(error, data);
             }
             this.content = data;
+            this.snapshot = ts.ScriptSnapshot.fromString(this.content);
             this.updated = true;
 
             callback(error, data);
@@ -522,6 +552,12 @@ File.prototype.readFromDiskSync = function()
 {
     return fs.readFileSync(this.path,  {encoding:'utf8', flag:'r'});
 };
+File.prototype.getSnapShot = function()
+{
+    this.getContent();
+    return this.snapshot;
+};
+
 File.prototype.getContent = function()
 {
     console.log(colors.magenta("Get content:"+this.path));
@@ -539,23 +575,28 @@ File.prototype.getContent = function()
         {
             this.importInvalidated = true;
             this.content = content;
+            console.log(ts.ScriptSnapshot.fromString(this.content).getChangeRange(this.snapshot));
+            this.snapshot = ts.ScriptSnapshot.fromString(this.content);
+            console.log(colors.cyan(this.file+" snapshort from content"));
         }
     }
     return this.content;
 };
 File.prototype.parse = function(source)
 {
+    if(!source)
+    {
+        source = this.source;
+    }
     if(!this.updated || !this.content)
     {
         //reload content
         this.getContent();
     }
-    if(this.parseInvalidated)
+    //this.source = source;
+    if(!this.isParsed())
     {
-
-
-        this.parseInvalidated = true;
-       var parsed = this.parseNode(0, source);
+        var parsed = this.parseNode(0, source);
 
         var exposed = [];
         var intern = [];
@@ -647,6 +688,17 @@ File.prototype.parse = function(source)
             }
         }
         this.parseInfomation = parsed;
+        this.state = "parsed";
+       /* console.log(colors.green(this.file));
+        if(this.file == "HashMap3.ts")
+        {
+            console.log(parsed);
+            process.exit(1);
+            return;
+        }else
+       {
+           console.log(colors.green(this.file));
+       }*/
         this.emit(File.EVENT_PARSED, parsed);
         /*
         console.log(parsed);
@@ -821,7 +873,12 @@ File.prototype.parseNode = function(level, parsed, node)
                     var identifier = identifiers[identifiers.length-1];
                     identifier.type ="propertydeclaration";
                     parsed.used.push(identifier);
-                    parsed.dependencies.push(identifier);
+                    //only if static
+                    var isStatic = this.findFirstNode(node, "StaticKeyword");
+                    if(isStatic!=null)
+                    {
+                        parsed.dependencies.push(identifier);
+                    }
                 }
             }
         }
@@ -832,7 +889,7 @@ File.prototype.parseNode = function(level, parsed, node)
     {
         str+="\t";
     }
-   // console.log(str, colors.red(ts.SyntaxKind[node.kind]), children.length?'':node.getText());
+  //  console.log(str, colors.red(ts.SyntaxKind[node.kind]), children.length?'':node.getText());
     //console.log({kind:ts.SyntaxKind[node.kind],pos:node.pos, end:node.end, flags:node.flags, children:children.length});
     children.forEach(this.parseNode.bind(this, level+1, parsed));
     return parsed;
@@ -1038,6 +1095,7 @@ File.prototype.findFirstNode = function(node, type)
     }
     return null;
 };
+
 File.prototype.getImports = function()
 {
     if(!this.updated || !this.content)
@@ -1162,10 +1220,54 @@ File.prototype.getImports = function()
 
         this.importInvalidated = false;
     }
-}
+};
+File.prototype.setError = function(type, diagnostics)
+{
+    this.state = "error";
+
+};
+File.prototype.isParsed = function()
+{
+    if(!this.updated || !this.content)
+    {
+        //reload content
+        this.getContent();
+    }
+    return !(this.state == "ready" || this.state == "invalidated");
+};
+File.prototype.isSemanticValidated = function()
+{
+    return this.state == "semantic_validated" || this.state == "compiled";
+};
+File.prototype.validSemantic = function()
+{
+    this.state = "semantic_validated";
+};
+File.prototype.validCompilation = function()
+{
+    this.state = "compiled";
+};
+File.prototype.isInvalidate = function()
+{
+    //validate need to be called
+    return this.state == "invalidated" || this.state == "ready";
+};
+File.prototype.isCompiled = function()
+{
+    return this.state == "compiled";
+};
+File.prototype.validate = function()
+{
+    this.getContent();
+    if (!this.updated) {
+        die(this.file+" can't get content");
+    }
+};
 File.prototype.invalidate = function()
 {
-    this.updated = false;;
+    this.updated = false;
+    this.version++;
+    this.state = "invalidated";
 };
 
 util.inherits(File, EventEmitter);
@@ -1174,11 +1276,16 @@ util.inherits(File, EventEmitter);
 function Compiler(module, config)
 {
     this.tsConfig  = config;
-    this.tsConfig.compilerOptions["outFile"] = "test.js";
-    this.tsConfig.compilerOptions["noResolve"] = true;
+    //this.tsConfig.compilerOptions["outFile"] = "test.js";
+    //this.tsConfig.compilerOptions["noResolve"] = false;
+    this.tsConfig.compilerOptions["declaration"] = true;
     this.module  = module;
     this.versions  = {};
     this.folder = path.join(module.folder, module.path);
+
+    this.documentRegistry = null;
+    this.serviceHost = null;
+    this.services = null;
 
     this.files;
 }
@@ -1186,34 +1293,67 @@ function Compiler(module, config)
 Compiler.prototype.init = function()
 {
 
-    this.files = this.tsConfig.files.reduce(function(previous, filename)
+    this.files = this.tsConfig.files.reduce((previous, filename)=>
     {
-        previous[filename] = {version:0};
+        var file = this.module.getFile(filename);
+        if(file)
+        {
+            previous[filename] = file;
+        }else
+            previous[filename] = {version:0};
         return previous;
     }, {});
-    /*const servicesHost =  {
-        getScriptFileNames: () => rootFileNames,
-    getScriptVersion: (fileName) => files[fileName] && files[fileName].version.toString(),
-    getScriptSnapshot: (fileName) => {
-    if (!fs.existsSync(fileName)) {
-        return undefined;
-    }
-
-    return ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString());
-},
-    getCurrentDirectory: () => process.cwd(),
-    getCompilationSettings: () => options,
-    getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
-};*/
-    /*
-    for(var p in ts)
+    if(!this.serviceHost)
     {
-        if(typeof ts[p] == "function")
-        {
-            if(p.indexOf("create")>-1)
-            console.log(p);
-        }
-    }*/
+        this.serviceHost =  {
+            getScriptFileNames:()=>
+            {
+                console.log(colors.red("GET FILES"));
+                return this.tsConfig.files;},
+            getScriptVersion: (fileName) => {
+                if(this.files[fileName])
+                    console.log(colors.red("version:"+fileName+"=>"+this.files[fileName].version.toString()));
+                //console.log(this.files[fileName]);
+                return this.files[fileName] && this.files[fileName].version.toString()
+            },
+            getScriptSnapshot: (fileName,data, data2) => {
+                console.log(colors.green("SNAPSHOT"));
+                console.log(fileName, data, data2);
+                var file;
+                if((file = this.module.getFile(fileName)))
+                {
+                    console.log(colors.green("found"));
+                    console.log(file.getSnapShot());
+                    return file.getSnapShot();
+                }
+                if (!fs.existsSync(fileName)) {
+                    fileName = path.join(this.folder, fileName);
+                    if (!fs.existsSync(fileName)) {
+                        return undefined;
+                    }
+                }
+
+                return ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString());
+            },
+            getCurrentDirectory: () =>   this.folder,
+            getCompilationSettings: () => this.tsConfig.compilerOptions,
+            getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options)
+        };
+    }
+    if(!this.documentRegistry)
+    {
+        this.documentRegistry = ts.createDocumentRegistry();
+    }
+    if(!this.services)
+    {
+        this.services = ts.createLanguageService(this.serviceHost, this.documentRegistry);
+    }
+    if(this.services.getCompilerOptionsDiagnostics().length)
+    {
+        console.log(colors.cyan("CompilerOptions Error"));
+        console.log(this.services.getCompilerOptionsDiagnostics());
+        return;
+    }
     this.compile();
 
 };
@@ -1229,48 +1369,172 @@ Compiler.prototype.getImports = function(file)
 }
 Compiler.prototype.compile = function()
 {
+    var time = Date.now();
+    var result = this._compile();
+    if(result !== true)
+    {
+        var file = result[0];
+        var type = result[1];
+        var diagnostics = result[2];
+        var position;
+        console.log(colors.red(file.file+ " "+type+" error"));
+        for(var i=0; i<diagnostics.length; i++)
+        {
+            position = ts.getLineAndCharacterOfPosition(file.source, diagnostics[i].start);
+            console.log(file.file+"("+(position.line+1)+","+(position.character+1)+"): error T"+diagnostics[i].code+": "+ diagnostics[i].messageText);
+        }
+
+    }
+    time = Date.now() - time;
+    console.log(colors.cyan(time+" ms"));
+};
+Compiler.prototype._compile = function()
+{
     if(this.module.compiled)
     {
         return;
     }
-    var servicesHost =
-    {
-        getScriptFileNames:()=>this.tsConfig.files,
-        getScriptVersion: (fileName) => this.files[fileName] && this.files[fileName].version.toString(),
-        getScriptSnapshot: (fileName) => {
-            if(this.module.hasFile(fileName))
-            {
-                return ts.ScriptSnapshot.fromString(this.module.getFile(fileName).getContent());
-            }
-            if (!fs.existsSync(fileName)) {
-                fileName = path.join(this.folder, fileName);
-                if (!fs.existsSync(fileName)) {
-                    return undefined;
-                }
-            }
-            return ts.ScriptSnapshot.fromString(fs.readFileSync(fileName).toString());
-         },
-        getCurrentDirectory: () =>   this.folder,
-        getCompilationSettings: () => this.tsConfig.compilerOptions,
-        getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options)
-    };
-    var document = ts.createDocumentRegistry();
-    var services = ts.createLanguageService(servicesHost, document);
-    var program = services.getProgram();
-    var file = path.relative("/",path.join(this.folder, "HashMap.ts"));
+
+    var services = this.services;//ts.createLanguageService(this.serviceHost, this.documentRegistry);
+
+    var file, diagnostics;
     var sources = services.getProgram().getSourceFiles();
-    var file;
     for(var i=0; i<sources.length; i++)
     {
         file = this.module.getFile(sources[i].fileName);
-        if(!file)
+        if(file)
         {
-            //TODO:manage lib import
-            continue;
+            file.source = sources[i];
         }
-        console.log(colors.cyan(sources[i].fileName));
-        file.parse(sources[i]);
     }
+    for(var p in this.files)
+    {
+        file = this.files[p];
+
+        if (!file.isInvalidate())
+        {
+            file.validate();
+        }
+        if(!file.isParsed())
+        {
+            console.log(colors.cyan(file.file + " check syntax"));
+            //pur syntax check
+            diagnostics = services.getSyntacticDiagnostics(file.file);
+            if(diagnostics.length)
+            {
+                file.setError("syntax", diagnostics);
+                return [file, "syntax", diagnostics];
+            }
+        }
+    }
+
+
+
+    var program =  services.getProgram();
+    console.log(colors.cyan("diagnostic"));;
+    console.log(program.emit());
+
+    for(var p in this.files)
+    {
+        file = this.files[p];
+        if(!file.isParsed())
+        {
+            console.log(colors.cyan(file.file + " parse"));
+            //TODO:add imported files
+            file.parse();
+        }
+        //console.log(services.getEmitOutput(sources[i].fileName));
+    }
+
+
+
+    for(var p in this.files)
+    {
+        file = this.files[p];
+
+        if (!file.isInvalidate())
+        {
+            file.validate();
+        }
+        if(!file.isSemanticValidated())
+        {
+            /*console.log(colors.cyan(file.file + " check semantics"));
+            //semantic
+            diagnostics = services.getSemanticDiagnostics(file.file);
+            if(diagnostics.length)
+            {
+                file.setError("semantics", diagnostics);
+                console.log(colors.cyan("Semantics Error"));
+                console.log(diagnostics);
+
+                return;
+            }else
+            {
+                file.validSemantic();
+            }*/
+            file.validSemantic();
+        }
+    }
+    //TODO:if output write files in order
+
+
+
+
+
+
+    //TODO:get extern d.ts value
+
+    for(var p in this.files)
+    {
+        file = this.files[p];
+        if(!file.isCompiled())
+        {
+            console.log(colors.cyan(file.file + " compile"));
+            var diagnostics = ts.getPreEmitDiagnostics(program, file.source);
+            if(!diagnostics.length)
+            {
+                var result = program.emit(file.source, function(name, content)
+                {
+                    //declaration
+                    if(name.indexOf(".d.ts") != -1)
+                    {
+                        file.declarationResult = content;
+                    }else
+                    {
+                        file.jsResult = content;
+                    }
+                });
+                diagnostics = result.diagnostics;
+            }
+            if(diagnostics.length)
+            {
+                file.setError("compilation", diagnostics);
+                return [file, "compilation", diagnostics];
+            }else
+            {
+                file.validCompilation();
+            }
+
+        }
+    }
+
+    //console.log(;
+    return true;
+    console.log(program.emit(undefined, function(filename, data)
+    {
+        if(filename.indexOf(".d.ts")==-1)
+        {
+            console.log(colors.cyan(filename));
+            console.log(data);
+        }
+    }));
+/*
+    console.log(result);
+    console.log(program.getCompilerOptions());
+*/
+
+
+
 
 /*
     for(var p in source)
@@ -1334,7 +1598,7 @@ Compiler.prototype.compile = function()
 
 
     //this.tsConfig.compilerOptions["outFile"] = "out.js";
-    this.tsConfig.compilerOptions["noEmit"] = true;
+    //this.tsConfig.compilerOptions["noEmit"] = true;
     this.tsConfig.compilerOptions["declaration"] = true;
     var files =  this.tsConfig.files.map(function(file){
         return path.join(this.module.folder,this.module.path, file)}, this);

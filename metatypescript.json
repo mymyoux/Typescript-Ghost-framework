@@ -3,5 +3,11 @@
     [
       "ghost/utils",
       "test/ghost"
+    ],
+    "out":
+    [
+      {
+        "level.data.HashMap":"out.js"
+      }
     ]
 }

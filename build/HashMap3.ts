@@ -4,9 +4,8 @@ namespace ghost.level.data
 
     export class HashMap3<T ,X>// extends t<any, any>
     {
-
-     //   public static ppp:any = t;
-        public xxxx:any = t;
+        private  mlml:t<any, any>;
+        //private static property:sub.HashMap<any, any> = new sub.HashMap();
     }
 
 }
