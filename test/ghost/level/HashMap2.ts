@@ -1,9 +1,10 @@
-namespace ghost.data
+///<reference path="mlml.d.ts"/>
+namespace ghost.level
 {
     /**
      * HashMap
      */
-    export class HashMap<KEY, VALUE>
+    export class HashMap2<KEY, VALUE>
     {
         public values:VALUE[];
         public keys:KEY[];

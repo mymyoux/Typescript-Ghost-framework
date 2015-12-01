@@ -121,7 +121,7 @@ MetaCompiler.prototype.getModule = function(folder, file)
     if(!module)
     {
         this.modules[relative] = new Module(folder, relative);
-        this.modules[relative].once("ready", this.onModuleReady.bind(this, this.modules[relative]));
+        this.modules[relative].once(Module.EVENT_READY, this.onModuleReady.bind(this, this.modules[relative]));
     }
     if(this.modules[relative].folder != folder)
     {
@@ -250,6 +250,8 @@ function Module(folder, pathModule, compiler)
 
     this.files = {};
 }
+Module.EVENT_READY = "module_event_ready";
+
 Module.prototype.inspect = function()
 {
     return "[Module name=\""+this.path+"\" files=\""+this.tsConfig.files.length+"\"]";
@@ -332,7 +334,8 @@ Module.prototype.onPreReady = function()
     for(var p in this.tsConfig.files)
     {
         this.files[this.tsConfig.files[p]] = new File(path.join(this.folder, this.path), this.tsConfig.files[p]);
-        this.files[this.tsConfig.files[p]].on("ready", this.onFileReady.bind(this, this.files[this.tsConfig.files[p]]));
+        this.files[this.tsConfig.files[p]].on(File.EVENT_READY, this.onFileReady.bind(this, this.files[this.tsConfig.files[p]]));
+        this.files[this.tsConfig.files[p]].on(File.EVENT_PARSED, this.onFileParsed.bind(this, this.files[this.tsConfig.files[p]]));
         this.files[this.tsConfig.files[p]].init();
     }
 };
@@ -347,11 +350,20 @@ Module.prototype.onFileReady = function(file, data)
     }
     this.onReady();
 };
+Module.prototype.onFileParsed = function(file, data)
+{
+    console.log(colors.magenta(file.file+" parsed"));
+    console.log(data.dependencies.map(function(item){return item.value;}));
+    if(data.dependencies.length)
+    {
+        console.log(data);
+    }
+};
 Module.prototype.onReady = function()
 {
     this.ready = true;
 
-    this.emit("ready");
+    this.emit(Module.EVENT_READY);
 };
 Module.prototype.addFile = function(file)
 {
@@ -435,6 +447,7 @@ function File(folder, file)
     this.path = path.join(folder, file);
     this.folder = folder;
     this.file = file;
+    this.parseInfomation = null;
 
     this.updated = false;
     this.updating = false;
@@ -449,6 +462,8 @@ function File(folder, file)
     this.classes = [];
 }
 
+File.EVENT_PARSED = "file_event_parsed";
+File.EVENT_READY = "file_event_ready";
 File.prototype.init = function()
 {
     if(!this.updated)
@@ -467,7 +482,7 @@ File.prototype.init = function()
 File.prototype.onReady = function()
 {
     this.ready = true;
-    this.emit("ready", this.content);
+    this.emit(File.EVENT_READY, this.content);
 };
 File.prototype.inspect = function()
 {
@@ -541,7 +556,6 @@ File.prototype.parse = function(source)
 
         this.parseInvalidated = true;
        var parsed = this.parseNode(0, source);
-        console.log(parsed);
 
         var exposed = [];
         var intern = [];
@@ -616,7 +630,25 @@ File.prototype.parse = function(source)
                     extern.push(data);
                 }
             }
+
+            //imports
+            //TODO:with vars
+            var keylen;
+            for(var i=0; i<parsed.used.length; i++)
+            {
+                for(var j=0; j<parsed.imports.length; j++)
+                {
+                    keylen = parsed.imports[j].key.length;
+                    if(parsed.imports[j].key == parsed.used[i].value.substring(0, keylen) && (parsed.used[i].value.length == keylen || parsed.used[i].value.substr(keylen, 1)=="/"))
+                    {
+                        parsed.used[i].value = parsed.imports[j].value + parsed.used[i].value.substr(keylen);
+                    }
+                }
+            }
         }
+        this.parseInfomation = parsed;
+        this.emit(File.EVENT_PARSED, parsed);
+        /*
         console.log(parsed);
         console.log(colors.cyan("------- exposed "));
         console.log(exposed);
@@ -625,17 +657,14 @@ File.prototype.parse = function(source)
         console.log(colors.cyan("* extern"));
         console.log(extern);
         console.log(extern.map(function(item){return item.value}));
+
+        console.log(colors.cyan("* dependencies"));
+        console.log(parsed.dependencies);
+        console.log(parsed.dependencies.map(function(item){return item.value}));*/
+
         //TODO:add exposed link to this file + add import to others is they exists (+need recompile)
         //TODO:add dependencies to this file (module internal or external)
         //TODO:search for external dependencies matches then mark this as needs recompile
-
-        return;
-     //   console.log(source.getNamedDeclarations());
-        var children = source.getChildren();
-        children.forEach(function(node)
-        {
-                console.log({kind:ts.SyntaxKind[node.kind],pos:node.pos, end:node.end, flags:node.flags, children:node.getChildren()});
-        });
     }
 };
 File.prototype.parseNode = function(level, parsed, node)
@@ -651,13 +680,13 @@ File.prototype.parseNode = function(level, parsed, node)
             namespaces:[],
             imports:[],
             used:[],
-            intern:[]
+            intern:[],
+            dependencies:[]
         };
     }
     if(ts.SyntaxKind[node.kind] == "ModuleBlock")
     {
         var parent = node;
-        console.log("preok");
         while(parent.parent && ts.SyntaxKind[parent.parent.kind] === "ModuleDeclaration" )
         {
             parent = parent.parent;
@@ -678,6 +707,7 @@ File.prototype.parseNode = function(level, parsed, node)
         if(identifier)
         {
             identifier.namespace = parsed.currentNamespace;
+            identifier.type = "import";
             parsed.imports.push(identifier);
         }
     }else
@@ -720,8 +750,12 @@ File.prototype.parseNode = function(level, parsed, node)
             {
                 identifiers[p].type = "heritage";
                 identifiers[p].namespace = parsed.currentNamespace;
+
             }
             parsed.used = parsed.used.concat(identifiers);
+            var parent = this._getNodeParent(node, 1);
+            if(this.findFirstNode(node, "ExtendsKeyword") != null && ts.SyntaxKind[this._getNodeParent(node, 1).kind] == "ClassDeclaration")
+                parsed.dependencies = parsed.dependencies.concat(identifiers);
         }
     }else
     if(ts.SyntaxKind[node.kind] == "PropertyAccessExpression")
@@ -729,17 +763,18 @@ File.prototype.parseNode = function(level, parsed, node)
         var testNode = this.findFirstNode(node, "ThisKeyword");
         if(!testNode)
         {
-
-            var identifier = this.getIdentifier(null, node);
-            if(identifier)
+            var parent = this._getNodeParent(node, 1);
+            if((!parent || (ts.SyntaxKind[parent.kind] != "PropertyAccessExpression" && ts.SyntaxKind[parent.kind] != "ElementAccessExpression")))
             {
-                identifier.type="property";
-                identifier.namespace= parsed.currentNamespace;
-                //parsed.intern.push(identifiers[0]);
-                parsed.used.push(identifier);
+                var identifier = this.getIdentifier(null, node);
+                if(identifier)
+                {
+                    identifier.type="propertyexpression";
+                    identifier.namespace= parsed.currentNamespace;
+                    //parsed.intern.push(identifiers[0]);
+                    parsed.used.push(identifier);
+                }
             }
-            //TODO:check there is no missed data
-            return;
         }
     }else
     if(ts.SyntaxKind[node.kind] == "ElementAccessExpression")
@@ -750,38 +785,78 @@ File.prototype.parseNode = function(level, parsed, node)
             var identifier = this.getIdentifier(null, node);
             if(identifier)
             {
-                identifier.type="property";
-                identifier.namespace= parsed.currentNamespace;
-                //parsed.intern.push(identifiers[0]);
-                parsed.used.push(identifier);
+                var parent = this._getNodeParent(node, 1);
+                if((!parent || (ts.SyntaxKind[parent.kind] != "PropertyAccessExpression" && ts.SyntaxKind[parent.kind] != "ElementAccessExpression")))
+                {
+                    identifier.type="elementaccess";
+                    identifier.namespace= parsed.currentNamespace;
+                    //parsed.intern.push(identifiers[0]);
+                    parsed.used.push(identifier);
+                }
             }
         }
     }else
     if(ts.SyntaxKind[node.kind] == "PropertyDeclaration")
     {
         var parent = this._getNodeParent(node, 1);
-        console.log(ts.SyntaxKind[parent.kind])
-        debugger;
         if(parent && ts.SyntaxKind[parent.kind] == "ClassDeclaration" )
         {
             //class properties
-            var identifier = this.getIdentifier(null, node);
-            console.log(identifier);
-            debugger;
+            var identifiers = this.getIdentifiers(null, node);
+            if(identifiers.length>1)
+            {
+                parsed.used.push(identifiers[1]);
+            }
+            var assignment = this.findFirstNode(node, "FirstAssignment");
+            if(assignment)
+            {
+                var caster = this.findFirstNode(node, "FirstBinaryOperator");
+                var nextNode = this._getNextNode(assignment);
+                identifiers = this.getIdentifiers(null, nextNode);
+                if(identifiers.length)
+                {
+                    if (caster) {
+                        parsed.used.push(identifiers[0]);
+                    }
+                    var identifier = identifiers[identifiers.length-1];
+                    identifier.type ="propertydeclaration";
+                    parsed.used.push(identifier);
+                    parsed.dependencies.push(identifier);
+                }
+            }
         }
     }
-
     var children = node.getChildren() || [];
     var str = "";
     for(var i=0;i<level; i++)
     {
         str+="\t";
     }
-    console.log(str, colors.red(ts.SyntaxKind[node.kind]), children.length?'':node.getText());
+   // console.log(str, colors.red(ts.SyntaxKind[node.kind]), children.length?'':node.getText());
     //console.log({kind:ts.SyntaxKind[node.kind],pos:node.pos, end:node.end, flags:node.flags, children:children.length});
     children.forEach(this.parseNode.bind(this, level+1, parsed));
     return parsed;
 };
+File.prototype._getNextNode = function(node)
+{
+    if(!node.parent)
+    {
+        return null;
+    }
+    var children = node.parent.getChildren();
+    if(!children)
+    {
+        return null;
+    }
+    for(var i=0; i<children.length; i++)
+    {
+        if(children[i] === node)
+        {
+            return children[i+1];
+        }
+    }
+    return null;
+}
 File.prototype._getNodeParent = function(node, index)
 {
     if(index == undefined){
@@ -903,6 +978,10 @@ File.prototype._getIdentifier = function(until, identifier, node)
     {
         identifier.push(node.getText());
     }else
+    if(ts.SyntaxKind[node.kind] == "ColonToken")
+    {
+        identifier.push(",");
+    }else
     if(ts.SyntaxKind[node.kind] == "StringLiteral")
     {
         identifier.push({value:node.text,type:"string"});
@@ -979,7 +1058,7 @@ File.prototype.getImports = function()
 
 
 
-        console.log(colors.cyan("OOOOOOOOOOOO"));
+//        console.log(colors.cyan("OOOOOOOOOOOO"));
 
 
         var namespace = ".";
@@ -988,7 +1067,7 @@ File.prototype.getImports = function()
         var scanner = ts.createScanner(2, true);
         scanner.setText(content);
         var token = scanner.scan();
-        console.log(token, ts.SyntaxKind[token]);
+  //      console.log(token, ts.SyntaxKind[token]);
         while (token !== 1 /* EndOfFileToken */)
         {
             //namespace list
@@ -1179,8 +1258,21 @@ Compiler.prototype.compile = function()
     var services = ts.createLanguageService(servicesHost, document);
     var program = services.getProgram();
     var file = path.relative("/",path.join(this.folder, "HashMap.ts"));
-    var source = services.getProgram().getSourceFiles()[2];
+    var sources = services.getProgram().getSourceFiles();
+    var file;
+    for(var i=0; i<sources.length; i++)
+    {
+        file = this.module.getFile(sources[i].fileName);
+        if(!file)
+        {
+            //TODO:manage lib import
+            continue;
+        }
+        console.log(colors.cyan(sources[i].fileName));
+        file.parse(sources[i]);
+    }
 
+/*
     for(var p in source)
     {
         if(typeof source[p] == "function")
@@ -1195,13 +1287,13 @@ Compiler.prototype.compile = function()
         }else
         console.log(p);
     }
-    console.log(colors.cyan("----"));
+    console.log(colors.cyan("----"));*/
    // console.log(source.getNamedDeclarations());
    // console.log(services.getTodoComments("HashMap3.ts"));
     //console.log(program.getClassifiableNames())
     //console.log(ts.preProcessFile(this.module.getFile("HashMap3.ts").getContent()));
     //console.log(program.getFileProcessingDiagnostics().getDiagnostics());
-    this.module.getFile("HashMap3.ts").parse(source);
+
     return;
     //this.getImports()
 

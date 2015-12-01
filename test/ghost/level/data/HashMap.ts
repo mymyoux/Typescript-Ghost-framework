@@ -1,4 +1,4 @@
-namespace ghost.data
+namespace ghost.level.data
 {
     /**
      * HashMap
