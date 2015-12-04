@@ -107,7 +107,7 @@ namespace ghost.io
 					promise.setAjax(null);
 
 				data = middleware(data, "success_always");
-				if(data && data.success === false)
+				if(data && (data.success === false || data.error))
 				{
 					if(settings.retry === true)
 					{
