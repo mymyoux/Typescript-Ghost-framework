@@ -3,11 +3,38 @@
 namespace ghost.mvc
 {
     import API = ghost.browser.api.API;
+    import APIExtended = ghost.browser.api.APIExtended;
     /**
      * Collection API class
      */
     export class CollectionAPI<T extends ghost.mvc.Model> extends Collection<T>
     {
+        private requests:any;
+        public constructor()
+        {
+            super();
+            this.requests = {};
+        }
+        public next(part:string, quantity:number):APIExtended
+        public next(quantity:number):APIExtended
+        public next(part:any, quantity:number = 10):APIExtended
+        {
+            if(typeof part == "string")
+            {
+                //part
+            }else
+            {
+                if(typeof part == "number")
+                    quantity = part;
+                part = Model.PART_DEFAULT;
+            }
+
+            if(this.requests[part])
+            {
+                return this.requests[part].next(quantity);
+            }
+            return null;
+        }
         protected hasPart(name:string, params:any = null):boolean
         {
             return this._partsPromises[name] || this.getRequest(name, params)!=null;//name == "default";
@@ -21,6 +48,7 @@ namespace ghost.mvc
             if(!this._partsPromises[name])
             {
                 var request:API<API<any>> = this.getRequest(name, params);
+                this.requests[name] = request;
                 this._partsPromises[name] = new Promise<any>((accept, reject)=>
                 {
                     var _self:any = this;

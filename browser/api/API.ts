@@ -1,8 +1,10 @@
 ///<lib="es6-promise"/>
 ///<module="io"/>
+///<module="framework/ghost/utils"/>
 module ghost.browser.api
 {
 
+    import Objects = ghost.utils.Objects;
     export abstract class API<T extends API<any>>
     {
         private static _instance:API<any>;
@@ -10,7 +12,7 @@ module ghost.browser.api
         {
             if(inst || !API._instance)
             {
-                API._instance = inst?inst:new APICustom();
+                API._instance = inst?inst:new APIExtended();
             }
             return API._instance;
         }
@@ -119,38 +121,87 @@ module ghost.browser.api
             }
             return null;
         }
+        protected hasData():boolean
+        {
+            return this._data != null;
+        }
+        protected getData():any
+        {
+            return this._data;
+        }
+        protected getRequest():any
+        {
+            var request:any = {};
+            request.method = this._method?this._method:'GET';
+            if(this._data);
+                request.data = this.getData();
+            request.retry = ghost.io.RETRY_INFINITE;
+            request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
+            return request;
+        }
         protected getPromise():Promise<any>
         {
-          /*  return new Promise<any>((resolve:any, reject:any):void=>
-            {*/
-                var request:any = {};
-                request.method = this._method?this._method:'GET';
-                if(this._data);
-                    request.data = this._data;
-                request.retry = ghost.io.RETRY_INFINITE;
-                request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
-                console.log(request);
-               return  ghost.io.ajax(request);//.then(resolve, reject);
-            //});
+               var request:any = this.getRequest();
+               return  ghost.io.ajax(request);
         }
+
     }
-    export class APICustom extends API<APICustom>
+    export class APIExtended extends API<APIExtended>
     {
-        public static instance(inst?:API<any>):APICustom
+        private _services:any[];
+        public static instance(inst?:API<any>):APIExtended
         {
-            return <APICustom>API.instance(inst);
+            return <APIExtended>API.instance(inst);
         }
-        public static request():APICustom
+        public constructor()
         {
-            return <APICustom>API.instance().request();
+            super();
+            this._services = [];
         }
-        public echo():APICustom
+        public static request():APIExtended
+        {
+            return <APIExtended>API.instance().request();
+        }
+        protected hasData():boolean
+        {
+            return this._data != null || this._services.length!=0;
+        }
+        protected getData():any
+        {
+            var data:any = this._data?Objects.clone(this._data):{};
+            data = this._services.reduce(function(previous:any, item:any):any
+            {
+                if(!previous[item.name])
+                    previous[item.name] = {}
+                previous[item.name][item.property] = item.data;
+                return previous;
+            }, data);
+            return data;
+        }
+        public echo():APIExtended
         {
             return this.request().controller("echo").action("echo");
         }
         public test():void{
             debugger;
-
+        }
+        protected service(serviceName:string, property:string, data):APIExtended
+        {
+            this._services.push({name:serviceName, property:property, data:data});
+            return this;
+        }
+        public order(id:string, direction:number = 1):APIExtended
+        {
+            return this.service("order", "key", id).service("order","direction", direction);
+        }
+        public paginate(key:string):APIExtended
+        {
+            return this.service("paginate", "key", key);
+        }
+        public next(quantity:number = 10):T
+        {
+            debugger;
+            return <any>this;
         }
     }
     export interface IAPIOptions
