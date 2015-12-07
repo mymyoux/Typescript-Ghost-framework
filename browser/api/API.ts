@@ -198,7 +198,7 @@ module ghost.browser.api
         {
             return this.service("paginate", "key", key);
         }
-        public next(quantity:number = 10):T
+        public next(quantity:number = 10):APIExtended
         {
             debugger;
             return <any>this;
