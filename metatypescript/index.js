@@ -20,21 +20,40 @@ function Debug()
 {
 
 }
-Debug.inspect = function(object)
+Debug.inspect = function(object, level)
 {
+    var str = "";
+    if(level === undefined)
+    {
+        level = 0;
+    }
+    for(var i=0; i<level; i++)
+    {
+        str += "\t";
+    }
     for(var p in object)
     {
         if(typeof object[p] == "function")
         {
             if(p.substring(0, 3) == "get")
             {
-                console.log(colors.red(p));
+                console.log(str+colors.red(p));
             }else
             {
-                console.log(colors.cyan(p));
+                console.log(str+colors.cyan(p));
             }
         }else
-            console.log(p);
+        {
+            console.log(str+p);
+            if(object[p] && typeof object[p] == "object" && level<10)
+            {
+                Debug.inspect(object[p], level+1);
+            }
+            if(level >=10)
+            {
+                console.log(colors.red("too deep"));
+            }
+        }
     }
 };
 
@@ -154,10 +173,49 @@ MetaCompiler.prototype.getModule = function(folder, file)
 MetaCompiler.prototype._checkIsReady = function()
 {
 
+    var errors;
+    for(var p in this.modules)
+    {
+       if((errors = this.modules[p].getCompiler().compileSyntax())!==true)
+       {
+           return this.displayErrors(errors);
+       }
+    }
+    for(var p in this.modules)
+    {
+        if((errors = this.modules[p].getCompiler().compileParse())!==true)
+        {
+            return this.displayErrors(errors);
+        }
+    }
+    for(var p in this.modules)
+    {
+        if((errors = this.modules[p].getCompiler().compileOutput())!==true)
+        {
+            return this.displayErrors(errors);
+        }
+    }
     console.log(this.modules);
+    //this.modules["level/data"].compile();
 
-    this.modules["level/data"].compile();
+};
+MetaCompiler.prototype.displayErrors = function( files)
+{
 
+    var file;
+    for(var p in files)
+    {
+        file = files[p];
+        if(!file.diagnostics || !file.diagnostics.length)
+        {
+            continue;
+        }
+        for(var i=0; i<file.diagnostics.length; i++)
+        {
+            position = ts.getLineAndCharacterOfPosition(file.source, file.diagnostics[i].start);
+            console.log( colors.red(file.file+"("+(position.line+1)+","+(position.character+1)+"): "+file.diagnostics[i].error_type+" error T"+file.diagnostics[i].code+": "+file.diagnostics[i].messageText));
+        }
+    }
 };
 MetaCompiler.prototype.onModuleReady = function(module)
 {
@@ -218,7 +276,6 @@ MetaCompiler.prototype.onWatcherChange = function(folder, path)
     {
         return;
     }
-    console.log("done");
     file.invalidate();
     module.invalidate();
     module.compile();
@@ -271,13 +328,15 @@ function Module(folder, pathModule, compiler)
     this.compiled = false;
 
     this.files = {};
+
+    this.declarationFile = new DeclarationFile();
 }
 Module.EVENT_READY = "module_event_ready";
 
 Module.prototype.inspect = function()
 {
     return "[Module name=\""+this.path+"\" files=\""+this.tsConfig.files.length+"\"]";
-}
+};
 Module.prototype.init = function()
 {
 
@@ -374,12 +433,7 @@ Module.prototype.onFileReady = function(file, data)
 };
 Module.prototype.onFileParsed = function(file, data)
 {
-    console.log(colors.magenta(file.file+" parsed"));
-    console.log(data.dependencies.map(function(item){return item.value;}));
-    if(data.dependencies.length)
-    {
-        console.log(data);
-    }
+
 };
 Module.prototype.onReady = function()
 {
@@ -441,6 +495,15 @@ Module.prototype.syncTsConfig = function(callback)
         });
     }
 };
+Module.prototype.getCompiler = function()
+{
+    if(!this.compiler)
+    {
+        this.compiler = new Compiler(this, this.tsConfig);
+        this.compiler.init();
+    }
+    return this.compiler;
+}
 Module.prototype.compile = function()
 {
     if(!this.compiler)
@@ -457,19 +520,58 @@ Module.prototype.compile = function()
 Module.prototype.invalidate = function()
 {
     this.compiled = false;
-}
+};
+Module.prototype.updateContent = function()
+{
+    var files = this.files_order;
+    var content = "", declarationContent = "";
+    for(var i =0; i<files.length; i++)
+    {
+        declarationContent+= files[i].declarationResult;
+        content+= files[i].jsResult;
+    }
+    if(content != this.content)
+    {
+        this.content = content;
+    }
+    if(declarationContent != this.declarationContent)
+    {
+        this.declarationContent = declarationContent;
+    }
+};
+
+
 
 util.inherits(Module, EventEmitter);
 
-
-
+function DeclarationFile()
+{
+    EventEmitter.call(this);
+    this.version = 0;
+    this.content = null;
+}
+DeclarationFile.EVENT_UPDATED = "declarationfile_event_updated";
+DeclarationFile.prototype.updateVersion = function()
+{
+    this.version ++;
+    this.emit(DeclarationFile.EVENT_UPDATED);
+};
+DeclarationFile.prototype.setContent = function(content)
+{
+    if(this.content != content)
+    {
+        this.content = content;
+        this.updateVersion();
+    }
+};
+util.inherits(DeclarationFile, EventEmitter);
 function File(folder, file)
 {
     EventEmitter.call(this);
     this.path = path.join(folder, file);
     this.folder = folder;
     this.file = file;
-    this.parseInfomation = null;
+    this.parseInformation = null;
 
     this.state = "not_ready";
 
@@ -488,6 +590,17 @@ function File(folder, file)
     this.version = 0;
 
     this.source = null;
+
+
+    /**
+     * Array of diagnostics
+     */
+    this.diagnostics;
+
+    /**
+     * First Syntax non valid
+     */
+    this._validSyntax = false;
 }
 
 File.EVENT_PARSED = "file_event_parsed";
@@ -560,7 +673,7 @@ File.prototype.getSnapShot = function()
 
 File.prototype.getContent = function()
 {
-    console.log(colors.magenta("Get content:"+this.path));
+    //console.log(colors.magenta("Get content:"+this.path));
     if(this.updated && this.content)
     {
         return this.content;
@@ -575,9 +688,7 @@ File.prototype.getContent = function()
         {
             this.importInvalidated = true;
             this.content = content;
-            console.log(ts.ScriptSnapshot.fromString(this.content).getChangeRange(this.snapshot));
             this.snapshot = ts.ScriptSnapshot.fromString(this.content);
-            console.log(colors.cyan(this.file+" snapshort from content"));
         }
     }
     return this.content;
@@ -594,7 +705,7 @@ File.prototype.parse = function(source)
         this.getContent();
     }
     //this.source = source;
-    if(!this.isParsed())
+    if(!this.isValidParsed())
     {
         var parsed = this.parseNode(0, source);
 
@@ -687,7 +798,7 @@ File.prototype.parse = function(source)
                 }
             }
         }
-        this.parseInfomation = parsed;
+        this.parseInformation = parsed;
         this.state = "parsed";
        /* console.log(colors.green(this.file));
         if(this.file == "HashMap3.ts")
@@ -699,6 +810,7 @@ File.prototype.parse = function(source)
        {
            console.log(colors.green(this.file));
        }*/
+        this.validParse();
         this.emit(File.EVENT_PARSED, parsed);
         /*
         console.log(parsed);
@@ -748,6 +860,7 @@ File.prototype.parseNode = function(level, parsed, node)
             var identifier = this.getIdentifier(node, parent);
             if(identifier)
             {
+                identifier.type = "module";
                 parsed.namespaces.push(identifier);
                 parsed.currentNamespace = identifier.value;
             }
@@ -855,6 +968,11 @@ File.prototype.parseNode = function(level, parsed, node)
         {
             //class properties
             var identifiers = this.getIdentifiers(null, node);
+            for(var p in identifiers)
+            {
+                identifiers[p].type = "propertydeclaration1"
+                identifiers[p].namespace = parsed.currentNamespace;
+            }
             if(identifiers.length>1)
             {
                 parsed.used.push(identifiers[1]);
@@ -871,7 +989,8 @@ File.prototype.parseNode = function(level, parsed, node)
                         parsed.used.push(identifiers[0]);
                     }
                     var identifier = identifiers[identifiers.length-1];
-                    identifier.type ="propertydeclaration";
+                    identifier.type ="propertydeclaration2";
+                    identifier.namespace =parsed.currentNamespace;
                     parsed.used.push(identifier);
                     //only if static
                     var isStatic = this.findFirstNode(node, "StaticKeyword");
@@ -1131,9 +1250,7 @@ File.prototype.getImports = function()
             //namespace list
             if(token === 124 /* NamespaceKeyword */ )
             {
-                console.log(colors.red( ts.SyntaxKind[token]));
                 token = scanner.scan();
-                console.log(token, ts.SyntaxKind[token]);
                 var name = [];
                 while((token === 67 || token === 21) && token !== 1 /* Identifier Dot && EndOfFileToken*/)
                 {
@@ -1144,22 +1261,18 @@ File.prototype.getImports = function()
                     token = scanner.scan();
                 }
                 namespace = name.join("/");
-                console.log(colors.cyan(namespace));
             }else
             if(token === 87 /* ImportKeyword */)
             {
                 //import list
                 token = scanner.scan();
-                console.log(token, ts.SyntaxKind[token]);
                 if(token === 67 /* Identifier */ )
                 {
                     token = scanner.scan();
-                    console.log(token, ts.SyntaxKind[token]);
                     if(token === 55 /* FirstAssignment */ )
                     {
                         var name = [];
                         token = scanner.scan();
-                        console.log(token, ts.SyntaxKind[token]);
                         //TODO:test virgule aussi
                         while(token !== 23 && token !== 1 /* SemicolonToken && EndOfFileToken*/)
                         {
@@ -1196,7 +1309,6 @@ File.prototype.getImports = function()
 
             //if nothing matched
             token = scanner.scan();
-            console.log(token, ts.SyntaxKind[token]);
         }
         for(var p in scanner)
         {
@@ -1212,11 +1324,6 @@ File.prototype.getImports = function()
             }else
                 console.log(p);
         }
-        console.log(token, ts.SyntaxKind[token]);
-
-        console.log(this.imports);
-        console.log(colors.red("ok"));
-        console.log(identifiers);
 
         this.importInvalidated = false;
     }
@@ -1224,16 +1331,27 @@ File.prototype.getImports = function()
 File.prototype.setError = function(type, diagnostics)
 {
     this.state = "error";
-
-};
-File.prototype.isParsed = function()
-{
-    if(!this.updated || !this.content)
+    this.diagnostics = diagnostics.map(function(item)
     {
-        //reload content
-        this.getContent();
-    }
-    return !(this.state == "ready" || this.state == "invalidated");
+        item.error_type = type;
+        return item;
+    });
+};
+File.prototype.hasError = function()
+{
+    return this.state.indexOf("error") == -1;
+}
+File.prototype.isValidParsed = function()
+{
+    return this._validParsed === true;
+};
+File.prototype.unvalidParse = function()
+{
+    this._validParsed = false;
+};
+File.prototype.validParse = function()
+{
+    this._validParsed = true;
 };
 File.prototype.isSemanticValidated = function()
 {
@@ -1247,6 +1365,23 @@ File.prototype.validCompilation = function()
 {
     this.state = "compiled";
 };
+File.prototype.isValidSyntax = function()
+{
+    return this._validSyntax === true;
+};
+File.prototype.validSyntax = function()
+{
+    this.state = "syntax_validated";
+    this._validSyntax = true;
+};
+File.prototype.invalidSyntax = function()
+{
+    this.state = "syntax_invalidated";
+    this._validSyntax = false;
+
+    //TODO:invalid next steps
+    this.invalidParse();
+};
 File.prototype.isInvalidate = function()
 {
     //validate need to be called
@@ -1258,6 +1393,7 @@ File.prototype.isCompiled = function()
 };
 File.prototype.validate = function()
 {
+    //force load content
     this.getContent();
     if (!this.updated) {
         die(this.file+" can't get content");
@@ -1267,6 +1403,8 @@ File.prototype.invalidate = function()
 {
     this.updated = false;
     this.version++;
+
+    this.invalidSyntax();
     this.state = "invalidated";
 };
 
@@ -1308,22 +1446,14 @@ Compiler.prototype.init = function()
         this.serviceHost =  {
             getScriptFileNames:()=>
             {
-                console.log(colors.red("GET FILES"));
                 return this.tsConfig.files;},
             getScriptVersion: (fileName) => {
-                if(this.files[fileName])
-                    console.log(colors.red("version:"+fileName+"=>"+this.files[fileName].version.toString()));
-                //console.log(this.files[fileName]);
                 return this.files[fileName] && this.files[fileName].version.toString()
             },
             getScriptSnapshot: (fileName,data, data2) => {
-                console.log(colors.green("SNAPSHOT"));
-                console.log(fileName, data, data2);
                 var file;
                 if((file = this.module.getFile(fileName)))
                 {
-                    console.log(colors.green("found"));
-                    console.log(file.getSnapShot());
                     return file.getSnapShot();
                 }
                 if (!fs.existsSync(fileName)) {
@@ -1354,8 +1484,17 @@ Compiler.prototype.init = function()
         console.log(this.services.getCompilerOptionsDiagnostics());
         return;
     }
-    this.compile();
-
+    //TODO: update source when file updated ??
+    var file;
+    var sources = this.services.getProgram().getSourceFiles();
+    for(var i=0; i<sources.length; i++)
+    {
+        file = this.module.getFile(sources[i].fileName);
+        if(file)
+        {
+            file.source = sources[i];
+        }
+    }
 };
 Compiler.prototype.getImports = function(file)
 {
@@ -1383,10 +1522,239 @@ Compiler.prototype.compile = function()
             position = ts.getLineAndCharacterOfPosition(file.source, diagnostics[i].start);
             console.log(file.file+"("+(position.line+1)+","+(position.character+1)+"): error T"+diagnostics[i].code+": "+ diagnostics[i].messageText);
         }
-
+    }else
+    {
+        this._postCompile();
     }
     time = Date.now() - time;
     console.log(colors.cyan(time+" ms"));
+};
+/**
+ * Check syntax and set file.diagnostics
+ * @returns {*}
+ */
+Compiler.prototype.compileSyntax = function()
+{
+    var services = this.services;//ts.createLanguageService(this.serviceHost, this.documentRegistry);
+
+    var file, diagnostics, errors = [];
+    for(var p in this.files)
+    {
+        file = this.files[p];
+
+        //force content load
+        if (!file.isInvalidate())
+        {
+            file.validate();
+        }
+        //check syntax
+        if(!file.isValidSyntax())
+        {
+            console.log(colors.cyan(file.file + " check syntax"));
+            //pur syntax check
+            diagnostics = services.getSyntacticDiagnostics(file.file);
+            if(diagnostics.length)
+            {
+                file.setError("syntax", diagnostics);
+                errors.push(file);
+                file.invalidSyntax();
+            }else
+            {
+                file.validSyntax();
+            }
+        }
+    }
+    //return errors or true
+    return errors.length?errors:true;
+};
+Compiler.prototype.compileParse = function()
+{
+    var file;
+    for(var p in this.files)
+    {
+        file = this.files[p];
+        if(!file.isValidParsed())
+        {
+            console.log(colors.cyan(file.file + " parse"));
+            //TODO:add imported files
+            file.parse();
+        }
+        //console.log(services.getEmitOutput(sources[i].fileName));
+    }
+    return true;
+};
+Compiler.prototype.compileOutput = function()
+{
+    var program =  this.services.getProgram();
+    var file, errors = [];
+    for(var p in this.files)
+    {
+        file = this.files[p];
+        if(!file.isCompiled())
+        {
+            console.log(colors.cyan(file.file + " compile"));
+            var diagnostics = ts.getPreEmitDiagnostics(program, file.source);
+            if(!diagnostics.length)
+            {
+                var result = program.emit(file.source, function(name, content)
+                {
+                    //declaration
+                    if(name.indexOf(".d.ts") != -1)
+                    {
+                        file.declarationResult = content;
+                    }else
+                    {
+                        file.jsResult = content;
+                    }
+                });
+                diagnostics = result.diagnostics;
+            }
+            if(diagnostics.length)
+            {
+                var result = program.emit(file.source, function(name, content)
+                {
+                    //declaration
+                    if(name.indexOf(".d.ts") != -1)
+                    {
+                        file.declarationResult = content;
+                    }else
+                    {
+                        file.jsResult = content;
+                    }
+                });
+                console.log(file.jsResult);
+                file.setError("compilation", diagnostics);
+                errors.push(file);
+            }else
+            {
+                file.validCompilation();
+            }
+
+        }
+    }
+    return errors.length?errors:true;
+};
+Compiler.prototype._postCompile = function()
+{
+    var file;
+    var interns = [];
+    var dependencies = [];
+    var used = [];
+    for(var p in this.files)
+    {
+        file = this.files[p];
+     //   console.log(file.parseInformation);
+        interns = interns.concat(file.parseInformation.intern);
+        dependencies = dependencies.concat(file.parseInformation.dependencies);
+        used = used.concat(file.parseInformation.used);
+      //  console.log(p+":"+this.files[p].jsResult.length );
+    }
+
+    var files = [];
+    for(var p in this.files)
+    {
+        files.push(this.files[p]);
+    }
+    //for test only
+    files.reverse();
+
+
+    var lenIntern = interns.length;
+    files.forEach(function(file)
+    {
+        var len = file.parseInformation.dependencies.length;
+        file.parseInformation.dependenciesInterns = [];
+        file.parseInformation.dependenciesExterns = [];
+        var used, intern, isIntern;
+        for(var i = 0; i<len; i++)
+        {
+            used = file.parseInformation.dependencies[i];
+            isIntern = false;
+            for(var j=0; j<lenIntern; j++)
+            {
+                intern = interns[j];
+                if(used.namespace+'/'+used.value == intern.namespace+'/'+intern.value || used.value == intern.namespace+'/'+intern.value) {
+                    isIntern = true;
+                    break;
+                }
+            }
+            if(isIntern)
+            {
+                file.parseInformation.dependenciesInterns.push(used);
+            }else
+            {
+                file.parseInformation.dependenciesExterns.push(used);
+            }
+        }
+       return file;
+    });
+
+    var len = files.length;
+    var i = 0, j;
+    var currentInterns = [];
+    var dependency, isFound;
+    var t = 0;
+    var first;
+    //define writing order
+    while(i<len && t++<50)
+    {
+        file = files[i];
+        console.log("test:", file);
+        j =  file.parseInformation.dependenciesInterns.length;
+        while(j>0)
+        {
+            dependency = file.parseInformation.dependenciesInterns[j-1];
+            isFound = false;
+            for(var k=0; k<currentInterns.length; k++)
+            {
+                if(dependency.namespace+'/'+dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value || dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value) {
+                    isFound = true;
+                    break;
+                }
+            }
+            if(isFound)
+            {
+                file.parseInformation.dependenciesInterns.pop();
+                j--;
+            }else
+            {
+                console.log("not found:", dependency);
+                //dendency not satisfated
+                break;
+            }
+        }
+        if(!file.parseInformation.dependenciesInterns.length)
+        {
+            i++;
+            first = null;
+            currentInterns = currentInterns.concat(file.parseInformation.intern);
+            console.log("ok:", file);
+        }else
+        {
+            console.log("not:", file);
+            if(file === first)
+            {
+                console.log(files.slice(i));
+                throw new Error("Cyclic dependency found");
+            }
+            files.splice(i, 1);
+            files.push(file);
+            if(!first)
+            {
+                first = file;
+            }
+        }
+    }
+
+    this.module.interns = interns;
+    this.module.dependencies = dependencies;
+    this.module.used = used;
+
+    this.module.files_order = files;
+
+
+    this.module.updateContent();
+
 };
 Compiler.prototype._compile = function()
 {
@@ -1397,6 +1765,8 @@ Compiler.prototype._compile = function()
 
     var services = this.services;//ts.createLanguageService(this.serviceHost, this.documentRegistry);
 
+    this.compileSyntax();
+    /*
     var file, diagnostics;
     var sources = services.getProgram().getSourceFiles();
     for(var i=0; i<sources.length; i++)
@@ -1427,14 +1797,16 @@ Compiler.prototype._compile = function()
             }
         }
     }
-
+        */
 
 
     var program =  services.getProgram();
-    console.log(colors.cyan("diagnostic"));;
-    console.log(program.emit());
 
-    for(var p in this.files)
+
+    this.compileParse();
+
+    this.compileOutput();
+    /*    for(var p in this.files)
     {
         file = this.files[p];
         if(!file.isParsed())
@@ -1444,7 +1816,7 @@ Compiler.prototype._compile = function()
             file.parse();
         }
         //console.log(services.getEmitOutput(sources[i].fileName));
-    }
+    }*/
 
 
 
@@ -1508,6 +1880,18 @@ Compiler.prototype._compile = function()
             }
             if(diagnostics.length)
             {
+                var result = program.emit(file.source, function(name, content)
+                {
+                    //declaration
+                    if(name.indexOf(".d.ts") != -1)
+                    {
+                        file.declarationResult = content;
+                    }else
+                    {
+                        file.jsResult = content;
+                    }
+                });
+                console.log(file.jsResult);
                 file.setError("compilation", diagnostics);
                 return [file, "compilation", diagnostics];
             }else
@@ -1616,7 +2000,6 @@ Compiler.prototype._compile = function()
             console.log(p);
         }
     }
-    console.log(program.getTypeChecker());
     return;
     var emitResult = program.emit();
 

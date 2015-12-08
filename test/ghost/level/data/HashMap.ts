@@ -5,6 +5,7 @@ namespace ghost.level.data.sub
      */
     export class HashMap<KEY, VALUE>
     {
+        public static NAME:string = "hashmap";
         public values:VALUE[];
         public keys:KEY[];
         public constructor()
