@@ -5,9 +5,8 @@
       "test/ghost"
     ],
     "out":
-    [
-      {
-        "level.data.HashMap":"out.js"
-      }
-    ]
+    {
+      "level/data":"build/out.js"
+    }
+
 }

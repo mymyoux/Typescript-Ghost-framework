@@ -5,6 +5,7 @@ namespace ghost.level.data.sub
      */
     export class HashMap<KEY, VALUE>
     {
+        //public static ppp:any = new ghost.level.data.HashMap3<any, any>();
         public static NAME:string = "hashmap";
         public values:VALUE[];
         public keys:KEY[];
@@ -60,6 +61,11 @@ namespace ghost.level.data.sub
         {
             return this.values.slice();
         }
+    }
+
+    class RRT<TX, TY>
+    {
+        public static llll:any = HashMap.NAME;
     }
 }
 
