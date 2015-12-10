@@ -189,6 +189,7 @@ MetaCompiler.prototype._checkIsReady = function()
             return this.displayErrors(errors);
         }
     }
+    //TODO:WARNING DONT EDIT dependencies for file/module when sorting use temp array orderFiles/orderModules
     for(var p in this.modules)
     {
         if((errors = this.modules[p].orderFiles())!==true)
@@ -196,25 +197,52 @@ MetaCompiler.prototype._checkIsReady = function()
             return this.displayErrors(errors);
         }
     }
-    for(var p in this.modules)
+
+    this.orderModules();
+
+    for(var p in this.ordonnedModules)
     {
-        if((errors = this.modules[p].getCompiler().compileOutput())!==true)
+        if((errors = this.ordonnedModules[p].calculModulesDependencies())!==true)
         {
             return this.displayErrors(errors);
         }
     }
-    for(var p in this.modules)
+    //TODO:ici on peut rajouter les modules externes + lib
+
+    //first compilation without displaying errors
+    for(var p in this.ordonnedModules)
     {
-        if((errors = this.modules[p].generateDeclarationOutput())!==true)
+        if((errors = this.ordonnedModules[p].getCompiler().compileOutput())!==true)
+        {
+          //  return this.displayErrors(errors);
+        }
+    }
+    for(var p in this.ordonnedModules)
+    {
+        if((errors = this.ordonnedModules[p].generateDeclarationOutput())!==true)
         {
             return this.displayErrors(errors);
         }
     }
-    for(var p in this.modules)
+    for(var p in this.ordonnedModules)
     {
-        if((errors = this.modules[p].generateContentOutput())!==true)
+        if((errors = this.ordonnedModules[p].generateContentOutput())!==true)
         {
             return this.displayErrors(errors);
+        }
+    }
+    for(var p in this.ordonnedModules)
+    {
+        if((errors = this.ordonnedModules[p].addDependencies())!==true)
+        {
+            return this.displayErrors(errors);
+        }
+    }
+    for(var p in this.ordonnedModules)
+    {
+        if((errors = this.ordonnedModules[p].getCompiler().compileOutput())!==true)
+        {
+              return this.displayErrors(errors);
         }
     }
     if(this.configuration.out)
@@ -224,13 +252,93 @@ MetaCompiler.prototype._checkIsReady = function()
             if(this.modules[p])
             {
                 console.log(colors.green("Writing "+this.configuration.out[p]));
-                fs.writeFileSync(this.configuration.out[p], this.modules["level/data"].getFullOutput(true), 0, "utf-8");
+                fs.writeFileSync(this.configuration.out[p], this.modules[p].getFullOutput(true), 0, "utf-8");
             }
         }
     }
     //this.modules["level/data"].compile();
+};
+MetaCompiler.prototype.orderModules = function()
+{
+    var modules = [];
+    for(var p in this.modules)
+    {
+        modules.push(this.modules[p]);
+        this.modules[p].tmpDependencies = this.modules[p].dependencies.slice();
+    }
+
+    console.log(colors.red("premodules"));
+    console.log(modules);
+    //for test only
+    modules.reverse();
+    var i = 0, j;
+    var currentInterns = [];
+    var dependency, isFound;
+    var first, module;
+    var len = modules.length;
+    //define writing order
+    while(i<len)
+    {
+        module = modules[i];
+        j = module.tmpDependencies.length;
+        console.log(colors.green(j));
+        while(j>0)
+        {
+            dependency = module.tmpDependencies[j-1];
+            isFound = false;
+            for(var k=0; k<currentInterns.length; k++)
+            {
+                if(Compiler.isInstanceOf(dependency, currentInterns[k]))/*dependency.namespace+'/'+dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value || dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value)*/ {
+                    isFound = true;
+                    break;
+                }
+            }
+            if(isFound)
+            {
+                module.tmpDependencies[j-1].module =  currentInterns[k].module;
+                module.tmpDependencies.pop();
+                j--;
+            }else
+            {
+                console.log("not found:", dependency);
+                //dendency not satisfated
+                break;
+            }
+        }
+
+        if(!module.tmpDependencies.length)
+        {
+            i++;
+            first = null;
+            currentInterns = currentInterns.concat(module.interns);
+            console.log("ok:", module);
+        }else
+        {
+            console.log("not:", module);
+            if(module === first)
+            {
+                var f = modules.slice(i);
+                for(var p in f)
+                {
+                    console.log(colors.cyan(f[p].inspect()));
+                }
+                return [{error:new Error("Cyclic dependencies"), files:modules.slice(i)}];
+            }
+            modules.splice(i, 1);
+            modules.push(module);
+            if(!first)
+            {
+                first = module;
+            }
+        }
+    }
+
+    this.ordonnedModules = modules;
+    console.log(colors.red("MODULES"));
+    console.log(modules);
 
 };
+
 MetaCompiler.prototype.displayErrors = function( files)
 {
 
@@ -374,13 +482,21 @@ function Module(folder, pathModule, compiler)
 
     this.files = {};
 
-    this.declarationFile = new DeclarationFile();
+    //this.declarationFile = new DeclarationFile();
 }
 Module.EVENT_READY = "module_event_ready";
 
 Module.prototype.inspect = function()
 {
-    return "[Module name=\""+this.path+"\" files=\""+this.tsConfig.files.length+"\"]";
+    var dep;
+    if(this.dependencies)
+    {
+        dep = this.dependencies.map(function(item)
+        {
+            return item.module?item.module.path:'Unkown module';
+        });
+    }
+    return "[Module name=\""+this.path+"\" files=\""+this.tsConfig.files.length+"\" depencies=\""+(this.dependencies?this.dependencies.length:0)+"\"]"+(dep?dep.join('\n'):'');
 };
 Module.prototype.init = function()
 {
@@ -508,8 +624,27 @@ Module.prototype.getFile = function(file)
     {
         return this.files[file];
     }
+    console.log(colors.green(file));
+    console.log(this.files);
+
+    if(this.useDependencies)
+    {
+        for(var p in this.dependenciesModules)
+        {
+            if( this.dependenciesModules[p].getDeclarationFile().file == file)
+            {
+                return this.dependenciesModules[p].getDeclarationFile();
+            }
+        }
+    }
+
     file = path.relative(this.path, path.relative(this.folder, file));
-    return this.files[file];
+    if(this.files[file])
+    {
+        return this.files[file];
+    }
+
+    return null;
 };
 Module.prototype.syncTsConfig = function(callback)
 {
@@ -575,14 +710,50 @@ Module.prototype.updateContent = function()
         declarationContent+= files[i].declarationResult;
         content+= files[i].jsResult;
     }
-    if(content != this.content)
+    this.declarationFile.setContent(content);
+    this.declarationFile.setDeclarationContent(declarationContent);
+};
+Module.prototype.getDeclarationFile = function()
+{
+    if(!this.declarationFile)
     {
-        this.content = content;
+        this.declarationFile = new ModuleFile("module_"+this.path.replace(/\//g,'_')+".d.ts");
     }
-    if(declarationContent != this.declarationContent)
+    return this.declarationFile;
+};
+function ModuleFile(name)
+{
+    this.declarationContent;
+    this.content;
+    this.file = name;
+    console.log(colors.red("name:")+colors.cyan(name));
+    this.version = 0;
+}
+ModuleFile.prototype.setContent = function(content)
+{
+    this.content = content;
+};
+ModuleFile.prototype.getContent = function()
+{
+    return this.content?this.content:"";
+};
+ModuleFile.prototype.setDeclarationContent = function(content)
+{
+    if(this.declarationContent != content)
     {
-        this.declarationContent = declarationContent;
+        this.declarationContent = content;
+        this.snapshot = ts.ScriptSnapshot.fromString(this.declarationContent);
+        this.version++;
     }
+};
+ModuleFile.prototype.getDeclarationContent = function()
+{
+    return this.declarationContent?this.declarationContent:"";
+};
+ModuleFile.prototype.getSnapShot = function()
+{
+    console.log(colors.red("GET CONTENT:")+this.declarationContent);
+    return this.snapshot?this.snapshot:ts.ScriptSnapshot.fromString("");
 };
 Module.prototype.orderFiles = function()
 {
@@ -627,7 +798,7 @@ Module.prototype.orderFiles = function()
             for(var j=0; j<lenIntern; j++)
             {
                 intern = interns[j];
-                if(used.namespace+'/'+used.value == intern.namespace+'/'+intern.value || used.value == intern.namespace+'/'+intern.value) {
+                if(Compiler.isInstanceOf(used, intern))/*used.namespace+'/'+used.value == intern.namespace+'/'+intern.value || used.value == intern.namespace+'/'+intern.value)*/ {
                     isIntern = true;
                     break;
                 }
@@ -647,10 +818,9 @@ Module.prototype.orderFiles = function()
     var i = 0, j;
     var currentInterns = [];
     var dependency, isFound;
-    var t = 0;
     var first;
     //define writing order
-    while(i<len && t++<50)
+    while(i<len)
     {
         file = files[i];
         console.log("test:", file);
@@ -661,7 +831,7 @@ Module.prototype.orderFiles = function()
             isFound = false;
             for(var k=0; k<currentInterns.length; k++)
             {
-                if(dependency.namespace+'/'+dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value || dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value) {
+                if(Compiler.isInstanceOf(dependency, currentInterns[k]))/*dependency.namespace+'/'+dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value || dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value)*/ {
                     isFound = true;
                     break;
                 }
@@ -704,10 +874,25 @@ Module.prototype.orderFiles = function()
             }
         }
     }
-    this.files = files;
+    //extern dependencies
+    dependencies = [];
+    for(var i=0; i<files.length; i++)
+    {
+        file = files[i];
+        if(file.parseInformation.dependenciesExterns)
+        {
+            dependencies = dependencies.concat(file.parseInformation.dependenciesExterns);
+        }
+    }
+    this.ordonnedFiles = files;
 
-    this.interns = interns;
+    this.interns = interns.map(function(item)
+    {
+        item.module = this;
+        return item;
+    }, this);
     this.dependencies = dependencies;
+
     this.used = used;
 
     return true;
@@ -715,23 +900,23 @@ Module.prototype.orderFiles = function()
 
 Module.prototype.generateDeclarationOutput = function()
 {
-    var contents = this.files.map(function(file)
+    var contents = this.ordonnedFiles.map(function(file)
     {
-       return file.declarationResult;
+       return file.declarationResult?file.declarationResult:"";
     });
     var content = contents.join("\n");
-    this.declarationContent = content;
+    this.getDeclarationFile().setDeclarationContent(content);
     return true;
 };
 
 Module.prototype.generateContentOutput = function()
 {
-    var contents = this.files.map(function(file)
+    var contents = this.ordonnedFiles.map(function(file)
     {
-       return file.jsResult;
+       return file.jsResult?file.jsResult:"";
     });
     var content = contents.join("\n");
-    this.content = content;
+    this.getDeclarationFile().setContent(content);
     return true;
 };
 Module.prototype.getFullOutput = function(removeExtends)
@@ -755,12 +940,25 @@ Module.prototype.getFullOutput = function(removeExtends)
     return content;
 
 };
+Module.prototype.calculModulesDependencies = function()
+{
+    this.dependenciesModules = this.dependencies.map(function(item)
+    {
+        return item.module;
+    });
+    return true;
+};
+Module.prototype.addDependencies = function()
+{
+    this.useDependencies = true;
+    return true;
+};
 Module.prototype.getOutput = function()
 {
-    return this.content;
-}
+    return this.getDeclarationFile().content;
+};
 util.inherits(Module, EventEmitter);
-
+/*
 function DeclarationFile()
 {
     EventEmitter.call(this);
@@ -781,7 +979,7 @@ DeclarationFile.prototype.setContent = function(content)
         this.updateVersion();
     }
 };
-util.inherits(DeclarationFile, EventEmitter);
+util.inherits(DeclarationFile, EventEmitter);*/
 function File(folder, file)
 {
     EventEmitter.call(this);
@@ -1039,31 +1237,10 @@ File.prototype.parse = function(source)
 
         this.parseInformation = parsed;
         this.state = "parsed";
-       /* console.log(colors.green(this.file));
-        if(this.file == "HashMap3.ts")
-        {
-            console.log(parsed);
-            process.exit(1);
-            return;
-        }else
-       {
-           console.log(colors.green(this.file));
-       }*/
+
         this.validParse();
         this.emit(File.EVENT_PARSED, parsed);
-        /*
-        console.log(parsed);
-        console.log(colors.cyan("------- exposed "));
-        console.log(exposed);
-        console.log(colors.cyan("* intern"));
-        console.log(intern);
-        console.log(colors.cyan("* extern"));
-        console.log(extern);
-        console.log(extern.map(function(item){return item.value}));
 
-        console.log(colors.cyan("* dependencies"));
-        console.log(parsed.dependencies);
-        console.log(parsed.dependencies.map(function(item){return item.value}));*/
 
         //TODO:add exposed link to this file + add import to others is they exists (+need recompile)
         //TODO:add dependencies to this file (module internal or external)
@@ -1720,6 +1897,22 @@ Compiler.prototype.init = function()
         this.serviceHost =  {
             getScriptFileNames:()=>
             {
+            /*    console.log( this.tsConfig.files);
+                process.exit(1);*/
+                if(this.module.useDependencies)
+                {
+                    var files = this.module.dependenciesModules.map(function(module)
+                    {
+                        console.log(module.getDeclarationFile());
+                        return module.getDeclarationFile().file;
+                    }).concat(this.module.ordonnedFiles.map(function(file)
+                    {
+                        return file.file;
+                    }));
+                    console.log(colors.red("files list"));
+                    console.log(files);
+                    return files;
+                }else
                 return this.tsConfig.files;},
             getScriptVersion: (fileName) => {
                 return this.files[fileName] && this.files[fileName].version.toString()
@@ -1729,6 +1922,13 @@ Compiler.prototype.init = function()
                 if((file = this.module.getFile(fileName)))
                 {
                     return file.getSnapShot();
+                }
+                if(this.module.useDependencies && fileName.indexOf("lib.d.ts")==-1)
+                {
+                    console.log(this.module);
+                    console.log(fileName);
+                    console.log(this.module.getFile(fileName));
+                    process.exit(1);
                 }
                 if (!fs.existsSync(fileName)) {
                     fileName = path.join(this.folder, fileName);
@@ -1910,6 +2110,7 @@ Compiler.prototype.compileOutput = function()
     }
     return errors.length?errors:true;
 };
+
 Compiler.prototype._postCompile = function()
 {
     var file;
