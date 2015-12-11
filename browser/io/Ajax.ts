@@ -187,6 +187,12 @@ namespace ghost.io
 	}
 	export class CancelablePromise<T> extends Promise<T>
 	{
+		/*
+		public constructor(method:any)
+		{
+			super(method);
+			Promise.call(this);
+		} */
 		public canceled:boolean = false;
 		private $ajax:any;
 		public cancel():void
@@ -204,6 +210,8 @@ namespace ghost.io
 			this.$ajax = $ajax;
 		}
 	}
+
+	//window["__extends"](CancelablePromise, Promise);
 	export interface IMiddleWare
 	{
 		/**

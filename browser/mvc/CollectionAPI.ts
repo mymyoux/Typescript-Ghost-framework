@@ -15,23 +15,87 @@ namespace ghost.mvc
             super();
             this.requests = {};
         }
-        public next(part:string, quantity:number):APIExtended
-        public next(quantity:number):APIExtended
-        public next(part:any, quantity:number = 10):APIExtended
+        protected onPartData(name:string, data:any):void
+        {
+            if(name == Model.PART_DEFAULT)
+                this.readExternal(data);
+        }
+        protected _getRequest(part?:string):APIExtended
         {
             if(typeof part == "string")
             {
-                //part
+                return this.requests[part];
             }else
             {
-                if(typeof part == "number")
-                    quantity = part;
-                part = Model.PART_DEFAULT;
+                return  this.requests[ Model.PART_DEFAULT];
             }
-
-            if(this.requests[part])
+            return null;
+        }
+        public next(part:string, quantity:number):APIExtended
+        public next(quantity:number):APIExtended
+        public next():APIExtended
+        public next(part:any = null, quantity:number = 10):APIExtended
+        {
+            if(typeof part == "number")
             {
-                return this.requests[part].next(quantity);
+                quantity = part;
+                part = null;
+            }
+            var request:any = this._getRequest(part);
+            if(request);
+            {
+                return request.next(quantity);
+            }
+            return null;
+        }
+        public nextAll(part:string, quantity:number):APIExtended
+        public nextAll(quantity:number):APIExtended
+        public nextAll():APIExtended
+        public nextAll(part:any = null, quantity:number = 10):APIExtended
+        {
+            if(typeof part == "number")
+            {
+                quantity = part;
+                part = null;
+            }
+            var request:any = this._getRequest(part);
+            if(request);
+            {
+                return request.nextAll(quantity);
+            }
+            return null;
+        }
+        public previous(part:string, quantity:number):APIExtended
+        public previous(quantity:number):APIExtended
+        public previous():APIExtended
+        public previous(part:any = null, quantity:number = 10):APIExtended
+        {
+            if(typeof part == "number")
+            {
+                quantity = part;
+                part = null;
+            }
+            var request:any = this._getRequest(part);
+            if(request);
+            {
+                return request.previous(quantity);
+            }
+            return null;
+        }
+        public previousAll(part:string, quantity:number):APIExtended
+        public previousAll(quantity:number):APIExtended
+        public previousAll():APIExtended
+        public previousAll(part:any = null, quantity:number = 10):APIExtended
+        {
+            if(typeof part == "number")
+            {
+                quantity = part;
+                part = null;
+            }
+            var request:any = this._getRequest(part);
+            if(request);
+            {
+                return request.previousAll(quantity);
             }
             return null;
         }
@@ -49,6 +113,7 @@ namespace ghost.mvc
             {
                 var request:API<API<any>> = this.getRequest(name, params);
                 this.requests[name] = request;
+
                 this._partsPromises[name] = new Promise<any>((accept, reject)=>
                 {
                     var _self:any = this;
@@ -57,6 +122,8 @@ namespace ghost.mvc
                         {
                             _self._partsPromises[name] = true;
                             accept.call(null, {data:Array.prototype.slice.call(arguments),read:false});
+
+                            request.on(API.EVENT_DATA_FORMATTED, _self.onPartData.bind(_self, name));
                         },reject);
                 });
             }
@@ -82,5 +149,9 @@ namespace ghost.mvc
             return null;
         }
 
+        public readExternal(input:any[]):void
+        {
+            debugger;
+        }
     }
 }

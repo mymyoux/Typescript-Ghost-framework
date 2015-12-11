@@ -1,12 +1,16 @@
 ///<lib="es6-promise"/>
 ///<module="io"/>
+///<module="framework/ghost/events"/>
 ///<module="framework/ghost/utils"/>
 module ghost.browser.api
 {
 
     import Objects = ghost.utils.Objects;
-    export abstract class API<T extends API<any>>
+    import EventDispatcher = ghost.events.EventDispatcher;
+    export abstract class API<T extends API<any>> extends EventDispatcher
     {
+        public static EVENT_DATA:any = "event_data";
+        public static EVENT_DATA_FORMATTED:any = "event_data_formatted";
         private static _instance:API<any>;
         public static instance(inst?:API<any>):API<any>
         {
@@ -98,13 +102,16 @@ module ghost.browser.api
             {
                 this._promise = this.getPromise();
             }
-            this._promise.then(function(data:any)
+            this._promise.then((data:any)=>
             {
+                this._promise = null;
                 if(data && data.error)
                 {
                     reject(data);
                     return;
                 }
+                this.parseResult(data);
+                this.trigger(API.EVENT_DATA, data);
                 resolve(data);
             }, reject);
             return <any>this;
@@ -139,6 +146,10 @@ module ghost.browser.api
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
             return request;
         }
+        protected parseResult(data:any):void
+        {
+
+        }
         protected getPromise():Promise<any>
         {
                var request:any = this.getRequest();
@@ -149,6 +160,8 @@ module ghost.browser.api
     export class APIExtended extends API<APIExtended>
     {
         private _services:any[];
+        private _apiData:any;
+        private _direction:number = 1;
         public static instance(inst?:API<any>):APIExtended
         {
             return <APIExtended>API.instance(inst);
@@ -187,20 +200,144 @@ module ghost.browser.api
         }
         protected service(serviceName:string, property:string, data):APIExtended
         {
+            this.removeService(serviceName, property);
             this._services.push({name:serviceName, property:property, data:data});
+            return this;
+        }
+        protected removeService(serviceName:string, property:string):APIExtended
+        {
+            for(var p in this._services)
+            {
+                if(this._services[p].name == serviceName && this._services[p].property == property)
+                {
+                    this._services.splice(p, 1);
+                }
+            }
             return this;
         }
         public order(id:string, direction:number = 1):APIExtended
         {
-            return this.service("order", "key", id).service("order","direction", direction);
+            this._direction = direction;
+            return this.service("paginate", "key", id).service("paginate","direction", direction);
         }
         public paginate(key:string):APIExtended
         {
             return this.service("paginate", "key", key);
         }
-        public next(quantity:number = 10):APIExtended
+        public limit(size:number):APIExtended
         {
-            debugger;
+            return this.service("paginate", "limit", size);
+        }
+        protected parseResult(data:any):void
+        {
+            if(data.api_data)
+            {
+                this.parseAPIData(data.api_data);
+                if(data.api_data.key &&  data.data)
+                {
+                    this.trigger(API.EVENT_DATA_FORMATTED, data.data[data.api_data.key]);
+                }
+            }
+        }
+        protected parseAPIData(data:any):void
+        {
+            if(!data)
+            {
+                return;
+            }
+            if(!this._apiData)
+            {
+                this._apiData = {};
+            }
+            if(data.paginate)
+            {
+                if(!this._apiData.paginate)
+                {
+                    this._apiData.paginate = {};
+                }
+                if(data.paginate.next)
+                {
+                    this._apiData.paginate.next = data.paginate.next;
+                    if(!this._apiData.paginate.next || (this._apiData.paginate.next< data.paginate.next && this._direction>0) || (this._apiData.paginate.next> data.paginate.next && this._direction<0) )
+                    {
+                        this._apiData.paginate.nextAll = data.paginate.next;
+                    }
+
+                }                                                                                                                                                           https://lacontrerevolution.wordpress.com/2015/11/30/attentats-avant-les-elections-une-simple-coincidence/https://lacontrerevolution.wordpress.com/2015/11/30/attentats-avant-les-elections-une-simple-coincidence/
+                if(data.paginate.previous)
+                {
+                    this._apiData.paginate.previous = data.paginate.previous;
+                    if(!this._apiData.paginate.previous || (this._apiData.paginate.previous> data.paginate.previous && this._direction>0) || (this._apiData.paginate.previous< data.paginate.previous && this._direction<0) )
+                    {
+                        this._apiData.paginate.previousAll = data.paginate.previous;
+                    }
+
+                }
+            }
+        }
+
+        public next(quantity?:number):APIExtended
+        {
+            if(this._apiData && this._apiData.paginate)
+            {
+                this.removeService("paginate", "previous");
+                this.service("paginate", "next", this._apiData.paginate.next);
+                if(quantity != undefined)
+                {
+                    this.service("paginate", "limit", quantity);
+                }
+            }else
+            {
+                throw new Error("No previous data");
+            }
+            return <any>this;
+        }
+        public nextAll(quantity?:number):APIExtended
+        {
+            if(this._apiData && this._apiData.paginate)
+            {
+                this.removeService("paginate", "previous");
+                this.service("paginate", "next", this._apiData.paginate.nextAll);
+                if(quantity != undefined)
+                {
+                    this.service("paginate", "limit", quantity);
+                }
+            }else
+            {
+                throw new Error("No previous data");
+            }
+            return <any>this;
+        }
+        public previous(quantity?:number):APIExtended
+        {
+            if(this._apiData && this._apiData.paginate)
+            {
+                this.service("paginate", "previous", this._apiData.paginate.previous);
+                this.removeService("paginate", "next");
+                if(quantity != undefined)
+                {
+                    this.service("paginate", "limit", quantity);
+                }
+            }else
+            {
+                throw new Error("No previous data");
+            }
+            return <any>this;
+        }
+        public previousAll(quantity?:number):APIExtended
+        {
+            if(this._apiData && this._apiData.paginate)
+            {
+                this.service("paginate", "previous", this._apiData.paginate.previousAll);
+                this.removeService("paginate", "next");
+                if(quantity != undefined)
+                {
+                    this.service("paginate", "limit", quantity);
+                }
+            }else
+            {
+                throw new Error("No previous data");
+            }
             return <any>this;
         }
     }

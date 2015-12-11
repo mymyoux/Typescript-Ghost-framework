@@ -608,6 +608,7 @@ namespace ghost.mvc
                 }
                Promise.all(promises).then(function(values:any[])
                 {
+                    debugger;
                     //TODO:weird le data.read devrait être dans le filter ?
                     values.filter(function(data:any):boolean{ return data!==true && !data.read?true:false;}).map(function(data:any){
                         data.read = true;
