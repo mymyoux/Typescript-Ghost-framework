@@ -1,5 +1,7 @@
+///<module="events"/>
 namespace ghost.mvc
 {
+	import EventDispatcher = ghost.events.EventDispatcher;
 	export interface IData
 	{
 		name():string;
@@ -22,8 +24,9 @@ namespace ghost.mvc
 			return this._name;
 		}
 	}
-	export interface IModel
+	export interface IModel extends EventDispatcher
 	{
-
+		readExternal(input:any):void;
+		toObject():any;
 	}
 }

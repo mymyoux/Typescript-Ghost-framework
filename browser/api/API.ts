@@ -110,9 +110,9 @@ module ghost.browser.api
                     reject(data);
                     return;
                 }
-                this.parseResult(data);
+                var parsed:any = this.parseResult(data);
                 this.trigger(API.EVENT_DATA, data);
-                resolve(data);
+                resolve(parsed, data);
             }, reject);
             return <any>this;
         }
@@ -146,9 +146,9 @@ module ghost.browser.api
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
             return request;
         }
-        protected parseResult(data:any):void
+        protected parseResult(data:any):any
         {
-
+            return data;
         }
         protected getPromise():Promise<any>
         {
@@ -220,6 +220,15 @@ module ghost.browser.api
             this._direction = direction;
             return this.service("paginate", "key", id).service("paginate","direction", direction);
         }
+        public param(param:string, data:any):APIExtended
+        {
+            if(!this._data)
+            {
+                this._data = {};
+            }
+            this._data[param] = data;
+            return this;
+        }
         public paginate(key:string):APIExtended
         {
             return this.service("paginate", "key", key);
@@ -228,7 +237,7 @@ module ghost.browser.api
         {
             return this.service("paginate", "limit", size);
         }
-        protected parseResult(data:any):void
+        protected parseResult(data:any):any
         {
             if(data.api_data)
             {
@@ -237,7 +246,9 @@ module ghost.browser.api
                 {
                     this.trigger(API.EVENT_DATA_FORMATTED, data.data[data.api_data.key]);
                 }
+                return data.data[data.api_data.key];
             }
+            return data;
         }
         protected parseAPIData(data:any):void
         {
@@ -258,7 +269,7 @@ module ghost.browser.api
                 if(data.paginate.next)
                 {
                     this._apiData.paginate.next = data.paginate.next;
-                    if(!this._apiData.paginate.next || (this._apiData.paginate.next< data.paginate.next && this._direction>0) || (this._apiData.paginate.next> data.paginate.next && this._direction<0) )
+                    if(!this._apiData.paginate.nextAll || (this._apiData.paginate.nextAll< data.paginate.next && this._direction>0) || (this._apiData.paginate.nextAll> data.paginate.next && this._direction<0) )
                     {
                         this._apiData.paginate.nextAll = data.paginate.next;
                     }
@@ -267,7 +278,7 @@ module ghost.browser.api
                 if(data.paginate.previous)
                 {
                     this._apiData.paginate.previous = data.paginate.previous;
-                    if(!this._apiData.paginate.previous || (this._apiData.paginate.previous> data.paginate.previous && this._direction>0) || (this._apiData.paginate.previous< data.paginate.previous && this._direction<0) )
+                    if(!this._apiData.paginate.previousAll || (this._apiData.paginate.previousAll> data.paginate.previous && this._direction>0) || (this._apiData.paginate.previousAll< data.paginate.previous && this._direction<0) )
                     {
                         this._apiData.paginate.previousAll = data.paginate.previous;
                     }
@@ -304,7 +315,7 @@ module ghost.browser.api
                 }
             }else
             {
-                throw new Error("No previous data");
+                //throw new Error("No previous data");
             }
             return <any>this;
         }
@@ -336,7 +347,7 @@ module ghost.browser.api
                 }
             }else
             {
-                throw new Error("No previous data");
+             //   throw new Error("No previous data");
             }
             return <any>this;
         }

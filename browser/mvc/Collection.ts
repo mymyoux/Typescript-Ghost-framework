@@ -7,7 +7,7 @@ namespace ghost.mvc
     /**
      * Collection class
      */
-    export class Collection<T extends ghost.mvc.Model> extends ghost.events.EventDispatcher implements IRetrievable, IModel
+    export class Collection<T extends IModel> extends ghost.events.EventDispatcher implements IRetrievable, IModel
     {
         /**
          * Default part
@@ -192,7 +192,7 @@ namespace ghost.mvc
         /**
          * Pop the last element
          */
-        public pop():Model
+        public pop():T
         {
             this._remove(this._models[this._models.length-1]);
             return this._models.pop();
@@ -260,9 +260,12 @@ namespace ghost.mvc
             if(model)
             {
                 this._triggerUpdate(model);
+            }else
+            {
+                debugger;
             }
         }
-        private _triggerUpdate(model:T):void
+        protected _triggerUpdate(model:T):void
         {
             this.trigger(Collection.EVENT_CHANGE, model);
             if(this._changed.indexOf(model)==-1)
@@ -608,7 +611,6 @@ namespace ghost.mvc
                 }
                Promise.all(promises).then(function(values:any[])
                 {
-                    debugger;
                     //TODO:weird le data.read devrait être dans le filter ?
                     values.filter(function(data:any):boolean{ return data!==true && !data.read?true:false;}).map(function(data:any){
                         data.read = true;
@@ -658,14 +660,14 @@ namespace ghost.mvc
                     {
                         if(rawModel.__class)
                         {
-                            var model:T = <T>Model.get(rawModel.__class);
+                            var model:T = <any>Model.get(rawModel.__class);
                             model.readExternal(rawModel);
                             this.push(model);
                         }else
                         {
                             if(typeof rawModel == "object")
                             {
-                                var model:T = <T>Model.get(this.getDefaultClass());
+                                var model:T = <any>Model.get(this.getDefaultClass());
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else

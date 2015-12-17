@@ -7,20 +7,42 @@ namespace ghost.mvc
     /**
      * Collection API class
      */
-    export class CollectionAPI<T extends ghost.mvc.Model> extends Collection<T>
+    export class CollectionAPI<T extends IModel> extends Collection<T>
     {
+        private _order:string;
         private requests:any;
         public constructor()
         {
             super();
             this.requests = {};
         }
+        public order(order:string, direction:number):void
+        {
+            this._order = order;
+            if(this.length())
+            {
+                this.sort(function(modelA:T, modelB:T):number
+                {
+                    if(modelA[order] > modelB[order])
+                    {
+                        return direction>0?-1:1;
+                    }
+                    if(modelA[order] < modelB[order])
+                    {
+                        return direction>0?1:-1;
+                    }
+                    return 0;
+                });
+            };
+
+        }
+
         protected onPartData(name:string, data:any):void
         {
             if(name == Model.PART_DEFAULT)
                 this.readExternal(data);
         }
-        protected _getRequest(part?:string):APIExtended
+        protected _getRequest(part?:string, params?:any ):APIExtended
         {
             if (typeof part !== "string")
             {
@@ -29,7 +51,8 @@ namespace ghost.mvc
 
             if (!this.requests[part])
             {
-                this.requests[part] = this.getRequest(part);
+                this.requests[part] = this.getRequest(part, params);
+                this.requests[part].on(API.EVENT_DATA_FORMATTED, this.onPartData.bind(this, part));
             }
 
             return this.requests[part];
@@ -45,7 +68,7 @@ namespace ghost.mvc
                 part = null;
             }
             var request:any = this._getRequest(part);
-            if(request);
+            if(request)
             {
                 return request.next(quantity);
             }
@@ -63,7 +86,7 @@ namespace ghost.mvc
                 part = null;
             }
             var request:any = this._getRequest(part);
-            if(request);
+            if(request)
             {
                 return request.nextAll(quantity);
             }
@@ -80,7 +103,7 @@ namespace ghost.mvc
                 part = null;
             }
             var request:any = this._getRequest(part);
-            if(request);
+            if(request)
             {
                 return request.previous(quantity);
             }
@@ -97,7 +120,7 @@ namespace ghost.mvc
                 part = null;
             }
             var request:any = this._getRequest(part);
-            if(request);
+            if(request)
             {
                 return request.previousAll(quantity);
             }
@@ -138,8 +161,7 @@ namespace ghost.mvc
                 }
                Promise.all(promises).then(function(values:any[])
                 {
-                    debugger;
-                    //TODO:weird le data.read devrait être dans le filter ?
+                    //TODO:weird le data.read devrait être dans le filter ? MAIS VA TE FAIRE FOUTRE CHROME
                     values.filter(function(data:any):boolean{ return data!==true && !data.read?true:false;}).map(function(data:any){
                         data.read = true;
                         return data.data[0];})//.forEach(this.readExternal, _this);
@@ -157,11 +179,11 @@ namespace ghost.mvc
             }
             if(!this._partsPromises[name])
             {
-                var request:API<API<any>> = this.getRequest(name, params);
+                var request:API<API<any>> = this._getRequest(name, params); //this.getRequest(name, params);
 
-                request.on(API.EVENT_DATA_FORMATTED, this.onPartData.bind(this, name));
 
-                this.requests[name] = request;
+
+              //  this.requests[name] = request;
 
                 this._partsPromises[name] = new Promise<any>((accept, reject)=>
                 {
@@ -196,11 +218,120 @@ namespace ghost.mvc
             }
             return null;
         }
+        public getModelByID(id:any):T
+        {
+            var id_name:string = this.getModelIDName();
+            var len:number = this._models.length;
+            for(var i:number=0; i<len; i++)
+            {
+                if(this._models[i] && this._models[i][id_name] == id)
+                {
+                    return this._models[i];
+                }
+            }
+            return null;
+        }
+        protected getModelIDName():string
+        {
+            var cls:any = this.getDefaultClass();
+            if(typeof cls.getIDName != "function")
+            {
+                debugger;
+                throw new Error("[API ERROR] Child class must have a static method getIDName()");
+            }
+           return cls.getIDName();
+        }
+        /**
+         * @protected
+         * @type {[type]}
+         */
+        public _onChange( model:T):void
+        public _onChange(key:string, model:T):void
+        public _onChange(key:any, model?:T):void
+        {
+            if(typeof key != "string")
+            {
+                model = key;
+                key = null;
+            }
 
+            if(model)
+            {
+                this._triggerUpdate(model);
+            }else
+            {
+                debugger;
+            }
+        }
+        public push(...models:T[]):number
+        {
+            var index:number;
+            var model:T;
+            for(var p in models)
+            {
+                model = models[p]
+                if((index = this._models.indexOf(model))==-1)
+                {
+                    //if list ordonned
+                    if(this._order)
+                    {
+
+                    }else
+                    {
+                        this._models.push(model);
+                    }
+                    this._add(model);
+                }else
+                {
+                    console.warn("already into collection:", model);
+                }
+            }
+
+            return this.length();
+        }
         public readExternal(input:any[]):void
         {
-            super.readExternal(input);
-            // debugger;
+            if(input)
+            {
+                if(input.forEach)
+                    input.forEach(function(rawModel:any):void
+                    {
+                        if(rawModel.__class)
+                        {
+                            var model:T = <any>Model.get(rawModel.__class);
+                            model.readExternal(rawModel);
+                            this.push(model);
+                        }else
+                        {
+                            if(typeof rawModel == "object")
+                            {
+                                var cls:any = this.getDefaultClass();
+                                var id:string = this.getModelIDName();
+                                var model:T;
+                                if(rawModel && rawModel[id] != undefined)
+                                {
+                                    model = this.getModelByID(rawModel[id] );
+                                }
+                                if(!model)
+                                {
+                                    model  = <any>Model.get(cls);
+                                    this.push(model);
+
+
+                                }
+                                model.readExternal(rawModel);
+                                this.trigger(Collection.EVENT_CHANGE, model);
+                            }else
+                            {
+                                console.error("RawModel must be object, given ", rawModel);
+                            }
+                        }
+                    }, this);
+            }
+        }
+        public toRactive():any
+        {
+            return this;
         }
     }
 }
