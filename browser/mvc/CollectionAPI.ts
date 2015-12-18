@@ -278,7 +278,6 @@ namespace ghost.mvc
                     //if list ordonned
                     if(this._order)
                     {
-                        debugger;
                         var result:IBinaryResult = Arrays.binaryFind(this._models, model, this._order);
                         if(result.index == undefined)
                         {
