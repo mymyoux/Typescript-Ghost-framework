@@ -4,6 +4,8 @@ namespace ghost.mvc
 {
     import API = ghost.browser.api.API;
     import APIExtended = ghost.browser.api.APIExtended;
+    import Arrays = ghost.utils.Arrays;
+    import IBinaryResult = ghost.utils.IBinaryResult;
     /**
      * Collection API class
      */
@@ -16,7 +18,7 @@ namespace ghost.mvc
             super();
             this.requests = {};
         }
-        public order(order:string, direction:number):void
+        public order(order:string, direction:number = 1):void
         {
             this._order = order;
             if(this.length())
@@ -25,11 +27,11 @@ namespace ghost.mvc
                 {
                     if(modelA[order] > modelB[order])
                     {
-                        return direction>0?-1:1;
+                        return direction>0 ? -1 : 1;
                     }
                     if(modelA[order] < modelB[order])
                     {
-                        return direction>0?1:-1;
+                        return direction>0 ? 1 : -1;
                     }
                     return 0;
                 });
@@ -263,6 +265,7 @@ namespace ghost.mvc
                 debugger;
             }
         }
+        private t = 0;
         public push(...models:T[]):number
         {
             var index:number;
@@ -275,7 +278,17 @@ namespace ghost.mvc
                     //if list ordonned
                     if(this._order)
                     {
-
+                        debugger;
+                        var result:IBinaryResult = Arrays.binaryFind(this._models, model, this._order);
+                        if(result.index == undefined)
+                        {
+                            //handle order
+                               this._models.push(model);
+                        }else
+                        {
+                            this._models.splice(result.index, 0, model);
+                            model["added"] = this.t++ + "-"+result.index;
+                        }
                     }else
                     {
                         this._models.push(model);
@@ -315,11 +328,13 @@ namespace ghost.mvc
                                 if(!model)
                                 {
                                     model  = <any>Model.get(cls);
+                                    model.readExternal(rawModel);
                                     this.push(model);
-
-
+                                }else
+                                {
+                                    model.readExternal(rawModel);
                                 }
-                                model.readExternal(rawModel);
+
                                 this.trigger(Collection.EVENT_CHANGE, model);
                             }else
                             {

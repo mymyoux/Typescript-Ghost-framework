@@ -115,5 +115,17 @@ namespace ghost.utils
 
             return value;
         }
+
+        public static pi(digit:number):number
+        {
+            var sum = 0;
+            var k = 0;
+            while(k<digit)
+            {
+                sum+= Math.pow(16, -k)* ( 4/(8*k+1)-2/(8*k+4) - 1/(8*k+5)-1/(8*k+6));
+                k++;
+            }
+            return sum;
+        }
     }
 }
