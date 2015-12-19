@@ -107,14 +107,20 @@ module ghost.browser.api
                 this._promise = null;
                 if(data && data.error)
                 {
+                    if(reject)
                     reject(data);
                     return;
                 }
                 var parsed:any = this.parseResult(data);
                 this.trigger(API.EVENT_DATA, data);
-                resolve(parsed, data);
+                if(resolve)
+                    resolve(parsed, data);
             }, reject);
             return <any>this;
+        }
+        public done():T
+        {
+            return this.then();
         }
         protected getConfig(name:string):any
         {
