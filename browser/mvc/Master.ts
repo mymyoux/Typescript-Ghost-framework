@@ -53,7 +53,7 @@ namespace ghost.mvc
 			}else
 			{
                 //additional parts
-                if((name.parts || name.ractive || name.name) && name.data)
+                if((name.parts || name.ractive || name.name || name.async != undefined) && name.data)
                 {
                     this._parts[this._parts.length-1] = name;
                     name = name.data;
@@ -353,11 +353,12 @@ namespace ghost.mvc
                             return null;
                         }
                     }
+                    var promise:any;
                     if(this._parts[index] && this._parts[index].parts)
                     {
-                        return item.retrieveData(this._parts[index].parts, params);
+                        promise =  item.retrieveData(this._parts[index].parts, params);
                     }
-                    var promise:any = item.retrieveData(null, params);
+                    promise = item.retrieveData(null, params);
                     if(this._parts[index] && this._parts[index].async === true)
                     {
                         return true;
