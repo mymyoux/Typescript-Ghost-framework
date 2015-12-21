@@ -26,6 +26,7 @@ namespace ghost.mvc
 		protected $container:JQuery;
 
         protected _parts:IPart[];
+        protected _partsPromises:Promise<any>[];
 
         protected paramsFromActivation:any;
 
@@ -35,6 +36,7 @@ namespace ghost.mvc
 			super();
 			this._data = [];
             this._parts = [];
+            this._partsPromises = [];
 		}
         public navigation():ghost.browser.navigation.Navigation
         {
@@ -203,7 +205,18 @@ namespace ghost.mvc
 	 			console.error("Master failed during preactivation", this, error);
  			});
         }
+        /**
+         * Called after view is loaded (not necesseraly all data)
+         */
         protected bindEvents():void
+        {
+
+        }
+
+        /**
+         * Called when all data is loaded
+         */
+        protected bindAsyncEvents():void
         {
 
         }
@@ -361,6 +374,7 @@ namespace ghost.mvc
                     promise = item.retrieveData(null, params);
                     if(this._parts[index] && this._parts[index].async === true)
                     {
+                        this._partsPromises.push(promise);
                         return true;
                     }
         		  return promise;
@@ -370,6 +384,16 @@ namespace ghost.mvc
             {
                 return item != null;
             });
+            if(this._partsPromises.length)
+            {
+                Promise.all(<any[]> this._partsPromises).then(()=>
+                {
+                    this.bindAsyncEvents();
+                });
+            }else
+            {
+                this.bindAsyncEvents();
+            }
         	return Promise.all(promises);
         }
         protected firstActivation():Promise<any>|boolean
