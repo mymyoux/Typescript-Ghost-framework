@@ -2279,13 +2279,25 @@ namespace ghost.browser.forms
         {
             super.bindEvents();
             if(this.$input)
+            {
                 this.$input.on("keyup", this.onChangeBinded);
+                if(this.$input.attr("type") == "search")
+                {
+                    this.$input.on("search", this.onChangeBinded);
+                }
+            }
         }
         public dispose():void
         {
             super.dispose();
             if(this.$input)
+            {
                 this.$input.off("keyup", this.onChangeBinded);
+                if(this.$input.attr("type") == "search")
+                {
+                    this.$input.off("search", this.onChangeBinded);
+                }
+            }
         }
         public onChange(event:any):void
         {
