@@ -20,8 +20,16 @@ function Debug()
 {
 
 }
-Debug.inspect = function(object, level)
+Debug.inspect = function(object, level, maxLevel)
 {
+    if(maxLevel == undefined)
+    {
+        maxLevel = 10;
+    }
+    if(level>maxLevel)
+    {
+        return;
+    }
     var str = "";
     if(level === undefined)
     {
@@ -33,23 +41,26 @@ Debug.inspect = function(object, level)
     }
     for(var p in object)
     {
-        if(typeof object[p] == "function")
+        if(typeof object[p] == "function" || level == -1)
         {
             if(p.substring(0, 3) == "get")
             {
                 console.log(str+colors.red(p));
             }else
             {
-                console.log(str+colors.cyan(p));
+                if(typeof object[p] == "function")
+                    console.log(str+colors.cyan(p));
+                else
+                    console.log(str+p);
             }
         }else
         {
             console.log(str+p);
             if(object[p] && typeof object[p] == "object" && level<10)
             {
-                Debug.inspect(object[p], level+1);
+                Debug.inspect(object[p], level+1, maxLevel);
             }
-            if(level >=10)
+            if(level >=maxLevel)
             {
                 console.log(colors.red("too deep"));
             }
@@ -252,7 +263,7 @@ MetaCompiler.prototype._checkIsReady = function()
             if(this.modules[p])
             {
                 console.log(colors.green("Writing "+this.configuration.out[p]));
-                fs.writeFileSync(this.configuration.out[p], this.modules[p].getFullOutput(true), 0, "utf-8");
+                fs.writeFileSync(this.configuration.out[p], this.modules[p].getFullOutput(true, this.ordonnedModules), 0, "utf-8");
             }
         }
     }
@@ -265,6 +276,7 @@ MetaCompiler.prototype.orderModules = function()
     {
         modules.push(this.modules[p]);
         this.modules[p].tmpDependencies = this.modules[p].dependencies.slice();
+        this.modules[p].tmpUsed = this.modules[p].used.slice();
     }
 
     console.log(colors.red("premodules"));
@@ -332,7 +344,32 @@ MetaCompiler.prototype.orderModules = function()
             }
         }
     }
-
+    i = 0;
+    while(i<len) {
+        module = modules[i];
+        j = module.tmpUsed.length;
+        console.log(colors.green(j));
+        while (j > 0) {
+            dependency = module.tmpUsed[j - 1];
+            isFound = false;
+            for (var k = 0; k < currentInterns.length; k++) {
+                if (Compiler.isInstanceOf(dependency, currentInterns[k]))/*dependency.namespace+'/'+dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value || dependency.value == currentInterns[k].namespace+'/'+currentInterns[k].value)*/ {
+                    isFound = true;
+                    break;
+                }
+            }
+            if (isFound) {
+                module.tmpUsed[j - 1].module = currentInterns[k].module;
+                module.tmpUsed.pop();
+                j--;
+            } else {
+                console.log("not found:", dependency);
+                //dendency not satisfated
+                break;
+            }
+        }
+        i++;
+    }
     this.ordonnedModules = modules;
     console.log(colors.red("MODULES"));
     console.log(modules);
@@ -919,10 +956,19 @@ Module.prototype.generateContentOutput = function()
     this.getDeclarationFile().setContent(content);
     return true;
 };
-Module.prototype.getFullOutput = function(removeExtends)
+Module.prototype.getFullOutput = function(removeExtends, ordonned)
 {
     //add content from others modules
-    var content = this.getOutput();
+    var modules = this.getUsedModules();
+    modules.push(this);
+    var content = "";
+    for(var i=0; i<ordonned.length; i++)
+    {
+        if(modules.indexOf(ordonned[i]) != -1)
+        {
+            content+= ordonned[i].getOutput();
+        }
+    }
     if(removeExtends !== false)
     {
         //TODO:maybe needs a loop
@@ -938,16 +984,36 @@ Module.prototype.getFullOutput = function(removeExtends)
             '};\r\n'+content;
     }
     return content;
-
 };
+Module.prototype.getUsedModules = function(modules)
+{
+    if(!modules)
+    {
+        modules = [];
+    }
+    if(this.usedModules)
+    {
+        modules = modules.concat(this.usedModules.filter(function(module)
+        {
+            return modules.indexOf(module)==-1;
+        }));
+    }
+
+    return modules;
+}
 Module.prototype.calculModulesDependencies = function()
 {
     this.dependenciesModules = this.dependencies.map(function(item)
     {
         return item.module;
     });
+    this.usedModules = this.used.map(function(item)
+    {
+        return item.module;
+    });
     return true;
 };
+
 Module.prototype.addDependencies = function()
 {
     this.useDependencies = true;
@@ -1125,7 +1191,38 @@ File.prototype.parse = function(source)
     if(!this.isValidParsed())
     {
         var parsed = this.parseNode(0, source);
-
+        console.log(this.file);
+        if(false && this.file == "HashMap3.ts")
+        {
+            Debug.inspect(ts, -1);
+            //console.log(ts.getAllAccessorDeclarations(source));
+            console.log(colors.red("docs"));
+            var docs = ts.getJsDocComments(source, source);
+            for(var p in docs)
+            {
+                /**
+                 * getJSDocTypeTag
+                 getJSDocReturnTag
+                 getJSDocTemplateTag
+                 getCorrespondingJSDocParameterTag
+                 */
+                //console.log(ts.SyntaxKind[docs[p].kind]+":"+docs[p].kind);
+                if(ts.SyntaxKind[docs[p].kind] == "MultiLineCommentTrivia")
+                {
+                    /*console.log(this.parseNode(0, docs[p]));
+                    Debug.inspect(ts.displayPartsToString(docs[p]));
+                    Debug.inspect(source.getSourceFile(), 0, 0);
+                    console.log(ts.displayPartsToString(docs));*/
+                    console.log(source.getFullText().substring(docs[p].pos, docs[p].end));
+                    console.log(ts.getJSDocTypeTag(source));
+                    console.log(docs[p].jsDocComment);
+                    console.log(ts.getJsDocTagAtPosition(source,0));
+                }
+            }
+            console.log(source.get)
+            process.exit(1);
+            return;
+        }
         var exposed = [];
         var intern = [];
         var extern = [];
@@ -1233,6 +1330,34 @@ File.prototype.parse = function(source)
             i++;
         }
 
+        /**
+         * Parse JSDocs
+         */
+        parsed.comments = parsed.comments.reduce((previous, item)=>
+        {
+            var comment;
+            for(var i =0; i<item.comments.length; i++)
+            {
+                comment = item.comments[i];
+                var comment = this.source.getFullText().substring(comment.pos, comment.end);
+                var lines = comment.split("\n").map(function(line)
+                {
+                    var result =line.match(/\* +@([a-z]+) +([a-zA-Z0-9\.-_ ]+)/i);
+                    if(result && ["lib","module"].indexOf(result[1])!=-1)
+                    {
+                        return {type:result[1], value:result[2]};
+                    }
+                    return null;
+                }).filter(function(line)
+                {
+                    return line?true:false;
+                });
+
+                previous = previous.concat(lines);
+
+            }
+            return previous;
+        }, []);
 
 
         this.parseInformation = parsed;
@@ -1242,6 +1367,17 @@ File.prototype.parse = function(source)
         this.emit(File.EVENT_PARSED, parsed);
 
 
+        /*
+        if(this.file == "HashMap3.ts")
+        {
+            console.log(parsed.comments);
+            var comment;
+            for(var p in parsed.comments)
+            {
+                console.log(parsed.comments[p]);
+            }
+            process.exit(1);
+        }*/
         //TODO:add exposed link to this file + add import to others is they exists (+need recompile)
         //TODO:add dependencies to this file (module internal or external)
         //TODO:search for external dependencies matches then mark this as needs recompile
@@ -1261,6 +1397,7 @@ File.prototype.parseNode = function(level, parsed, node)
             imports:[],
             used:[],
             intern:[],
+            comments:[],
             dependencies:[]
         };
     }
@@ -1418,14 +1555,32 @@ File.prototype.parseNode = function(level, parsed, node)
             }
         }
     }
-    var children = node.getChildren() || [];
+    var docs =ts.getJsDocComments(node, this.source);
+    if(docs)
+    {
+        var found = false;
+        for(var i=parsed.comments.length-1; i>=0; i--)
+        {
+            if(parsed.comments[i].pos == node.pos)
+            {
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+        {
+            parsed.comments.push({node:node, comments:docs, pos:node.pos});
+        }
+
+    }
+    var children = node && node.getChildren?node.getChildren(): [];
     var str = "";
     for(var i=0;i<level; i++)
     {
         str+="\t";
     }
-  //  console.log(str, colors.red(ts.SyntaxKind[node.kind]), children.length?'':node.getText());
-    //console.log({kind:ts.SyntaxKind[node.kind],pos:node.pos, end:node.end, flags:node.flags, children:children.length});
+    ///console.log(str, colors.red(ts.SyntaxKind[node.kind]), children.length || !node || !node.getText?'':node.getText());
+ //   console.log({kind:ts.SyntaxKind[node.kind],pos:node.pos, end:node.end, flags:node.flags, children:children.length});
     children.forEach(this.parseNode.bind(this, level+1, parsed));
     return parsed;
 };
@@ -1657,12 +1812,21 @@ File.prototype.getImports = function()
         var namespace = ".";
         var identifiers = [];
         //parse imports
-        var scanner = ts.createScanner(2, true);
+        var scanner = ts.createScanner(2, false);
         scanner.setText(content);
         var token = scanner.scan();
+
   //      console.log(token, ts.SyntaxKind[token]);
         while (token !== 1 /* EndOfFileToken */)
         {
+            if(token>=250 && token<=270)
+            {
+                console.log(token);
+                console.log("youhou");
+                process.exit(1);
+            }
+            console.log("youhou");
+            process.exit(1);
             //namespace list
             if(token === 124 /* NamespaceKeyword */ )
             {
@@ -1973,7 +2137,9 @@ Compiler.prototype.init = function()
 Compiler.prototype.getImports = function(file)
 {
     var imports = [];
-    var scanner = ts.createScanner(2, false);
+    console.log(ScriptTarget.Latest);
+    process.exit(1);
+    var scanner = ts.createScanner(ScriptTarget.Latest, false);
     scanner.setText(file.getContent());
     var token = scanner.scan();
 
