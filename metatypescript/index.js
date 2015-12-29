@@ -185,6 +185,7 @@ MetaCompiler.prototype._checkIsReady = function()
 {
 
     //TODO:remove module that doesn't succeed each task
+    console.log(colors.red("STEP 1:")+" Compile Syntax");
     var errors;
     for(var p in this.modules)
     {
@@ -193,6 +194,7 @@ MetaCompiler.prototype._checkIsReady = function()
            return this.displayErrors(errors);
        }
     }
+    console.log(colors.red("STEP 2:")+" Compile Parse");
     for(var p in this.modules)
     {
         if((errors = this.modules[p].getCompiler().compileParse())!==true)
@@ -200,6 +202,7 @@ MetaCompiler.prototype._checkIsReady = function()
             return this.displayErrors(errors);
         }
     }
+    console.log(colors.red("STEP 3:")+" Order Files");
     //TODO:WARNING DONT EDIT dependencies for file/module when sorting use temp array orderFiles/orderModules
     for(var p in this.modules)
     {
@@ -209,8 +212,13 @@ MetaCompiler.prototype._checkIsReady = function()
         }
     }
 
-    this.orderModules();
+    console.log(colors.red("STEP 4:")+" Order Module Syntax");
+    if((errors = this.orderModules())!==true)
+    {
+        return this.displayErrors(errors);
+    }
 
+    console.log(colors.red("STEP 5:")+" Module Dependencies");
     for(var p in this.ordonnedModules)
     {
         if((errors = this.ordonnedModules[p].calculModulesDependencies())!==true)
@@ -220,6 +228,7 @@ MetaCompiler.prototype._checkIsReady = function()
     }
     //TODO:ici on peut rajouter les modules externes + lib
 
+    console.log(colors.red("STEP 6:")+" Compile Output");
     //first compilation without displaying errors
     for(var p in this.ordonnedModules)
     {
@@ -228,6 +237,7 @@ MetaCompiler.prototype._checkIsReady = function()
           //  return this.displayErrors(errors);
         }
     }
+    console.log(colors.red("STEP 7:")+" Generate Declaration Output");
     for(var p in this.ordonnedModules)
     {
         if((errors = this.ordonnedModules[p].generateDeclarationOutput())!==true)
@@ -235,6 +245,7 @@ MetaCompiler.prototype._checkIsReady = function()
             return this.displayErrors(errors);
         }
     }
+    console.log(colors.red("STEP 8:")+" Generate Content Output");
     for(var p in this.ordonnedModules)
     {
         if((errors = this.ordonnedModules[p].generateContentOutput())!==true)
@@ -242,6 +253,7 @@ MetaCompiler.prototype._checkIsReady = function()
             return this.displayErrors(errors);
         }
     }
+    console.log(colors.red("STEP 9:")+" Add Dependencies");
     for(var p in this.ordonnedModules)
     {
         if((errors = this.ordonnedModules[p].addDependencies())!==true)
@@ -249,6 +261,8 @@ MetaCompiler.prototype._checkIsReady = function()
             return this.displayErrors(errors);
         }
     }
+
+    console.log(colors.red("STEP 10:")+" Compile Output");
     for(var p in this.ordonnedModules)
     {
         if((errors = this.ordonnedModules[p].getCompiler().compileOutput())!==true)
@@ -256,6 +270,8 @@ MetaCompiler.prototype._checkIsReady = function()
               return this.displayErrors(errors);
         }
     }
+    console.log(colors.red("STEP 11:")+" Write output file");
+    console.log(Object.keys(this.modules));
     if(this.configuration.out)
     {
         for(var p in this.configuration.out)
@@ -280,7 +296,7 @@ MetaCompiler.prototype.orderModules = function()
     }
 
     console.log(colors.red("premodules"));
-    console.log(modules);
+  //  console.log(modules);
     //for test only
     modules.reverse();
     var i = 0, j;
@@ -293,7 +309,7 @@ MetaCompiler.prototype.orderModules = function()
     {
         module = modules[i];
         j = module.tmpDependencies.length;
-        console.log(colors.green(j));
+        console.log(colors.cyan(module.path+":"+j));
         while(j>0)
         {
             dependency = module.tmpDependencies[j-1];
@@ -323,17 +339,29 @@ MetaCompiler.prototype.orderModules = function()
             i++;
             first = null;
             currentInterns = currentInterns.concat(module.interns);
-            console.log("ok:", module);
+            console.log()
+            //console.log("ok:", module);
         }else
         {
-            console.log("not:", module);
+            //console.log("not:", module);
             if(module === first)
             {
                 var f = modules.slice(i);
-                for(var p in f)
+                /*for(var p in f)
                 {
                     console.log(colors.cyan(f[p].inspect()));
+                }*/
+                /*console.log(modules.map(function(item)
+                {
+                    return {path:item.path, dep:item.tmpDependencies};
                 }
+                ));*/
+                console.log(colors.cyan("CYCLIC"));
+                console.log(colors.red(module.path));
+                console.log(module.tmpDependencies.lenth);
+                console.log(colors.red("lready done"));
+                //console.log(currentInterns);
+                process.exit(1);
                 return [{error:new Error("Cyclic dependencies"), files:modules.slice(i)}];
             }
             modules.splice(i, 1);
@@ -371,9 +399,8 @@ MetaCompiler.prototype.orderModules = function()
         i++;
     }
     this.ordonnedModules = modules;
-    console.log(colors.red("MODULES"));
-    console.log(modules);
 
+    return true;
 };
 
 MetaCompiler.prototype.displayErrors = function( files)
@@ -530,6 +557,7 @@ Module.prototype.inspect = function()
     {
         dep = this.dependencies.map(function(item)
         {
+            console.log(item);
             return item.module?item.module.path:'Unkown module';
         });
     }
@@ -661,8 +689,7 @@ Module.prototype.getFile = function(file)
     {
         return this.files[file];
     }
-    console.log(colors.green(file));
-    console.log(this.files);
+
 
     if(this.useDependencies)
     {
@@ -674,6 +701,22 @@ Module.prototype.getFile = function(file)
             }
         }
     }
+
+    for(var p in this.libs)
+    {
+        if(this.libs[p].file == file)
+        {
+            return this.libs[p];
+        }
+
+    }
+
+    if(file == "jquery.d.ts")
+    {
+        console.log(this.files);
+        process.exit(1);
+    }
+    console.log(this.files);
 
     file = path.relative(this.path, path.relative(this.folder, file));
     if(this.files[file])
@@ -856,10 +899,14 @@ Module.prototype.orderFiles = function()
     var currentInterns = [];
     var dependency, isFound;
     var first;
+
+
+    var libs = [];
     //define writing order
     while(i<len)
     {
         file = files[i];
+        libs = libs.concat(file.parseInformation.lib);
         console.log("test:", file);
         j =  file.parseInformation.dependenciesInterns.length;
         while(j>0)
@@ -921,6 +968,42 @@ Module.prototype.orderFiles = function()
             dependencies = dependencies.concat(file.parseInformation.dependenciesExterns);
         }
     }
+
+
+    this.libs = libs.reduce(function(previous, item){
+        for(var p in previous)
+        {
+            if(previous[p].value == item.value)
+            {
+                return previous;
+            }
+        }
+        previous.push(item);
+        return previous;
+    }, []).
+    map(function(item)
+    {
+       return new File(compiler.configuration.lib, item.value+".d.ts");
+    });
+
+
+    var file;
+    for(var p in this.libs)
+    {
+        file = this.libs[p];
+        if(!file.existsSync())
+        {
+            return [{error:"Library "+file.file+" doesn't exist on disk"}];
+        }
+    }
+
+    if(libs.length)
+    {
+        files = this.libs.concat(files);
+        //console.log(this.libs);
+        //process.exit(1);
+    }
+
     this.ordonnedFiles = files;
 
     this.interns = interns.map(function(item)
@@ -928,6 +1011,7 @@ Module.prototype.orderFiles = function()
         item.module = this;
         return item;
     }, this);
+
     this.dependencies = dependencies;
 
     this.used = used;
@@ -1148,6 +1232,10 @@ File.prototype.readFromDiskSync = function()
 {
     return fs.readFileSync(this.path,  {encoding:'utf8', flag:'r'});
 };
+File.prototype.existsSync = function()
+{
+    return fs.existsSync(this.path);
+};
 File.prototype.getSnapShot = function()
 {
     this.getContent();
@@ -1330,6 +1418,10 @@ File.prototype.parse = function(source)
             i++;
         }
 
+        if(!parsed.lib)
+        {
+            parsed.lib = [];
+        }
         /**
          * Parse JSDocs
          */
@@ -1360,13 +1452,21 @@ File.prototype.parse = function(source)
         }, []);
 
 
+        parsed.lib = parsed.lib.concat(parsed.comments.filter(function(item){return item.type == "lib";}));
+
         this.parseInformation = parsed;
         this.state = "parsed";
 
         this.validParse();
+
+        console.log(parsed);
+        console.log(colors.red(this.file));
+        /*if(this.file == "HashMap3.ts")
+            process.exit(1);*/
+
+
+
         this.emit(File.EVENT_PARSED, parsed);
-
-
         /*
         if(this.file == "HashMap3.ts")
         {
@@ -2678,9 +2778,8 @@ Compiler.isInstanceOf = function(item, parent)
 
     var value =  item.namespace +"/"+ item.value;
     var len = parentValue.length;
-    debugger;
-    console.log(value.substring(0, len) );
-    console.log(value.substr(len, 1));
+    /*console.log(value.substring(0, len) );
+    console.log(value.substr(len, 1));*/
     if(value.substring(0, len) == parentValue && (value.length == len || value.substr(len, 1)=="/"))
     {
         return true;
