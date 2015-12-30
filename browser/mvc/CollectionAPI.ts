@@ -59,6 +59,15 @@ namespace ghost.mvc
 
             return this.requests[part];
         }
+        protected getAPIData(part?:string):any
+        {
+            var api:APIExtended = this._getRequest(part);
+            if(api)
+            {
+                return api.getAPIData();
+            }
+            return null;
+        }
         public next(part:string, quantity:number):APIExtended
         public next(quantity:number):APIExtended
         public next():APIExtended

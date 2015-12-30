@@ -177,6 +177,10 @@ module ghost.browser.api
             super();
             this._services = [];
         }
+        public getAPIData():any
+        {
+            return this._apiData;
+        }
         public static request():APIExtended
         {
             return <APIExtended>API.instance().request();
@@ -289,6 +293,14 @@ module ghost.browser.api
                         this._apiData.paginate.previousAll = data.paginate.previous;
                     }
 
+                }
+                var keys = ["allowed","direction","key","limit","previous","next"];
+                for(var p in data.paginate)
+                {
+                    if(keys.indexOf(p)==-1)
+                    {
+                        this._apiData[p] = data.paginate[p];
+                    }
                 }
             }
         }
