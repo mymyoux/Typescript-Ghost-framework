@@ -145,9 +145,16 @@ module ghost.browser.api
         protected getRequest():any
         {
             var request:any = {};
-            request.method = this._method?this._method:'GET';
+            //request.method = this._method?this._method:'GET';
+            request.method = "POST";
             if(this._data);
                 request.data = this.getData();
+
+            if(!request.data)
+            {
+                request.data = {};
+            }
+            request.data.method = this._method?this._method:'GET';
             request.retry = ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
             return request;
