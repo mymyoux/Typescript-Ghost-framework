@@ -11,12 +11,15 @@ namespace ghost.mvc
      */
     export class CollectionAPI<T extends IModel> extends Collection<T>
     {
+
         private _order:string;
         private requests:any;
+
         public constructor()
         {
             super();
             this.requests = {};
+
         }
         public order(order:string, direction:number = 1):void
         {
@@ -67,6 +70,21 @@ namespace ghost.mvc
                 return api.getAPIData();
             }
             return null;
+        }
+        public first():Promise<any>
+        {
+            var promise:Promise<any> = new Promise((resolve:any, reject:any):void=>
+            {
+                if(!this.firstData)
+                {
+                    return resolve();
+                }
+                this.once(ghost.mvc.Collection.EVENT_FIRST_DATA, ()=>
+                {
+                   resolve();
+                });
+            });
+            return promise;
         }
         public next(part:string, quantity:number):APIExtended
         public next(quantity:number):APIExtended
@@ -314,6 +332,7 @@ namespace ghost.mvc
         {
             if(input)
             {
+
                 if(input.forEach)
                     input.forEach(function(rawModel:any):void
                     {
@@ -350,6 +369,7 @@ namespace ghost.mvc
                             }
                         }
                     }, this);
+                this.triggerFirstData();
             }
         }
         public toRactive():any

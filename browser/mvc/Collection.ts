@@ -17,6 +17,7 @@ namespace ghost.mvc
         public static EVENT_RETRIEVED:string = Model.EVENT_RETRIEVED;
         public static EVENT_CHANGE:string = "change";
         public static EVENT_CHANGED:string = "changed";
+        public static EVENT_FIRST_DATA:string = "first_data";
 
         /**
          * Model's instances
@@ -133,6 +134,7 @@ namespace ghost.mvc
          */
         public _name:string;
         private _timeout:any = <any>-1;
+        protected firstData:boolean;
 
         /**
          * Constructor
@@ -142,6 +144,7 @@ namespace ghost.mvc
             super();
             this._models = [];
             this._changed = [];
+            this.firstData =   true;
             if(this.saveInstance())
             {
                 Collection.saveInstance(this);
@@ -676,6 +679,18 @@ namespace ghost.mvc
                             }
                         }
                     }, this);
+                this.triggerFirstData();
+            }
+        }
+        protected triggerFirstData():void
+        {
+            if(this.firstData)
+            {
+                this.firstData = false;
+                setTimeout(()=>
+                {
+                    this.trigger(Collection.EVENT_FIRST_DATA);
+                }, 0);
             }
         }
         /**
