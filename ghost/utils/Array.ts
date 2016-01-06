@@ -13,7 +13,7 @@ namespace ghost.utils
 			var currentIndex;
 			var currentElement;
 
-			searchElement = property?searchElement[property]:searchElement;
+				searchElement = property?searchElement[property]:searchElement;
 
 			while (minIndex <= maxIndex) {
 				currentIndex = (minIndex + maxIndex) / 2 | 0;
@@ -33,9 +33,10 @@ namespace ghost.utils
 				}
 			}
 
+			currentIndex = currentElement < searchElement ? currentIndex + 1 : currentIndex;
 			return {
 				found: false,
-				index: currentElement < searchElement ? currentIndex + 1 : currentIndex
+				index: currentIndex
 			};
 		}
 	}
