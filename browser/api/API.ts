@@ -98,13 +98,14 @@ module ghost.browser.api
         }
         public then(resolve?:any, reject?:any):T
         {
-            if(!this._promise)
+           /* if(!this._promise)
             {
                 this._promise = this.getPromise();
-            }
-            this._promise.then((data:any)=>
+            }*/
+            var promise = this.getPromise();
+            promise.then((data:any)=>
             {
-                this._promise = null;
+               // this._promise = null;
                 if(data && data.error)
                 {
                     if(reject)
