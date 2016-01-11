@@ -844,6 +844,9 @@ namespace ghost.phonegap
             }
         }
     }
+    export class NoViewTransition extends ViewTransition {
+
+    }
     /**
      * Manages transition view based
      * @type {*}
@@ -895,8 +898,9 @@ namespace ghost.phonegap
             this._currentView = null;
             this._defaultTransition = new SlideViewTransition();
             this._defaultTransition.setOptions({duration:200});
-            this._noTransition = new SlideViewTransition();
+            this._noTransition = new NoViewTransition();
             this._noTransition.setOptions({duration:0});
+            debugger;
             this._link(root);
     
     

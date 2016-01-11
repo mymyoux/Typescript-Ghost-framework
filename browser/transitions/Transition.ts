@@ -899,7 +899,8 @@ namespace ghost.transitions
             this._currentView = null;
             this._defaultTransition = new SlideViewTransition();
             this._defaultTransition.setOptions({duration:2000});
-            this._noTransition = new SlideViewTransition();
+            this._noTransition = new NoViewTransition();
+            debugger;
             this._noTransition.setOptions({duration:0});
             this._link(root);
     
