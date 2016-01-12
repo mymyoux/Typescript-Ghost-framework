@@ -429,6 +429,10 @@ namespace ghost.browser.forms
                 tmp[prefix] = data;
                 data = tmp;
             }
+            // add user_id
+            if (this.data && this.data.id_user)
+                data.id_user = this.data.id_user;
+
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -500,6 +504,11 @@ namespace ghost.browser.forms
                 tmp[prefix] = data;
                 data = tmp;
             }
+
+            // add user_id
+            if (this.data && this.data.id_user)
+                data.id_user = this.data.id_user;
+
             var ajax:any = ghost.io.ajax({
                     url:action,
                     data:data,
@@ -609,6 +618,11 @@ namespace ghost.browser.forms
                 tmp[prefix] = data;
                 data = tmp;
             }
+
+            // add user_id
+            if (this.data && this.data.id_user)
+                data.id_user = this.data.id_user;
+
             var ajax:any = ghost.io.ajax({
                 url:action,
                 data:data,
@@ -653,6 +667,10 @@ namespace ghost.browser.forms
                 tmp[prefix] = data;
                 data = tmp;
             }
+            // add user_id
+            if (this.data && this.data.id_user)
+                data.id_user = this.data.id_user;
+
             var action:string = this.getAction();
             if(!action)
             {
