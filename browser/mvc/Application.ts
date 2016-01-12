@@ -7,10 +7,25 @@ namespace ghost.mvc
 {
     export class Application extends ghost.core.CoreObject
     {
+        protected static _instance: Application;
         protected _navigation:ghost.browser.navigation.Navigation;
+        public static getRootURL():string
+        {
+            return Application._instance.getRootURL();
+        }
+        protected getRootURL(): string   
+        {
+                var pathname: string = window.location.pathname;
+                var index: number = pathname.indexOf("/", 1);
+                if (index > -1) {
+                    pathname = pathname.substring(0, index);
+                }
+                return window.location.protocol + "//" + window.location.host + (pathname.length > 1 ? pathname + "/" : pathname);
+        }
         public constructor()
         {
             super();
+            Application._instance = this;
             //initialization navigation for scope support
            
             this.prerequire(()=>
