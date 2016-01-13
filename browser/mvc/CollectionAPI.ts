@@ -305,7 +305,6 @@ namespace ghost.mvc
                 if((index = this._models.indexOf(model))==-1)
                 {
                     //if list ordonned
-                    debugger;
                     if(this._order)
                     {
                         var result:IBinaryResult = Arrays.binaryFind(this._models, model, this._order, this._orderDirection);
@@ -361,10 +360,6 @@ namespace ghost.mvc
                         {
                             if(typeof rawModel == "object")
                             {
-                                if (rawModel.id_conversation == 220)
-                                {
-                                    debugger;
-                                }
                                 var cls:any = this.getDefaultClass();
                                 var id:string = this.getModelIDName();
                                 var model:T;
