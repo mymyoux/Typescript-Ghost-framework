@@ -13,6 +13,7 @@ namespace ghost.mvc
     {
 
         private _order:string;
+        private _orderDirection: number;
         private requests:any;
 
         public constructor()
@@ -24,6 +25,7 @@ namespace ghost.mvc
         public order(order:string, direction:number = 1):void
         {
             this._order = order;
+            this._orderDirection = direction;
             if(this.length())
             {
                 this.sort(function(modelA:T, modelB:T):number
@@ -303,17 +305,31 @@ namespace ghost.mvc
                 if((index = this._models.indexOf(model))==-1)
                 {
                     //if list ordonned
+                    debugger;
                     if(this._order)
                     {
-                        var result:IBinaryResult = Arrays.binaryFind(this._models, model, this._order);
+                        var result:IBinaryResult = Arrays.binaryFind(this._models, model, this._order, this._orderDirection);
                         if(result.index == undefined)
                         {
                             //handle order
-                               this._models.push(model);
+                               
+                               if (this._orderDirection > 0)
+                               {
+                                   this._models.push(model);
+                               }else
+                               {
+                                   this._models.unshift(model);
+                               }
                         }else
                         {
-                            this._models.splice(result.index, 0, model);
-                            model["added"] = this.t++ + "-"+result.index;
+                            this._models.splice(result.index, 0, model);/*
+                           
+                            if (this._orderDirection > 0) {
+                                this._models.splice(result.index, 0, model);
+                            }else
+                            {
+                                this._models.splice(result.index+1, 0, model);
+                            }*/
                         }
                     }else
                     {
@@ -345,6 +361,10 @@ namespace ghost.mvc
                         {
                             if(typeof rawModel == "object")
                             {
+                                if (rawModel.id_conversation == 220)
+                                {
+                                    debugger;
+                                }
                                 var cls:any = this.getDefaultClass();
                                 var id:string = this.getModelIDName();
                                 var model:T;
