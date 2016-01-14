@@ -148,7 +148,7 @@ module ghost.browser.api
             var request:any = {};
             //request.method = this._method?this._method:'GET';
             request.method = "POST";
-            if(this._data);
+            if(this._data)
                 request.data = this.getData();
 
             if(!request.data)
