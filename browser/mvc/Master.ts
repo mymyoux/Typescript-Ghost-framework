@@ -370,8 +370,10 @@ namespace ghost.mvc
                     if(this._parts[index] && this._parts[index].parts)
                     {
                         promise =  item.retrieveData(this._parts[index].parts, params);
+                    }else
+                    {
+                        promise = item.retrieveData(null, params);
                     }
-                    promise = item.retrieveData(null, params);
                     if(this._parts[index] && this._parts[index].async === true)
                     {
                         this._partsPromises.push(promise);
