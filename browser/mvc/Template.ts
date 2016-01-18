@@ -145,13 +145,7 @@ namespace ghost.mvc
 
         protected getRootURL():string
         {
-            var pathname:string = window.location.pathname;
-            var index:number = pathname.indexOf("/",1);
-            if(index > -1)
-            {
-                pathname = pathname.substring(0, index);
-            }
-            return window.location.protocol+"//"+window.location.host+(pathname.length>1?pathname+"/":pathname);
+            return ghost.mvc.Application.getRootURL();
         }
 
         protected sync():void{

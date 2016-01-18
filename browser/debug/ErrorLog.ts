@@ -99,6 +99,7 @@ namespace ghost.debug {
 		}
 		protected dispatch(error: UncaughtError): void
 		{
+			debugger;
 			this.trigger(ErrorLogger.EVENT_ERROR, error);
 			console.error(error);
 		}
