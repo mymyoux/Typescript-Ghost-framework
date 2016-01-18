@@ -2519,9 +2519,9 @@ namespace ghost.browser.forms
             this.force_max = false;
             this.addValidator(new TextValidator());
             var $max:JQuery;
-            if(($max = $(this.element).find("[data-max]")).length)
+            if (($max = $(this.element).find("[data-max]").addBack("[data-max]")).length)
             {
-                this.$counter = $max;
+                this.$counter = $(this.element).find("[data-max],.counter");
                 this.max = parseInt($max.attr("data-max"),10);
                 if(isNaN(this.max))
                 {
@@ -2537,9 +2537,10 @@ namespace ghost.browser.forms
                 }
             }
             var $min:JQuery;
-            if (($min = $(this.element).find("[data-min]")).length)
+            if (($min = $(this.element).find("[data-min]").addBack("[data-min]")).length)
             {
-                this.$counter = $min;
+                //can't be textarea itself as a counter
+                this.$counter = $(this.element).find("[data-min],.counter");
                 this.min = parseInt($min.attr("data-min"), 10);
                 if (isNaN(this.min)) {
                     this.min = -1;
