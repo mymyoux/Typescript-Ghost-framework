@@ -299,6 +299,11 @@ namespace ghost.mvc
         }
         protected initializeView():Promise<any>|boolean
         {
+            if(!this.scoping())
+            {
+                //no template - no view
+                return true;
+            }
         	if(!this.templateData)
         	{
         		//var _this:Master = this;
@@ -573,8 +578,13 @@ namespace ghost.mvc
 
         public render():Promise<any>
         {
+
+
             var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
             {
+                if (!this.scoping()) {
+                    return resolve();
+                }
                 if(!this.templateData) {
                    reject("no template data");
                     return;
