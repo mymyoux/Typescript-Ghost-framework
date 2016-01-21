@@ -156,6 +156,7 @@ module ghost.browser.api
                 request.data = {};
             }
             request.data.method = this._method?this._method:'GET';
+            request.data.__timestamp = Date.now();
             request.retry = ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
             return request;
