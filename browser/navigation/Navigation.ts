@@ -77,6 +77,7 @@ namespace ghost.browser.navigation
         private _last:string;
 
         private _currentHash:string;
+        protected _converseHash: boolean = false;
         /**
          * Constructor
          * @param ready If true, will be active as soon as possible otherwise will wait for #listen() to be call
@@ -99,6 +100,10 @@ namespace ghost.browser.navigation
             {
                 this.listen();
             }
+        }
+        public conserveHash(value: boolean): boolean
+        {
+            return this._converseHash = value;
         }
         public listen():void
         {
@@ -243,6 +248,11 @@ namespace ghost.browser.navigation
                 {
                     this._currentHash = this._buildCurrentHash();
                 }
+                if (this._converseHash)
+                {
+                    this._currentHash = window.location.hash; 
+                }
+
                 window.location.hash = this._currentHash;
                 return;
             }
@@ -276,6 +286,9 @@ namespace ghost.browser.navigation
                 console.log("end boucle", p, hashes);
             }
             this._currentHash = this._buildCurrentHash();
+            if (this._converseHash) {
+                this._currentHash = window.location.hash;
+            }
             window.location.hash = this._currentHash;
             console.log("CURRENT", this._currentHash);
             if(this._last)
