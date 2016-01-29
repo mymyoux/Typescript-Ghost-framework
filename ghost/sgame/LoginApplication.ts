@@ -21,6 +21,7 @@ namespace ghost.sgame
             console.log("loginAction");
             setTimeout(function()
             {
+                console.log("ok");
                 user.addRight("app");
                 user.login = "mymyoux"+Maths.randBetween(0, 100);
                 user.id = "couceouceokoekte"+Maths.randBetween(0, 100);

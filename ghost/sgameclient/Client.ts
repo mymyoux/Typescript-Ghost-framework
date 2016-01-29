@@ -15,38 +15,23 @@ namespace ghost.sgameclient
         public static EVENT_DISCONNECT:string = "disconnect";
         public static EVENT_ERROR:string = "error";
         public static EVENT_ERROR_CONNECTION:string = "error_connection";
-        private protocol:string;
-        private host:string;
-        private port:number;
         private url:string;
+        private options: SocketIOClient.ConnectOpts;
         private socket:any;
         private buffer:Buffer;
 
         private disconnected:boolean;
-        public constructor(host:string, port:number = null)
+        public constructor(url: string, options?: SocketIOClient.ConnectOpts)
         {
             super();
             this.disconnected = true;
-            this.init(host, port);
+            this.init(url, options);
             this.buffer = new Buffer();
         }
-        public init(host:string, port:number = null):void
+        public init(url: string, options?: SocketIOClient.ConnectOpts): void
         {
-            var index:number = host.indexOf("://");
-            if(index == -1)
-            {
-                this.protocol = "http";
-            }else
-            {
-                this.protocol = host.substring(0, index);
-                host = host.substring(index+3);
-            }
-            this.host = host;
-            this.port = port;
-            if(this.port)
-                this.url = this.protocol+"://"+this.host+":"+this.port;
-            else
-                this.url = this.protocol+"://"+this.host;
+            this.url = url;
+            this.options = options;
         }
         public isConnected():boolean
         {
@@ -93,7 +78,7 @@ namespace ghost.sgameclient
             {
                 console.log("Node environment");
             }
-            var socket = ROOT._isNode?require('socket.io-client')(this.url):io(this.url);
+            var socket = ROOT._isNode?require('socket.io-client')(this.url, this.options):io(this.url, this.options);
             socket.on('connect', this._onConnect.bind(this));
             socket.on('event', this._onEvent.bind(this));
        /*     socket.on('*', (data:any)=>{
