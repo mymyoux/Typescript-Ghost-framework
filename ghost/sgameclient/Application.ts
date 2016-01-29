@@ -90,6 +90,7 @@ namespace ghost.sgameclient
         }
         private _enterRoom(name:string, visibility:string, password:string, callback:Function):void
         {
+            debugger;
             this.buffer.push({command:Const.APPLICATION_COMMAND_ENTER_ROOM, data:{name:name, visibility:visibility, password:password}, callback:(success:boolean, users:IUser[])=>
             {
                 console.log("ENTER ROOM "+name, callback);
@@ -136,6 +137,7 @@ namespace ghost.sgameclient
         private bindEvents():void
         {
             console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
+            this.client.on(Client.EVENT_CONNECT, this._onConnect.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+this.name, this._onData.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+Const.ALL_APP, this._onDatall.bind(this));
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+Const.ALL_APP, this._onInternalData.bind(this));
@@ -248,8 +250,14 @@ namespace ghost.sgameclient
                 console.warn("["+this.name+"]"+name+" doesn't exist", data);
             }
         }
+        private _onConnect():void
+        {
+            console.log("connected");
+            this.writeNext(); 
+        }
         private writeNext(data:any = null):void
         {
+            debugger;
             if(!this.isConnected())
             {
                 this.connect();

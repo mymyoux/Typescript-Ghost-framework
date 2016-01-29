@@ -18,13 +18,41 @@ namespace ghost.sgame
         private users:User[];
         private io:any;
         private listening:boolean;
-        public constructor()
+        private app: any;
+        public constructor(options:any)
         {
             super();
             this.listening = false;
-            this.server = require('http').createServer();
+            this.server = this.createServer(options);//require('http').createServer();
             this.io = require('socket.io')(this.server);
             this.users = [];
+        }
+        protected createServer(options:any):any
+        {
+
+            if(!options.secure)
+            {
+                delete options.secure; 
+                return require('http').createServer(options);
+            }else
+            {
+                console.log("https");
+                //https
+                var express = require('express');
+                var https = require("https");
+                var fs = require("fs");
+                var app = express();
+                this.app = app;
+                delete options.secure;
+                if(options.key)
+                {
+                    options.key = fs.readFileSync(options.key);
+                }
+                if (options.cert) {
+                    options.cert = fs.readFileSync(options.cert);
+                }
+                return https.createServer(options, app);
+            }
         }
         public listen(port:number):void
         {
@@ -38,7 +66,9 @@ namespace ghost.sgame
                 this.listening = true;
                 this.io.on('connection', this._onConnection.bind(this));
                 this.io.on('error', this._onError.bind(this));
-                 this.server.listen(this.port);
+
+                this.server.listen(this.port);
+                
                 console.log("listen from port "+this.port);
             }
         }
