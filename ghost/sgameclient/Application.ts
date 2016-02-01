@@ -90,7 +90,6 @@ namespace ghost.sgameclient
         }
         private _enterRoom(name:string, visibility:string, password:string, callback:Function):void
         {
-            debugger;
             this.buffer.push({command:Const.APPLICATION_COMMAND_ENTER_ROOM, data:{name:name, visibility:visibility, password:password}, callback:(success:boolean, users:IUser[])=>
             {
                 console.log("ENTER ROOM "+name, callback);
@@ -257,7 +256,6 @@ namespace ghost.sgameclient
         }
         private writeNext(data:any = null):void
         {
-            debugger;
             if(!this.isConnected())
             {
                 this.connect();

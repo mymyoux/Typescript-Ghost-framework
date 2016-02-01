@@ -12,7 +12,7 @@ namespace ghost.sgame
         public login:string;
         public constructor()
         {
-            super();
+            super(); 
             this.rights = [];
             this.apps = {};
             this.rooms = {};

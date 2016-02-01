@@ -4,7 +4,7 @@ namespace ghost.sgame
     export class Room
     {
         public name:string;
-        private password:string;
+        protected password:string;
         private users:User[];
         private usersIDs:string[];
         public constructor(name:string, password:string = null)
@@ -23,7 +23,7 @@ namespace ghost.sgame
             return this.users.map(function(user:User):any
             {
               return {id:user.id, login:user.login};
-            });
+            }); 
         }
         public addUser(user:User, password:string = null):boolean
         {
