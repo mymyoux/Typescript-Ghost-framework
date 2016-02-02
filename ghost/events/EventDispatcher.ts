@@ -31,7 +31,7 @@ namespace ghost.events
         /**
          * Constructor
          */
-        constructor()
+        public constructor()
         {
             super();
             this._eventsK1 = {};
@@ -64,7 +64,10 @@ namespace ghost.events
         }
         public trigger(name:string, ...data:any[]):void
         {
-
+            if (!this._events) {
+                //disposed
+                return;
+            }
 
             if(this._muted)
             {
@@ -180,6 +183,10 @@ namespace ghost.events
         }
         private __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
         {
+            if (!this._events) {
+                //disposed
+                return;
+            }
             if(!name)
             {
                 throw(new Error("event's name can't be null"));
@@ -191,7 +198,8 @@ namespace ghost.events
                 {
                     if(names[p].length>0)
                     {
-                        this.once.apply(this, [names[p],callback, scope].concat(parameters));
+                       // this.once.apply(this, [names[p],callback, scope].concat(parameters));
+                        this.__on(once, names[p], callback, scope, parameters); 
                     }
                 }
                 return;
@@ -242,7 +250,11 @@ namespace ghost.events
         }
         public off(name?:string,  callback?:Function, scope?:any):void
         {
-
+            if (!this._events)
+            {
+                //disposed
+                return;
+            }
 //debugger;
             var key1:string, key2:string;
             var listener:Listener;
@@ -257,7 +269,7 @@ namespace ghost.events
                     {
                         if(names[p].length>0)
                         {
-                            this.off.call(this, names[p],callback, scope);
+                            this.off(names[p],callback, scope);
                         }
                     }
                     return;
