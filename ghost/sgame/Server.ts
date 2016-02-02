@@ -3,10 +3,12 @@
 ///<file="User"/>
 ///<module="events"/>
 ///<module="sgamecommon"/>
+///<module="logging"/>
 
 namespace ghost.sgame
 {
     import Const = ghost.sgamecommon.Const;
+    import log = ghost.logging.log;
     //import Socket = SocketIO.Socket;
     export class Server extends ghost.events.EventDispatcher
     {
@@ -19,6 +21,7 @@ namespace ghost.sgame
         private io:any;
         private listening:boolean;
         private app: any;
+        private stats:any; 
         public constructor(options:any)
         {
             super();
@@ -26,17 +29,22 @@ namespace ghost.sgame
             this.server = this.createServer(options);//require('http').createServer();
             this.io = require('socket.io')(this.server);
             this.users = [];
+            //instance of stats
+            this.stats = ghost.sgame.Stats.instance();
+            this.stats.users = this.users;
+            log.level(log.LEVEL_WARN);
         }
         protected createServer(options:any):any
         {
-
+            log.info("createServer");
             if(!options.secure)
             {
+                log.info("http mode");
                 delete options.secure; 
                 return require('http').createServer(options);
             }else
             {
-                console.log("https");
+                log.info("https mode");
                 //https
                 var express = require('express');
                 var https = require("https");
@@ -51,8 +59,44 @@ namespace ghost.sgame
                 if (options.cert) {
                     options.cert = fs.readFileSync(options.cert);
                 }
+                if (options.stats && options.stats.port) {
+                    this.app.listen(options.stats.port);
+                    if (options.stats.folder)
+                    {
+                        this.app.use(express.static(options.stats.folder));
+                    }
+                    this.app.get('/stats', (req, res)=> {
+
+                        res.json(this.stats.toJSON());
+                    });
+                }
                 return https.createServer(options, app);
             }
+        }
+        public hasUser(id:string):boolean
+        {
+            var len:number = this.users.length;
+            for(var i:number=0; i<len; i++)
+            {
+                if(this.users[i].id == id)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public getUser(id:string):User
+        {
+            var len:number = this.users.length;
+            for(var i:number=0; i<len; i++)
+            {
+                if(this.users[i].id == id)
+                {
+                    return this.users[i];
+                }
+            }
+            return null;
         }
         public listen(port:number):void
         {
@@ -69,14 +113,29 @@ namespace ghost.sgame
 
                 this.server.listen(this.port);
                 
-                console.log("listen from port "+this.port);
+                log.info("listen from port "+this.port);
             }
         }
         private _onConnection(socket:any):void {
             var user:User = new User();
             user.socket = new Socket(socket);
             user.socket.on(Socket.EVENT_DATA, this._onData, this, user);
+            user.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
             this.users.push(user);
+            log.info("new connection");
+            log.info(this.users);
+        }
+        protected _onUserChangeClass(newUser: User, user: User): void
+        {
+            user.dispose();
+            var index: number = this.users.indexOf(user);
+            if(index != -1)
+            {
+                this.users[index] = newUser;
+                newUser.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+            }
+            log.info("on change class");
+            log.info(this.users);
         }
         private _onData(command:string, data:any, callback:Function, user:User):void
         {
@@ -114,7 +173,7 @@ namespace ghost.sgame
                             }
                         }else
                         {
-                            console.warn("try to callback twice", arguments);
+                            log.warn("try to callback twice", arguments);
                             throw new Error("twice");
                         }
                     }

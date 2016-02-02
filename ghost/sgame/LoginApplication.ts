@@ -18,13 +18,11 @@ namespace ghost.sgame
             {
                 icallback.handled = true;
             }
-            console.log("loginAction");
-            setTimeout(function()
+            setTimeout(()=>
             {
-                console.log("ok");
                 user.addRight("app");
                 user.login = "mymyoux"+Maths.randBetween(0, 100);
-                user.id = "couceouceokoekte"+Maths.randBetween(0, 100);
+                user.id = this.generateTokenFromData(Maths.randBetween(0, 100));
                 icallback.success({id:user.id, login:user.login});
             }, 0);
         }
@@ -32,6 +30,24 @@ namespace ghost.sgame
         {
             user.addApp(this.name);
             callback.success();
+        }
+        /**
+         * Generate an unique id from a non unique resource
+         * @param  {any}    data non unique vlaue
+         * @return {string}      Unique id for an user id
+         */
+        protected generateTokenFromData(data:any):string
+        {
+            return data + ":" + ghost.utils.Strings.getUniqueToken(60);
+        }
+        /**
+         * Checks if the current user is already connected
+         * @param  {string}  id user id
+         * @return {boolean}    true or false
+         */
+        protected hasUser(id:string):boolean
+        {
+            return this.server.hasUser(id);
         }
     }
 

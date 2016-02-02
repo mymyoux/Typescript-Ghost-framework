@@ -7,12 +7,13 @@ namespace ghost.sgame
 {
     import Const = ghost.sgamecommon.Const;
     import IApplicationMessage = ghost.sgamecommon.IApplicationMessage;
+    import log = ghost.logging.log;
     export class Application
     {
         /**
          * Server
          */
-        private server:Server;
+        protected server:Server;
         protected roomManager:RoomManager; 
         private users:User[];
         private users_ids:string[];
@@ -52,11 +53,11 @@ namespace ghost.sgame
         }
         private _onExit(data:IApplicationMessage, user:User):void
         {
-            console.log("["+this.name+"] exit : "+user.login,data);
+            log.info("[" + this.name + "] exit : " + user.login, data);
         }
         protected _onEnter(data:IApplicationMessage, user:User, callback:ICallback):void
         {
-            console.log("["+this.name+"] enter : "+user.login);
+            log.info("["+this.name+"] enter : "+user.login);
             if(user.isAllowed(this.name))
             {
                 callback.success();
@@ -69,7 +70,7 @@ namespace ghost.sgame
         }
         protected _rejectUser(user:User, callback:ICallback = null):void
         {
-            console.log("["+this.name+"] reject : "+user.login);
+            log.warn("["+this.name+"] reject : "+user.login);
             if(callback)
             {
                 callback.error(Const.ERROR_NEED_LOGIN, {
@@ -85,7 +86,7 @@ namespace ghost.sgame
 
         private _onEnterRoom(room:{name:string, visibility:string, password:string}, user:User, icallback:ICallback):void
         {
-            console.log("["+this.name+"] room enter : "+user.login, room);
+            log.info("["+this.name+"] room enter : "+user.login, room);
 
             if(!room || !room.name)
             {
@@ -107,7 +108,7 @@ namespace ghost.sgame
                     return;
                 }
                 var users:User[] = currentRoom.getUsers();
-                console.log("["+this.name+"] room users : "+user.login, currentRoom.getUsersInformation());
+                log.info("[" + this.name + "] room users : " + user.login, currentRoom.getUsersInformation());
                 if(!users)
                 {
                     return;
@@ -121,13 +122,13 @@ namespace ghost.sgame
         }
         private _onLeaveRoom(room:string, user:User, icallback:ICallback):void
         {
-            console.log("["+this.name+"] rooom leave : "+user.login, room);
+            log.info("[" + this.name + "] rooom leave : " + user.login, room);
             this.onLeaveRoom(<any>this.roomManager.getRoom(room), user);
             this.roomManager.removeUserFromRoom(room, user);
         }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
         {
-            console.log(">"+roomname+" ["+this.name+"] data : "+user.login, data);
+            log.info(">" + roomname + " [" + this.name + "] data : " + user.login, data);
             var room:Room = this.roomManager.getRoom(roomname);
             if(!room || !room.hasUser(user))
             {
@@ -147,7 +148,7 @@ namespace ghost.sgame
             if(id_recipient)
             {
                 var recipient:User = room.getUser(id_recipient);
-                console.log("WRITE ALONE MESSAGE TO "+recipient.login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
+                log.info("WRITE ALONE MESSAGE TO " + recipient.login, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, sender: user.id, data: data });
                 this.writeOne(recipient, Const.MSG_APPLICATION, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:{command:command, data:data}});
             }else
             for(var p in users)
@@ -155,7 +156,7 @@ namespace ghost.sgame
                 //all
                 if(users[p] != user)
                 {
-                    console.log("WRITE MESSAGE TO "+users[p].login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
+                    log.info("WRITE MESSAGE TO "+users[p].login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
                     this.writeOne(users[p], Const.MSG_APPLICATION, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:{command:command, data:data}});
                 }
             }
@@ -167,10 +168,10 @@ namespace ghost.sgame
                 icallback.error(Const.ERROR_BAD_FORMAT, {app:this.name});
                 return;
             }
-            console.log("["+this.name+"] data : "+user.login, data);
+            log.info("["+this.name+"] data : "+user.login, data);
             if(!user.hasApp(this.name))
             {
-                console.warn("user is not in app : "+this.name);
+                log.warn("user is not in app : "+this.name);
                 if(!user.isAllowed(this.name))
                 {
                     icallback.error(Const.ERROR_NEED_LOGIN, {app:this.name});
@@ -202,17 +203,17 @@ namespace ghost.sgame
                     this[name](data.data, user, icallback);
                 }else
                 {
-                    console.warn(name+" doesn't exist");
+                    log.warn(name+" doesn't exist");
                 }
             }
         }
         private _addUser(user:User):void
         {
-            console.log("["+this.name+"] add : "+user.login);
+            log.info("[" + this.name + "] add : " + user.login);
             user.addApp(this.name);
             if(this.users_ids.indexOf(user.id)!=-1)
             {
-                console.warn(this.name+"["+user.id+"] "+user.login+" already exists");
+                log.warn(this.name+"["+user.id+"] "+user.login+" already exists");
             }
             this.users.push(user);
             this.users_ids.push(user.id);
@@ -220,7 +221,7 @@ namespace ghost.sgame
         }
         private _removeUser(user:User):void
         {
-            console.log("["+this.name+"] remove : "+user.login);
+            log.info("[" + this.name + "] remove : " + user.login);
             var index:number = this.users.indexOf(user);
             if(index != -1)
             {

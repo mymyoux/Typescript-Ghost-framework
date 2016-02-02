@@ -30,5 +30,8 @@ namespace ghost.sgamecommon
         public static ERROR_ROOM_RECIPIENT_UNKNOWN:string = "error_room_recipient_unknown";
         public static ERROR_ROOM_ENTER_FAILED:string = "error_bad_room_enter";
         public static ERROR_NEED_APPLICATION_ENTER:string = "error_need_application_enter";
+
+
+        public static USER_CLASS_CHANGE:string = "user_class_change";
     }
 }

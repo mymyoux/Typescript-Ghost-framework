@@ -4,6 +4,7 @@ namespace ghost.sgame
 {
     import Socketio = SocketIO.Socket;
     import Const = ghost.sgamecommon.Const;
+    import log = ghost.logging.log;
     export class Socket extends ghost.events.EventDispatcher
     {
         public static EVENT_ERROR:string = "error";
@@ -26,7 +27,7 @@ namespace ghost.sgame
             return this.connected && this.socket.connected;
         }
         private bindEvents():void{
-            console.log("connection");
+            log.info("connection");
             this.socket.on('error', this._onError.bind(this));
             this.socket.on('event', this._onEvent.bind(this));
             this.socket.on('data', this._onData.bind(this));
@@ -41,19 +42,19 @@ namespace ghost.sgame
         }
         private _onError(error:any):void
         {
-            console.log("socketerror", error);
+            log.error("socketerror", error);
             if(error && error.stack)
             {
-                console.log(error.stack);
+                log.error(error.stack);
             }
         }
         private _onDisconnect():void
         {
-            console.log("disconnect");
+            log.warn("disconnect");
         }
         private _onData(command:string, data:any):void
         {
-            console.log("[DATA]", command, data);
+            log.info("[DATA]", command, data);
             var callback:Function = null;
             if(typeof arguments[arguments.length-1] == "function")
             {
@@ -63,7 +64,7 @@ namespace ghost.sgame
         }
         private _onEvent(data:any):void
         {
-            console.log("event", data);
+            log.info("event", data);
         }
 
         public write(command:string, data:any):void

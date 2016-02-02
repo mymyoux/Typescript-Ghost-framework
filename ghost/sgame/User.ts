@@ -2,6 +2,7 @@
 ///<file="Socket"/>
 namespace ghost.sgame
 {
+    import Const = ghost.sgamecommon.Const;
     export class User extends ghost.events.EventDispatcher
     {
         private rights:string[];
@@ -56,6 +57,40 @@ namespace ghost.sgame
         {
             this.socket.destroy();
             super.destroy();
+        }
+        public setUserClass(cls:any):User  
+        {
+            //maybe only change the prototype
+            //should only happend at early state of the user 
+            var user: User = new cls();
+            user.id = this.id;
+            user.login = this.login;
+            user.socket = this.socket;
+            for (var p in this.rooms) {
+                if (this.rooms[p] === true)
+                    user.addRoom(p);
+            }
+            for (var p in this.apps) {
+                if (this.apps[p] === true)
+                    user.addApp(p);
+            }
+            this.rights.forEach(user.addRight.bind(user));
+            this.trigger(Const.USER_CLASS_CHANGE, user);
+            return user;
+        }
+        public inspect(): any {
+            var data: any = {};
+            for (var p in this) {
+                if (this.hasOwnProperty(p))
+                    if (p.substring(0, 1) != "_" && p !="socket") {
+                        if (typeof this[p] == "object" && this[p].inspect) {
+                            data[p] = this[p].inspect();
+                        } else {
+                            data[p] = this[p];
+                        }
+                    }
+            }
+            return data;
         }
     }
 }
