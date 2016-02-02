@@ -13,7 +13,7 @@ namespace ghost.sgame
          * Server
          */
         private server:Server;
-        private roomManager:RoomManager;
+        protected roomManager:RoomManager; 
         private users:User[];
         private users_ids:string[];
         protected name:string;
@@ -82,6 +82,7 @@ namespace ghost.sgame
                 this.writeOne(user, "login", {});
             }
         }
+
         private _onEnterRoom(room:{name:string, visibility:string, password:string}, user:User, icallback:ICallback):void
         {
             console.log("["+this.name+"] room enter : "+user.login, room);
@@ -91,7 +92,9 @@ namespace ghost.sgame
                 icallback.error(Const.ERROR_BAD_FORMAT);
             }else
             {
-                var success:boolean = this.roomManager.addUserToRoom(room.name, room.visibility, room.password, user);
+                var success: boolean = this.isAllowedInRoom(room, user);
+                if(success)
+                    success = this.roomManager.addUserToRoom(room.name, room.visibility, room.password, user);
                 var currentRoom:Room = this.roomManager.getRoom(room.name);
                 if(success)
                 {
@@ -113,11 +116,13 @@ namespace ghost.sgame
                 {
                     this.writeOne(users[p], Const.ROOM_COMMAND_USER_ENTER,  {room:room.name, data:{id:user.id,login:user.login}});
                 }
+                this.onEnterRoom(room, user);
             }
         }
         private _onLeaveRoom(room:string, user:User, icallback:ICallback):void
         {
             console.log("["+this.name+"] rooom leave : "+user.login, room);
+            this.onLeaveRoom(<any>this.roomManager.getRoom(room), user);
             this.roomManager.removeUserFromRoom(room, user);
         }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
@@ -211,6 +216,7 @@ namespace ghost.sgame
             }
             this.users.push(user);
             this.users_ids.push(user.id);
+            this.onEnter(user);
         }
         private _removeUser(user:User):void
         {
@@ -220,7 +226,26 @@ namespace ghost.sgame
             {
                 this.users_ids.splice(index, 1);
                 this.users.splice(index, 1);
+                this.onLeave(user);
             }
+        }
+
+        //to override
+        protected onEnter(user:User):void
+        {
+
+        }
+        protected onLeave(user: User): void {
+
+        }
+        protected isAllowedInRoom(room: { name: string, visibility?: string, password?: string }, user: User): boolean {
+            return true;
+        }
+        protected onEnterRoom(room: { name: string, visibility?: string, password?: string }, user: User): void {
+
+        }
+        protected onLeaveRoom(room: Room, user: User): void {
+
         }
     }
 

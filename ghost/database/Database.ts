@@ -18,8 +18,13 @@ namespace ghost.database
             Database._instance = this;
             this.db = new Sequelize(database, username, password, {host:host, dialect:dialect}, options);
             this.initDefine();
+            this.initRelations();
         }
         protected initDefine():void
+        {
+
+        }
+        protected initRelations(): void
         {
 
         }

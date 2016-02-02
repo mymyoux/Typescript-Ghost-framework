@@ -131,6 +131,7 @@ namespace ghost.mvc
             if( Model._instances[<any>instance.constructor])
             {
                 console.warn("Instance already exists for ",instance.constructor," previous will be ")
+                return;
             }
             Model._instances[<any>instance.constructor] = instance;
         }
