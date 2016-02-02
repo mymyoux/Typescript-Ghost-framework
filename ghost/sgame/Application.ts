@@ -25,7 +25,7 @@ namespace ghost.sgame
             this.server = server;
             this.users = [];
             this.users_ids = [];
-            this.roomManager = new RoomManager();
+            this.roomManager = new RoomManager(this.name);
             this.bindEvents();
         }
         public bindEvents()
@@ -45,11 +45,11 @@ namespace ghost.sgame
         }
         public writeOne(user:User, command:string, data:any):void
         {
-            user.socket.write(Const.MSG_APPLICATION, {command:command, app:this.name, data:data});
+            user.write(Const.MSG_APPLICATION, {command:command, app:this.name, data:data});
         }
         private dispatchOne(user:User, application:string, command:string, data:any):void
         {
-            user.socket.write(Const.MSG_APPLICATION, {command:command, app:application, data:data});
+            user.write(Const.MSG_APPLICATION, {command:command, app:application, data:data});
         }
         private _onExit(data:IApplicationMessage, user:User):void
         {
@@ -217,6 +217,7 @@ namespace ghost.sgame
             }
             this.users.push(user);
             this.users_ids.push(user.id);
+            this._bindUserEvents(user);
             this.onEnter(user);
         }
         private _removeUser(user:User):void
@@ -228,7 +229,24 @@ namespace ghost.sgame
                 this.users_ids.splice(index, 1);
                 this.users.splice(index, 1);
                 this.onLeave(user);
+                this._unbindUserEvents(user);
             }
+        }
+        protected _onUserChangeClass(newUser: User, user: User): void {
+            this._unbindUserEvents(user);
+            var index: number = this.users.indexOf(user);
+            if (index != -1) {
+                this.users[index] = newUser;
+                this._bindUserEvents(newUser);
+            }
+        }
+        protected _unbindUserEvents(user: User): void {
+            user.off(Const.USER_DISCONNECTED, this._removeUser, this);
+            user.off(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this);
+        }
+        protected _bindUserEvents(user: User): void {
+            user.once(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+            user.once(Const.USER_DISCONNECTED, this._removeUser, this, user);
         }
 
         //to override

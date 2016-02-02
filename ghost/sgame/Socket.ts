@@ -50,7 +50,8 @@ namespace ghost.sgame
         }
         private _onDisconnect():void
         {
-            log.warn("disconnect");
+            log.warn("Disconnect");
+            this.trigger(Socket.EVENT_DISCONNECTED);
         }
         private _onData(command:string, data:any):void
         {

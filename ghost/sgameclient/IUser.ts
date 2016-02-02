@@ -5,5 +5,6 @@ namespace ghost.sgameclient
         token?:string;
         id:string;
         login:string;
+        write: Function;
     }
 }

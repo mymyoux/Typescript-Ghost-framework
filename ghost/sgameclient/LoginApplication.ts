@@ -6,7 +6,7 @@ namespace ghost.sgameclient
     import IApplicationData = ghost.sgamecommon.IApplicationData;
     export class LoginApplication extends Application
     {
-        protected user:IUser;
+        public user:IUser;
         public constructor(client:Client, user:IUser)
         {
             super(Const.LOGIN_APP, client)
@@ -28,9 +28,10 @@ namespace ghost.sgameclient
                     if(data.login)
                         this.user.login = data.login;
                     this.writeInternalData(Const.ALL_APP, Const.LOGIN_COMMAND, success);
+                    this.user["write"] = this.write.bind(this, Const.USER_CUSTOM_VAR);
                 }else
                 {
-                    console.warn("LOGIN FAILED", data);
+                    console.warn("LOGIN FAILED", data); 
                 }
             });
         }

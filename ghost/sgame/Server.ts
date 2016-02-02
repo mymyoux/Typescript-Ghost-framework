@@ -32,46 +32,38 @@ namespace ghost.sgame
             //instance of stats
             this.stats = ghost.sgame.Stats.instance();
             this.stats.users = this.users;
-            log.level(log.LEVEL_WARN);
         }
         protected createServer(options:any):any
         {
-            log.info("createServer");
-            if(!options.secure)
+            log.info("createServer : "+(options.secure?"https":"http"));
+            var express = require('express');
+            var fs = require("fs");
+            var app = express();
+            var http: any;
+            if(options.secure)
             {
-                log.info("http mode");
-                delete options.secure; 
-                return require('http').createServer(options);
-            }else
-            {
-                log.info("https mode");
-                //https
-                var express = require('express');
-                var https = require("https");
-                var fs = require("fs");
-                var app = express();
-                this.app = app;
-                delete options.secure;
-                if(options.key)
-                {
+                if (options.key) {
                     options.key = fs.readFileSync(options.key);
                 }
                 if (options.cert) {
                     options.cert = fs.readFileSync(options.cert);
                 }
-                if (options.stats && options.stats.port) {
-                    this.app.listen(options.stats.port);
-                    if (options.stats.folder)
-                    {
-                        this.app.use(express.static(options.stats.folder));
-                    }
-                    this.app.get('/stats', (req, res)=> {
-
-                        res.json(this.stats.toJSON());
-                    });
-                }
-                return https.createServer(options, app);
+                http = require('https').createServer(options, app);
+            }else
+            {
+                http = require('http').createServer(app);
             }
+            if (options.stats) {
+                // https.listen(options.stats.port);
+                if (options.stats.folder) {
+                    app.use(express.static(options.stats.folder));
+                }
+                app.get('/stats', (req, res) => {
+
+                    res.json(this.stats.toJSON());
+                });
+            }
+            return http;
         }
         public hasUser(id:string):boolean
         {
@@ -118,24 +110,49 @@ namespace ghost.sgame
         }
         private _onConnection(socket:any):void {
             var user:User = new User();
-            user.socket = new Socket(socket);
-            user.socket.on(Socket.EVENT_DATA, this._onData, this, user);
-            user.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+            user.setSocket(new Socket(socket));
+            this._bindUserEvents(user);
             this.users.push(user);
             log.info("new connection");
             log.info(this.users);
         }
         protected _onUserChangeClass(newUser: User, user: User): void
         {
+            //avoid socket dispose
+            this._unbindUserEvents(user);
+            user.setSocket(null);
             user.dispose();
             var index: number = this.users.indexOf(user);
             if(index != -1)
             {
                 this.users[index] = newUser;
-                newUser.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+                this._bindUserEvents(newUser);
             }
             log.info("on change class");
             log.info(this.users);
+        }
+        protected _unbindUserEvents(user: User): void {
+            if (user.socket)
+                user.socket.off(Socket.EVENT_DATA, this._onData, this);
+            user.off(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this);
+            user.off(Const.USER_DISCONNECTED, this._onUserDisconnected, this);
+        }
+        protected _bindUserEvents(user:User):void
+        {
+            if(user.socket)
+                user.socket.on(Socket.EVENT_DATA, this._onData, this, user);
+            user.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+            user.on(Const.USER_DISCONNECTED, this._onUserDisconnected, this, user);
+        }
+        protected _onUserDisconnected(user: User): void {
+            var index: number = this.users.indexOf(user);
+            if (index != -1) 
+            { 
+                this.users.splice(index, 1);
+            }
+            this._unbindUserEvents(user);
+            user.dispose(); 
+            log.warn("disconnected", user);
         }
         private _onData(command:string, data:any, callback:Function, user:User):void
         {

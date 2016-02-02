@@ -31,7 +31,10 @@ namespace ghost.sgamecommon
         public static ERROR_ROOM_ENTER_FAILED:string = "error_bad_room_enter";
         public static ERROR_NEED_APPLICATION_ENTER:string = "error_need_application_enter";
 
-
+ 
         public static USER_CLASS_CHANGE:string = "user_class_change";
+        public static USER_DISCONNECTED:string = "user_disconnected";
+
+        public static USER_CUSTOM_VAR:string = "set_user_custom_var"; 
     }
 }

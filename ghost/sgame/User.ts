@@ -3,6 +3,7 @@
 namespace ghost.sgame
 {
     import Const = ghost.sgamecommon.Const;
+    import log = ghost.logging.log;
     export class User extends ghost.events.EventDispatcher
     {
         private rights:string[];
@@ -17,6 +18,27 @@ namespace ghost.sgame
             this.rights = [];
             this.apps = {};
             this.rooms = {};
+        }
+        public setSocket(socket:Socket):void
+        {
+            if(this.socket)
+            {
+                this.socket.off(Socket.EVENT_DISCONNECTED, this.onDisconnected, this);
+            }
+            this.socket = socket; 
+            if(this.socket) 
+                this.socket.once(Socket.EVENT_DISCONNECTED, this.onDisconnected, this);
+        }
+        public write(command:string, data:any):void
+        {
+            if(this.socket)
+            {
+                this.socket.write(command, data);
+            }
+        }
+        protected onDisconnected():void
+        {
+            this.trigger(Const.USER_DISCONNECTED);
         }
         public hasApp(name:string):boolean
         {
@@ -55,8 +77,14 @@ namespace ghost.sgame
         }
         public destroy():void
         {
+            if(this.socket)
             this.socket.destroy();
             super.destroy();
+        }
+        public dispose():void
+        {
+            this.destroy(); 
+            super.dispose();
         }
         public setUserClass(cls:any):User  
         {
@@ -65,7 +93,7 @@ namespace ghost.sgame
             var user: User = new cls();
             user.id = this.id;
             user.login = this.login;
-            user.socket = this.socket;
+            user.setSocket(this.socket);
             for (var p in this.rooms) {
                 if (this.rooms[p] === true)
                     user.addRoom(p);

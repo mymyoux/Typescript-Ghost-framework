@@ -1,6 +1,8 @@
 ///<file="User"/>
+///<module="sgamecommon"/>
 namespace ghost.sgame
 {
+    import Const = ghost.sgamecommon.Const;
     export class Room
     {
         public name:string;
@@ -37,6 +39,7 @@ namespace ghost.sgame
                 user.addRoom(this.name);
                 this.users.push(user);
                 this.usersIDs.push(user.id);
+                this._bindUserEvents(user);
             }
             return true;
         }
@@ -68,11 +71,30 @@ namespace ghost.sgame
                 this.users[index].removeRoom(this.name);
                 this.users.splice(index, 1);
                 this.usersIDs.splice(index, 1);
+                this._unbindUserEvents(user);
             }
         }
         public length():number
         {
             return this.users.length;
         }
+
+        protected _onUserChangeClass(newUser: User, user: User): void {
+            this._unbindUserEvents(user);
+            var index: number = this.users.indexOf(user);
+            if (index != -1) {
+                this.users[index] = newUser;
+                this._bindUserEvents(newUser);
+            }
+        }
+        protected _unbindUserEvents(user: User): void {
+            user.off(Const.USER_DISCONNECTED, this.removeUser, this);
+            user.off(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this);
+        }
+        protected _bindUserEvents(user: User): void {
+            user.once(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+            user.once(Const.USER_DISCONNECTED, this.removeUser, this, user);
+        }
+
     }
 }

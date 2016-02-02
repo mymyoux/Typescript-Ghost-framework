@@ -1,9 +1,11 @@
 ///<lib="sequelize"/>
 ///<lib="node"/>
 ///<lib="es6-promise"/>
+///<module="logging"/>
 
 namespace ghost.database
 {
+    import log = ghost.logging.log;
     var Sequelize = require("Sequelize");
     export class Database
     {
@@ -16,7 +18,7 @@ namespace ghost.database
         public constructor(database:string, host:string, username:string, password:string, dialect:string = "mysql", options:any = null)
         {
             Database._instance = this;
-            this.db = new Sequelize(database, username, password, {host:host, dialect:dialect}, options);
+            this.db = new Sequelize(database, username, password, {host:host, dialect:dialect, logging:log.info}, options);
             this.initDefine();
             this.initRelations();
         }
