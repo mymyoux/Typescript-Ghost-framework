@@ -88,6 +88,7 @@ namespace ghost.mvc
         protected onPageChanging(type:string, previous:string, next:string, event:ghost.browser.navigation.NavigationEvent):void
         {
             var controller:Controller = Controller.getController(next);
+
             if(controller)
             {
                 var canActivate:string|boolean|IScopeOptions = controller.canActivate(event.params);
@@ -132,7 +133,23 @@ namespace ghost.mvc
                         },0);
                     }
                 }
+            }
+            else
+            {
+                if (type === ghost.browser.navigation.Navigation.PUSH)
+                {
+                    // if controller not exist
+                    event.cancel();
 
+                    var page : string = Scope.navigation().getDefaultPage( this._name );
+
+                    if (null !== page)
+                    {
+                        window.setTimeout(() => {
+                            ghost.browser.navigation.Navigation.changeHash( this._name + '/' + page );
+                        }, 0);
+                    }
+                }
             }
         }
         /**

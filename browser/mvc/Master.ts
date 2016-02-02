@@ -60,7 +60,7 @@ namespace ghost.mvc
                     this._parts[this._parts.length-1] = name;
                     name = name.data;
                     delete this._parts[this._parts.length-1].data;
-                } 
+                }
                 if(typeof name == "function")
                 {
                     name = ghost.mvc.Model.get(name, true);
@@ -100,7 +100,7 @@ namespace ghost.mvc
 				//index
 				return this._data[asked];
 			}
-			return null; 
+			return null;
 		}
 		protected _setData():void
 		{
@@ -170,8 +170,8 @@ namespace ghost.mvc
         	this._activated = true;
 		 	(<any>Promise).series([this.initializeFirstData.bind(this), this.initializeView.bind(this), this.initializeData.bind(this), this.isActivated.bind(this), this.firstActivation.bind(this)]).
 		 	then(()=>
-		 	{	
-                
+		 	{
+
 		 		//if could have been turn off
 		 		if(this.isActivated())
 		 		{
@@ -203,6 +203,13 @@ namespace ghost.mvc
 	 		{
                 ghost.debug.ErrorLogger.instance().addError("master_activation_failed",error);
 	 			console.error("Master failed during preactivation", this, error);
+
+                var scope : string    = this.scoping();
+                var page : string     = this.navigation().getDefaultPage( scope );
+
+                window.setTimeout(() => {
+                    ghost.browser.navigation.Navigation.changeHash( scope + '/' + page );
+                }, 0);
  			});
         }
         /**
@@ -254,7 +261,7 @@ namespace ghost.mvc
                                 }
                             }
                         }
-                        
+
                     }
                 });
                 this.disactivate();
@@ -270,7 +277,7 @@ namespace ghost.mvc
 	                    for(var p in listener)
 	                    {
 	                        this.template.off(p, listener[p]);
-	                        
+
 	                    }
 	                }*/
 	                //TODO:maybe dont remove template
@@ -352,7 +359,7 @@ namespace ghost.mvc
     				reject
 	    			);*/
         		});
-        		
+
                 return promise;
         	}
         	return true;
@@ -361,7 +368,7 @@ namespace ghost.mvc
         {
             var params:any = this.getActivationParams();
         	var promises:Promise<any>[] = <any>this._data.map((item:any, index:number)=>
-        	{	
+        	{
                 if(item.retrieveData)
                 {
                     if(this._parts[index] && this._parts[index].condition)
@@ -407,7 +414,7 @@ namespace ghost.mvc
         {
         	if(!this._firstActivation)
         	{
-        		return true;	
+        		return true;
         	}
         	this._firstActivation = false;
         	return this.ready();
@@ -472,7 +479,7 @@ namespace ghost.mvc
         /**
          * Called on the first activation - after all have been set but just before #activate();
          */
-        protected ready():Promise<any>|boolean  
+        protected ready():Promise<any>|boolean
         {
             return true;
         }
@@ -573,7 +580,7 @@ namespace ghost.mvc
                         previous[name] = item.toRactive?item.toRactive(ractiveString):item instanceof Data?item.value:item.toObject();
                     }
                     return previous;
-                }, {} );   
+                }, {} );
         }
 
         public render():Promise<any>
