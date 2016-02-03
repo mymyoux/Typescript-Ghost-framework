@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "mocha"
+    "test": "mocha",
+    "postinstall": "echo \"You have to execute: npm -g install mocha\nthen npm test\n\" && exit 0"
   },
   "author": "",
   "license": "ISC",
