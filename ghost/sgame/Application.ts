@@ -27,6 +27,8 @@ namespace ghost.sgame
             this.users_ids = [];
             this.roomManager = new RoomManager(this.name);
             this.bindEvents();
+
+            this.server.addApp(this);
         }
         public bindEvents()
         {
@@ -41,7 +43,11 @@ namespace ghost.sgame
         }
         public destroy():void
         {
-            this.server = null;
+            if(this.server)
+            {
+                this.server.removeApp(this);
+                this.server = null;
+            }
         }
         public writeOne(user:User, command:string, data:any):void
         {
@@ -245,8 +251,9 @@ namespace ghost.sgame
             user.off(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this);
         }
         protected _bindUserEvents(user: User): void {
-            user.once(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
-            user.once(Const.USER_DISCONNECTED, this._removeUser, this, user);
+            log.info("bidn events : "+user.login);
+            user.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
+            user.on(Const.USER_DISCONNECTED, this._removeUser, this, user);
         }
 
         //to override
@@ -265,6 +272,20 @@ namespace ghost.sgame
         }
         protected onLeaveRoom(room: Room, user: User): void {
 
+        }
+        public inspect(): any {
+            var data: any = {};
+            for (var p in this) {
+                if (this.hasOwnProperty(p))
+                    if (p.substring(0, 1) != "_" && p != "server") {
+                        if (typeof this[p] == "object" && this[p].inspect) {
+                            data[p] = this[p].inspect();
+                        } else {
+                            data[p] = this[p];
+                        }
+                    }
+            }
+            return data;
         }
     }
 

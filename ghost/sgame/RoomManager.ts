@@ -17,7 +17,6 @@ namespace ghost.sgame
         }
         public addUserToRoom(name:string, visibility:string, password:string, user:User):boolean
         {
-            name = this._getFullRoomName(name);
             if(!this.rooms[name])
             {
                 ///no password for public channels
@@ -29,13 +28,10 @@ namespace ghost.sgame
             }
            return this.rooms[name].addUser(user, password);
         }
-        private _getFullRoomName(name:string):string
-        {
-            return this.appName + ":" + name;
-        }
+
         private createRoom(name:string, visibility:string, password:string):void
         {
-            this.rooms[name] = new Room(name, password);
+            this.rooms[name] = new Room(this.appName, name, password);
             if(visibility == Const.ROOM_VISIBILITY_PUBLIC)
             {
                 this.publics.push(this.rooms[name]);
@@ -43,7 +39,6 @@ namespace ghost.sgame
         }
         public removeUserFromRoom(name:string, user:User):void
         {
-            name = this._getFullRoomName(name);
             if(!this.rooms[name])
             {
                 //nothing to do
@@ -63,7 +58,6 @@ namespace ghost.sgame
         }
         public getRoom(name:string):Room
         {
-            name = this._getFullRoomName(name);
             return this.rooms[name];
         }
         public getRooms():Room[]

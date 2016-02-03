@@ -11,8 +11,8 @@ namespace ghost.events
         {
             ALL : "all"
         };
-        private _eventsK1:any;
-        private _eventsK2:any;
+        public _eventsK1: any;
+        public _eventsK2: any;
         /**
          * named indexed objects for each event
          */
@@ -312,6 +312,7 @@ namespace ghost.events
                 this._eventsK2 = {};
                 return;
             }
+            var toDispose: any[] = [];
              if(this._eventsK1[key1])
             {
                 for(var p in this._eventsK1[key1])
@@ -336,7 +337,8 @@ namespace ghost.events
                      {
                         continue;
                      }
-                     listener.dispose();
+                     toDispose.push(listener);
+                     //listener.dispose();
                     this._eventsK1[key1].splice(p, 1);
                 }
             } 
@@ -362,12 +364,17 @@ namespace ghost.events
                      {
                         continue;
                      }
-                    listener.dispose();
+                    //listener.dispose();
+                     toDispose.push(listener);
                     this._eventsK2[key2].splice(p, 1);   
                 }
             }
+            while(toDispose.length)
+            {
+                toDispose.shift().dispose();
+            }
 
-
+            return;
 
 
             if(!scope && !callback)
@@ -446,6 +453,7 @@ namespace ghost.events
     class Listener
     {
 
+        public instance: number = ghost.utils.Maths.getUniqueID();
         constructor(public key1:string, public key2:string, public once:boolean, public callback:Function, public scope?:any, public parameters?:any[])
         {
             if(!callback)

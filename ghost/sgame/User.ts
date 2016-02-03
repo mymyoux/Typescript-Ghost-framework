@@ -9,7 +9,6 @@ namespace ghost.sgame
         private rights:string[];
         public socket:Socket;
         private apps:any;
-        private rooms:any;
         public id:string;
         public login:string;
         public constructor()
@@ -17,7 +16,6 @@ namespace ghost.sgame
             super(); 
             this.rights = [];
             this.apps = {};
-            this.rooms = {};
         }
         public setSocket(socket:Socket):void
         {
@@ -38,7 +36,9 @@ namespace ghost.sgame
         }
         protected onDisconnected():void
         {
+            log.error("disconnected");
             this.trigger(Const.USER_DISCONNECTED);
+            this.dispose(); 
         }
         public hasApp(name:string):boolean
         {
@@ -46,19 +46,32 @@ namespace ghost.sgame
         }
         public addApp(name:string):void
         {
-            this.apps[name] = true;
+            this.apps[name] = {
+                name:name,
+                inside: true,
+                rooms:{}
+            };
         }
         public removeApp(name:string):void
         {
             delete this.apps[name];
         }
-        public addRoom(name:string):void
+        public addRoom(appName:string, name:string):void
         {
-            this.rooms[name] = true;
+            if (!this.apps[appName])
+            {
+                log.warn("user:"+this.id+" try to go in the room "+name+" but is not in the app "+appName);
+                return;
+            }
+            this.apps[appName].rooms[name] = true;
         }
-        public removeRoom(name:string):void
+        public removeRoom(appName:string, name:string):void
         {
-            delete this.rooms[name];
+            if (!this.apps[appName]) {
+                log.warn("user:" + this.id + " try to leave the room " + name + " but is not in the app " + appName);
+                return;
+            }
+            delete this.apps[appName].rooms[name];
         }
         public addRight(right:string):void{
             if(this.rights.indexOf(right)==-1)
@@ -83,6 +96,7 @@ namespace ghost.sgame
         }
         public dispose():void
         {
+            log.error("dispose");
             this.destroy(); 
             super.dispose();
         }
@@ -94,13 +108,16 @@ namespace ghost.sgame
             user.id = this.id;
             user.login = this.login;
             user.setSocket(this.socket);
-            for (var p in this.rooms) {
-                if (this.rooms[p] === true)
-                    user.addRoom(p);
-            }
-            for (var p in this.apps) {
-                if (this.apps[p] === true)
-                    user.addApp(p);
+            for (var p in this.apps) 
+            {
+                if (this.apps[p].inside)
+                {
+                    user.addApp(this.apps[p].name);
+                    for(var q in this.apps[p].rooms)
+                    {
+                        user.addRoom(this.apps[p].name, q);
+                    }
+                }
             }
             this.rights.forEach(user.addRight.bind(user));
             this.trigger(Const.USER_CLASS_CHANGE, user);
@@ -120,5 +137,11 @@ namespace ghost.sgame
             }
             return data;
         }
+    }
+    interface IApp
+    {
+        name:string;
+        in:boolean;
+        rooms:any;
     }
 }
