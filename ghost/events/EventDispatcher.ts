@@ -256,8 +256,8 @@ namespace ghost.events
                 return;
             }
 //debugger;
-            var key1:string, key2:string;
-            var listener:Listener;
+            var key1:string, key2:string; 
+            var listener:Listener;  
 
             //TODO:off with new system
             if(name)
