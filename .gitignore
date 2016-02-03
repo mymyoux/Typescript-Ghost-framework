@@ -13,6 +13,7 @@ vendor/bin
 #documentation
 documentation
 docscss
+npm-debug.log
 
 #SASS
 *.css.map

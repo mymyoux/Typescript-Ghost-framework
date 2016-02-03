@@ -91,17 +91,78 @@ namespace ghost.events
                 }
                 if(key2 == "" || !key2)
                 {
-                    key2 = EventDispatcher.EVENTS.ALL;
+                    key2 = null;
                 }
             }else
             {
                 key1 = name;
-                key2 = EventDispatcher.EVENTS.ALL;
+                key2 = null;//EventDispatcher.EVENTS.ALL;
             }
+            //console.log(key1 + ":" + key2);
             //if(key1 == "page_changed")
             //console.log("TT_TRIGGER_=>"+name+"     |      "+key1+":"+key2);
             var once:Listener[] = [];
             var listener:Listener;
+
+            if (key1 != EventDispatcher.EVENTS.ALL)
+            {
+                if (this._eventsK1[key1]) 
+                {
+                    //dispatch all key1 that match key1:key2 & key1:all
+                    for (var p in this._eventsK1[key1]) 
+                    {
+                        listener = this._eventsK1[key1][p];
+                        //dont dispatch if key2 doesn't match
+                        if (listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL) {
+                            continue;
+                        }
+                        if (listener.once) {
+                            once.push(listener);
+                        }
+                        listener.execute(data);
+                    }
+                }
+
+
+                //dispatch for all:key2 && all:all
+                if (this._eventsK1[EventDispatcher.EVENTS.ALL]) 
+                {
+                    for (var p in this._eventsK1[EventDispatcher.EVENTS.ALL]) 
+                    {
+                        listener = this._eventsK1[EventDispatcher.EVENTS.ALL][p];
+                         //dont dispatch if key2 doesn't match
+                        if (listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL) {
+                            continue;
+                        }
+                        //  if(key1 == "page_changed")
+                        //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
+                        if (listener.once) {
+                            once.push(listener);
+                        }
+                        listener.execute(data, [key1]);
+                    }
+                }
+            }else
+            {
+                for (key1 in this._eventsK1)
+                {
+                    if (this._eventsK1[key1]) {
+                        //dispatch all key1 that match key1:key2 & key1:all
+                        for (var p in this._eventsK1[key1]) {
+                            listener = this._eventsK1[key1][p];
+                            //dont dispatch if key2 doesn't match
+                            if (listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL) {
+                                continue;
+                            }
+                            if (listener.once) {
+                                once.push(listener);
+                            }
+                            listener.execute(data);
+                        }
+                    }
+                }
+            }
+            /*
 
             if(this._eventsK1[key1])
             {
@@ -169,7 +230,7 @@ namespace ghost.events
                     //console.log("TT___execute=>"+listener.key1+":"+listener.key2);
                     listener.execute(data);
                 }
-            }
+            }*/
             while(once.length)
             {
                 this.off(once[0].key1+":"+once[0].key2, once[0].callback, once[0].scope);
@@ -183,13 +244,17 @@ namespace ghost.events
         }
         private __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
         {
-            if (!this._events) {
+            if (!this._eventsK1) {
                 //disposed
                 return;
             }
             if(!name)
             {
                 throw(new Error("event's name can't be null"));
+            }
+            if(!callback)
+            {
+                throw(new Error("callback is required"));
             }
             if(name.indexOf(" ")>-1)
             {
@@ -367,6 +432,31 @@ namespace ghost.events
                     //listener.dispose();
                      toDispose.push(listener);
                     this._eventsK2[key2].splice(p, 1);   
+                }
+            }
+            if (key2 == EventDispatcher.EVENTS.ALL)
+            {
+                for (key2 in this._eventsK2)
+                {
+                    for (var p in this._eventsK2[key2]) {
+                        listener = this._eventsK2[key2][p];
+                        if (!listener) {
+                            debugger;
+                        }
+                        //we dont re-execute two keys match & all:all match
+                        if (listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL)) {
+                            continue;
+                        }
+                        if (callback && callback !== listener.callback) {
+                            continue;
+                        }
+                        if (scope && scope !== listener.scope) {
+                            continue;
+                        }
+                        //listener.dispose();
+                        toDispose.push(listener);
+                        this._eventsK2[key2].splice(p, 1);
+                    }
                 }
             }
             while(toDispose.length)
