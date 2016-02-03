@@ -28,6 +28,8 @@ namespace ghost.events
          */
         public _muted:boolean = false;
 
+        private _listeners: Listener[];
+
         /**
          * Constructor
          */
@@ -39,6 +41,8 @@ namespace ghost.events
 
             this._events = {};
             this._eventsOnce = {};
+
+            this._listeners = [];
         }
 
         /**
@@ -64,7 +68,7 @@ namespace ghost.events
         }
         public trigger(name:string, ...data:any[]):void
         {
-            if (!this._events) {
+            if (!this._listeners) {
                 //disposed
                 return;
             }
@@ -78,6 +82,7 @@ namespace ghost.events
                 debugger;
                 throw(new Error("event's name can't be null"));
             }
+
             var key1:string;
             var key2:string;
             if(name.indexOf(":") != -1)
@@ -98,143 +103,31 @@ namespace ghost.events
                 key1 = name;
                 key2 = null;//EventDispatcher.EVENTS.ALL;
             }
-            //console.log(key1 + ":" + key2);
-            //if(key1 == "page_changed")
-            //console.log("TT_TRIGGER_=>"+name+"     |      "+key1+":"+key2);
-            var once:Listener[] = [];
-            var listener:Listener;
-
-            if (key1 != EventDispatcher.EVENTS.ALL)
+            var len: number = this._listeners.length;
+            var i: number = 0;
+            var listener: Listener;
+            while(i<len)
             {
-                if (this._eventsK1[key1]) 
+                listener = this._listeners[i];
+                if ((listener.key1 == key1 || listener.key1 == EventDispatcher.EVENTS.ALL || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == EventDispatcher.EVENTS.ALL || listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL))
                 {
-                    //dispatch all key1 that match key1:key2 & key1:all
-                    for (var p in this._eventsK1[key1]) 
+                    if (listener.key1 == EventDispatcher.EVENTS.ALL) 
                     {
-                        listener = this._eventsK1[key1][p];
-                        //dont dispatch if key2 doesn't match
-                        if (listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL) {
-                            continue;
-                        }
-                        if (listener.once) {
-                            once.push(listener);
-                        }
+                        listener.execute(data, [key1]);
+                    }else
+                    {
                         listener.execute(data);
                     }
-                }
-
-
-                //dispatch for all:key2 && all:all
-                if (this._eventsK1[EventDispatcher.EVENTS.ALL]) 
-                {
-                    for (var p in this._eventsK1[EventDispatcher.EVENTS.ALL]) 
-                    {
-                        listener = this._eventsK1[EventDispatcher.EVENTS.ALL][p];
-                         //dont dispatch if key2 doesn't match
-                        if (listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL) {
-                            continue;
-                        }
-                        //  if(key1 == "page_changed")
-                        //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
-                        if (listener.once) {
-                            once.push(listener);
-                        }
-                        listener.execute(data, [key1]);
-                    }
-                }
-            }else
-            {
-                for (key1 in this._eventsK1)
-                {
-                    if (this._eventsK1[key1]) {
-                        //dispatch all key1 that match key1:key2 & key1:all
-                        for (var p in this._eventsK1[key1]) {
-                            listener = this._eventsK1[key1][p];
-                            //dont dispatch if key2 doesn't match
-                            if (listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL) {
-                                continue;
-                            }
-                            if (listener.once) {
-                                once.push(listener);
-                            }
-                            listener.execute(data);
-                        }
-                    }
-                }
-            }
-            /*
-
-            if(this._eventsK1[key1])
-            {
-                for(var p in this._eventsK1[key1])
-                {
-                    listener = this._eventsK1[key1][p];
-                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        continue;
-                    }
-                     //  if(key1 == "page_changed")
-                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
                     if(listener.once)
                     {
-                        once.push(listener);
-                    }
-                    listener.execute(data);
-                }
-            }
-            if(this._eventsK1[EventDispatcher.EVENTS.ALL])
-            {
-                for(var p in this._eventsK1[EventDispatcher.EVENTS.ALL])
-                {
-                    listener = this._eventsK1[EventDispatcher.EVENTS.ALL][p];
-                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        continue;
-                    }
-                    //  if(key1 == "page_changed")
-                    //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
-                    if(listener.once)
-                    {
-                        once.push(listener);
-                    }
-                    listener.execute(data,  [key1]);
-                }
-            }
-            if(this._eventsK2[key2])
-            {
-                for(var p in this._eventsK2[key2])
-                {
-                    listener = this._eventsK2[key2][p];
-                    if(!listener)
-                    {
-                        debugger;
-                    }
-                    //we dont re-execute two keys match & all:all match
-                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
-                    {
-                        continue;
-                    }
-                    if(listener.once)
-                    {
-                        if( once.indexOf(listener) == -1)
-                        {
 
-                            once.push(listener);
-                        }else
-                        {
-                            //not called twice
-                            continue;
-                        }
+                        this._listeners.splice(i, 1);
+                        listener.dispose();
+                        len--;
+                        continue;
                     }
-                   //if(key1 == "page_changed")
-                    //console.log("TT___execute=>"+listener.key1+":"+listener.key2);
-                    listener.execute(data);
                 }
-            }*/
-            while(once.length)
-            {
-                this.off(once[0].key1+":"+once[0].key2, once[0].callback, once[0].scope);
-                once.shift();
+                i++;
             }
         }
 
@@ -244,7 +137,7 @@ namespace ghost.events
         }
         private __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
         {
-            if (!this._eventsK1) {
+            if (!this._listeners) {
                 //disposed
                 return;
             }
@@ -292,22 +185,7 @@ namespace ghost.events
           ///  if(key1 == "page_changed")
           //console.log("TT___on["+once+"]=>"+name +"      |    "+key1+":"+key2);
             var listener:Listener = new Listener(key1, key2, once, callback, scope, parameters);
-            if(key1)
-            {
-                if(!this._eventsK1[key1])
-                {
-                    this._eventsK1[key1] = new Array<Listener>();
-                }
-                this._eventsK1[key1].push(listener);
-            }
-            if(key2)
-            {
-                if(!this._eventsK2[key2])
-                {
-                    this._eventsK2[key2] = new Array<Listener>();
-                }
-                this._eventsK2[key2].push(listener);
-            }
+            this._listeners.push(listener);
         }
         public once(name:string, callback:Function, scope?:any, ...parameters:any[]):void
         {
@@ -315,7 +193,7 @@ namespace ghost.events
         }
         public off(name?:string,  callback?:Function, scope?:any):void
         {
-            if (!this._events)
+            if (!this._listeners)
             {
                 //disposed
                 return;
@@ -348,18 +226,6 @@ namespace ghost.events
                 {
                     key1 = name;
                 }
-                /*
-                 //si c'est un event categorie on supprime tous les events liés
-                if(name.indexOf(":") == -1)
-                {
-                    for(var p in this._events)
-                    {
-                        if(p.substring(0, name.length+1)==name+":")
-                        {
-                            this.off(p, callback, scope);
-                        }
-                    }
-                }*/
             }
             if(!key1 || key1 == "")
             {
@@ -370,155 +236,27 @@ namespace ghost.events
                 key2 = EventDispatcher.EVENTS.ALL;
             }
 
-
-            if(!name)
-            {
-                this._eventsK1 = {};
-                this._eventsK2 = {};
+            if (!name) {
+                while(this._listeners.length)
+                {
+                    this._listeners.shift().dispose();
+                }
                 return;
             }
-            var toDispose: any[] = [];
-             if(this._eventsK1[key1])
-            {
-                for(var p in this._eventsK1[key1])
-                {
-                    listener = this._eventsK1[key1][p];
-                    if(listener.key2 != key2 && key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        continue;
-                    }
-                    if(listener.key2 == EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        console.warn("a listener listen for all "+key1+" events and can't be remove from a specific one like "+key2);
-                        continue;
-                    }
-                     //  if(key1 == "page_changed")
-                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
-                     if(callback && callback !== listener.callback)
-                     {
-                        continue;
-                     }
-                     if(scope && scope !== listener.scope)
-                     {
-                        continue;
-                     }
-                     toDispose.push(listener);
-                     //listener.dispose();
-                    this._eventsK1[key1].splice(p, 1);
-                }
-            } 
-            if(this._eventsK2[key2])
-            {
-                for(var p in this._eventsK2[key2])
-                {
-                    listener = this._eventsK2[key2][p];
-                    if(!listener)
-                    {
-                        debugger;
-                    }
-                    //we dont re-execute two keys match & all:all match
-                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
-                    {
-                        continue;
-                    }
-                    if(callback && callback !== listener.callback)
-                     {
-                        continue;
-                     }
-                     if(scope && scope !== listener.scope)
-                     {
-                        continue;
-                     }
-                    //listener.dispose();
-                     toDispose.push(listener);
-                    this._eventsK2[key2].splice(p, 1);   
-                }
-            }
-            if (key2 == EventDispatcher.EVENTS.ALL)
-            {
-                for (key2 in this._eventsK2)
-                {
-                    for (var p in this._eventsK2[key2]) {
-                        listener = this._eventsK2[key2][p];
-                        if (!listener) {
-                            debugger;
-                        }
-                        //we dont re-execute two keys match & all:all match
-                        if (listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL)) {
-                            continue;
-                        }
-                        if (callback && callback !== listener.callback) {
-                            continue;
-                        }
-                        if (scope && scope !== listener.scope) {
-                            continue;
-                        }
-                        //listener.dispose();
-                        toDispose.push(listener);
-                        this._eventsK2[key2].splice(p, 1);
-                    }
-                }
-            }
-            while(toDispose.length)
-            {
-                toDispose.shift().dispose();
-            }
 
-            return;
-
-
-            if(!scope && !callback)
-            {
-                if(!name)
-                {
-                    //this._events = {};
-                    //this._eventsOnce = {};
-                    this._eventsK1 = {};
-                    this._eventsK2 = {};
-                }else
-                {
-                    delete this._events[name];
-                    delete this._eventsOnce[name];
+            var len: number = this._listeners.length;
+            var i: number = 0;
+            var listener: Listener;
+            while (i < len) {
+                listener = this._listeners[i];
+                if ((!callback || callback === listener.callback) && (!scope || scope === listener.scope) && (listener.key1 == key1 || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL)) {
+                        this._listeners.splice(i, 1);
+                        listener.dispose();
+                        len--;
+                        continue;
                 }
-            }else
-            {
-                if(!name)
-                {
-                    for(var p in this._events)
-                    {
-                        this.off(this._events[p], callback, scope);
-                    }
-                    return;
-                }
-               
-                if(this._events[name])
-                {
-                    var i:number = 0;
-                    while(i<this._events[name].length)
-                    {
-                       if((!scope || this._events[name][i].isScope(scope)) && (!callback || this._events[name][i].isCallback(callback)))
-                       {
-                           this._events[name].splice(i, 1);
-                           continue;
-                       }
-                        i++;
-                    }
-                }
-                if(this._eventsOnce[name])
-                {
-                    var i:number = 0;
-                    while(i<this._eventsOnce[name].length)
-                    {
-                        if((!scope || this._eventsOnce[name][i].isScope(scope)) && (!callback || this._eventsOnce[name][i].isCallback(callback)))
-                        {
-                            this._eventsOnce[name].splice(i, 1);
-                            continue;
-                        }
-                        i++;
-                    }
-                }
+                i++;
             }
-
         }
         public proxy(callback:Function, scope?:any):any
         {
@@ -534,7 +272,7 @@ namespace ghost.events
         }
         public destroy():void
         {
-            this._events = this._eventsOnce = null;
+            this._listeners = null;
         }
     }
     /**
@@ -575,4 +313,3 @@ namespace ghost.events
         }
     }
 }
-

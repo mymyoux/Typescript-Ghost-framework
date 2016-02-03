@@ -77,14 +77,15 @@ describe('EventDispatcher', function() {
 		it('On', function() {
 
 			prepareListeners();
-
+			expect(dispatcher._listeners.length).to.equal(6);
+/*
 			expect(dispatcher._eventsK1[eventk1].length).to.equal(2);
 			expect(dispatcher._eventsK1["all"].length).to.equal(2);
 			expect(dispatcher._eventsK1[eventk3].length).to.equal(2);
 
 			expect(dispatcher._eventsK2[eventk2].length).to.equal(2);
 			expect(dispatcher._eventsK2["all"].length).to.equal(3);
-			expect(dispatcher._eventsK2[eventk3].length).to.equal(1);
+			expect(dispatcher._eventsK2[eventk3].length).to.equal(1);*/
 
 		});
 	});
@@ -169,7 +170,7 @@ describe('EventDispatcher', function() {
 		});
 	});
 	describe("Off", function(){
-		it('Off all', function() {
+		it('Off all:all', function() {
 			dispatcher.off();
 			dispatcher.trigger("all:all");
 
