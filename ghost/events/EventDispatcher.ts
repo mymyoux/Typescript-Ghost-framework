@@ -30,6 +30,8 @@ namespace ghost.events
 
         private _listeners: Listener[];
 
+        private _trigerring: boolean;
+
         /**
          * Constructor
          */
@@ -103,13 +105,16 @@ namespace ghost.events
                 key1 = name;
                 key2 = null;//EventDispatcher.EVENTS.ALL;
             }
-            var len: number = this._listeners.length;
+            //var len: number = this._listeners.length;
             var i: number = 0;
             var listener: Listener;
-            while(i<len)
+            var listeners: Listener[] = this._listeners.slice();
+            //copy array & remove once after ?
+            var len: number = listeners.length;
+            while (i < len)
             {
-                listener = this._listeners[i];
-                if ((listener.key1 == key1 || listener.key1 == EventDispatcher.EVENTS.ALL || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == EventDispatcher.EVENTS.ALL || listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL))
+                listener = listeners[i];
+                if (listener.disposed !== true && (listener.key1 == key1 || listener.key1 == EventDispatcher.EVENTS.ALL || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == EventDispatcher.EVENTS.ALL || listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL))
                 {
                     if (listener.key1 == EventDispatcher.EVENTS.ALL) 
                     {
@@ -118,17 +123,39 @@ namespace ghost.events
                     {
                         listener.execute(data);
                     }
+                    //test if the current dispatcher has been disposed();
                     if(listener.once)
                     {
 
-                        this._listeners.splice(i, 1);
                         listener.dispose();
-                        len--;
-                        continue;
+                        //this._listeners.splice(i, 1);
+                        //len--;
+                      //  continue;
                     }
                 }
                 i++;
             }
+            //disposed between
+            if (!this._listeners)
+            {
+                return;
+            }
+            i = 0;
+            len = this._listeners.length;
+            while(i<len)
+            {
+                if (this._listeners[i].disposed === true)
+                {
+                    this._listeners.splice(i, 1);
+                    len--;
+                    continue;
+                }            
+                i++;    
+            }
+
+
+            //for dispose maybe set a variable to running & only dispose listeners after the running
+            //for off ?
         }
 
         public on(name:string, callback:Function, scope?:any, ...parameters:any[]):void
@@ -239,7 +266,7 @@ namespace ghost.events
             if (!name) {
                 while(this._listeners.length)
                 {
-                    this._listeners.shift().dispose();
+                    this._listeners.shift();//.dispose();
                 }
                 return;
             }
@@ -251,7 +278,7 @@ namespace ghost.events
                 listener = this._listeners[i];
                 if ((!callback || callback === listener.callback) && (!scope || scope === listener.scope) && (listener.key1 == key1 || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL)) {
                         this._listeners.splice(i, 1);
-                        listener.dispose();
+                        //listener.dispose();
                         len--;
                         continue;
                 }
@@ -282,6 +309,7 @@ namespace ghost.events
     {
 
         public instance: number = ghost.utils.Maths.getUniqueID();
+        public disposed: boolean;
         constructor(public key1:string, public key2:string, public once:boolean, public callback:Function, public scope?:any, public parameters?:any[])
         {
             if(!callback)
@@ -310,6 +338,8 @@ namespace ghost.events
             this.callback = null;
             this.scope = null;
             this.parameters = null;
+            this.once = false;
+            this.disposed = true;
         }
     }
 }

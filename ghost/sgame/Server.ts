@@ -146,7 +146,7 @@ namespace ghost.sgame
             //avoid socket dispose
             this._unbindUserEvents(user);
             user.setSocket(null);
-            user.dispose();
+
             var index: number = this.users.indexOf(user);
             if(index != -1)
             {
@@ -155,6 +155,10 @@ namespace ghost.sgame
             }
             log.info("on change class");
             log.info(this.users);
+            //decaler dans le temps pke le dispose(); kill les _listeners
+            setTimeout(() => {
+                user.dispose();
+            },0);
         }
         protected _unbindUserEvents(user: User): void {
             if (user.socket)

@@ -2179,27 +2179,44 @@ var ghost;
                     key1 = name;
                     key2 = null; //EventDispatcher.EVENTS.ALL;
                 }
-                var len = this._listeners.length;
+                //var len: number = this._listeners.length;
                 var i = 0;
                 var listener;
+                var listeners = this._listeners.slice();
+                //copy array & remove once after ?
+                var len = listeners.length;
                 while (i < len) {
-                    listener = this._listeners[i];
-                    if ((listener.key1 == key1 || listener.key1 == EventDispatcher.EVENTS.ALL || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == EventDispatcher.EVENTS.ALL || listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL)) {
+                    listener = listeners[i];
+                    if (listener.disposed !== true && (listener.key1 == key1 || listener.key1 == EventDispatcher.EVENTS.ALL || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == EventDispatcher.EVENTS.ALL || listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL)) {
                         if (listener.key1 == EventDispatcher.EVENTS.ALL) {
                             listener.execute(data, [key1]);
                         }
                         else {
                             listener.execute(data);
                         }
+                        //test if the current dispatcher has been disposed();
                         if (listener.once) {
-                            this._listeners.splice(i, 1);
                             listener.dispose();
-                            len--;
-                            continue;
                         }
                     }
                     i++;
                 }
+                //disposed between
+                if (!this._listeners) {
+                    return;
+                }
+                i = 0;
+                len = this._listeners.length;
+                while (i < len) {
+                    if (this._listeners[i].disposed === true) {
+                        this._listeners.splice(i, 1);
+                        len--;
+                        continue;
+                    }
+                    i++;
+                }
+                //for dispose maybe set a variable to running & only dispose listeners after the running
+                //for off ?
             };
             EventDispatcher.prototype.on = function (name, callback, scope) {
                 var parameters = [];
@@ -2294,7 +2311,7 @@ var ghost;
                 }
                 if (!name) {
                     while (this._listeners.length) {
-                        this._listeners.shift().dispose();
+                        this._listeners.shift(); //.dispose();
                     }
                     return;
                 }
@@ -2305,7 +2322,7 @@ var ghost;
                     listener = this._listeners[i];
                     if ((!callback || callback === listener.callback) && (!scope || scope === listener.scope) && (listener.key1 == key1 || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL)) {
                         this._listeners.splice(i, 1);
-                        listener.dispose();
+                        //listener.dispose();
                         len--;
                         continue;
                     }
@@ -2363,6 +2380,8 @@ var ghost;
                 this.callback = null;
                 this.scope = null;
                 this.parameters = null;
+                this.once = false;
+                this.disposed = true;
             };
             return Listener;
         })();
