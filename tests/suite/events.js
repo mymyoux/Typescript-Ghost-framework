@@ -12,7 +12,7 @@ describe('EventDispatcher', function() {
 		//console.log("callback listener = " + this.name);
 		this.called++;
 		this.params = Array.prototype.slice.call(arguments);
-		console.log(this.name);
+	//	console.log(this.name);
 	};
 	Listener.prototype.reset = function()
 	{
@@ -21,12 +21,12 @@ describe('EventDispatcher', function() {
 	};
 	Listener.prototype.callbackKill = function()
 	{
-		console.log("callback kill");
+		//console.log("callback kill");
 		dispatcher.dispose();
 	};
 	Listener.prototype.callbackOff = function()
 	{
-		console.log("callback off");
+		//console.log("callback off");
 		dispatcher.off("k1");
 	};
 	var listenerk1k2;
