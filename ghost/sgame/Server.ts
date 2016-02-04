@@ -156,6 +156,8 @@ namespace ghost.sgame
             log.info("on change class");
             log.info(this.users);
             //decaler dans le temps pke le dispose(); kill les _listeners
+            user.dispose();
+            return;
             setTimeout(() => {
                 user.dispose();
             },0);
@@ -179,12 +181,8 @@ namespace ghost.sgame
             { 
                 this.users.splice(index, 1);
             }
-            log.info("k1",user._eventsK1);
-            log.info("k2",user._eventsK2);
             this._unbindUserEvents(user);
-            log.warn("k1", user._eventsK1);
-            log.warn("k2", user._eventsK2);
-            //user.dispose() is called on disconnected
+            //user.dispose();// is called on disconnected
           
             log.warn("disconnected", user);
         }
