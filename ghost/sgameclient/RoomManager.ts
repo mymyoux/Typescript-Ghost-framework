@@ -8,14 +8,38 @@ namespace ghost.sgameclient
     {
         private rooms:any;
         private publics:Room[];
-        public constructor()
+        private application: Application;
+        public constructor(application:Application)
         {
             this.rooms = {};
             this.publics = [];
+            this.application = application;
         }
-        public enterRoom(name:string, password:string, visibility:string):Room
+        public enterRoom(room:Room):Room
+        public enterRoom(name:string, password?:string, visibility?:string):Room
+        public enterRoom(room:any, password?:string, visibility?:string):Room
         {
-            return this.rooms[name] = new Room(name, password, visibility);
+            var name: string = typeof room == "string"?room:room.name;
+            if (this.rooms[name] && this.rooms[name] !== room) {
+                this.rooms[name].dispose();
+            }
+            if(typeof room == "string")
+            {
+               this.rooms[name] = this.createRoom(room, password, visibility);
+            }else
+            {
+                this.rooms[name] = room;
+            }
+            this.rooms[name].enter();
+            return this.rooms[name];
+        }
+        public createRoom(name: string, password: string, visibility: string): Room
+        {
+            if (this.rooms[name])
+            {
+                return this.rooms[name];
+            }
+            return new Room(name, password, visibility, this.application);
         }
         public leaveRoom(name:string):void
         {

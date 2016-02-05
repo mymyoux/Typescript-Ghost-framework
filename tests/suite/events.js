@@ -259,6 +259,7 @@ describe('EventDispatcher', function() {
 			expect(listenerall.called).to.equal(1);
 			expect(listenerk3k3.called).to.equal(1);
 			expect(listenerk3.called).to.equal(1);
+			
 			//dispatcher is disposed
 			dispatcher.trigger("all:all");
 			expect(listenerk1k2.called).to.equal(1);

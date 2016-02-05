@@ -134,6 +134,7 @@ namespace ghost.sgame
         }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
         {
+            log.warn("ROOM_DATA:" + roomname+" command : "+command);
             log.info(">" + roomname + " [" + this.name + "] data : " + user.login, data);
             var room:Room = this.roomManager.getRoom(roomname);
             if(!room || !room.hasUser(user))
@@ -145,6 +146,14 @@ namespace ghost.sgame
                 return icallback.error(Const.ERROR_ROOM_RECIPIENT_UNKNOWN, {room:roomname, user:id_recipient});
             }
             icallback.success();
+
+            //custom data
+            if (command == Const.ROOM_COMMAND_USER_DATA)
+            {
+                user.onSetCustomData(room, data);
+                return;
+            }
+
             var users:User[] = room.getUsers();
             if(!users)
             {

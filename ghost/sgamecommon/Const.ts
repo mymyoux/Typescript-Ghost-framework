@@ -17,6 +17,7 @@ namespace ghost.sgamecommon
         public static ROOM_COMMAND_USER_ENTER = "room_user_enter";
         public static ROOM_COMMAND_USER_MESSAGE = "room_user_message";
         public static ROOM_COMMAND_USER_LEAVE = "room_user_leave";
+        public static ROOM_COMMAND_USER_DATA = "room_user_data";
 
         public static ALL_APP:string = "*all";
         public static ROOM_VISIBILITY_PUBLIC:string = "public";

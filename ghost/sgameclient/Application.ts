@@ -27,7 +27,7 @@ namespace ghost.sgameclient
             this.connecting = false;
             this.processing = false;
             this.buffer = [];
-            this.roomManager = new RoomManager();
+            this.roomManager = new RoomManager(this);
             //this.connect();
             if(this.client.isConnected())
             {
@@ -69,13 +69,13 @@ namespace ghost.sgameclient
             this.buffer.push({command:command , data:data, callback:callback, room:room.name, user:user.id});
             this.writeNext();
         }
-        public createPrivateRoom(name:string, password:string = null, callback:Function = null):void
+        public createPrivateRoom(name:string, password:string = null, callback:Function = null):Room
         {
-            this._enterRoom(name, Const.ROOM_VISIBILITY_PRIVATE, password, callback);
+            return this._enterRoom(name, Const.ROOM_VISIBILITY_PRIVATE, password, callback);
         }
-        public enterRoom(name:string, callback?:Function):void;
-        public enterRoom(name:string, visibility?:string, callback?:Function):void;
-        public enterRoom(name:string, visibility:any =Const.ROOM_VISIBILITY_PUBLIC, callback:Function = null):void
+        public enterRoom(name: string, callback?: Function): Room;
+        public enterRoom(name: string, visibility?: string, callback?: Function): Room;
+        public enterRoom(name: string, visibility: any = Const.ROOM_VISIBILITY_PUBLIC, callback: Function = null): Room
         {
             if(typeof visibility == "function")
             {
@@ -86,17 +86,18 @@ namespace ghost.sgameclient
             {
                 this.connect();
             }
-            this._enterRoom(name, visibility, null, callback);
+            return this._enterRoom(name, visibility, null, callback);
         }
-        private _enterRoom(name:string, visibility:string, password:string, callback:Function):void
+        private _enterRoom(name:string, visibility:string, password:string, callback:Function):Room
         {
+            var room: Room = this.roomManager.createRoom(name, visibility, null);
             this.buffer.push({command:Const.APPLICATION_COMMAND_ENTER_ROOM, data:{name:name, visibility:visibility, password:password}, callback:(success:boolean, users:IUser[])=>
             {
                 console.log("ENTER ROOM "+name, callback);
-                var room:Room;
+                
                 if(success)
                 {
-                    room = this.roomManager.enterRoom(name, visibility, null);
+                    room = this.roomManager.enterRoom(room);
                     console.log(success, users);
                     if(users)
                         users.forEach(room.addUser, room);
@@ -107,6 +108,7 @@ namespace ghost.sgameclient
                 }
             }});
             this.writeNext();
+            return room;
         }
         public leaveRoom(name:string):void
         {
@@ -291,7 +293,7 @@ namespace ghost.sgameclient
                 {
                     if(_this.buffer.length && _this.buffer[0] === data)
                     {
-                        _this.processing = false;
+
                         if(!success && error)
                         {
                             if(error == Const.ERROR_NEED_LOGIN)
@@ -316,6 +318,8 @@ namespace ghost.sgameclient
                             }
                             //data.callback.apply(null, Array.prototype.slice.call(arguments));
                         }
+
+                        _this.processing = false;
 
                         _this.buffer.shift();
                         _this.writeNext();

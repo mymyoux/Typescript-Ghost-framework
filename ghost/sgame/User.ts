@@ -4,6 +4,7 @@ namespace ghost.sgame
 {
     import Const = ghost.sgamecommon.Const;
     import log = ghost.logging.log;
+    import Objects = ghost.utils.Objects;
     export class User extends ghost.events.EventDispatcher
     {
         private rights:string[];
@@ -63,7 +64,34 @@ namespace ghost.sgame
                 log.warn("user:"+this.id+" try to go in the room "+name+" but is not in the app "+appName);
                 return;
             }
-            this.apps[appName].rooms[name] = true;
+            this.apps[appName].rooms[name] = {
+                inside:true,
+                data:{}
+            };
+        }
+        public onSetCustomData(room:Room, data:any):void
+        {
+            if (this.apps[room.appName] && this.apps[room.appName].rooms[room.name])
+            {
+                var roomraw: any = this.apps[room.appName].rooms[room.name];
+                roomraw.data = Objects.mergeObjects(roomraw.data, data);
+            }
+        }
+        public getCustomData(room:Room):any
+        public getCustomData(appName:string, name:string):any
+        public getCustomData(appName:any, name?:string):any
+        {
+            if(typeof appName == "string")
+            {
+                var roomraw: any = this.apps[appName].rooms[name];
+                return roomraw.data;
+            }
+            var room:Room = <any>appName;
+            if (this.apps[room.appName] && this.apps[room.appName].rooms[room.name]) {
+                var roomraw: any = this.apps[room.appName].rooms[room.name];
+                return roomraw.data;
+            }
+            return null;
         }
         public removeRoom(appName:string, name:string):void
         {

@@ -2,22 +2,47 @@
 ///<module="events"/>
 namespace ghost.sgameclient
 {
+    import Const = ghost.sgamecommon.Const;
     export class Room extends ghost.events.EventDispatcher
     {
         public static EVENT_DATA:string = "data";
+        public static EVENT_READY:string = "ready";
         private users:IUser[];
         private usersIDs:string[];
         public name:string;
         private password:string;
         private visibility:string;
-        public constructor(name:string, password:string, visibility:string)
+        protected ready: boolean;
+        protected application: Application; 
+        private buffer: any[];
+        public constructor(name:string, password:string, visibility:string, application:Application)
         {
             this.name = name;
             this.password = password;
             this.visibility = visibility;
             this.users = [];
             this.usersIDs = [];
+            this.ready = false;
+            this.buffer = [];
+            this.application = application;
             super();
+        }
+        public enter():void
+        {
+            this.ready = true;
+            var buffer: any;
+            while(this.buffer.length)
+            {
+                buffer = this.buffer.shift();
+                if (buffer.func == "write")
+                {
+                    this.write(buffer.command, buffer.data, buffer.callback);
+                }else
+                if (buffer.func == "writeUser") {
+                    this.writeUser(buffer.user, buffer.command, buffer.data, buffer.callback);
+                }
+            }
+            this.trigger(Room.EVENT_READY);
         }
         public addUser(user:IUser)
         {
@@ -69,6 +94,37 @@ namespace ghost.sgameclient
         public length():number
         {
             return this.users.length;
+        }
+        public write(command: string, data: any, callback: Function = null): void {
+            if (!this.ready)
+                this.buffer.push({ func: "write", command: command, data: data, callback: callback });
+            else 
+            {
+                debugger;
+                this.application.writeRoom(this, command, data, callback);
+            }
+        }
+        public writeUser(user: IUser, command: string, data: any, callback: Function = null): void {
+            if (!this.ready)
+                this.buffer.push({ func: "writeUser", user: user, command: command, data: data, callback: callback });
+            else
+                this.application.writeRoomUser(this, user, command, data, callback);
+        }
+        public setData(data: any, callback:Function = null):void
+        {
+            this.write(Const.ROOM_COMMAND_USER_DATA, data, callback);
+        }
+        public exit():void
+        {
+            this.application.leaveRoom(this.name);
+        }
+        public dispose():void
+        {
+            super.dispose();
+            this.application = null;
+            this.users.length = 0;
+            this.usersIDs.length = 0;
+            this.buffer.length = 0;
         }
     }
 }
