@@ -115,6 +115,11 @@ namespace ghost.mvc
 
 		}
 
+        protected cache(): ghost.data.LocalForage
+        {
+            return ghost.forage.war( this.name() + '_controller' );
+        }
+
         /**
          * Override this function to enable params mapping
          * @returns Array of string
@@ -704,7 +709,7 @@ namespace ghost.mvc
                         return;
                     }
 
-                    var listener:any = this.getBindedFunctions(); //this.getBindedEventListeners();
+                    var listener:any = binded; //this.getBindedEventListeners();
                     if(listener)
                     {
                         for(var p in listener)

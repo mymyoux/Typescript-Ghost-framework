@@ -22,6 +22,12 @@ namespace ghost.mvc
             this.requests = {};
 
         }
+
+        public cache(): ghost.data.LocalForage
+        {
+            return ghost.forage.war( this.name() + '_collection' );
+        }
+
         public order(order:string, direction:number = 1):void
         {
             this._order = order;
@@ -311,7 +317,7 @@ namespace ghost.mvc
                         if(result.index == undefined)
                         {
                             //handle order
-                               
+
                                if (this._orderDirection > 0)
                                {
                                    this._models.push(model);
@@ -322,7 +328,7 @@ namespace ghost.mvc
                         }else
                         {
                             this._models.splice(result.index, 0, model);/*
-                           
+
                             if (this._orderDirection > 0) {
                                 this._models.splice(result.index, 0, model);
                             }else
