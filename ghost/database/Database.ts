@@ -6,7 +6,7 @@
 namespace ghost.database
 {
     import log = ghost.logging.log;
-    var Sequelize = require("Sequelize");
+    var Sequelize = require("sequelize");
     export class Database
     {
         private static _instance:Database;
