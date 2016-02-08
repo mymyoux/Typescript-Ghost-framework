@@ -1722,13 +1722,17 @@ var ghost;
             };
             Objects.mergeProperties = function (propertyKey, firstObject, secondObject) {
                 var propertyValue = firstObject[propertyKey];
-                if (typeof (propertyValue) === "object") {
+                var propertyValue2 = secondObject[propertyKey];
+                if (typeof (propertyValue) === "object" && !(propertyValue instanceof Date) && propertyValue2 !== undefined && !(propertyValue2 instanceof Date)) {
                     return Objects.mergeObjects(firstObject[propertyKey], secondObject[propertyKey]);
                 }
                 else if (secondObject[propertyKey] === undefined) {
                     return firstObject[propertyKey];
                 }
                 return secondObject[propertyKey];
+            };
+            Objects.merge = function (firstObject, secondObject) {
+                return this.mergeObjects(firstObject, secondObject);
             };
             Objects.mergeObjects = function (firstObject, secondObject) {
                 if (!firstObject) {
@@ -1744,7 +1748,7 @@ var ghost;
                 }
                 // Merge second object and its properties.
                 for (var propertyKey in secondObject) {
-                    finalObject[propertyKey] = Objects.mergeProperties(propertyKey, secondObject, firstObject);
+                    finalObject[propertyKey] = Objects.mergeProperties(propertyKey, secondObject, finalObject);
                 }
                 return finalObject;
             };
