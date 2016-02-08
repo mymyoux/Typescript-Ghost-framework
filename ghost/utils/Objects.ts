@@ -8,8 +8,22 @@ namespace ghost.utils
             {
                 return false;
             }
+
             if(typeof a == "object")
             {
+                if (a instanceof Date) {
+                    if(b instanceof Date)
+                    {
+                        return a == b;
+                    }else
+                    {
+                        return false;
+                    }
+                }else
+                if (b instanceof Date) 
+                {
+                    return false;
+                }
                 for(var p in a)
                 {
                     if(!Objects.deepEquals(a[p], b[p]))

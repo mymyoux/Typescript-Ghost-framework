@@ -3,6 +3,7 @@
 namespace ghost.sgameclient
 {
     import Const = ghost.sgamecommon.Const;
+    import Objects = ghost.utils.Objects;
     export class Room extends ghost.events.EventDispatcher
     {
         public static EVENT_DATA:string = "data";
@@ -15,6 +16,7 @@ namespace ghost.sgameclient
         protected ready: boolean;
         protected application: Application; 
         private buffer: any[];
+        protected data:any;
         public constructor(name:string, password:string, visibility:string, application:Application)
         {
             this.name = name;
@@ -25,6 +27,7 @@ namespace ghost.sgameclient
             this.ready = false;
             this.buffer = [];
             this.application = application;
+            this.data = {};
             super();
         }
         public enter():void
@@ -111,7 +114,12 @@ namespace ghost.sgameclient
         }
         public setData(data: any, callback:Function = null):void
         {
-            this.write(Const.ROOM_COMMAND_USER_DATA, data, callback);
+            var result:any = Objects.merge(this.data, data);
+            if (!Objects.deepEquals(result, this.data))
+            {
+                this.data = result;
+                this.write(Const.ROOM_COMMAND_USER_DATA, data, callback);
+            }
         }
         public exit():void
         {

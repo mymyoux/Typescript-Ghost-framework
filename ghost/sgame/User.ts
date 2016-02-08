@@ -80,12 +80,8 @@ namespace ghost.sgame
         public setCustomData(room: Room, data: any): void
         {
             if (this.apps[room.appName] && this.apps[room.appName].rooms[room.name]) {
-                log.error("Set new data:", data);
                 var roomraw: any = this.apps[room.appName].rooms[room.name];
-                log.warn(roomraw.data);
                 roomraw.data = Objects.mergeObjects(roomraw.data, data);
-                log.error(roomraw.data);
-                require("process").exit(1);
             }
         }
         public getCustomData(room:Room):any
