@@ -18,9 +18,20 @@ namespace ghost.database
         public constructor(database:string, host:string, username:string, password:string, dialect:string = "mysql", options:any = null)
         {
             Database._instance = this;
-            this.db = new Sequelize(database, username, password, {host:host, dialect:dialect, logging:log.info}, options);
+            if(!options)
+            {
+                options = {};
+            }
+            if(!options.dialect)
+            {
+                options.dialect = dialect;
+            }
+            if (!options.host) {
+                options.host = host;
+            }
+            this.db = new Sequelize(database, username, password, options);
             this.initDefine();
-            this.initRelations();
+            this.initRelations(); 
         }
         protected initDefine():void
         {

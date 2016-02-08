@@ -53,6 +53,10 @@ namespace ghost.sgame
         {
             user.write(Const.MSG_APPLICATION, {command:command, app:this.name, data:data});
         }
+        public writeRoomOne(user: User, room:Room, command: string, data: any)
+        {
+            this.writeOne(user, Const.MSG_APPLICATION, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, data: { command: command, data: data } });
+        }
         private dispatchOne(user:User, application:string, command:string, data:any):void
         {
             user.write(Const.MSG_APPLICATION, {command:command, app:application, data:data});
@@ -132,6 +136,10 @@ namespace ghost.sgame
             this.onLeaveRoom(<any>this.roomManager.getRoom(room), user);
             this.roomManager.removeUserFromRoom(room, user);
         }
+        protected onCustomDataRoom(room:Room, user:User, data:any):void
+        {
+            user.onSetCustomData(room, data);
+        }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
         {
             log.warn("ROOM_DATA:" + roomname+" command : "+command);
@@ -150,7 +158,7 @@ namespace ghost.sgame
             //custom data
             if (command == Const.ROOM_COMMAND_USER_DATA)
             {
-                user.onSetCustomData(room, data);
+                this.onCustomDataRoom(room, user, data);
                 return;
             }
 

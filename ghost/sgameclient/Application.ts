@@ -90,7 +90,16 @@ namespace ghost.sgameclient
         }
         private _enterRoom(name:string, visibility:string, password:string, callback:Function):Room
         {
-            var room: Room = this.roomManager.createRoom(name, visibility, null);
+            var room: Room;
+            if (this.roomManager.hasRoom(name))
+            {
+                room = this.roomManager.getRoom(name);
+                if (callback) {
+                    callback(room);
+                }
+                return room;
+            }
+            room = this.roomManager.createRoom(name, visibility, null);
             this.buffer.push({command:Const.APPLICATION_COMMAND_ENTER_ROOM, data:{name:name, visibility:visibility, password:password}, callback:(success:boolean, users:IUser[])=>
             {
                 console.log("ENTER ROOM "+name, callback);
@@ -104,7 +113,7 @@ namespace ghost.sgameclient
                 }
                 if(callback)
                 {
-                    callback(this.roomManager.getRoom(name));
+                    callback(room);
                 }
             }});
             this.writeNext();

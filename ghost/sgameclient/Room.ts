@@ -100,7 +100,6 @@ namespace ghost.sgameclient
                 this.buffer.push({ func: "write", command: command, data: data, callback: callback });
             else 
             {
-                debugger;
                 this.application.writeRoom(this, command, data, callback);
             }
         }

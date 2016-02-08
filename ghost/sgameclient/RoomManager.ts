@@ -33,6 +33,10 @@ namespace ghost.sgameclient
             this.rooms[name].enter();
             return this.rooms[name];
         }
+        public hasRoom(name:string):boolean
+        {
+            return this.rooms[name] != undefined;
+        }
         public createRoom(name: string, password: string, visibility: string): Room
         {
             if (this.rooms[name])

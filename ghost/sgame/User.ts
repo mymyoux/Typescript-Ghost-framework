@@ -77,7 +77,19 @@ namespace ghost.sgame
                 roomraw.data = Objects.mergeObjects(roomraw.data, data);
             }
         }
+        public setCustomData(room: Room, data: any): void
+        {
+            if (this.apps[room.appName] && this.apps[room.appName].rooms[room.name]) {
+                log.error("Set new data:", data);
+                var roomraw: any = this.apps[room.appName].rooms[room.name];
+                log.warn(roomraw.data);
+                roomraw.data = Objects.mergeObjects(roomraw.data, data);
+                log.error(roomraw.data);
+                require("process").exit(1);
+            }
+        }
         public getCustomData(room:Room):any
+        public getCustomData(room: Room, name: string): any
         public getCustomData(appName:string, name:string):any
         public getCustomData(appName:any, name?:string):any
         {
@@ -89,7 +101,7 @@ namespace ghost.sgame
             var room:Room = <any>appName;
             if (this.apps[room.appName] && this.apps[room.appName].rooms[room.name]) {
                 var roomraw: any = this.apps[room.appName].rooms[room.name];
-                return roomraw.data;
+                return name ? (roomraw.data? roomraw.data[name] : null) : roomraw.data;
             }
             return null;
         }
