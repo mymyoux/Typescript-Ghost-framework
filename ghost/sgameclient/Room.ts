@@ -28,7 +28,15 @@ namespace ghost.sgameclient
             this.buffer = [];
             this.application = application;
             this.data = {};
-            super();
+            super(); 
+        }
+        public getVisibility():string
+        {
+            return this.visibility;
+        }
+        public getPassword():string
+        {
+            return this.password;
         }
         public enter():void
         {
@@ -65,6 +73,11 @@ namespace ghost.sgameclient
                 this.users.splice(index, 1);
                 this.usersIDs.splice(index, 1);
             }
+        }
+        public clearUsers():void
+        {
+            this.users.length = 0;
+            this.usersIDs.length = 0;
         }
         public getUser(id:string):IUser
         {
@@ -125,13 +138,25 @@ namespace ghost.sgameclient
         {
             this.application.leaveRoom(this.name);
         }
+
         public dispose():void
         {
-            super.dispose();
-            this.application = null;
-            this.users.length = 0;
-            this.usersIDs.length = 0;
-            this.buffer.length = 0;
+            if(this.application)
+            {
+                this.application = null;
+                //user can be share between many rooms
+                /*this.users.forEach(function(user:any)
+                {
+                    if(user.dispose)
+                        user.dispose();
+                });*/
+                this.users.length = 0;
+                this.usersIDs.length = 0;
+                this.buffer.length = 0;
+                this.data = null;
+
+                super.dispose();
+            }
         }
     }
 }

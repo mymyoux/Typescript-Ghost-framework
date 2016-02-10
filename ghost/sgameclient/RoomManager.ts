@@ -9,11 +9,13 @@ namespace ghost.sgameclient
         private rooms:any;
         private publics:Room[];
         private application: Application;
+        protected _length: number;
         public constructor(application:Application)
         {
             this.rooms = {};
             this.publics = [];
             this.application = application;
+            this._length = 0;
         }
         public enterRoom(room:Room):Room
         public enterRoom(name:string, password?:string, visibility?:string):Room
@@ -43,7 +45,8 @@ namespace ghost.sgameclient
             {
                 return this.rooms[name];
             }
-            return new Room(name, password, visibility, this.application);
+            this._length++;
+            return this.rooms[name] = new Room(name, password, visibility, this.application);
         }
         public leaveRoom(name:string):void
         {
@@ -52,6 +55,7 @@ namespace ghost.sgameclient
                 //nothing to do
                 return;
             }
+            this._length--;
             this.rooms[name].dispose();
             delete this.rooms[name];
         }
@@ -68,14 +72,23 @@ namespace ghost.sgameclient
             }
             return rooms;
         }
+        public length():number
+        {
+            return this._length;
+        }
         public dispose():void
         {
-            var rooms:Room[] = this.getRooms();
-            while(rooms.length)
+            if(this.application)
             {
-                rooms.shift().dispose();
+                var rooms:Room[] = this.getRooms();
+                while(rooms.length)
+                {
+                    rooms.shift().dispose();
+                }
+                this.rooms = {};
+                this.application = null;
+                this._length = 0;
             }
-            this.rooms = {};
         }
     }
 }

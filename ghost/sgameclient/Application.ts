@@ -18,6 +18,8 @@ namespace ghost.sgameclient
         private connecting:boolean;
         private processing:boolean;
         private buffer:any[];
+
+        private applicationConnected: boolean;
         public constructor(name:string, client:Client)
         {
             super();
@@ -28,6 +30,7 @@ namespace ghost.sgameclient
             this.processing = false;
             this.buffer = [];
             this.roomManager = new RoomManager(this);
+            this.applicationConnected = false;
             //this.connect();
             if(this.client.isConnected())
             {
@@ -35,6 +38,11 @@ namespace ghost.sgameclient
             }
             this.bindEvents();
         }
+        public getRoomManager():RoomManager
+        {
+            return this.roomManager;
+        }
+
         public isConnected():boolean
         {
             return this.connected && this.client.isConnected();
@@ -88,7 +96,7 @@ namespace ghost.sgameclient
             }
             return this._enterRoom(name, visibility, null, callback);
         }
-        private _enterRoom(name:string, visibility:string, password:string, callback:Function):Room
+        protected _enterRoom(name:string, visibility:string, password:string, callback:Function):Room
         {
             var room: Room;
             if (this.roomManager.hasRoom(name))
@@ -100,25 +108,11 @@ namespace ghost.sgameclient
                 return room;
             }
             room = this.roomManager.createRoom(name, visibility, null);
-            this.buffer.push({command:Const.APPLICATION_COMMAND_ENTER_ROOM, data:{name:name, visibility:visibility, password:password}, callback:(success:boolean, users:IUser[])=>
-            {
-                console.log("ENTER ROOM "+name, callback);
-                
-                if(success)
-                {
-                    room = this.roomManager.enterRoom(room);
-                    console.log(success, users);
-                    if(users)
-                        users.forEach(room.addUser, room);
-                }
-                if(callback)
-                {
-                    callback(room);
-                }
-            }});
+            this._roomConnectCall(room, callback);
             this.writeNext();
             return room;
         }
+       
         public leaveRoom(name:string):void
         {
             this.roomManager.leaveRoom(name);
@@ -148,42 +142,66 @@ namespace ghost.sgameclient
         {
             console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
             this.client.on(Client.EVENT_CONNECT, this._onConnect.bind(this));
+            this.client.on(Client.EVENT_RECONNECT, this._onReconnect.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+this.name, this._onData.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+Const.ALL_APP, this._onDatall.bind(this));
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+Const.ALL_APP, this._onInternalData.bind(this));
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+this.name, this._onInternalDataAll.bind(this));
+            this.client.on(Const.EVENT_DISPOSE, this.dispose.bind(this));
         }
         private _onServerConnect():void
         {
+            debugger;
             this.connected = true;
             this.connecting = true;
             this._enterApplication();
         }
         private _enterApplication():void
         {
-            this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION_IN, {app:this.name}, (success:boolean, data:any)=>
-            {
-                if(success)
-                {
-                    this.connecting = false;
-                    this._onApplicationConnect();
-                }else {
-                    console.log("!! ERROR NEED LOGIN");
-                    if(data && data.app && data.command && data.error)
-                    {
-                        this.writeInternalData(data.app, data.command, data.error);
-                    }else
-                    {
-                        this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, data);
+            this._applicationConnectCall();
+            this.writeNext(true);
+        }
+        protected _applicationConnectCall(): void {
+            this.buffer.unshift({
+                command: Const.MSG_APPLICATION_IN, data: { app: this.name }, callback: (success: boolean, data: any) => {
+                    debugger;
+                    if (success) {
+                        this.connecting = false;
+                        this._onApplicationConnect();
+                    } else {
+                        console.log("!! ERROR NEED LOGIN");
+                        if (data && data.app && data.command && data.error) {
+                            this.writeInternalData(data.app, data.command, data.error);
+                        } else {
+                            this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, data);
+                        }
+                        //    this.client._
                     }
-                    //    this.client._
+                }
+            });
+        }
+        protected _roomConnectCall(room: Room, callback: Function = null): void {
+            this.buffer.push({
+                command: Const.APPLICATION_COMMAND_ENTER_ROOM, data: { name: name, visibility: room.getVisibility(), password: room.getPassword() }, callback: (success: boolean, users: IUser[]) => {
+                    console.log("ENTER ROOM " + name, callback);
+
+                    if (success) {
+                        room = this.roomManager.enterRoom(room);
+                        room.clearUsers();
+                        console.log(success, users);
+                        if (users)
+                            users.forEach(room.addUser, room);
+                    }
+                    if (callback) {
+                        callback(room);
+                    }
                 }
             });
         }
         public leaveApplication():void
         {
-            this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION_OUT, {app:this.name});
-            this.dispose();
+            this.client.write(Const.MSG_APPLICATION_OUT, {app:this.name});
+            this.dispose(); 
         }
         private _onApplicationConnect():void
         {
@@ -195,6 +213,7 @@ namespace ghost.sgameclient
         }
         private _onInternalData(source:Application, command:string, data:IApplicationData):void
         {
+            debugger;
             if(source !== this)
             {
                 var name:string = command+"Internal";
@@ -265,16 +284,36 @@ namespace ghost.sgameclient
             console.log("connected");
             this.writeNext(); 
         }
-        private writeNext(data:any = null):void
+        protected _onReconnect():void
+        {
+            var buffer: any[] = this.buffer;
+            this.buffer = [];
+            this._applicationConnectCall();
+            var rooms:Room[] = this.roomManager.getRooms();
+            rooms.forEach((room:Room):void=>
+            {
+                this._roomConnectCall(room);
+            });
+            //remove app/room
+            buffer.forEach(this.buffer.push);
+            this.writeNext(true);    
+        }
+        private writeNext():void
+        private writeNext(force:boolean):void
+        private writeNext(data?:any):void
         {
             if(!this.isConnected())
             {
                 this.connect();
                 return;
             }
-            if(this.connecting)
+            debugger;
+            if (this.connecting && data !== true) 
             {
                 return;
+            }
+            if (data === true) {
+                data = null;
             }
             if(!this.processing)
             {
@@ -338,9 +377,14 @@ namespace ghost.sgameclient
         }
         public dispose():void
         {
-            this.roomManager.dispose();
-            super.dispose();
-            this.buffer.length = 0;
+            if(this.client)
+            {
+                this.client = null;
+                this.roomManager.dispose();
+                this.buffer.length = 0;
+                this.trigger(Const.EVENT_DISPOSE);
+                super.dispose();
+            }
         }
     }
 }

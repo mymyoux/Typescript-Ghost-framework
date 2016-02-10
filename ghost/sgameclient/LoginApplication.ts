@@ -14,6 +14,7 @@ namespace ghost.sgameclient
         }
         public loginAction(data:any):void
         {
+            debugger;
             if(!this.user || !this.user.token)
             {
                 console.warn("user doesn't have token", this.user);

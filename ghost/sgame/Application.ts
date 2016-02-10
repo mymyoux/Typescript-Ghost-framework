@@ -140,6 +140,21 @@ namespace ghost.sgame
         {
             user.onSetCustomData(room, data);
         }
+        protected onCustomRoomCommand(room: Room, user: User, data: any, id_recipient: string, icallback: ICallback): void {
+            
+            log.error("COMMAND:" + data.method + " => " + "onRoom" + data.method, data);
+                //process.exit(1);
+            if(data.method && this["onRoom"+data.method])
+            {
+
+                this["onRoom" + data.method](room, user, data.data, id_recipient);
+                icallback.success();
+            }else 
+            {
+
+                icallback.error(Const.ERROR_ROOM_COMMAND_CUSTOM_METHOD, { room: room.name });
+            }
+        }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
         {
             log.warn("ROOM_DATA:" + roomname+" command : "+command);
@@ -151,10 +166,15 @@ namespace ghost.sgame
             }
             if(id_recipient && !room.hasUser(id_recipient))
             {
+             
                 return icallback.error(Const.ERROR_ROOM_RECIPIENT_UNKNOWN, {room:roomname, user:id_recipient});
             }
+     
+        
+            if (command == Const.ROOM_COMMAND_CUSTOM_METHOD) {
+                return this.onCustomRoomCommand(room, user, data, id_recipient, icallback);
+            }
             icallback.success();
-
             //custom data
             if (command == Const.ROOM_COMMAND_USER_DATA)
             {
