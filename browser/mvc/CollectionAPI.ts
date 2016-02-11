@@ -20,7 +20,6 @@ namespace ghost.mvc
         {
             super();
             this.requests = {};
-
         }
 
         public cache(): ghost.data.LocalForage
@@ -78,6 +77,14 @@ namespace ghost.mvc
                 return api.getAPIData();
             }
             return null;
+        }
+
+        public clear() : void//:Promise<any>
+        {
+            this._changed     = [];
+            this.firstData    = true;
+            this.requests     = {};
+            super.clear();
         }
         public first():Promise<any>
         {
@@ -259,7 +266,7 @@ namespace ghost.mvc
         {
             var id_name:string = this.getModelIDName();
             var len:number = this._models.length;
-            for(var i:number=0; i<len; i++)
+            for(var i:number=0; i < len; i++)
             {
                 if(this._models[i] && this._models[i][id_name] == id)
                 {
@@ -286,7 +293,7 @@ namespace ghost.mvc
         public _onChange(key:string, model:T):void
         public _onChange(key:any, model?:T):void
         {
-            if(typeof key != "string")
+            if (typeof key != "string" && !Array.isArray(key))
             {
                 model = key;
                 key = null;
