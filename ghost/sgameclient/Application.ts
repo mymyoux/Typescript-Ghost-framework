@@ -107,7 +107,7 @@ namespace ghost.sgameclient
                 }
                 return room;
             }
-            room = this.roomManager.createRoom(name, visibility, null);
+            room = this.roomManager.createRoom(name, password, visibility);
             this._roomConnectCall(room, callback);
             this.writeNext();
             return room;
@@ -225,8 +225,17 @@ namespace ghost.sgameclient
                 this._roomConnectCall(room);
                 room.resendData();
             });
+            if(buffer.length>0 || this.buffer.length)
+            {
+                //debugger; 
+            }
             //remove app/room
-            buffer.filter(function(data: any): boolean { return data.command != Const.APPLICATION_COMMAND_ENTER_ROOM; }).forEach((data:any):void=>{this.buffer.push(data);});
+            buffer.filter(function(data: any): boolean { 
+                
+                return data.command != Const.APPLICATION_COMMAND_ENTER_ROOM && (data.command != Const.MSG_APPLICATION || !data.data || data.data.command != Const.ROOM_COMMAND_USER_DATA);
+              }).forEach((data: any): void=> { 
+                  data.source = "connect";
+                  this.buffer.push(data); });
             this.writeNext();
         }
         private _onInternalDataAll(source:Application, command:string, data:IApplicationData):void
@@ -359,6 +368,14 @@ namespace ghost.sgameclient
                 if(data.user)
                 {
                     request.user = data.user;
+                }
+                if (request.command == Const.ROOM_COMMAND_USER_DATA)
+                {
+                    debugger;
+                }
+                if(request["_id"] == undefined)
+                {
+                    request["_id"] = ghost.utils.Maths.getUniqueID();
                 }
                 this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION, request, function(success:boolean, error:string, args:any[])
                 {

@@ -131,14 +131,19 @@ namespace ghost.sgameclient
             if (!Objects.deepEquals(result, this.data))
             {
                 this.data = result;
+                data.source = "setData";
+                data.id_set_data = ghost.utils.Maths.getUniqueID();
                 this.write(Const.ROOM_COMMAND_USER_DATA, data, callback);
             }
         }
         public resendData():void
         {
-            if(this.data)
+            if (this.data && !this.buffer.length)
             {
-                this.write(Const.ROOM_COMMAND_USER_DATA, this.data);
+                var data: any = ghost.utils.Objects.clone(this.data);
+                data.id_resend = ghost.utils.Maths.getUniqueID();
+                data.source = "resend";
+                this.write(Const.ROOM_COMMAND_USER_DATA, data);
             }
         }
         public exit():void
