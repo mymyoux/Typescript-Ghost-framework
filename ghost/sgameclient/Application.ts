@@ -143,6 +143,7 @@ namespace ghost.sgameclient
             console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
             this.client.on(Client.EVENT_CONNECT, this._onClientConnect.bind(this));
             this.client.on(Client.EVENT_RECONNECT, this._onReconnect.bind(this));
+            this.client.on(Client.EVENT_DISCONNECT, this._onClientDisconnect.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+this.name, this._onData.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+Const.ALL_APP, this._onDatall.bind(this));
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+Const.ALL_APP, this._onInternalData.bind(this));
@@ -151,9 +152,16 @@ namespace ghost.sgameclient
         }
         private _onClientConnect(): void
         {
+            debugger;
             this.connected = true;
             
             this._enterApplication();
+        }
+        private _onClientDisconnect():void
+        {
+            this.connected = false;
+            this.applicationConnected = false;
+            this.connecting = false;
         }
         private _enterApplication():void
         {
@@ -215,6 +223,7 @@ namespace ghost.sgameclient
             var rooms: Room[] = this.roomManager.getRooms();
             rooms.forEach((room: Room): void=> {
                 this._roomConnectCall(room);
+                room.resendData();
             });
             //remove app/room
             buffer.filter(function(data: any): boolean { return data.command != Const.APPLICATION_COMMAND_ENTER_ROOM; }).forEach((data:any):void=>{this.buffer.push(data);});

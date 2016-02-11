@@ -134,6 +134,13 @@ namespace ghost.sgameclient
                 this.write(Const.ROOM_COMMAND_USER_DATA, data, callback);
             }
         }
+        public resendData():void
+        {
+            if(this.data)
+            {
+                this.write(Const.ROOM_COMMAND_USER_DATA, this.data);
+            }
+        }
         public exit():void
         {
             this.application.leaveRoom(this.name);
