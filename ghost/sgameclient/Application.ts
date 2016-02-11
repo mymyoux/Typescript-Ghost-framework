@@ -34,7 +34,7 @@ namespace ghost.sgameclient
             //this.connect();
             if(this.client.isConnected())
             {
-                this._onServerConnect();
+                this._onClientConnect();
             }
             this.bindEvents();
         }
@@ -58,7 +58,7 @@ namespace ghost.sgameclient
                 }else
                 {
                     //sync client & app statsu
-                    this._onServerConnect();
+                    this._onClientConnect();
                 }
             }
         }
@@ -129,7 +129,7 @@ namespace ghost.sgameclient
             //a priori aucune repercution
             if(success)
             {
-                this.connecting = true;
+                this.connecting = false;
                 this.connected = true;
                 //this._onApplicationConnect();
                 this._enterApplication();
@@ -141,7 +141,7 @@ namespace ghost.sgameclient
         private bindEvents():void
         {
             console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
-            this.client.on(Client.EVENT_CONNECT, this._onConnect.bind(this));
+            this.client.on(Client.EVENT_CONNECT, this._onClientConnect.bind(this));
             this.client.on(Client.EVENT_RECONNECT, this._onReconnect.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+this.name, this._onData.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+Const.ALL_APP, this._onDatall.bind(this));
@@ -149,40 +149,39 @@ namespace ghost.sgameclient
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+this.name, this._onInternalDataAll.bind(this));
             this.client.on(Const.EVENT_DISPOSE, this.dispose.bind(this));
         }
-        private _onServerConnect():void
+        private _onClientConnect(): void
         {
-            debugger;
             this.connected = true;
-            this.connecting = true;
+            
             this._enterApplication();
         }
         private _enterApplication():void
         {
-            this._applicationConnectCall();
-            this.writeNext(true);
-        }
-        protected _applicationConnectCall(): void {
-            this.buffer.unshift({
-                command: Const.MSG_APPLICATION_IN, data: { app: this.name }, callback: (success: boolean, data: any) => {
-                    debugger;
-                    if (success) {
-                        this.connecting = false;
-                        this._onApplicationConnect();
-                    } else {
-                        console.log("!! ERROR NEED LOGIN");
-                        if (data && data.app && data.command && data.error) {
-                            this.writeInternalData(data.app, data.command, data.error);
+            
+            if (!this.connecting && !this.applicationConnected)
+            {
+                this.connecting = true;
+                this.client.write(Const.MSG_APPLICATION_IN, { app: this.name }, (success: boolean, data: any) => {
+                        if (success) {
+                            this.connecting = false;
+                            this.applicationConnected = true;
+                            this._onApplicationConnect();
                         } else {
-                            this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, data);
+                            console.log("!! ERROR NEED LOGIN");
+                            if (data && data.app && data.command && data.error) {
+                                this.writeInternalData(data.app, data.command, data.error);
+                            } else {
+                                this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, data);
+                            }
+                            //    this.client._
                         }
-                        //    this.client._
                     }
-                }
-            });
+                );
+            }
         }
         protected _roomConnectCall(room: Room, callback: Function = null): void {
             this.buffer.push({
-                command: Const.APPLICATION_COMMAND_ENTER_ROOM, data: { name: name, visibility: room.getVisibility(), password: room.getPassword() }, callback: (success: boolean, users: IUser[]) => {
+                command: Const.APPLICATION_COMMAND_ENTER_ROOM, data: { name: room.name, visibility: room.getVisibility(), password: room.getPassword() }, callback: (success: boolean, users: IUser[]) => {
                     console.log("ENTER ROOM " + name, callback);
 
                     if (success) {
@@ -203,8 +202,22 @@ namespace ghost.sgameclient
             this.client.write(Const.MSG_APPLICATION_OUT, {app:this.name});
             this.dispose(); 
         }
-        private _onApplicationConnect():void
+        /**
+         * Application connected;
+         */
+        protected _onApplicationConnect():void
         {
+            //application connected
+            this.applicationConnected = true;
+
+            var buffer: any[] = this.buffer;
+            this.buffer = [];
+            var rooms: Room[] = this.roomManager.getRooms();
+            rooms.forEach((room: Room): void=> {
+                this._roomConnectCall(room);
+            });
+            //remove app/room
+            buffer.filter(function(data: any): boolean { return data.command != Const.APPLICATION_COMMAND_ENTER_ROOM; }).forEach((data:any):void=>{this.buffer.push(data);});
             this.writeNext();
         }
         private _onInternalDataAll(source:Application, command:string, data:IApplicationData):void
@@ -213,7 +226,6 @@ namespace ghost.sgameclient
         }
         private _onInternalData(source:Application, command:string, data:IApplicationData):void
         {
-            debugger;
             if(source !== this)
             {
                 var name:string = command+"Internal";
@@ -279,13 +291,15 @@ namespace ghost.sgameclient
                 console.warn("["+this.name+"]"+name+" doesn't exist", data);
             }
         }
+        /*
         private _onConnect():void
         {
             console.log("connected");
             this.writeNext(); 
-        }
+        }*/
         protected _onReconnect():void
         {
+            /*
             var buffer: any[] = this.buffer;
             this.buffer = [];
             this._applicationConnectCall();
@@ -296,24 +310,24 @@ namespace ghost.sgameclient
             });
             //remove app/room
             buffer.forEach(this.buffer.push);
-            this.writeNext(true);    
+            //this.writeNext(true);    
+            */
         }
-        private writeNext():void
-        private writeNext(force:boolean):void
-        private writeNext(data?:any):void
+        protected writeNext(): void
+        protected writeNext(data?:any):void
         {
             if(!this.isConnected())
             {
                 this.connect();
                 return;
             }
-            debugger;
-            if (this.connecting && data !== true) 
+            if (this.connecting) 
             {
                 return;
-            }
-            if (data === true) {
-                data = null;
+            } 
+            if (!this.applicationConnected)
+            {
+                return;
             }
             if(!this.processing)
             {

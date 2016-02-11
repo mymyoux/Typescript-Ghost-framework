@@ -37,7 +37,6 @@ namespace ghost.sgame
         }
         protected onDisconnected():void
         {
-            log.error("disconnected");
             this.trigger(Const.USER_DISCONNECTED);
             this.dispose(); 
         }
@@ -132,7 +131,6 @@ namespace ghost.sgame
         }
         public dispose():void
         {
-            log.error("dispose");
             this.destroy(); 
             super.dispose();
         }

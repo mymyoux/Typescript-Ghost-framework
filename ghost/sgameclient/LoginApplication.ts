@@ -14,7 +14,6 @@ namespace ghost.sgameclient
         }
         public loginAction(data:any):void
         {
-            debugger;
             if(!this.user || !this.user.token)
             {
                 console.warn("user doesn't have token", this.user);
@@ -40,7 +39,27 @@ namespace ghost.sgameclient
         {
             this.loginAction(data);
         }
-
-
+        protected writeNext(): void
+        protected writeNext(data?: any): void
+        { 
+            debugger;
+            if(data)
+            {
+                debugger;
+            }
+            super.writeNext();
+        }
+        public write(command: string, data: any, callback: Function = null): void {
+            debugger;
+            super.write(command, data, callback);
+        }
+        public writeRoom(room: Room, command: string, data: any, callback: Function = null): void {
+            debugger;
+            super.writeRoom(room, command, data, callback);
+        }
+        public writeRoomUser(room: Room, user: IUser, command: string, data: any, callback: Function = null): void {
+            debugger;
+            super.writeRoomUser(room, user, command, data, callback);
+        }
     }
 }

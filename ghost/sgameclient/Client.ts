@@ -68,7 +68,6 @@ namespace ghost.sgameclient
             {
                 if ((!this.isConnected() || this.socket.disconnected) && !this.connecting)
                 {
-                    debugger;
                     this.connecting = true;
                     this.socket.connect();
                 }else
@@ -135,7 +134,12 @@ namespace ghost.sgameclient
         private _onError(error:any):void
         {
             console.log("error", error);
+            debugger;
             this.trigger(Client.EVENT_ERROR);
+            if(this.socket.disconnected)
+            {
+                this._onDisconnect();
+            }
         }
         private _onErrorConnection(error:any):void
         {
@@ -146,6 +150,7 @@ namespace ghost.sgameclient
         }
         private _onConnect():void
         {
+            debugger;
             this.connecting = false;   
             this.disconnected = false;
             if (this._hasBeenConnected)
@@ -178,9 +183,12 @@ namespace ghost.sgameclient
         private _onDisconnect():void
         {
             debugger;
-            this.disconnected = true;
-            this.connecting = false;
-            this.trigger(Client.EVENT_DISCONNECT);
+            if (!this.disconnected || this.connecting)
+            {
+                this.disconnected = true;
+                this.connecting = false;
+                this.trigger(Client.EVENT_DISCONNECT);
+            }
         }
     }
     if(typeof module != "undefined")
