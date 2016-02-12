@@ -170,7 +170,7 @@ namespace ghost.mvc
                 Model.saveInstance(this);
             }
         }
-       
+
         ///PROMISES PARTS
         protected _partsPromises:any = {};
         protected hasPart(name:string):boolean
@@ -250,7 +250,7 @@ namespace ghost.mvc
             }
             return null;
         }
-        
+
         public retrieveData(data:string[] = [Model.PART_DEFAULT], params:any = null):Promise<any>
         {
             if(!data)
@@ -269,7 +269,7 @@ namespace ghost.mvc
                         return this.getPartPromise(name, params);
                     }else
                     {
-                        //reject Promise   
+                        //reject Promise
                         failed = true;
                         reject(new Error(name+" is not a correct part's name"));
                         return null;
@@ -624,6 +624,6 @@ namespace ghost.mvc
         reset?:boolean;
 
     }
-   
+
 
 }

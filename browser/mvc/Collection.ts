@@ -180,8 +180,9 @@ namespace ghost.mvc
          */
         public clear():void
         {
-            var models:T[] = this._models.concat();
-            this._models.length = 0;
+            var models:T[]   = this._models.concat();
+            this._models     = [];
+
             for(var i:number = 0;i < models.length; i++)
             {
                 this._remove(models[i]);
