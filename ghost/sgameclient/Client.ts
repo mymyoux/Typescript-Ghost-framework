@@ -11,6 +11,7 @@ namespace ghost.sgameclient
     {
         public static EVENT_DATA:string = "data";
         public static EVENT_CONNECT:string = "connect";
+        public static EVENT_RECONNECT: string = "reconnect";
         public static EVENT_EVENT:string = "event";
         public static EVENT_DISCONNECT:string = "disconnect";
         public static EVENT_ERROR:string = "error";
@@ -19,12 +20,15 @@ namespace ghost.sgameclient
         private options: SocketIOClient.ConnectOpts;
         private socket:any;
         private buffer:Buffer;
-
+        protected connecting: boolean;
         private disconnected:boolean;
+        private _hasBeenConnected: boolean;
         public constructor(url: string, options?: SocketIOClient.ConnectOpts)
         {
             super();
+            this._hasBeenConnected = false;
             this.disconnected = true;
+            this.connecting = false;
             this.init(url, options);
             this.buffer = new Buffer();
         }
@@ -45,14 +49,26 @@ namespace ghost.sgameclient
         {
             this.connect();
         }
+        public dispose():void
+        {
+            if(this.socket)
+            {
+                this.close();
+                this.socket = null;
+                this.buffer = null;
+                this.trigger(Const.EVENT_DISPOSE);
+                super.dispose();
+            }
+        }
         public connect():void
         {
             if(!this.socket)
                 this._connect();
             else
             {
-                if(!this.isConnected() || this.socket.disconnected)
+                if ((!this.isConnected() || this.socket.disconnected) && !this.connecting)
                 {
+                    this.connecting = true;
                     this.socket.connect();
                 }else
                 {
@@ -92,7 +108,7 @@ namespace ghost.sgameclient
                 _this._onData.apply(_this, args);
             };
             socket.io.on('error', function(){console.log("error", arguments)});
-            socket.io.on('connect_error', function(error){console.log("connet_error", error);});
+            socket.io.on('connect_error', this._onConnectError.bind(this));
             socket.on('disconnect',this._onDisconnect.bind(this));
 
             this.socket = socket;
@@ -111,26 +127,52 @@ namespace ghost.sgameclient
                 this.trigger(channel+":"+data.app, data.command, data.data);
             }
         }
+        private _onConnectError(error:any):void
+        {
+            this._onErrorConnection(error);
+        }
         private _onError(error:any):void
         {
             console.log("error", error);
+            debugger;
             this.trigger(Client.EVENT_ERROR);
+            if(this.socket.disconnected)
+            {
+                this._onDisconnect();
+            }
         }
         private _onErrorConnection(error:any):void
         {
+            this.connecting = false;
             this.disconnected = true;
             this.trigger(Client.EVENT_ERROR_CONNECTION);
             this._onError(error);
         }
         private _onConnect():void
         {
+            debugger;
+            this.connecting = false;   
             this.disconnected = false;
-            this.onConnect();
+            if (this._hasBeenConnected)
+            {
+                this.onReconnect();
+                
+            }else
+            {
+                this.onConnect();
+                this._hasBeenConnected = true;
+            }
+            
             this.trigger(Client.EVENT_CONNECT);
         }
         protected onConnect():void
         {
             //TODO:emit to app to have them purge their messages
+            this.buffer.callAll();
+        }
+        protected onReconnect():void
+        {
+            this.trigger(Client.EVENT_RECONNECT);
             this.buffer.callAll();
         }
         private _onEvent():void
@@ -140,8 +182,13 @@ namespace ghost.sgameclient
         }
         private _onDisconnect():void
         {
-            this.disconnected = true;
-            this.trigger(Client.EVENT_DISCONNECT);
+            debugger;
+            if (!this.disconnected || this.connecting)
+            {
+                this.disconnected = true;
+                this.connecting = false;
+                this.trigger(Client.EVENT_DISCONNECT);
+            }
         }
     }
     if(typeof module != "undefined")

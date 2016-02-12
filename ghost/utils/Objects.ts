@@ -8,8 +8,22 @@ namespace ghost.utils
             {
                 return false;
             }
+
             if(typeof a == "object")
             {
+                if (a instanceof Date) {
+                    if(b instanceof Date)
+                    {
+                        return a == b;
+                    }else
+                    {
+                        return false;
+                    }
+                }else
+                if (b instanceof Date) 
+                {
+                    return false;
+                }
                 for(var p in a)
                 {
                     if(!Objects.deepEquals(a[p], b[p]))
@@ -98,19 +112,24 @@ namespace ghost.utils
             }
             return data;
         }
-        public static  mergeProperties(propertyKey:string, firstObject:any, secondObject:any):any {
-        var propertyValue:any = firstObject[propertyKey];
 
-        if (typeof(propertyValue) === "object") {
-            return Objects.mergeObjects(firstObject[propertyKey], secondObject[propertyKey]);
-        } else if (secondObject[propertyKey] === undefined) {
-            return firstObject[propertyKey];
+        public static  mergeProperties(propertyKey:string, firstObject:any, secondObject:any):any 
+        {
+            var propertyValue:any = firstObject[propertyKey];
+            var propertyValue2:any = secondObject[propertyKey];
+            if (typeof (propertyValue) === "object" && !(propertyValue instanceof Date) && propertyValue2 !== undefined && !(propertyValue2 instanceof Date)) {
+                return Objects.mergeObjects(firstObject[propertyKey], secondObject[propertyKey]);
+            } else if (secondObject[propertyKey] === undefined) {
+                return firstObject[propertyKey];
+            }
+            return secondObject[propertyKey];
         }
-
-        return secondObject[propertyKey];
-    }
-
-        public static mergeObjects(firstObject:any, secondObject:any):any {
+        public static merge(firstObject: any, secondObject: any): any
+        {
+            return this.mergeObjects(firstObject, secondObject);
+        }
+        public static mergeObjects(firstObject:any, secondObject:any):any 
+        {
             if(!firstObject)
             {
                 return secondObject;
@@ -128,10 +147,10 @@ namespace ghost.utils
 
             // Merge second object and its properties.
             for (var propertyKey in secondObject) {
-                finalObject[propertyKey] = Objects.mergeProperties(propertyKey, secondObject, firstObject);
+                finalObject[propertyKey] = Objects.mergeProperties(propertyKey, secondObject, finalObject);
             }
 
-        return finalObject;
-    }
+            return finalObject;
+        }
     }
 }

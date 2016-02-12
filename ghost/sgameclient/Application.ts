@@ -18,6 +18,8 @@ namespace ghost.sgameclient
         private connecting:boolean;
         private processing:boolean;
         private buffer:any[];
+
+        private applicationConnected: boolean;
         public constructor(name:string, client:Client)
         {
             super();
@@ -27,14 +29,20 @@ namespace ghost.sgameclient
             this.connecting = false;
             this.processing = false;
             this.buffer = [];
-            this.roomManager = new RoomManager();
+            this.roomManager = new RoomManager(this);
+            this.applicationConnected = false;
             //this.connect();
             if(this.client.isConnected())
             {
-                this._onServerConnect();
+                this._onClientConnect();
             }
             this.bindEvents();
         }
+        public getRoomManager():RoomManager
+        {
+            return this.roomManager;
+        }
+
         public isConnected():boolean
         {
             return this.connected && this.client.isConnected();
@@ -50,7 +58,7 @@ namespace ghost.sgameclient
                 }else
                 {
                     //sync client & app statsu
-                    this._onServerConnect();
+                    this._onClientConnect();
                 }
             }
         }
@@ -69,13 +77,13 @@ namespace ghost.sgameclient
             this.buffer.push({command:command , data:data, callback:callback, room:room.name, user:user.id});
             this.writeNext();
         }
-        public createPrivateRoom(name:string, password:string = null, callback:Function = null):void
+        public createPrivateRoom(name:string, password:string = null, callback:Function = null):Room
         {
-            this._enterRoom(name, Const.ROOM_VISIBILITY_PRIVATE, password, callback);
+            return this._enterRoom(name, Const.ROOM_VISIBILITY_PRIVATE, password, callback);
         }
-        public enterRoom(name:string, callback?:Function):void;
-        public enterRoom(name:string, visibility?:string, callback?:Function):void;
-        public enterRoom(name:string, visibility:any =Const.ROOM_VISIBILITY_PUBLIC, callback:Function = null):void
+        public enterRoom(name: string, callback?: Function): Room;
+        public enterRoom(name: string, visibility?: string, callback?: Function): Room;
+        public enterRoom(name: string, visibility: any = Const.ROOM_VISIBILITY_PUBLIC, callback: Function = null): Room
         {
             if(typeof visibility == "function")
             {
@@ -86,28 +94,25 @@ namespace ghost.sgameclient
             {
                 this.connect();
             }
-            this._enterRoom(name, visibility, null, callback);
+            return this._enterRoom(name, visibility, null, callback);
         }
-        private _enterRoom(name:string, visibility:string, password:string, callback:Function):void
+        protected _enterRoom(name:string, visibility:string, password:string, callback:Function):Room
         {
-            this.buffer.push({command:Const.APPLICATION_COMMAND_ENTER_ROOM, data:{name:name, visibility:visibility, password:password}, callback:(success:boolean, users:IUser[])=>
+            var room: Room;
+            if (this.roomManager.hasRoom(name))
             {
-                console.log("ENTER ROOM "+name, callback);
-                var room:Room;
-                if(success)
-                {
-                    room = this.roomManager.enterRoom(name, visibility, null);
-                    console.log(success, users);
-                    if(users)
-                        users.forEach(room.addUser, room);
+                room = this.roomManager.getRoom(name);
+                if (callback) {
+                    callback(room);
                 }
-                if(callback)
-                {
-                    callback(this.roomManager.getRoom(name));
-                }
-            }});
+                return room;
+            }
+            room = this.roomManager.createRoom(name, password, visibility);
+            this._roomConnectCall(room, callback);
             this.writeNext();
+            return room;
         }
+       
         public leaveRoom(name:string):void
         {
             this.roomManager.leaveRoom(name);
@@ -124,7 +129,7 @@ namespace ghost.sgameclient
             //a priori aucune repercution
             if(success)
             {
-                this.connecting = true;
+                this.connecting = false;
                 this.connected = true;
                 //this._onApplicationConnect();
                 this._enterApplication();
@@ -136,46 +141,101 @@ namespace ghost.sgameclient
         private bindEvents():void
         {
             console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
-            this.client.on(Client.EVENT_CONNECT, this._onConnect.bind(this));
+            this.client.on(Client.EVENT_CONNECT, this._onClientConnect.bind(this));
+            this.client.on(Client.EVENT_RECONNECT, this._onReconnect.bind(this));
+            this.client.on(Client.EVENT_DISCONNECT, this._onClientDisconnect.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+this.name, this._onData.bind(this));
             this.client.on(Const.MSG_APPLICATION+":"+Const.ALL_APP, this._onDatall.bind(this));
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+Const.ALL_APP, this._onInternalData.bind(this));
             this.client.on(Const.MSG_APPLICATION_INTERNAL+":"+this.name, this._onInternalDataAll.bind(this));
+            this.client.on(Const.EVENT_DISPOSE, this.dispose.bind(this));
         }
-        private _onServerConnect():void
+        private _onClientConnect(): void
         {
+            debugger;
             this.connected = true;
-            this.connecting = true;
+            
             this._enterApplication();
+        }
+        private _onClientDisconnect():void
+        {
+            this.connected = false;
+            this.applicationConnected = false;
+            this.connecting = false;
         }
         private _enterApplication():void
         {
-            this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION_IN, {app:this.name}, (success:boolean, data:any)=>
+            
+            if (!this.connecting && !this.applicationConnected)
             {
-                if(success)
-                {
-                    this.connecting = false;
-                    this._onApplicationConnect();
-                }else {
-                    console.log("!! ERROR NEED LOGIN");
-                    if(data && data.app && data.command && data.error)
-                    {
-                        this.writeInternalData(data.app, data.command, data.error);
-                    }else
-                    {
-                        this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, data);
+                this.connecting = true;
+                this.client.write(Const.MSG_APPLICATION_IN, { app: this.name }, (success: boolean, data: any) => {
+                        if (success) {
+                            this.connecting = false;
+                            this.applicationConnected = true;
+                            this._onApplicationConnect();
+                        } else {
+                            console.log("!! ERROR NEED LOGIN");
+                            if (data && data.app && data.command && data.error) {
+                                this.writeInternalData(data.app, data.command, data.error);
+                            } else {
+                                this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, data);
+                            }
+                            //    this.client._
+                        }
                     }
-                    //    this.client._
+                );
+            }
+        }
+        protected _roomConnectCall(room: Room, callback: Function = null): void {
+            this.buffer.push({
+                command: Const.APPLICATION_COMMAND_ENTER_ROOM, data: { name: room.name, visibility: room.getVisibility(), password: room.getPassword() }, callback: (success: boolean, users: IUser[]) => {
+                    console.log("ENTER ROOM " + name, callback);
+
+                    if (success) {
+                        room = this.roomManager.enterRoom(room);
+                        room.clearUsers();
+                        console.log(success, users);
+                        if (users)
+                            users.forEach(room.addUser, room);
+                    }
+                    if (callback) {
+                        callback(room);
+                    }
                 }
             });
         }
         public leaveApplication():void
         {
-            this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION_OUT, {app:this.name});
-            this.dispose();
+            this.client.write(Const.MSG_APPLICATION_OUT, {app:this.name});
+            this.dispose(); 
         }
-        private _onApplicationConnect():void
+        /**
+         * Application connected;
+         */
+        protected _onApplicationConnect():void
         {
+            //application connected
+            this.applicationConnected = true;
+
+            var buffer: any[] = this.buffer;
+            this.buffer = [];
+            var rooms: Room[] = this.roomManager.getRooms();
+            rooms.forEach((room: Room): void=> {
+                this._roomConnectCall(room);
+                room.resendData();
+            });
+            if(buffer.length>0 || this.buffer.length)
+            {
+                //debugger; 
+            }
+            //remove app/room
+            buffer.filter(function(data: any): boolean { 
+                
+                return data.command != Const.APPLICATION_COMMAND_ENTER_ROOM && (data.command != Const.MSG_APPLICATION || !data.data || data.data.command != Const.ROOM_COMMAND_USER_DATA);
+              }).forEach((data: any): void=> { 
+                  data.source = "connect";
+                  this.buffer.push(data); });
             this.writeNext();
         }
         private _onInternalDataAll(source:Application, command:string, data:IApplicationData):void
@@ -249,19 +309,41 @@ namespace ghost.sgameclient
                 console.warn("["+this.name+"]"+name+" doesn't exist", data);
             }
         }
+        /*
         private _onConnect():void
         {
             console.log("connected");
             this.writeNext(); 
+        }*/
+        protected _onReconnect():void
+        {
+            /*
+            var buffer: any[] = this.buffer;
+            this.buffer = [];
+            this._applicationConnectCall();
+            var rooms:Room[] = this.roomManager.getRooms();
+            rooms.forEach((room:Room):void=>
+            {
+                this._roomConnectCall(room);
+            });
+            //remove app/room
+            buffer.forEach(this.buffer.push);
+            //this.writeNext(true);    
+            */
         }
-        private writeNext(data:any = null):void
+        protected writeNext(): void
+        protected writeNext(data?:any):void
         {
             if(!this.isConnected())
             {
                 this.connect();
                 return;
             }
-            if(this.connecting)
+            if (this.connecting) 
+            {
+                return;
+            } 
+            if (!this.applicationConnected)
             {
                 return;
             }
@@ -287,11 +369,19 @@ namespace ghost.sgameclient
                 {
                     request.user = data.user;
                 }
+                if (request.command == Const.ROOM_COMMAND_USER_DATA)
+                {
+                    debugger;
+                }
+                if(request["_id"] == undefined)
+                {
+                    request["_id"] = ghost.utils.Maths.getUniqueID();
+                }
                 this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION, request, function(success:boolean, error:string, args:any[])
                 {
                     if(_this.buffer.length && _this.buffer[0] === data)
                     {
-                        _this.processing = false;
+
                         if(!success && error)
                         {
                             if(error == Const.ERROR_NEED_LOGIN)
@@ -317,6 +407,8 @@ namespace ghost.sgameclient
                             //data.callback.apply(null, Array.prototype.slice.call(arguments));
                         }
 
+                        _this.processing = false;
+
                         _this.buffer.shift();
                         _this.writeNext();
                     }
@@ -325,9 +417,14 @@ namespace ghost.sgameclient
         }
         public dispose():void
         {
-            this.roomManager.dispose();
-            super.dispose();
-            this.buffer.length = 0;
+            if(this.client)
+            {
+                this.client = null;
+                this.roomManager.dispose();
+                this.buffer.length = 0;
+                this.trigger(Const.EVENT_DISPOSE);
+                super.dispose();
+            }
         }
     }
 }

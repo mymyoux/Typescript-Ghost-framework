@@ -53,17 +53,19 @@ namespace ghost.sgame
         {
             user.write(Const.MSG_APPLICATION, {command:command, app:this.name, data:data});
         }
+        public writeRoomOne(user: User, room:Room, command: string, data: any)
+        {
+            this.writeOne(user, Const.MSG_APPLICATION, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, data: { command: command, data: data } });
+        }
         private dispatchOne(user:User, application:string, command:string, data:any):void
         {
             user.write(Const.MSG_APPLICATION, {command:command, app:application, data:data});
         }
         private _onExit(data:IApplicationMessage, user:User):void
         {
-            log.info("[" + this.name + "] exit : " + user.login, data);
         }
         protected _onEnter(data:IApplicationMessage, user:User, callback:ICallback):void
         {
-            log.info("["+this.name+"] enter : "+user.login);
             if(user.isAllowed(this.name))
             {
                 callback.success();
@@ -76,7 +78,6 @@ namespace ghost.sgame
         }
         protected _rejectUser(user:User, callback:ICallback = null):void
         {
-            log.warn("["+this.name+"] reject : "+user.login);
             if(callback)
             {
                 callback.error(Const.ERROR_NEED_LOGIN, {
@@ -92,7 +93,6 @@ namespace ghost.sgame
 
         private _onEnterRoom(room:{name:string, visibility:string, password:string}, user:User, icallback:ICallback):void
         {
-            log.info("["+this.name+"] room enter : "+user.login, room);
 
             if(!room || !room.name)
             {
@@ -114,7 +114,6 @@ namespace ghost.sgame
                     return;
                 }
                 var users:User[] = currentRoom.getUsers();
-                log.info("[" + this.name + "] room users : " + user.login, currentRoom.getUsersInformation());
                 if(!users)
                 {
                     return;
@@ -128,13 +127,30 @@ namespace ghost.sgame
         }
         private _onLeaveRoom(room:string, user:User, icallback:ICallback):void
         {
-            log.info("[" + this.name + "] rooom leave : " + user.login, room);
             this.onLeaveRoom(<any>this.roomManager.getRoom(room), user);
             this.roomManager.removeUserFromRoom(room, user);
         }
+        protected onCustomDataRoom(room:Room, user:User, data:any):void
+        {
+            log.info("> " + room.name + " Custom data:" + user.login, data);
+            user.onSetCustomData(room, data);
+        }
+        protected onCustomRoomCommand(room: Room, user: User, data: any, id_recipient: string, icallback: ICallback): void {
+            
+            if(data.method && this["onRoom"+data.method])
+            {
+
+                this["onRoom" + data.method](room, user, data.data, id_recipient);
+                icallback.success();
+            }else 
+            {
+                log.warn("on custom room command doesn't exist :" + data.method);
+                icallback.error(Const.ERROR_ROOM_COMMAND_CUSTOM_METHOD, { room: room.name });
+            }
+        }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
         {
-            log.info(">" + roomname + " [" + this.name + "] data : " + user.login, data);
+            log.info(">" + roomname + " [" + this.name + "] data["+command+"]>"+id_recipient+"< : " + user.login, data);
             var room:Room = this.roomManager.getRoom(roomname);
             if(!room || !room.hasUser(user))
             {
@@ -142,9 +158,22 @@ namespace ghost.sgame
             }
             if(id_recipient && !room.hasUser(id_recipient))
             {
+             
                 return icallback.error(Const.ERROR_ROOM_RECIPIENT_UNKNOWN, {room:roomname, user:id_recipient});
             }
+     
+        
+            if (command == Const.ROOM_COMMAND_CUSTOM_METHOD) {
+                return this.onCustomRoomCommand(room, user, data, id_recipient, icallback);
+            }
             icallback.success();
+            //custom data
+            if (command == Const.ROOM_COMMAND_USER_DATA)
+            {
+                this.onCustomDataRoom(room, user, data);
+                return;
+            }
+
             var users:User[] = room.getUsers();
             if(!users)
             {
@@ -154,7 +183,7 @@ namespace ghost.sgame
             if(id_recipient)
             {
                 var recipient:User = room.getUser(id_recipient);
-                log.info("WRITE ALONE MESSAGE TO " + recipient.login, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, sender: user.id, data: data });
+                log.info(">WRITE ALONE MESSAGE TO " + recipient.login, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, sender: user.id, data: data });
                 this.writeOne(recipient, Const.MSG_APPLICATION, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:{command:command, data:data}});
             }else
             for(var p in users)
@@ -162,7 +191,7 @@ namespace ghost.sgame
                 //all
                 if(users[p] != user)
                 {
-                    log.info("WRITE MESSAGE TO "+users[p].login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
+                    log.info(">WRITE MESSAGE TO "+users[p].login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
                     this.writeOne(users[p], Const.MSG_APPLICATION, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:{command:command, data:data}});
                 }
             }
@@ -174,7 +203,16 @@ namespace ghost.sgame
                 icallback.error(Const.ERROR_BAD_FORMAT, {app:this.name});
                 return;
             }
-            log.info("["+this.name+"] data : "+user.login, data);
+            log.error("[" + this.name + "]");
+            if(user.id != undefined)
+                log.info("id:" + user.id);
+            if (user["id_user"] != undefined)
+                log.info("id_user:" + user["id_user"]);
+            if (data.room != undefined)
+                log.info("room:" + data.room);
+            if (data.user != undefined)
+                log.info("to_user:"+data.user);
+            log.info(data);
             if(!user.hasApp(this.name))
             {
                 log.warn("user is not in app : "+this.name);
@@ -215,7 +253,6 @@ namespace ghost.sgame
         }
         private _addUser(user:User):void
         {
-            log.info("[" + this.name + "] add : " + user.login);
             user.addApp(this.name);
             if(this.users_ids.indexOf(user.id)!=-1)
             {
@@ -228,7 +265,6 @@ namespace ghost.sgame
         }
         private _removeUser(user:User):void
         {
-            log.info("[" + this.name + "] remove : " + user.login);
             var index:number = this.users.indexOf(user);
             if(index != -1)
             {
@@ -251,7 +287,6 @@ namespace ghost.sgame
             user.off(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this);
         }
         protected _bindUserEvents(user: User): void {
-            log.info("bidn events : "+user.login);
             user.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
             user.on(Const.USER_DISCONNECTED, this._removeUser, this, user);
         }

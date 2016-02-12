@@ -14,6 +14,8 @@ var files = fs.readdirSync(SUITE_FOLDER);
 
 files.forEach(function(file)
 {
-	console.log("---- "+colors.red(file)+ " -----");
-	eval(fs.readFileSync(path.join(SUITE_FOLDER, file)).toString());
+	//console.log("---- "+colors.red(file)+ " -----");
+	describe("---- "+colors.red(file)+ " -----", function() {
+		eval(fs.readFileSync(path.join(SUITE_FOLDER, file)).toString());
+	});
 });

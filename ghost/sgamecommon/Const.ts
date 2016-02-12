@@ -17,6 +17,8 @@ namespace ghost.sgamecommon
         public static ROOM_COMMAND_USER_ENTER = "room_user_enter";
         public static ROOM_COMMAND_USER_MESSAGE = "room_user_message";
         public static ROOM_COMMAND_USER_LEAVE = "room_user_leave";
+        public static ROOM_COMMAND_USER_DATA = "room_user_data";
+        public static ROOM_COMMAND_CUSTOM_METHOD= "room_custom_method";
 
         public static ALL_APP:string = "*all";
         public static ROOM_VISIBILITY_PUBLIC:string = "public";
@@ -30,11 +32,17 @@ namespace ghost.sgamecommon
         public static ERROR_ROOM_RECIPIENT_UNKNOWN:string = "error_room_recipient_unknown";
         public static ERROR_ROOM_ENTER_FAILED:string = "error_bad_room_enter";
         public static ERROR_NEED_APPLICATION_ENTER:string = "error_need_application_enter";
+        public static ERROR_ROOM_COMMAND_CUSTOM_METHOD: string = "error_room_custom_method";
 
  
         public static USER_CLASS_CHANGE:string = "user_class_change";
         public static USER_DISCONNECTED:string = "user_disconnected";
 
         public static USER_CUSTOM_VAR:string = "set_user_custom_var"; 
+
+        public static EVENT_DISPOSE:string = "event_dispose"; 
+
+
+
     }
 }

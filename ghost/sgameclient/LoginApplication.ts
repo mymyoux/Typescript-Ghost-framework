@@ -39,7 +39,5 @@ namespace ghost.sgameclient
         {
             this.loginAction(data);
         }
-
-
     }
 }

@@ -138,7 +138,13 @@ namespace ghost.logging
 					//ignore
 					return;
 				}
-				label = colors.data(this._getDisplayDate()) + (stackline.cls && stackline.cls != "null" ? " " + func(stackline.cls + (stackline.func && stackline.func != "<anonymous>" ? "::" + (stackline.func == "constructor" ? "const" : stackline.func) : "")) : "");
+                if (!stackline.cls || stackline.cls == "null")
+                {
+                    label = func(this._getDisplayDate());
+                }else
+                {
+				    label = colors.data(this._getDisplayDate()) + (stackline.cls && stackline.cls != "null" ? " " + func(stackline.cls + (stackline.func && stackline.func != "<anonymous>" ? "::" + (stackline.func == "constructor" ? "const" : stackline.func) : "")) : "");
+                }
 			}else
 			{
 				label = func(this._getDisplayDate());
