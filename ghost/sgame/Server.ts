@@ -22,6 +22,7 @@ namespace ghost.sgame
         private listening:boolean;
         private app: any;
         private stats:any; 
+        private applications: Application[];
         public constructor(options:any)
         {
             super();
@@ -29,9 +30,27 @@ namespace ghost.sgame
             this.server = this.createServer(options);//require('http').createServer();
             this.io = require('socket.io')(this.server);
             this.users = [];
+            this.applications = [];
+            
             //instance of stats
             this.stats = ghost.sgame.Stats.instance();
             this.stats.users = this.users;
+            this.stats.apps = this.applications;
+        }
+        public addApp(app:Application):void
+        {
+            if(this.applications.indexOf(app)==-1)
+            {
+                this.applications.push(app);
+            }
+        }
+        public removeApp(app:Application):void
+        {
+            var index: number;
+            if((index = this.applications.indexOf(app)) !=-1)
+            {
+                this.applications.splice(index, 1);
+            }
         }
         protected createServer(options:any):any
         {
@@ -60,7 +79,14 @@ namespace ghost.sgame
                 }
                 app.get('/stats', (req, res) => {
 
-                    res.json(this.stats.toJSON());
+                    try
+                    {
+                        res.json(this.stats.toJSON());
+                        
+                    }catch(error)
+                    {
+                        log.error(error);
+                    }
                 });
             }
             return http;
@@ -77,7 +103,6 @@ namespace ghost.sgame
             }
             return false;
         }
-
         public getUser(id:string):User
         {
             var len:number = this.users.length;
@@ -121,7 +146,7 @@ namespace ghost.sgame
             //avoid socket dispose
             this._unbindUserEvents(user);
             user.setSocket(null);
-            user.dispose();
+
             var index: number = this.users.indexOf(user);
             if(index != -1)
             {
@@ -130,6 +155,12 @@ namespace ghost.sgame
             }
             log.info("on change class");
             log.info(this.users);
+            //decaler dans le temps pke le dispose(); kill les _listeners
+            user.dispose();
+            return;
+            setTimeout(() => {
+                user.dispose();
+            },0);
         }
         protected _unbindUserEvents(user: User): void {
             if (user.socket)
@@ -151,7 +182,8 @@ namespace ghost.sgame
                 this.users.splice(index, 1);
             }
             this._unbindUserEvents(user);
-            user.dispose(); 
+            //user.dispose();// is called on disconnected
+          
             log.warn("disconnected", user);
         }
         private _onData(command:string, data:any, callback:Function, user:User):void
@@ -219,6 +251,13 @@ namespace ghost.sgame
         }
         public destroy():void
         {
+            if(this.applications)
+            {
+                while(this.applications.length)
+                {
+                    this.applications.shift().destroy();
+                }
+            }
             this.trigger(Server.EVENT_DESTROYED);
             while(this.users.length)
             {

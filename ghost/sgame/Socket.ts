@@ -18,7 +18,7 @@ namespace ghost.sgame
         public constructor(socket:Socketio)
         {
             super();
-            this.connected = true;
+            this.connected = true;  
             this.socket = socket;
             this.bindEvents();
         }
@@ -27,7 +27,6 @@ namespace ghost.sgame
             return this.connected && this.socket.connected;
         }
         private bindEvents():void{
-            log.info("connection");
             this.socket.on('error', this._onError.bind(this));
             this.socket.on('event', this._onEvent.bind(this));
             this.socket.on('data', this._onData.bind(this));
@@ -50,12 +49,11 @@ namespace ghost.sgame
         }
         private _onDisconnect():void
         {
-            log.warn("Disconnect");
             this.trigger(Socket.EVENT_DISCONNECTED);
         }
         private _onData(command:string, data:any):void
         {
-            log.info("[DATA]", command, data);
+            log.debug(command+":", data);
             var callback:Function = null;
             if(typeof arguments[arguments.length-1] == "function")
             {

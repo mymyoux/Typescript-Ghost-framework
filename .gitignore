@@ -9,10 +9,11 @@ nbproject
 .settings
 composer.lock
 vendor/bin
-
+.node_modules
 #documentation
 documentation
 docscss
+npm-debug.log
 
 #SASS
 *.css.map

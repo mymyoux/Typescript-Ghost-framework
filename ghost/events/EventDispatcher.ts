@@ -11,8 +11,8 @@ namespace ghost.events
         {
             ALL : "all"
         };
-        private _eventsK1:any;
-        private _eventsK2:any;
+        public _eventsK1: any;
+        public _eventsK2: any;
         /**
          * named indexed objects for each event
          */
@@ -28,6 +28,10 @@ namespace ghost.events
          */
         public _muted:boolean = false;
 
+        private _listeners: Listener[];
+
+        private _trigerring: boolean;
+
         /**
          * Constructor
          */
@@ -39,6 +43,8 @@ namespace ghost.events
 
             this._events = {};
             this._eventsOnce = {};
+
+            this._listeners = [];
         }
 
         /**
@@ -64,7 +70,7 @@ namespace ghost.events
         }
         public trigger(name:string, ...data:any[]):void
         {
-            if (!this._events) {
+            if (!this._listeners) {
                 //disposed
                 return;
             }
@@ -78,6 +84,7 @@ namespace ghost.events
                 debugger;
                 throw(new Error("event's name can't be null"));
             }
+
             var key1:string;
             var key2:string;
             if(name.indexOf(":") != -1)
@@ -91,90 +98,64 @@ namespace ghost.events
                 }
                 if(key2 == "" || !key2)
                 {
-                    key2 = EventDispatcher.EVENTS.ALL;
+                    key2 = null;
                 }
             }else
             {
                 key1 = name;
-                key2 = EventDispatcher.EVENTS.ALL;
+                key2 = null;//EventDispatcher.EVENTS.ALL;
             }
-            //if(key1 == "page_changed")
-            //console.log("TT_TRIGGER_=>"+name+"     |      "+key1+":"+key2);
-            var once:Listener[] = [];
-            var listener:Listener;
+            //var len: number = this._listeners.length;
+            var i: number = 0;
+            var listener: Listener;
+            var listeners: Listener[] = this._listeners.slice();
+            //copy array & remove once after ?
+            var len: number = listeners.length;
+            while (i < len)
+            {
+                listener = listeners[i];
+                if (listener.disposed !== true && (listener.key1 == key1 || listener.key1 == EventDispatcher.EVENTS.ALL || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == EventDispatcher.EVENTS.ALL || listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL))
+                {
+                    if (listener.key1 == EventDispatcher.EVENTS.ALL) 
+                    {
+                        listener.execute(data, [key1]);
+                    }else
+                    {
+                        listener.execute(data);
+                    }
+                    //test if the current dispatcher has been disposed();
+                    if(listener.once)
+                    {
 
-            if(this._eventsK1[key1])
-            {
-                for(var p in this._eventsK1[key1])
-                {
-                    listener = this._eventsK1[key1][p];
-                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        continue;
+                        listener.dispose();
+                        //this._listeners.splice(i, 1);
+                        //len--;
+                      //  continue;
                     }
-                     //  if(key1 == "page_changed")
-                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
-                    if(listener.once)
-                    {
-                        once.push(listener);
-                    }
-                    listener.execute(data);
                 }
+                i++;
             }
-            if(this._eventsK1[EventDispatcher.EVENTS.ALL])
+            //disposed between
+            if (!this._listeners)
             {
-                for(var p in this._eventsK1[EventDispatcher.EVENTS.ALL])
-                {
-                    listener = this._eventsK1[EventDispatcher.EVENTS.ALL][p];
-                    if(listener.key2 != key2 && listener.key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        continue;
-                    }
-                    //  if(key1 == "page_changed")
-                    //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
-                    if(listener.once)
-                    {
-                        once.push(listener);
-                    }
-                    listener.execute(data,  [key1]);
-                }
+                return;
             }
-            if(this._eventsK2[key2])
+            i = 0;
+            len = this._listeners.length;
+            while(i<len)
             {
-                for(var p in this._eventsK2[key2])
+                if (this._listeners[i].disposed === true)
                 {
-                    listener = this._eventsK2[key2][p];
-                    if(!listener)
-                    {
-                        debugger;
-                    }
-                    //we dont re-execute two keys match & all:all match
-                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
-                    {
-                        continue;
-                    }
-                    if(listener.once)
-                    {
-                        if( once.indexOf(listener) == -1)
-                        {
+                    this._listeners.splice(i, 1);
+                    len--;
+                    continue;
+                }            
+                i++;    
+            }
 
-                            once.push(listener);
-                        }else
-                        {
-                            //not called twice
-                            continue;
-                        }
-                    }
-                   //if(key1 == "page_changed")
-                    //console.log("TT___execute=>"+listener.key1+":"+listener.key2);
-                    listener.execute(data);
-                }
-            }
-            while(once.length)
-            {
-                this.off(once[0].key1+":"+once[0].key2, once[0].callback, once[0].scope);
-                once.shift();
-            }
+
+            //for dispose maybe set a variable to running & only dispose listeners after the running
+            //for off ?
         }
 
         public on(name:string, callback:Function, scope?:any, ...parameters:any[]):void
@@ -183,13 +164,17 @@ namespace ghost.events
         }
         private __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
         {
-            if (!this._events) {
+            if (!this._listeners) {
                 //disposed
                 return;
             }
             if(!name)
             {
                 throw(new Error("event's name can't be null"));
+            }
+            if(!callback)
+            {
+                throw(new Error("callback is required"));
             }
             if(name.indexOf(" ")>-1)
             {
@@ -227,22 +212,7 @@ namespace ghost.events
           ///  if(key1 == "page_changed")
           //console.log("TT___on["+once+"]=>"+name +"      |    "+key1+":"+key2);
             var listener:Listener = new Listener(key1, key2, once, callback, scope, parameters);
-            if(key1)
-            {
-                if(!this._eventsK1[key1])
-                {
-                    this._eventsK1[key1] = new Array<Listener>();
-                }
-                this._eventsK1[key1].push(listener);
-            }
-            if(key2)
-            {
-                if(!this._eventsK2[key2])
-                {
-                    this._eventsK2[key2] = new Array<Listener>();
-                }
-                this._eventsK2[key2].push(listener);
-            }
+            this._listeners.push(listener);
         }
         public once(name:string, callback:Function, scope?:any, ...parameters:any[]):void
         {
@@ -250,14 +220,14 @@ namespace ghost.events
         }
         public off(name?:string,  callback?:Function, scope?:any):void
         {
-            if (!this._events)
+            if (!this._listeners)
             {
                 //disposed
                 return;
             }
 //debugger;
-            var key1:string, key2:string;
-            var listener:Listener;
+            var key1:string, key2:string; 
+            var listener:Listener;  
 
             //TODO:off with new system
             if(name)
@@ -283,18 +253,6 @@ namespace ghost.events
                 {
                     key1 = name;
                 }
-                /*
-                 //si c'est un event categorie on supprime tous les events liés
-                if(name.indexOf(":") == -1)
-                {
-                    for(var p in this._events)
-                    {
-                        if(p.substring(0, name.length+1)==name+":")
-                        {
-                            this.off(p, callback, scope);
-                        }
-                    }
-                }*/
             }
             if(!key1 || key1 == "")
             {
@@ -305,123 +263,27 @@ namespace ghost.events
                 key2 = EventDispatcher.EVENTS.ALL;
             }
 
-
-            if(!name)
-            {
-                this._eventsK1 = {};
-                this._eventsK2 = {};
+            if (!name) {
+                while(this._listeners.length)
+                {
+                    this._listeners.shift();//.dispose();
+                }
                 return;
             }
-             if(this._eventsK1[key1])
-            {
-                for(var p in this._eventsK1[key1])
-                {
-                    listener = this._eventsK1[key1][p];
-                    if(listener.key2 != key2 && key2 != EventDispatcher.EVENTS.ALL)
-                    {
+
+            var len: number = this._listeners.length;
+            var i: number = 0;
+            var listener: Listener;
+            while (i < len) {
+                listener = this._listeners[i];
+                if ((!callback || callback === listener.callback) && (!scope || scope === listener.scope) && (listener.key1 == key1 || key1 == EventDispatcher.EVENTS.ALL) && (listener.key2 == key2 || key2 == EventDispatcher.EVENTS.ALL)) {
+                        this._listeners.splice(i, 1);
+                        //listener.dispose();
+                        len--;
                         continue;
-                    }
-                    if(listener.key2 == EventDispatcher.EVENTS.ALL && key2 != EventDispatcher.EVENTS.ALL)
-                    {
-                        console.warn("a listener listen for all "+key1+" events and can't be remove from a specific one like "+key2);
-                        continue;
-                    }
-                     //  if(key1 == "page_changed")
-                     //console.log("TT_execute=>"+listener.key1+":"+listener.key2);
-                     if(callback && callback !== listener.callback)
-                     {
-                        continue;
-                     }
-                     if(scope && scope !== listener.scope)
-                     {
-                        continue;
-                     }
-                     listener.dispose();
-                    this._eventsK1[key1].splice(p, 1);
                 }
-            } 
-            if(this._eventsK2[key2])
-            {
-                for(var p in this._eventsK2[key2])
-                {
-                    listener = this._eventsK2[key2][p];
-                    if(!listener)
-                    {
-                        debugger;
-                    }
-                    //we dont re-execute two keys match & all:all match
-                    if(listener.key1 != EventDispatcher.EVENTS.ALL || (listener.key1 == EventDispatcher.EVENTS.ALL && key2 == EventDispatcher.EVENTS.ALL))
-                    {
-                        continue;
-                    }
-                    if(callback && callback !== listener.callback)
-                     {
-                        continue;
-                     }
-                     if(scope && scope !== listener.scope)
-                     {
-                        continue;
-                     }
-                    listener.dispose();
-                    this._eventsK2[key2].splice(p, 1);   
-                }
+                i++;
             }
-
-
-
-
-            if(!scope && !callback)
-            {
-                if(!name)
-                {
-                    //this._events = {};
-                    //this._eventsOnce = {};
-                    this._eventsK1 = {};
-                    this._eventsK2 = {};
-                }else
-                {
-                    delete this._events[name];
-                    delete this._eventsOnce[name];
-                }
-            }else
-            {
-                if(!name)
-                {
-                    for(var p in this._events)
-                    {
-                        this.off(this._events[p], callback, scope);
-                    }
-                    return;
-                }
-               
-                if(this._events[name])
-                {
-                    var i:number = 0;
-                    while(i<this._events[name].length)
-                    {
-                       if((!scope || this._events[name][i].isScope(scope)) && (!callback || this._events[name][i].isCallback(callback)))
-                       {
-                           this._events[name].splice(i, 1);
-                           continue;
-                       }
-                        i++;
-                    }
-                }
-                if(this._eventsOnce[name])
-                {
-                    var i:number = 0;
-                    while(i<this._eventsOnce[name].length)
-                    {
-                        if((!scope || this._eventsOnce[name][i].isScope(scope)) && (!callback || this._eventsOnce[name][i].isCallback(callback)))
-                        {
-                            this._eventsOnce[name].splice(i, 1);
-                            continue;
-                        }
-                        i++;
-                    }
-                }
-            }
-
         }
         public proxy(callback:Function, scope?:any):any
         {
@@ -437,7 +299,7 @@ namespace ghost.events
         }
         public destroy():void
         {
-            this._events = this._eventsOnce = null;
+            this._listeners = null;
         }
     }
     /**
@@ -446,6 +308,8 @@ namespace ghost.events
     class Listener
     {
 
+        public instance: number = ghost.utils.Maths.getUniqueID();
+        public disposed: boolean;
         constructor(public key1:string, public key2:string, public once:boolean, public callback:Function, public scope?:any, public parameters?:any[])
         {
             if(!callback)
@@ -474,7 +338,8 @@ namespace ghost.events
             this.callback = null;
             this.scope = null;
             this.parameters = null;
+            this.once = false;
+            this.disposed = true;
         }
     }
 }
-

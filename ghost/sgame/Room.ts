@@ -6,12 +6,14 @@ namespace ghost.sgame
     export class Room
     {
         public name:string;
+        public appName:string;
         protected password:string;
         private users:User[];
         private usersIDs:string[];
-        public constructor(name:string, password:string = null)
+        public constructor(appName:string, name:string, password:string = null)
         {
             this.name = name;
+            this.appName = appName;
             this.users = [];
             this.usersIDs = [];
             this.password = password;
@@ -36,7 +38,7 @@ namespace ghost.sgame
             var index:number = this.users.indexOf(user);
             if(index == -1)
             {
-                user.addRoom(this.name);
+                user.addRoom(this.appName, this.name);
                 this.users.push(user);
                 this.usersIDs.push(user.id);
                 this._bindUserEvents(user);
@@ -68,7 +70,7 @@ namespace ghost.sgame
             var index:number = typeof user == "string"? this.usersIDs.indexOf(user):this.users.indexOf(user);
             if(index != -1)
             {
-                this.users[index].removeRoom(this.name);
+                this.users[index].removeRoom(this.appName, this.name);
                 this.users.splice(index, 1);
                 this.usersIDs.splice(index, 1);
                 this._unbindUserEvents(user);

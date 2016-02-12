@@ -101,5 +101,6 @@ namespace ghost.mvc
             }
             return this._navigation;
         }
+
     }
 }

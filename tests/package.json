@@ -1,0 +1,23 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "postinstall": "echo \"You have to execute: npm -g install mocha\nthen npm test\n\" && exit 0"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "JSON2": "^0.1.0",
+    "chai": "^3.5.0",
+    "colors": "^1.1.2",
+    "express": "^4.13.4",
+    "sequelize": "^3.17.3"
+  },
+  "dependencies": {
+    "mysql": "^2.10.2",
+    "socket.io": "^1.4.4"
+  }
+}
