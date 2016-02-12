@@ -182,7 +182,7 @@ namespace ghost.mvc
         {
             var models:T[] = this._models.concat();
             this._models.length = 0;
-            for(var i:number = 0;i<models.length; i++)
+            for(var i:number = 0;i < models.length; i++)
             {
                 this._remove(models[i]);
             }
@@ -323,7 +323,7 @@ namespace ghost.mvc
         public splice(index:number, howMany:number, ...models:T[]):T[]
         {
             var i:number = 0;
-            while(i<models.length)
+            while(i < models.length)
             {
                 if(this._models.indexOf(models[i])==-1)
                 {
@@ -337,7 +337,7 @@ namespace ghost.mvc
             var args:any[] = [index, howMany];
             args = args.concat(models);
             var removed:T[] =  this._models.splice.apply(this._models, args);
-            for(i=0; i<removed.length; i++)
+            for(i=0; i < removed.length; i++)
             {
                 this._remove(removed[i]);
             }
@@ -347,7 +347,7 @@ namespace ghost.mvc
         public unshift(...models:T[]):number
         {
             var i:number = 0;
-            while(i<models.length)
+            while(i < models.length)
             {
                 if(this._models.indexOf(models[i])==-1)
                 {
@@ -364,7 +364,7 @@ namespace ghost.mvc
         {
             var collection:Collection<T> = new Collection<T>();
             var i:number = 0;
-            while(i<models.length)
+            while(i < models.length)
             {
                 if(this._models.indexOf(models[i])==-1)
                 {
@@ -596,7 +596,7 @@ namespace ghost.mvc
                         return this.getPartPromise(name, params);
                     }else
                     {
-                        //reject Promise   
+                        //reject Promise
                         failed = true;
                         reject(new Error(name+" is not a correct part's name"));
                         return null;
