@@ -18,7 +18,12 @@ namespace ghost.data
          */
         public getItem(key:string):any
         {
-            return this._storage.getItem(key);
+            try
+            {
+                return this._storage.getItem(key);
+            } catch (error) {
+                return null;
+            }
         }
         /**
          * Gets key at the index id
@@ -27,7 +32,13 @@ namespace ghost.data
          */
         public key(id:string):string
         {
-            return this._storage.key(id);
+            try
+            {
+                return this._storage.key(id);
+            }catch(error)
+            {
+                return null;
+            }
         }
         /**
          * Sets an item by key
@@ -37,7 +48,13 @@ namespace ghost.data
          */
         public setItem(key:string, value:any):void
         {
-            return this._storage.setItem(key, value);
+            try
+            {
+
+                return this._storage.setItem(key, value);
+            } catch (error) {
+                return null;
+            }
         }
         /**
          * Removes an item by key
@@ -46,7 +63,12 @@ namespace ghost.data
          */
         public removeItem(key:string):any
         {
-            return this._storage.removeItem(key);
+            try
+            {
+                return this._storage.removeItem(key);
+            } catch (error) {
+                return null;
+            }
         }
         /**
          * Clear local storage
@@ -54,7 +76,14 @@ namespace ghost.data
          */
         public clear():void
         {
-            return this._storage.clear();
+            try
+            {
+                return this._storage.clear();
+                
+            } catch (error) {
+                return;
+            }
+
         }
         //not in the W3C standard
         /**
@@ -64,7 +93,13 @@ namespace ghost.data
          */
         public hasItem(key:string):boolean
         {
-            return this._storage.getItem(key)!=null;
+            try
+            {
+                return this._storage.getItem(key)!=null;
+            } catch (error) {
+                return false;
+            }
+
         }
     }
     var local:LocalStorage = new LocalStorage();
