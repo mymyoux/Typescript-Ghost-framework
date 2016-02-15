@@ -1,11 +1,11 @@
 
-    
+
 namespace ghost.utils
 {
     export class Strings
     {
         private static exceptWords:string[] = ["de","des","du","dans","la","le","les","au","aux"];
-        
+
         public static replaceAll(str:string, search:string, repl:string):string
         {
              while (str.indexOf(search) != -1)
@@ -49,7 +49,7 @@ namespace ghost.utils
             var capitalize = function(car)
             {
                 var name = text.split(car);
-                for(var i=0;i<name.length;i++)
+                for(var i=0;i < name.length;i++)
                 {
                     if(i==0 || Strings.exceptWords.indexOf(name[i])==-1)
                         name[i] = name[i].charAt(0).toUpperCase() +name[i].substring(1);
@@ -59,11 +59,11 @@ namespace ghost.utils
             }
             text = capitalize(" ");
             text = capitalize("'");
-            return text;  
+            return text;
         }
         public static trim(text:string):string
         {
-            return text.replace(/^\s+|\s+$/g, '');
+            return text ? text.replace(/^\s+|\s+$/g, '') : "";
         }
         public static similarityExtends(str1:string, str2:string):number
         {
@@ -77,7 +77,7 @@ namespace ghost.utils
             {
                 str2 = "";
             }
-        
+
             str1 = str1.toLowerCase();
             str2 = str2.toLowerCase();
             if(str1.length+str2.length==0)
@@ -92,25 +92,25 @@ namespace ghost.utils
             if(isNaN(options.insertion_cost)) options.insertion_cost = 1;
             if(isNaN(options.deletion_cost)) options.deletion_cost = 1;
             if(isNaN(options.substitution_cost)) options.substitution_cost = 1;
-        
+
             var sourceLength = source.length;
             var targetLength = target.length;
             var distanceMatrix = [[0]];
-        
+
             for (var row =  1; row <= sourceLength; row++) {
                 distanceMatrix[row] = [];
                 distanceMatrix[row][0] = distanceMatrix[row-1][0] + options.deletion_cost;
             }
-        
+
             for (var column = 1; column <= targetLength; column++) {
                 distanceMatrix[0][column] = distanceMatrix[0][column-1] + options.insertion_cost;
             }
-        
+
             for (var row = 1; row <= sourceLength; row++) {
                 for (var column = 1; column <= targetLength; column++) {
                     var costToInsert = distanceMatrix[row][column-1] + options.insertion_cost;
                     var costToDelete = distanceMatrix[row-1][column] + options.deletion_cost;
-        
+
                     var sourceElement = source[row-1];
                     var targetElement = target[column-1];
                     var costToSubstitute = distanceMatrix[row-1][column-1];
@@ -130,13 +130,13 @@ namespace ghost.utils
             var l:number = 0 // length of the matching prefix
             while(str1[l] == str2[l] && l < 4)
                 l++;
-            
+
             return jaro + l * p * (1 - jaro);
         }
         public static jaroDistance(s1:string, s2:string):number
         {
             if (typeof(s1) != "string" || typeof(s2) != "string") return 0;
-            if (s1.length == 0 || s2.length == 0) 
+            if (s1.length == 0 || s2.length == 0)
                 return 0;
             s1 = s1.toLowerCase(), s2 = s2.toLowerCase();
             var matchWindow = (Math.floor(Math.max(s1.length, s2.length) / 2.0)) - 1;
@@ -144,21 +144,21 @@ namespace ghost.utils
             var matches2 = new Array(s2.length);
             var m = 0; // number of matches
             var t = 0; // number of transpositions
-        
+
             //debug helpers
             //console.log("s1: " + s1 + "; s2: " + s2);
             //console.log(" - matchWindow: " + matchWindow);
-        
+
             // find matches
             for (var i = 0; i < s1.length; i++) {
                 var matched = false;
-        
+
                 // check for an exact match
                 if (s1[i] ==  s2[i]) {
                         matches1[i] = matches2[i] = matched = true;
                         m++
                 }
-        
+
                 // check the "match window"
                 else {
                         // this for loop is a little brutal
@@ -169,19 +169,19 @@ namespace ghost.utils
                                         if(!matches1[i] && !matches2[k]) {
                                                     m++;
                                        }
-        
+
                                 matches1[i] = matches2[k] = matched = true;
                             }
                         }
                 }
             }
-        
+
             if(m == 0)
                 return 0.0;
-        
+
             // count transpositions
             var k = 0;
-        
+
             for(var i = 0; i < s1.length; i++) {
                     if(matches1[k]) {
                         while(!matches2[k] && k < matches2.length)
@@ -189,11 +189,11 @@ namespace ghost.utils
                         if(s1[i] != s2[k] &&  k < matches2.length)  {
                         t++;
                     }
-        
+
                         k++;
                     }
             }
-            
+
             //debug helpers:
             //console.log(" - matches: " + m);
             //console.log(" - transpositions: " + t);
@@ -211,6 +211,6 @@ namespace ghost.utils
             }
             return token;
         }
-        
+
     }
 }
