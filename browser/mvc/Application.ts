@@ -9,6 +9,8 @@ namespace ghost.mvc
     {
         protected static _instance: Application;
         protected _navigation:ghost.browser.navigation.Navigation;
+        protected steps: string[] = ["preinit", "initUser", "init", "postinit", "ready"];
+        protected step: number = -1;
         public static getRootURL():string
         {
             return Application._instance.getRootURL();
@@ -36,11 +38,34 @@ namespace ghost.mvc
         private _init():void
         {
                  this.navigation();
-                this.preinit();
-                this.init();
-                this.postinit();
-                this.ready();
-                
+                 this.nextStep();
+        }
+        protected nextStep():void
+        {
+            this.step++;
+            var step: string = this.steps[this.step];
+            if(step)
+            {
+                if (this[step])
+                    console.log("step:" + step);
+                var result: any = this[step]?this[step]():null;
+                if(!result || !result.then)
+                {
+                    return this.nextStep();
+                }else
+                {
+                    result.then(() => {
+                        this.nextStep();
+                    }, ()=> {
+                        debugger;
+                        this.nextStep();
+                    });
+                }
+            }
+        }
+        protected initUser():any|void
+        {
+            return null;
         }
         public getPackage():any
         {
@@ -64,20 +89,28 @@ namespace ghost.mvc
         public preinit():void
         {
             var pckg:any = this.getPackage();
+            if (ghost.utils.Arrays.isArray(pckg))
+            {
+                for(var p in pckg)
+                {
+                    Controller.addPackage(pckg[p]);
+                }
+            }else
             if(pckg)
                 Controller.addPackage(pckg);
         }
-        public postinit():void
+        public postinit():any|void
         {
             var defaultPages:any = this.getDefaultPages();
             if(defaultPages)
             {
                 this.navigation().setDefaultPages(defaultPages);
             }
+            debugger;
             this.navigation().listen();
 
             ghost.mvc.Template.sync();
-
+            return null;
 
         }
         public getDefaultPages():any
@@ -85,7 +118,7 @@ namespace ghost.mvc
             return null;
         }
 
-        public init():void
+        public init():any
         {
 
         }
