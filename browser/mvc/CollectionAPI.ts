@@ -293,7 +293,7 @@ namespace ghost.mvc
         public _onChange(key:string, model:T):void
         public _onChange(key:any, model?:T):void
         {
-            if (typeof key != "string" && !Array.isArray(key))
+            if (key instanceof Model)
             {
                 model = key;
                 key = null;
