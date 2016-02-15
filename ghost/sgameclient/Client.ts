@@ -134,7 +134,6 @@ namespace ghost.sgameclient
         private _onError(error:any):void
         {
             console.log("error", error);
-            debugger;
             this.trigger(Client.EVENT_ERROR);
             if(this.socket.disconnected)
             {
@@ -150,7 +149,6 @@ namespace ghost.sgameclient
         }
         private _onConnect():void
         {
-            debugger;
             this.connecting = false;   
             this.disconnected = false;
             if (this._hasBeenConnected)
@@ -182,7 +180,6 @@ namespace ghost.sgameclient
         }
         private _onDisconnect():void
         {
-            debugger;
             if (!this.disconnected || this.connecting)
             {
                 this.disconnected = true;

@@ -106,7 +106,6 @@ namespace ghost.mvc
             {
                 this.navigation().setDefaultPages(defaultPages);
             }
-            debugger;
             this.navigation().listen();
 
             ghost.mvc.Template.sync();
