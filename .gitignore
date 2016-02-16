@@ -31,3 +31,4 @@ framework/**/*.d.ts
 #react
 .views
 .module-cache
+tests/index.js
