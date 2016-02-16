@@ -238,7 +238,7 @@ namespace ghost.browser.forms
             setTimeout(()=>
             {
                 var len:number = this.fields.length;
-                for(var i:number=0; i<len ;i++)
+                for(var i:number=0; i < len ;i++)
                 {
                     if(!this.fields[i].getValue())
                     {
@@ -357,7 +357,7 @@ namespace ghost.browser.forms
             }
             this.promises = {};
             var data:any = this.toObject();
-            if(data instanceof ghost.mvc.Model)
+            if (typeof data.toObject === 'function')
             {
                 var tmp:any = data.toObject();
                 if(tmp)
@@ -2424,12 +2424,12 @@ namespace ghost.browser.forms
                                               return;
                                           }
                                           var ratio:number = image.width/image.height;
-                                          if(image.width!=pwidth)
+                                          if(image.width != pwidth)
                                           {
                                               image.width = pwidth;
                                               image.height = image.width/ratio;
                                           }
-                                          if(image.height<pheight)
+                                          if(image.height < pheight)
                                           {
                                               image.height = pheight;
                                               image.width = image.height * ratio;
@@ -2584,7 +2584,7 @@ namespace ghost.browser.forms
                 if(this.max>-1)
                 {
                     var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
-                    if(count<0)
+                    if(count < 0)
                     {
                         this.error = "too_long";
                         return false;
@@ -2608,7 +2608,7 @@ namespace ghost.browser.forms
             if(this.max > 0)
             {
                 var count:number = this.max - (this.data[this.name]?this.data[this.name].length:0);
-                if(count<0)
+                if(count < 0)
                 {
                     if(this.force_max)
                     {
