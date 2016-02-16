@@ -1,7 +1,7 @@
 ///<lib="es6-promise"/>
 ///<module="framework/ghost/utils"/>
 ///<module="framework/browser/api"/>
-namespace ghost.performance
+namespace ghost.performance 
 {
     import BufferFunction = ghost.utils.BufferFunction;
     import Buffer = ghost.utils.Buffer;
@@ -76,9 +76,9 @@ namespace ghost.performance
             this._stop = Watch.now();
             Watch.addWatch(this.getResult());
         }
-        protected getResult():any
+        protected getResult():any 
         {
-            return { name: this._name, time: (this._stop-this._start)|0, now:Date.now(), type:this._type };
+            return { name: this._name, time: (this._stop-this._start)|0, date:Date.now(), type:this._type };
         }
     }
 }
