@@ -293,7 +293,12 @@ namespace ghost.mvc
                     this.templateData.off(Template.EVENT_EXPIRED, this._onTemplateExpired, this);
                 }
             	this._activated = false;
+                this.postDisactivate();
             }
+        }
+        protected postDisactivate():void
+        {
+
         }
         public isActivated():boolean
         {
@@ -433,6 +438,10 @@ namespace ghost.mvc
 
             ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
             ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
+            this.postActivation();
+        }
+        protected postActivation():void
+        {
         }
          /**
          * Called when application is paused (mobile + maybe tab lost focus?)
