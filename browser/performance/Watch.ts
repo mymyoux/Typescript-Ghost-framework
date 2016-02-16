@@ -56,6 +56,7 @@ namespace ghost.performance
         protected _stop: number;
         protected _name: string;
         protected _type: string;
+        protected _mark: boolean;
         public constructor(name:string, type?:string)
         {
             this._name = name;
@@ -64,6 +65,10 @@ namespace ghost.performance
         public start():void
         {
             this._start = Watch.now();
+            if (this._mark)
+            {
+                window.performance.mark("start-"+(this._type?this._type+'-':'')+this._name);
+            }
         }
         public cancel():void
         {
@@ -76,6 +81,15 @@ namespace ghost.performance
             }
             this._stop = Watch.now();
             Watch.addWatch(this.getResult());
+            if (this._mark) {
+               window.performance.mark("stop-" + (this._type ? this._type + '-' : '') + this._name);
+               window.performance.measure((this._type ? this._type + '-' : '') + this._name + " (" + ((((this._stop - this._start)*100)|0)/100)+"ms)", "start-" + (this._type ? this._type + '-' : '') + this._name, "stop-" + (this._type ? this._type + '-' : '') + this._name);
+            }
+        }
+        public mark():void
+        {
+            if (window.performance && window.performance.mark && window.performance.measure)
+                this._mark = true;
         }
         protected getResult():any 
         {
