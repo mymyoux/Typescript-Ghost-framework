@@ -48,7 +48,8 @@ namespace ghost.performance
         {
             var data: any[] = Watch._registered.slice();
             Watch._registered.length = 0;
-            API.request().controller("statistics").action("watch").method("POST").param("stats", data).done(); 
+            if(data && data.length)
+                API.request().controller("statistics").action("watch").method("POST").param("stats", data).done(); 
         }
 
         protected _start: number;
