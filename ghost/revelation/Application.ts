@@ -124,7 +124,7 @@ namespace ghost.revelation
 				(<Promise<any>>promise).then(()=>
 				{
 					this.preloadMiddleware(index+1);
-				}).catch((error)=>
+				},(error)=>
 				{
 					console.error("An error happend during middle ware initialization", this.middlewares[index], error, error.stack);
 				});

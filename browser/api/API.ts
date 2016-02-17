@@ -169,7 +169,7 @@ module ghost.browser.api
         protected getPromise():Promise<any>
         {
                var request:any = this.getRequest();
-               return  ghost.io.ajax(request);
+               return  <any>ghost.io.ajax(request);
         }
 
     }

@@ -185,14 +185,23 @@ namespace ghost.io
 		 */
 		asObject?:boolean;
 	}
-	export class CancelablePromise<T> extends Promise<T>
+	export class CancelablePromise<T>// extends Promise<T>
 	{
-		/*
+		protected promise: Promise<T>;
 		public constructor(method:any)
 		{
-			super(method);
-			Promise.call(this);
-		} */
+			var promise:any = new Promise(method);
+			CancelablePromise.extends(promise);
+
+			return promise; 
+		} 
+		public static extends(promise:any):void
+		{
+			promise.canceled = false;
+			promise.cancel = CancelablePromise.prototype.cancel.bind(promise);
+			promise.then = CancelablePromise.prototype.then.bind(promise);
+			promise.setAjax = CancelablePromise.prototype.setAjax.bind(promise);
+		}
 		public canceled:boolean = false;
 		private $ajax:any;
 		public cancel():void
@@ -209,9 +218,18 @@ namespace ghost.io
 		{
 			this.$ajax = $ajax;
 		}
+		public then(resolve?: Function, reject?: Function):CancelablePromise<T>
+		{
+			var promise:any = Promise.prototype.then.call(this, resolve, reject);
+			CancelablePromise.extends(promise);
+			return promise;
+		}
+		public catch: (callback: Function) => CancelablePromise<T>;
+		public done: () => CancelablePromise<T>;
+		public fail: (callback: Function) => CancelablePromise<T>;
+		public always: (callback: Function) => CancelablePromise<T>;
 	}
-
-	//window["__extends"](CancelablePromise, Promise);
+	
 	export interface IMiddleWare
 	{
 		/**
