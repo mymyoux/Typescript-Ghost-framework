@@ -152,7 +152,6 @@ namespace ghost.sgameclient
         }
         private _onClientConnect(): void
         {
-            debugger;
             this.connected = true;
             
             this._enterApplication();
