@@ -210,6 +210,7 @@ namespace ghost.mvc
         }
         protected load(name:string, forceReload:boolean = false):Promise<any>
         {
+            console.log("template:"+name);
             var promise:Promise<void> = new Promise<void>((resolve:any, reject):void=>
             {
                 this.cache().getItem(name).then((template:IRawTemplate)=>

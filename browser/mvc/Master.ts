@@ -17,7 +17,7 @@ namespace ghost.mvc
          */
         public static EVENTS:any = Controller.EVENTS;
 		//private templateString:string;
-        private templateData:Template;
+        protected templateData:Template;
 		protected template:Ractive;
 		private templateOptions:IRactiveOptions;
 		protected _firstActivation:boolean = true;
@@ -701,6 +701,7 @@ namespace ghost.mvc
                         {
                             debugger;
                         }
+                        this.prepareTemplate(options);
 
                         if(!this.templateData.isParsed())
                         {
@@ -709,6 +710,7 @@ namespace ghost.mvc
                         options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
                         //debugger;
                         console.log("TEMPLATE", options);
+
                         this.template = new Ractive(options);
                     }catch(error)
                     {
@@ -735,6 +737,18 @@ namespace ghost.mvc
                 }
             });
             return promise;
+        }
+        protected prepareTemplate(options:any):void
+        {
+            if(!this.templateData.isParsed())
+            {
+                this.templateData.parse(options);
+            }
+            options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
+            //debugger;
+            console.log("TEMPLATE", options);
+
+            this.template = new Ractive(options);
         }
         protected rerender():void
         {

@@ -370,7 +370,6 @@ namespace ghost.sgameclient
                 }
                 if (request.command == Const.ROOM_COMMAND_USER_DATA)
                 {
-                    debugger;
                 }
                 if(request["_id"] == undefined)
                 {
