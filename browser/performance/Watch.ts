@@ -74,13 +74,13 @@ namespace ghost.performance
         {
             delete this._start;
         }
-        public stop(): void {
+        public stop(data?:any): void {
             if(this._start == undefined)
             {
                 return;   
             }
             this._stop = Watch.now();
-            Watch.addWatch(this.getResult());
+            Watch.addWatch(this.getResult(data));
             if (this._mark) {
                window.performance.mark("stop-" + (this._type ? this._type + '-' : '') + this._name);
                window.performance.measure((this._type ? this._type + '-' : '') + this._name + " (" + ((((this._stop - this._start)*100)|0)/100)+"ms)", "start-" + (this._type ? this._type + '-' : '') + this._name, "stop-" + (this._type ? this._type + '-' : '') + this._name);
@@ -91,9 +91,9 @@ namespace ghost.performance
             if (window.performance && window.performance.mark && window.performance.measure)
                 this._mark = true;
         }
-        protected getResult():any 
+        protected getResult(data:any):any 
         {
-            return { name: this._name, time: (this._stop-this._start)|0, date:Date.now(), type:this._type };
+            return ghost.utils.Objects.merge({ name: this._name, time: (this._stop-this._start)|0, date:Date.now(), type:this._type }, data);
         }
     }
 }
