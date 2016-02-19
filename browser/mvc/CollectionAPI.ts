@@ -315,6 +315,11 @@ namespace ghost.mvc
             for(var p in models)
             {
                 model = models[p]
+                if(!this._models.length)
+                {
+                    this._models.push(model);
+                    continue;
+                }
                 if((index = this._models.indexOf(model))==-1)
                 {
                     //if list ordonned
@@ -334,7 +339,20 @@ namespace ghost.mvc
                                }
                         }else
                         {
-                            this._models.splice(result.index, 0, model);/*
+                            if(false && result.index == this._models.length)
+                            {
+                                this._models.push(model);
+                            }else
+                            {
+                                this._models.splice(result.index, 0, model);
+                                /*
+                                debugger; splice doesnt seems to work with ractive.0.8
+                                var temp1 = this._models.slice(0, result.index);
+                                var temp2 = this._models.slice(result.index);
+                                temp1.push(model);
+                                this._models =  temp1.concat(temp2);*/
+                            }
+                            /*
 
                             if (this._orderDirection > 0) {
                                 this._models.splice(result.index, 0, model);
@@ -361,43 +379,47 @@ namespace ghost.mvc
             if(input)
             {
 
-                if(input.forEach)
-                    input.forEach(function(rawModel:any):void
+                if(!input.length || !input.forEach)
+                {
+                    return;
+                }
+                input.forEach(function(rawModel:any):void
+                {
+                    if(rawModel.__class)
                     {
-                        if(rawModel.__class)
+                        var model:T = <any>Model.get(rawModel.__class);
+                        model.readExternal(rawModel);
+                        this.push(model);
+                    }else
+                    {
+                        if(typeof rawModel == "object")
                         {
-                            var model:T = <any>Model.get(rawModel.__class);
-                            model.readExternal(rawModel);
-                            this.push(model);
-                        }else
-                        {
-                            if(typeof rawModel == "object")
+                            var cls:any = this.getDefaultClass();
+                            var id:string = this.getModelIDName();
+                            var model:T;
+                            if(rawModel && rawModel[id] != undefined)
                             {
-                                var cls:any = this.getDefaultClass();
-                                var id:string = this.getModelIDName();
-                                var model:T;
-                                if(rawModel && rawModel[id] != undefined)
-                                {
-                                    model = this.getModelByID(rawModel[id] );
-                                }
-                                if(!model)
-                                {
-                                    model  = <any>Model.get(cls);
-                                    model.readExternal(rawModel);
-                                    this.push(model);
-                                }else
-                                {
-                                    model.readExternal(rawModel);
-                                }
-
-                                this.trigger(Collection.EVENT_CHANGE, model);
+                                model = this.getModelByID(rawModel[id] );
+                            }
+                            if(!model)
+                            {
+                                model  = <any>Model.get(cls);
+                                model.readExternal(rawModel);
+                                this.push(model);
                             }else
                             {
-                                console.error("RawModel must be object, given ", rawModel);
+                                model.readExternal(rawModel);
                             }
+
+                         //   this.trigger(Collection.EVENT_CHANGE, model);
+                        }else
+                        {
+                            console.error("RawModel must be object, given ", rawModel);
                         }
-                    }, this);
+                    }
+                }, this);
                 this.triggerFirstData();
+                this.trigger(Collection.EVENT_CHANGE);  
             }
         }
         public toRactive():any
