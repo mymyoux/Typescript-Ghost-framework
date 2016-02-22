@@ -1,6 +1,66 @@
 ///<module="ghost/core"/>
-namespace ghost.data
+///<module="framework/ghost/data"/>
+
+namespace ghost.browser.data
 {
+    export class FakeStorage extends ghost.data.HashMap<string, any>
+    {
+        /**
+         * Constructor
+         */
+        constructor()
+        {
+            super();
+        }
+        /**
+         * Gets Item by key
+         * @param key string key
+         * @returns {*} Value linked to the key
+         */
+        public getItem(key:string):any
+        {
+            return this.get(key);
+        }
+        /**
+         * Gets key at the index id
+         * @param id
+         * @returns {string} key
+         */
+        public key(id:string):string
+        {
+            return this.get(id);
+        }
+        /**
+         * Sets an item by key
+         * @param key key of the item
+         * @param value new item value
+         * @returns {void}
+         */
+        public setItem(key:string, value:any):void
+        {
+            this.set(key, value);
+        }
+        /**
+         * Removes an item by key
+         * @param key key of the item
+         * @returns {void}
+         */
+        public removeItem(key:string):any
+        {
+            this.remove(key);
+        }
+        //not in the W3C standard
+        /**
+         * Checks if an item exists with the key given
+         * @param key item's key
+         * @returns {boolean}
+         */
+        public hasItem(key:string):boolean
+        {
+            return this.has(key);
+        }
+    }
+
     class LocalStorage
     {
         private _storage:any;
@@ -9,7 +69,14 @@ namespace ghost.data
          */
         constructor()
         {
-            this._storage = ROOT.localStorage;
+            if (false === ghost.core.Hardware.hasCookieEnable())
+            {
+                this._storage = new ghost.browser.data.FakeStorage();
+            }
+            else
+            {
+                this._storage = ROOT.localStorage;
+            }
         }
         /**
          * Gets Item by key
@@ -79,7 +146,7 @@ namespace ghost.data
             try
             {
                 return this._storage.clear();
-                
+
             } catch (error) {
                 return;
             }
@@ -146,7 +213,7 @@ namespace ghost.data
         {
             return this.war(name);
         }
-    
+
         public get(key:string):any
         {
             var value = local.getItem(this._name+key);
@@ -201,11 +268,10 @@ namespace ghost.data
                 console.log("remove key from keys : "+key);
                 local.setItem(this._name+Warehouse._LIST_KEY, JSON.stringify(this._keys));
             }
-        }   
+        }
     }
-
 }
 namespace ghost
 {
-    export var cache:ghost.data.Warehouse = new ghost.data.Warehouse("root");
+    export var cache:ghost.browser.data.Warehouse = new ghost.browser.data.Warehouse("root");
 }

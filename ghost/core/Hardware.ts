@@ -1,6 +1,6 @@
 namespace ghost.core
 {
-    
+
     //TODO:try to removes phonegap dependency
     export interface IHardware
     {
@@ -19,6 +19,7 @@ namespace ghost.core
         landscape:boolean;
         portrait:boolean;
         browser:string;
+        cookie:string;
     }
     /**
      * Hardware manager
@@ -85,7 +86,7 @@ namespace ghost.core
          * @type {string}
          */
         public static OS_WINDOW_DESKTOP:string = "Windows Desktop";
-    
+
         /**
          * Get the version of Cordova running on the device.
          * @returns {*}
@@ -331,9 +332,17 @@ namespace ghost.core
                 orientation:Hardware.getOrientation(),
                 landscape:Hardware.isLandscape(),
                 portrait:Hardware.isPortrait(),
-                browser: Hardware.getBrowser()
+                browser: Hardware.getBrowser(),
+                cookie:(Hardware.hasCookieEnable() ? 'true' : 'false')
             };
             return data;
+        }
+
+        public static hasCookieEnable() : boolean
+        {
+            if (!Hardware.isBrowser()) return false;
+
+            return navigator.cookieEnabled;
         }
     }
 }

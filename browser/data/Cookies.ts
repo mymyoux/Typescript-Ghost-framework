@@ -1,4 +1,4 @@
-namespace ghost.data
+namespace ghost.browser.data
 {
     /**
      * Cookies

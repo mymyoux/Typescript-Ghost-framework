@@ -10,7 +10,7 @@ namespace ghost.mvc
      */
     export class Controller extends ghost.events.EventDispatcher
     {
-        public static EVENTS:any = 
+        public static EVENTS:any =
         {
             ACTIVATED:"acivated",
             DISACTIVATED:"disactivated"
@@ -244,7 +244,7 @@ namespace ghost.mvc
             if(!Controller._sControllerInstance[index])
             {
                 Controller._sControllerInstance[index] = new (Controller._sControllerClass[index]);
-                
+
             }
             return Controller._sControllerInstance[index];
         }
@@ -283,11 +283,11 @@ namespace ghost.mvc
             //private _data:ghost.data.ServerIO;
             /*public get(action:string, data:any = {}, method:string = "GET", alwaysWin:boolean = true, persistant: boolean = false):ghost.mvc.Response
             {
-              
+
               return ghost.mvc.ServerIO.getInstance().push(this._name, action, method, data,alwaysWin,persistant );
             }*/
-            private _local:ghost.data.Warehouse;
-            public local():ghost.data.Warehouse
+            private _local:ghost.browser.data.Warehouse;
+            public local():ghost.browser.data.Warehouse
             {
               if(!this._local)
               {
@@ -295,7 +295,7 @@ namespace ghost.mvc
               }
               return this._local;
             }
-        
+
 
     }
 }

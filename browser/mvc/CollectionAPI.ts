@@ -22,7 +22,7 @@ namespace ghost.mvc
             this.requests = {};
         }
 
-        public cache(): ghost.data.LocalForage
+        public cache(): ghost.browser.data.LocalForage
         {
             return ghost.forage.war( this.name() + '_collection' );
         }
@@ -421,7 +421,7 @@ namespace ghost.mvc
                     }
                 }, this);
                 this.triggerFirstData();
-                this.trigger(Collection.EVENT_CHANGE);  
+                this.trigger(Collection.EVENT_CHANGE);
             }
         }
         public toRactive():any
