@@ -19,7 +19,7 @@ namespace ghost.core
         landscape:boolean;
         portrait:boolean;
         browser:string;
-        cookie:boolean;
+        cookie:string;
     }
     /**
      * Hardware manager
@@ -333,7 +333,7 @@ namespace ghost.core
                 landscape:Hardware.isLandscape(),
                 portrait:Hardware.isPortrait(),
                 browser: Hardware.getBrowser(),
-                cookie:Hardware.hasCookieEnable()
+                cookie:(Hardware.hasCookieEnable() ? 'true' : 'false')
             };
             return data;
         }
