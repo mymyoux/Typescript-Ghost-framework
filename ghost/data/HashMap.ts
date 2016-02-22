@@ -14,8 +14,8 @@ namespace ghost.data
         }
         public clear():void
         {
-            this.keys.length = 0;
-            this.values.length = 0;
+            this.keys = [];
+            this.values = [];
         }
         public has(key:KEY):boolean
         {

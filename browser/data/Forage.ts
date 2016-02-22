@@ -27,6 +27,7 @@ namespace ghost.data
         private static consolelog(...args:any[]):void{
             console.log(args);
         }
+
         /**
          * Constructor
          */
@@ -52,7 +53,29 @@ namespace ghost.data
             this._storage = ROOT.localforage.createInstance({name:name});
             this._data = {};
             this._sync = {};
-            this._allSync = false;
+
+            var supportsIndexedDB: boolean = true;
+
+            try {
+                var indexedDB = indexedDB || indexedDB || msIndexedDB;
+
+                var test = indexedDB.open('_localforage_spec_test', 1);
+                test.onerror = function() {
+                    supportsIndexedDB = false;
+                }
+
+                var supportsIndexedDB = indexedDB && test.onupgradeneeded === null;
+            } catch(e) {
+                supportsIndexedDB = false;
+            }
+
+            if (false === supportsIndexedDB || false === ghost.core.Hardware.hasCookieEnable())
+            {
+                this._allSync = true;
+                this._keys = [];
+            }
+            else
+                this._allSync = false;
         }
         /**
          * Gets Item by key
@@ -109,8 +132,15 @@ namespace ghost.data
          */
         public key(id:string):Promise<string>
         {
+            if(this._allSync)
+            {
+                return this._keys[id];
+            }
+            else
+            {
+                return <any>this._storage.key(id);
+            }
             //TODO: mark as sync key from id
-            return <any>this._storage.key(id);
         }
         public iterate(func:Function):Promise<any[]>
         {
