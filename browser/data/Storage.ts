@@ -1,9 +1,9 @@
 ///<module="ghost/core"/>
 ///<module="framework/ghost/data"/>
 
-namespace ghost.data
+namespace ghost.browser.data
 {
-    export class FakeStorage extends HashMap<string, any>
+    export class FakeStorage extends ghost.data.HashMap<string, any>
     {
         /**
          * Constructor
@@ -71,7 +71,7 @@ namespace ghost.data
         {
             if (false === ghost.core.Hardware.hasCookieEnable())
             {
-                this._storage = new ghost.data.FakeStorage();
+                this._storage = new ghost.browser.data.FakeStorage();
             }
             else
             {
@@ -273,5 +273,5 @@ namespace ghost.data
 }
 namespace ghost
 {
-    export var cache:ghost.data.Warehouse = new ghost.data.Warehouse("root");
+    export var cache:ghost.browser.data.Warehouse = new ghost.browser.data.Warehouse("root");
 }

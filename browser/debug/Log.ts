@@ -6,7 +6,7 @@ namespace ghost.debug
     /**
      * Logger
      */
-    export class Log 
+    export class Log
     {
         /**
          *  All possible stacktrace lines :
@@ -69,7 +69,7 @@ namespace ghost.debug
         private static _manuallyLogged:boolean = false;
 
         private static _hasColors:boolean = false;
-        private static colors:any = {}; 
+        private static colors:any = {};
 
         /**
          * Log to INFO level
@@ -120,7 +120,7 @@ namespace ghost.debug
             }
         }
         private static gradient:ghost.utils.Gradient;
-        private static count:number = 0; 
+        private static count:number = 0;
         public static getColours()
         {
             if(!Log.gradient)
@@ -256,7 +256,7 @@ namespace ghost.debug
             {
                 Log._hasColors = true;
             }
-            var white:string[] = ghost.data.Cookies.getCookie("LOG_WHITE");
+            var white:string[] = ghost.browser.data.Cookies.getCookie("LOG_WHITE");
             if(white)
             {
                 Log._white = white;
@@ -280,7 +280,7 @@ namespace ghost.debug
                     (<any>console).groupEnd();
                 Log._manuallyLogged = true;
             }
-            var black:string[] = ghost.data.Cookies.getCookie("LOG_BLACK");
+            var black:string[] = ghost.browser.data.Cookies.getCookie("LOG_BLACK");
             if(black)
             {
                 Log._black = black;
@@ -303,7 +303,7 @@ namespace ghost.debug
                     (<any>console).groupEnd();
                 Log._manuallyLogged = true;
             }
-            var known:string[] = ghost.data.Cookies.getCookie("LOG_KNOWN");
+            var known:string[] = ghost.browser.data.Cookies.getCookie("LOG_KNOWN");
             if(known)
             {
                  Log._known = known;
@@ -339,8 +339,8 @@ namespace ghost.debug
          */
         public static save():void
         {
-            ghost.data.Cookies.setCookie("LOG_WHITE", Log._white);
-            ghost.data.Cookies.setCookie("LOG_BLACK", Log._black);
+            ghost.browser.data.Cookies.setCookie("LOG_WHITE", Log._white);
+            ghost.browser.data.Cookies.setCookie("LOG_BLACK", Log._black);
             console.log("%c[LOG_SAVE]White:"+JSON.stringify( Log._white),'color:#339900; font-weight:bold;');
             console.log("%c[LOG_SAVE]Black:"+JSON.stringify( Log._black),'color:#339900; font-weight:bold;');
         }
@@ -349,8 +349,8 @@ namespace ghost.debug
          */
         public static clearSave():void
         {
-            ghost.data.Cookies.removeCookie("LOG_WHITE");
-            ghost.data.Cookies.removeCookie("LOG_BLACK");
+            ghost.browser.data.Cookies.removeCookie("LOG_WHITE");
+            ghost.browser.data.Cookies.removeCookie("LOG_BLACK");
             console.log("%c[LOG_CLEAR_SAVE]",'color:#339900; font-weight:bold;');
         }
         public static getAllClasses():string[]
@@ -405,7 +405,7 @@ namespace ghost.debug
                 if(Log._known.indexOf(stackline.cls)==-1)
                 {
                     Log._known.push(stackline.cls);
-                    ghost.data.Cookies.setCookie("LOG_KNOWN", Log._known);
+                    ghost.browser.data.Cookies.setCookie("LOG_KNOWN", Log._known);
                     if(Log._manuallyLogged && Log._black.indexOf(Log.BLACKLIST_ALL)!=-1)
                     {
                         console.warn("%c[LOG_NEW_CLASS]A new class has been detected, maybe you should add it to your whitelist : "+stackline.cls,'color:#339900; font-weight:bold;');
@@ -614,7 +614,7 @@ namespace ghost.debug
             return null;
         }
     }
-    
+
 }
 
 var log = ghost.debug.Log;

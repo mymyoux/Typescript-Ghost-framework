@@ -123,7 +123,7 @@ namespace ghost.mvc
 
 		}
 
-        protected cache(): ghost.data.LocalForage
+        protected cache(): ghost.browser.data.LocalForage
         {
             return ghost.forage.war( this.name() + '_controller' );
         }
@@ -244,7 +244,7 @@ namespace ghost.mvc
             {
                 object = $(this.getContainer()).find(object);
             }
-            var $result:any =  $(object).on(events, selector, data, handler);            
+            var $result:any =  $(object).on(events, selector, data, handler);
             /*
             export interface IEvent {
                 selector: string;
@@ -253,7 +253,7 @@ namespace ghost.mvc
                 listener: any;
                 event: string;
             }*/
-           
+
             if (handler == null)
             {
                 if(typeof data == "function")
@@ -266,7 +266,7 @@ namespace ghost.mvc
                     selector = null;
                 }
             }
-            
+
             var listener: IEvent =
             {
                 object: object,
@@ -274,7 +274,7 @@ namespace ghost.mvc
                 handler:handler,
                 selector:selector
             };
-            this._bindedEvents.push(listener); 
+            this._bindedEvents.push(listener);
             return $result;
         }
 
@@ -291,8 +291,8 @@ namespace ghost.mvc
         }
         protected _unbindEvents(): void
         {
-                
-            var ievent: IEvent; 
+
+            var ievent: IEvent;
             while (this._bindedEvents.length)
             {
                 debugger;

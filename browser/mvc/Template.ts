@@ -24,7 +24,7 @@ namespace ghost.mvc
             return Template._templates[url];
         }
 
-        protected static cache():ghost.data.LocalForage
+        protected static cache():ghost.browser.data.LocalForage
         {
             return Template.instance().cache();
         }
@@ -108,7 +108,7 @@ namespace ghost.mvc
          */
 
 
-        protected cache():ghost.data.LocalForage
+        protected cache():ghost.browser.data.LocalForage
         {
             return ghost.forage.war("templates");
         }
