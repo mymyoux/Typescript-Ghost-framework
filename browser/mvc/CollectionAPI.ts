@@ -318,6 +318,7 @@ namespace ghost.mvc
                 if(!this._models.length)
                 {
                     this._models.push(model);
+                    this._add(model);
                     continue;
                 }
                 if((index = this._models.indexOf(model))==-1)
@@ -339,6 +340,7 @@ namespace ghost.mvc
                                }
                         }else
                         {
+                            ///test before remove this false
                             if(false && result.index == this._models.length)
                             {
                                 this._models.push(model);
