@@ -30,6 +30,8 @@ namespace ghost.mvc
 
         protected paramsFromActivation:any;
 
+        protected _bindedEvents: IEvent[];
+
 
 		constructor()
 		{
@@ -37,6 +39,7 @@ namespace ghost.mvc
 			this._data = [];
             this._parts = [];
             this._partsPromises = [];
+            this._bindedEvents = [];
 		}
         public navigation():ghost.browser.navigation.Navigation
         {
@@ -230,6 +233,51 @@ namespace ghost.mvc
 
         }
 
+        protected $(object: any, events: string, handler: (eventObject: JQueryEventObject, ...args: any[]) => any): JQuery;
+        protected $(object: any, events: string, selector: string, handler: (eventObject: JQueryEventObject) => any): JQuery;
+        protected $(object: any, events: string, selector: string, data: any, handler: (eventObject: JQueryEventObject) => any): JQuery;
+        protected $(object:any, events: { [key: string]: any; }, selector?: any, data?: any): JQuery;
+
+        protected $(object: any, events: any, selector: any, data?: any, handler?: any): JQuery
+        {
+            if(typeof object == "string")
+            {
+                object = $(this.getContainer()).find(object);
+            }
+            var $result:any =  $(object).on(events, selector, data, handler);            
+            /*
+            export interface IEvent {
+                selector: string;
+                useDocument?: boolean;
+                useContainer: boolean;
+                listener: any;
+                event: string;
+            }*/
+           
+            if (handler == null)
+            {
+                if(typeof data == "function")
+                {
+                    handler = data;
+                    data = null;
+                }else
+                if (typeof selector == "function") {
+                    handler = selector;
+                    selector = null;
+                }
+            }
+            
+            var listener: IEvent =
+            {
+                object: object,
+                events: events,
+                handler:handler,
+                selector:selector
+            };
+            this._bindedEvents.push(listener); 
+            return $result;
+        }
+
         /**
          * Called when all data is loaded
          */
@@ -240,6 +288,20 @@ namespace ghost.mvc
         protected unbindEvents():void
         {
 
+        }
+        protected _unbindEvents(): void
+        {
+                
+            var ievent: IEvent; 
+            while (this._bindedEvents.length)
+            {
+                debugger;
+                ievent = this._bindedEvents.shift();
+                if(ievent.selector)
+                    $(ievent.object).off(ievent.events, ievent.selector, ievent.handler);
+                else
+                    $(ievent.object).off(ievent.events, ievent.handler);
+            }
         }
         /**
          * Called when the controller is asked for disactivation
@@ -275,6 +337,7 @@ namespace ghost.mvc
                     }
                 });
                 this.disactivate();
+                this._unbindEvents();
                 this.unbindEvents();
                 this.trigger(Master.EVENTS.DISACTIVATED);
                 this.hideContainer();
@@ -855,5 +918,12 @@ namespace ghost.mvc
          * Data loaded asynchrone
          */
         async?:boolean;
+    }
+    export interface IEvent
+    {
+        object:any;
+        events:any;
+        selector:string;
+        handler:any;
     }
 }
