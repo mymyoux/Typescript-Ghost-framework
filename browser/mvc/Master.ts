@@ -61,9 +61,14 @@ namespace ghost.mvc
                     name = name.data;
                     delete this._parts[this._parts.length-1].data;
                 }
+                //TODO:check this
                 if(typeof name == "function")
                 {
                     name = ghost.mvc.Model.get(name, true);
+                    if(name && !this[name.name()])
+                    {
+                        this[name.name()] = name;
+                    }
                 }
 				this._data.push(name);
 			}
