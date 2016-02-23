@@ -244,6 +244,10 @@ namespace ghost.mvc
             {
                 object = $(this.getContainer()).find(object);
             }
+            if(!object)
+            {
+                object = this.getContainer();
+            }
             var $result:any =  $(object).on(events, selector, data, handler);
             /*
             export interface IEvent {
