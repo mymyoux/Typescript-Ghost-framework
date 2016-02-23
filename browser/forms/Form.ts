@@ -2154,6 +2154,12 @@ namespace ghost.browser.forms
             {
                 var value:any;
                 var data:any = this.data[this.prefix_autocomplete+"autocompletion"][index];
+                if(!data)
+                {
+                    //error is trigger otherwise
+                    debugger;
+                    return;
+                }
                 for(var p in this.data[this.prefix_autocomplete+"autocompletion"][index])
                 {
                     if(p == "id")
