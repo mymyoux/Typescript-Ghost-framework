@@ -69,7 +69,7 @@ namespace ghost.io
 			{
 				if(middlewares[p].id == (<IMiddleWare>middleware).id)
 				{
-					middlewares.splice(p, 1);
+					middlewares.splice(<any>p, 1);
 				}
 			}
 		}

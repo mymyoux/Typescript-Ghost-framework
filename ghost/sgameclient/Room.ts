@@ -19,6 +19,7 @@ namespace ghost.sgameclient
         protected data:any;
         public constructor(name:string, password:string, visibility:string, application:Application)
         {
+            super(); 
             this.name = name;
             this.password = password;
             this.visibility = visibility;
@@ -28,7 +29,6 @@ namespace ghost.sgameclient
             this.buffer = [];
             this.application = application;
             this.data = {};
-            super(); 
         }
         public getVisibility():string
         {

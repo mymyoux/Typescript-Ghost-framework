@@ -1429,11 +1429,10 @@ namespace ghost.browser.forms
         private sublist:string[];
         public constructor(name:string, data:any, element:any, _setInitialData:boolean, form:Form, parent:Field|Form)
         {
-            console.log("LISTFIELD:"+name, this.$input);
+            super(name, data, element, _setInitialData, form, parent);
             this.items = [];
             this.min = this.max = -1;
             //this.sublist = [];
-            super(name, data, element, _setInitialData, form, parent);
         }
 
         public validate():boolean

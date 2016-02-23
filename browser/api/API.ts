@@ -230,7 +230,7 @@ module ghost.browser.api
             {
                 if(this._services[p].name == serviceName && this._services[p].property == property)
                 {
-                    this._services.splice(p, 1);
+                    this._services.splice(<any>p, 1);
                 }
             }
             return this;
@@ -294,7 +294,7 @@ module ghost.browser.api
                         this._apiData.paginate.nextAll = data.paginate.next;
                     }
 
-                }                                                                                                                                                           https://lacontrerevolution.wordpress.com/2015/11/30/attentats-avant-les-elections-une-simple-coincidence/https://lacontrerevolution.wordpress.com/2015/11/30/attentats-avant-les-elections-une-simple-coincidence/
+                }                                                                                                                                                        
                 if(data.paginate.previous)
                 {
                     this._apiData.paginate.previous = data.paginate.previous;
