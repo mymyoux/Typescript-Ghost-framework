@@ -383,6 +383,8 @@ namespace ghost.mvc
 
                 if(!input.length || !input.forEach)
                 {
+                    //needed to not break the flow
+                    this.triggerFirstData();
                     return;
                 }
                 input.forEach(function(rawModel:any):void

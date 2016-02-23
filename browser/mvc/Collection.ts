@@ -655,7 +655,6 @@ namespace ghost.mvc
          */
         public readExternal(input:any[]):void
         {
-
             if(input)
             {
                 if(input.forEach)
