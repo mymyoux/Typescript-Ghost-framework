@@ -2,7 +2,7 @@
 ///<module="api"/>
 namespace ghost.mvc
 {
-    import API = ghost.browser.api.API;
+    import API = ghost.browser.api.APIExtended;
     import APIExtended = ghost.browser.api.APIExtended;
     import Arrays = ghost.utils.Arrays;
     import IBinaryResult = ghost.utils.IBinaryResult;
@@ -223,7 +223,7 @@ namespace ghost.mvc
             }
             if(!this._partsPromises[name])
             {
-                var request:API<API<any>> = this._getRequest(name, params); //this.getRequest(name, params);
+                var request: APIExtended = this._getRequest(name, params); //this.getRequest(name, params);
 
 
 
@@ -252,15 +252,18 @@ namespace ghost.mvc
         {
             return this.name();
         }
-        protected getRequest(name:string, params:any = null):API<API<any>>
+        protected getRequest(name: string, params: any = null): APIExtended
         {
             switch(name)
             {
                 case Model.PART_DEFAULT:
-                    return API.instance().controller(this.controller()).action(this.name());
+                    return this.request(name).controller(this.controller()).action(this.name());
                     break;
             }
             return null;
+        }
+        public request(name: string): APIExtended {
+            return API.request().name("controller_" + this.controller()+"_"+this.name() + "_" + name);
         }
         public getModelByID(id:any):T
         {

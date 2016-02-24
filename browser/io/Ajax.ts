@@ -1,5 +1,6 @@
 ///<lib="jquery"/>
 ///<lib="es6-promise"/>
+///<module="framework/ghost/events"/>
 namespace ghost.io
 {
 	var middlewares:any[] = [];
@@ -79,7 +80,7 @@ namespace ghost.io
 	export function ajax(settings:any):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:AjaxOptions):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:any):CancelablePromise<Object>;
-	export function ajax(url:any, settings?:AjaxOptions):CancelablePromise<Object>
+	export function ajax(url: any, settings?: AjaxOptions & { count_failed?:number}): CancelablePromise<Object>
 	{
 		if(typeof url == "string")
 		{
@@ -96,8 +97,9 @@ namespace ghost.io
 		var promise:CancelablePromise<Object> = new CancelablePromise<Object>(function(resolve, reject):void
 		{
 			settings = middleware(settings, "settings");
-			$ajax = $.ajax(settings)
-			.done(function(data, textStatus, jqXHR)
+			$ajax = $.ajax(settings);
+			
+			$ajax.done(function(data, textStatus, jqXHR)
 			{
 				if(promise && promise.canceled)
 				{
@@ -143,10 +145,34 @@ namespace ghost.io
 					{
 						settings.retry = <any> settings.retry - 1;
 					}
-					setTimeout(function()
+					if (settings.count_failed == undefined)
 					{
-						ajax(settings).then(resolve, reject);
-					}, 500);
+						settings.count_failed = 1;
+					}else
+					{
+						settings.count_failed++;
+					}
+					debugger;
+					if (navigator.onLine === false)
+					{
+						//wait
+						ghost.events.Eventer.once(ghost.events.Eventer.NETWORK_ONLINE, ()=>
+						{
+							debugger;
+							ajax(settings).then(resolve, reject);
+						});
+					}else
+					{
+						var time = 500 * Math.min(10, settings.count_failed);
+						if(time<0)
+						{
+							time = 500;
+						}
+						setTimeout(function()
+						{
+							ajax(settings).then(resolve, reject);
+						}, time); 
+					}
 				}else
 				{
 					if(promise)

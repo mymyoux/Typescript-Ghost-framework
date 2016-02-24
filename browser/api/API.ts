@@ -2,6 +2,7 @@
 ///<module="io"/>
 ///<module="framework/ghost/events"/>
 ///<module="framework/ghost/utils"/>
+///<module="data"/>  
 module ghost.browser.api
 {
 
@@ -173,11 +174,35 @@ module ghost.browser.api
         }
 
     }
+    class CacheManager {
+        public war(): ghost.browser.data.LocalForage {
+            return ghost.forage.warehouse("apicache");
+        }
+        public add(request: any): string {
+            var token: string = this.generateUniqueID();
+            this.war().setItem(token, request);
+            return token;
+        }
+        public remove(token: string): void {
+            this.war().removeItem(token);
+        }
+        protected generateUniqueID(): string {
+            return ghost.utils.Strings.getUniqueToken();
+        }
+    }
+
     export class APIExtended extends API<APIExtended>
     {
+        private static _always: any[] = [];
+        private static _cacheManager: CacheManager = new CacheManager();
+
+
         private _services:any[];
         private _apiData:any;
         private _direction:number = 1;
+        private _cacheLength: number;
+        private _name: string;
+        private _always: boolean;
         public static instance(inst?:API<any>):APIExtended
         {
             return <APIExtended>API.instance(inst);
@@ -186,6 +211,28 @@ module ghost.browser.api
         {
             super();
             this._services = [];
+        }
+        public cache(quantity: number): APIExtended
+        {
+            this._cacheLength = quantity;
+            return this;
+        }
+        public always(value:boolean):APIExtended
+        {
+            this._always = value;
+            return this;
+        }
+        public name(name:string):APIExtended
+        {
+            this._name = name;
+            return this;
+        }
+        public method(method: string): APIExtended {
+            if(method != "GET" && this._always == undefined)
+            {
+                this._always = true;
+            }
+            return <APIExtended>super.method(method);
         }
         public getAPIData():any
         {
@@ -379,7 +426,49 @@ module ghost.browser.api
             }
             return <any>this;
         }
+
+        public then(resolve?: any, reject?: any): APIExtended {
+            var request: any = this.getRequest();
+            var token: string;
+            if(this._always)
+            {
+               /* debugger;
+                token = APIExtended._cacheManager.add(request);*/
+            }
+            /* if(!this._promise)
+             {
+                 this._promise = this.getPromise();
+             }*/
+            var promise = ghost.io.ajax(request);//this.getPromise();
+            promise.then((data: any) => {
+                if(data && token)
+                {
+                 /*   debugger;
+                    APIExtended._cacheManager.remove(token);   */
+                }
+                // this._promise = null;
+                if (data && data.error) {
+                    if (reject)
+                        reject(data);
+                    return;
+                }
+                var parsed: any = this.parseResult(data);
+                this.trigger(API.EVENT_DATA, data);
+                if (resolve)
+                    resolve(parsed, data);
+            }, () => {
+                if(token)
+                {
+                    debugger;
+                }
+                if(reject)    
+                    reject();
+            });
+            return <any>this;
+        }
+
     }
+   
     export interface IAPIOptions
     {
         url?:string;

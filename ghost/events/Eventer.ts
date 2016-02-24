@@ -141,8 +141,7 @@ namespace ghost.events
             this.DEVICE_READY,
             this.APPLICATION_PAUSE,
             this.APPLICATION_RESUME,
-            this.NETWORK_ONLINE,
-            this.NETWORK_OFFLINE,
+
             this.KEYBOARD_BACK_BUTTON,
             this.KEYBOARD_MENU_BUTTON,
             this.KEYBOARD_SEARCH_BUTTON,
@@ -163,7 +162,9 @@ namespace ghost.events
         private _listWindow:string[] =
         [
             this.DOM_LOADED,
-            this.HASH_CHANGE
+            this.HASH_CHANGE,
+            this.NETWORK_ONLINE,
+            this.NETWORK_OFFLINE
         ];
             
         private _deviceReady:boolean = false;
