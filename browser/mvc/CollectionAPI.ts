@@ -392,6 +392,10 @@ namespace ghost.mvc
                 }
                 input.forEach(function(rawModel:any):void
                 {
+                    if(!rawModel)
+                    {
+                        return;
+                    }
                     if(rawModel.__class)
                     {
                         var model:T = <any>Model.get(rawModel.__class);
