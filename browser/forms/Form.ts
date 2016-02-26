@@ -2407,6 +2407,20 @@ namespace ghost.browser.forms
                                 return;
                             }
                               var file:FileReader = <FileReader>event.currentTarget;
+                              if(!file)
+                              {
+                                  file = <FileReader>event.target;
+                                  if (!file) {
+                                      file = <FileReader>event["originalTarget"];
+                                      if (!file) {
+                                          file = <FileReader>event["expliciteOriginalTarget"];
+                                      }
+                                      if(!file)
+                                      {
+                                          return;
+                                      }
+                                  }
+                              }
                               if(this.preview)
                               {
                                   if(this.preview_type == "img")
