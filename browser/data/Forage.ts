@@ -54,22 +54,7 @@ namespace ghost.browser.data
             this._data = {};
             this._sync = {};
 
-            var supportsIndexedDB: boolean = true;
-
-            try {
-                var indexedDB = indexedDB || indexedDB || msIndexedDB;
-
-                var test = indexedDB.open('_localforage_spec_test', 1);
-                test.onerror = function() {
-                    supportsIndexedDB = false;
-                }
-
-                var supportsIndexedDB = indexedDB && test.onupgradeneeded === null;
-            } catch(e) {
-                supportsIndexedDB = false;
-            }
-
-            if (false === supportsIndexedDB || false === ghost.core.Hardware.hasCookieEnable())
+            if (false === ghost.core.Hardware.hasCookieEnable())
             {
                 this._allSync = true;
                 this._keys = [];
