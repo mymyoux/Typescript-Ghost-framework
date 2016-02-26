@@ -129,6 +129,10 @@ namespace ghost.mvc
         {
 
         }
+        public isReloadingControllerOnHashChange() : boolean
+        {
+            return true;
+        }
         /**
          * Exists only to check controller type during init
          */

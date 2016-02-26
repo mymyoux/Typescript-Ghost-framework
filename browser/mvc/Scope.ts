@@ -62,19 +62,29 @@ namespace ghost.mvc
             log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
             /* if(name == this._name)
              {*/
-            this.removeCurrentController();
             if(next)
             {
-
-
                 var controller:Controller = Controller.getController(next);
-                if(controller)
+                var doAction: boolean     = true;
+
+                if (previous === next && !controller.isReloadingControllerOnHashChange())
+                    doAction = false;
+
+                if (true === doAction)
                 {
-                    log.warn("Loading : "+next);
-                    this.setCurrentController(controller, params);
+                    this.removeCurrentController();
+
+                    if(controller)
+                    {
+                        log.warn("Loading : "+next);
+                        this.setCurrentController(controller, params);
+                    }
                 }
             }
-            // }
+            else
+            {
+                this.removeCurrentController();
+            }
         }
 
         /**
