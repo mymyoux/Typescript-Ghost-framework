@@ -14,7 +14,7 @@ namespace ghost.mvc
 
         private _order:string;
         private _orderDirection: number;
-        private requests:any;
+        protected requests:any;
 
         public constructor()
         {

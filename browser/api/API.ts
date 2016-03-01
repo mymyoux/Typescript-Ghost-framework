@@ -277,13 +277,18 @@ module ghost.browser.api
             this._services.push({name:serviceName, property:property, data:data});
             return this;
         }
-        protected removeService(serviceName:string, property:string):APIExtended
+        protected removeService(serviceName:string, property?:string):APIExtended
         {
-            for(var p in this._services)
+
+            var i:number = 0;
+            while(i<this._services.length)
             {
-                if(this._services[p].name == serviceName && this._services[p].property == property)
+                if (this._services[i].name == serviceName && (!property || this._services[i].property == property))
                 {
-                    this._services.splice(<any>p, 1);
+                    this._services.splice(i, 1);
+                }else
+                {
+                    i++;
                 }
             }
             return this;
@@ -448,20 +453,23 @@ module ghost.browser.api
                 this._previousPromise = null;
             }
             return this;
-        }
+        } 
         public cancelAll():APIExtended
         {
             while(this._stacklist.length)
             {
+                console.error("CANCEL");
                 var popped: any = this._stacklist.pop();
                 if (popped.reject) {
                     popped.reject("abort");
                 }
             }
             if (this._previousPromise) {
+                console.error("CANCEL");
                 this._previousPromise.cancel();
                 this._previousPromise = null;
             }
+            console.error(this._instance);
             return this;
         }
         public stack(value:boolean):APIExtended{
@@ -537,6 +545,14 @@ module ghost.browser.api
                 var next: any = this._stacklist.shift();
                 this._then(next.request, next.resolve, next.reject, next.token);
             }
+        }
+        public reset():APIExtended
+        {
+            this._data = {};
+            this.removeService("paginate", "next");
+            this.removeService("paginate", "previous");
+            this._apiData = null;
+            return this;
         }
 
     }
