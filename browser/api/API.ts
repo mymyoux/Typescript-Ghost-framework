@@ -8,6 +8,7 @@ module ghost.browser.api
 
     import Objects = ghost.utils.Objects;
     import EventDispatcher = ghost.events.EventDispatcher;
+    import CancelablePromise = ghost.io.CancelablePromise;
     export abstract class API<T extends API<any>> extends EventDispatcher
     {
         public static EVENT_DATA:any = "event_data";
@@ -203,6 +204,10 @@ module ghost.browser.api
         private _cacheLength: number;
         private _name: string;
         private _always: boolean;
+        private _stack: boolean = true;
+        public _instance:number = ghost.utils.Maths.getUniqueID();
+        protected _previousPromise: CancelablePromise<any>;
+        protected _stacklist: any[];
         public static instance(inst?:API<any>):APIExtended
         {
             return <APIExtended>API.instance(inst);
@@ -211,6 +216,7 @@ module ghost.browser.api
         {
             super();
             this._services = [];
+            this._stacklist = []; 
         }
         public cache(quantity: number): APIExtended
         {
@@ -426,25 +432,80 @@ module ghost.browser.api
             }
             return <any>this;
         }
+        public cancel():APIExtended
+        {
+            if(this._stack && this._stacklist.length )
+            {
+                var popped:any = this._stacklist.pop();
+                if(popped.reject)
+                {
+                    popped.reject("abort");
+                }
+                return this;
+            }
+            if(this._previousPromise){
+                this._previousPromise.cancel();
+                this._previousPromise = null;
+            }
+            return this;
+        }
+        public cancelAll():APIExtended
+        {
+            while(this._stacklist.length)
+            {
+                var popped: any = this._stacklist.pop();
+                if (popped.reject) {
+                    popped.reject("abort");
+                }
+            }
+            if (this._previousPromise) {
+                this._previousPromise.cancel();
+                this._previousPromise = null;
+            }
+            return this;
+        }
+        public stack(value:boolean):APIExtended{
+            this._stack = value;
+            if (value && !this._stacklist)
+            {
+                this._stacklist = [];
+            }
+            return this;
+        }
 
         public then(resolve?: any, reject?: any): APIExtended {
             var request: any = this.getRequest();
             var token: string;
             if(this._always)
             {
-               /* debugger;
-                token = APIExtended._cacheManager.add(request);*/
+                debugger;
+                token = APIExtended._cacheManager.add(request);
             }
             /* if(!this._promise)
              {
                  this._promise = this.getPromise();
              }*/
+
+            if(this._stack && this._previousPromise)
+            {
+                //stack et already existing promise;
+                this._stacklist.push({ resolve: resolve, reject: reject, request: request, token:token});
+                return this;
+            }
+            return this._then(request, resolve, reject, token);
+        }
+        protected _then(request:any, resolve:any, reject:any, token:string):APIExtended
+        {
             var promise = ghost.io.ajax(request);//this.getPromise();
+            this._previousPromise = promise;
             promise.then((data: any) => {
-                if(data && token)
-                {
-                 /*   debugger;
-                    APIExtended._cacheManager.remove(token);   */
+                if (promise === this._previousPromise) {
+                    this._previousPromise = null;
+                }
+                this._next();
+                if (data && token) {
+                      debugger;
+                       APIExtended._cacheManager.remove(token);   
                 }
                 // this._promise = null;
                 if (data && data.error) {
@@ -455,16 +516,27 @@ module ghost.browser.api
                 var parsed: any = this.parseResult(data);
                 this.trigger(API.EVENT_DATA, data);
                 if (resolve)
-                    resolve(parsed, data);
-            }, () => {
-                if(token)
-                {
+                    resolve.call(this, parsed, data);
+            }, (reason: string) => {
+                if (promise === this._previousPromise) {
+                    this._previousPromise = null;
+                }
+                this._next();
+                if (token) {
                     debugger;
                 }
-                if(reject)    
-                    reject();
+                if (reject)
+                    reject(reason);
             });
             return <any>this;
+        }
+        protected _next():void
+        {
+            if (!this._previousPromise && this._stacklist && this._stacklist.length)
+            {
+                var next: any = this._stacklist.shift();
+                this._then(next.request, next.resolve, next.reject, next.token);
+            }
         }
 
     }

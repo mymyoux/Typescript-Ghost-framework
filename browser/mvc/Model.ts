@@ -32,6 +32,8 @@ namespace ghost.mvc
          * @type {string}
          */
         public static PART_DEFAULT:string = "default";
+
+        public static EVENT_FIRST_DATA: string = "first_data";
         /**
          * Model's instances
          * @type {string:Model}
@@ -155,8 +157,9 @@ namespace ghost.mvc
          */
         public data:any;
         private _timeout:any = <any>-1;
-        private _changed:string[];
+        protected _changed:string[];
         public _name:string;
+        protected firstData: boolean;  
         constructor()
         {
             super();
@@ -165,6 +168,7 @@ namespace ghost.mvc
                 this.data = this;///{};
             }
             this._changed = [];
+            this.firstData = true;
             if(this.saveInstance())
             {
                 Model.saveInstance(this);
@@ -411,7 +415,16 @@ namespace ghost.mvc
             {
                 this.data[p] = input[p];
             }
+            this.triggerFirstData();
             //this.data = input;
+        }
+        protected triggerFirstData(): void {
+            if (this.firstData) {
+                this.firstData = false;
+                setTimeout(() => {
+                    this.trigger(Model.EVENT_FIRST_DATA);
+                }, 0);
+            }
         }
 
         /**

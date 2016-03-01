@@ -139,7 +139,7 @@ namespace ghost.io
 				{
 					return;
 				}
-				if(settings.retry)
+				if(settings.retry && textStatus != "abort")
 				{
 					if(settings.retry !== RETRY_INFINITE && settings.retry!==true)
 					{

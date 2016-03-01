@@ -17,7 +17,7 @@ namespace ghost.mvc
         public static EVENT_RETRIEVED:string = Model.EVENT_RETRIEVED;
         public static EVENT_CHANGE:string = "change";
         public static EVENT_CHANGED:string = "changed";
-        public static EVENT_FIRST_DATA:string = "first_data";
+        public static EVENT_FIRST_DATA: string = Model.EVENT_FIRST_DATA;
 
         /**
          * Model's instances
@@ -264,14 +264,17 @@ namespace ghost.mvc
          * @protected
          * @type {[type]}
          */
-        public _onChange(key:string, model:T):void
+        public _onChange(model:T):void
         {
             if(model)
             {
                 this._triggerUpdate(model);
             }else
             {
-                debugger;
+                this.trigger(Collection.EVENT_CHANGE);
+                this._timeout = <any>setTimeout(() => {
+                    this.trigger(Collection.EVENT_CHANGED);
+                }, 0);
             }
         }
         protected _triggerUpdate(model:T):void

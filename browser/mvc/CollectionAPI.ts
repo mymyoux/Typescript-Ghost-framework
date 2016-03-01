@@ -54,6 +54,9 @@ namespace ghost.mvc
             if(name == Model.PART_DEFAULT)
                 this.readExternal(data);
         }
+        protected getRequestInstance(part?: string, params?: any): APIExtended {
+            return this._getRequest(part, params);
+        }
         protected _getRequest(part?:string, params?:any ):APIExtended
         {
             if (typeof part !== "string")
@@ -296,7 +299,7 @@ namespace ghost.mvc
         public _onChange(key:string, model:T):void
         public _onChange(key:any, model?:T):void
         {
-            if (key instanceof Model)
+            if (key instanceof ghost.events.EventDispatcher)
             {
                 model = key;
                 key = null;
