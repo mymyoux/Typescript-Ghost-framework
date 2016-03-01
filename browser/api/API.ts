@@ -204,7 +204,7 @@ module ghost.browser.api
         private _cacheLength: number;
         private _name: string;
         private _always: boolean;
-        private _stack: boolean = true;
+        private _stack: boolean = false;
         public _instance:number = ghost.utils.Maths.getUniqueID();
         protected _previousPromise: CancelablePromise<any>;
         protected _stacklist: any[];
