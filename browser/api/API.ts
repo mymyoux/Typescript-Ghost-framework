@@ -176,10 +176,32 @@ module ghost.browser.api
 
     }
     class CacheManager {
+        protected _api:APIExtended;
+        protected _local: ghost.browser.data.LocalForage;
+        protected _instance:string;
+        protected _initialized:boolean;
+        protected instance():string
+        {
+            if(!this._instance)
+            {
+                this._instance = this.generateUniqueID();
+            }
+            return this._instance;
+        }
         public war(): ghost.browser.data.LocalForage {
-            return ghost.forage.warehouse("apicache");
+            if(!this._local)
+            {
+                var name:string = "apicache";
+                this._local = ghost.forage.warehouse(name);
+            }
+            return this._local;
         }
         public add(request: any): string {
+            if (!this._initialized)
+            {
+                debugger;
+            }
+            request._instance = this.instance();
             var token: string = this.generateUniqueID();
             this.war().setItem(token, request);
             return token;
@@ -190,12 +212,69 @@ module ghost.browser.api
         protected generateUniqueID(): string {
             return ghost.utils.Strings.getUniqueToken();
         }
+        public init():void
+        {
+            if (this._initialized)
+            {
+                return;
+            }
+            this._initialized = true;
+            
+            this.war().keys().then((keys:string[]) => {
+                if (!keys || !keys.length)
+                {
+                    return;
+                }
+                this._api = APIExtended.request().stack(true);
+                keys.forEach((key:string):void=>
+                {
+                    this.war().getItem(key).then((request:any):void=>
+                    {
+                        if(!request)
+                        {
+                            this.war().removeItem(key);
+                            return;
+                        }
+                        if(request._instance == this.instance())
+                            this._api.then(key, request);
+                    }, (error:any):void=>
+                    {
+                        debugger;
+                    });
+                });
+
+                debugger;
+        }, () => {
+                debugger;
+            }); 
+        }
     }
 
     export class APIExtended extends API<APIExtended>
     {
         private static _always: any[] = [];
         private static _cacheManager: CacheManager = new CacheManager();
+        protected static _initialized:boolean;
+        public static init():void
+        {
+            if (APIExtended._initialized === true)
+            {
+                return;
+            }
+            APIExtended._initialized  = true;
+
+            APIExtended._cacheManager.init();
+            /*
+            APIExtended._cacheManager.keys().then(()=>
+            {
+                debugger;
+            }, ()=>
+            {
+                debugger;
+            });    */
+
+
+        }
 
 
         private _services:any[];
@@ -481,10 +560,23 @@ module ghost.browser.api
             return this;
         }
 
+        public then(token?:string, request?:any): APIExtended
+        public then(resolve?: any, reject?: any): APIExtended 
         public then(resolve?: any, reject?: any): APIExtended {
-            var request: any = this.getRequest();
-            var token: string;
-            if(this._always)
+            var request: any;
+            var token:string;
+            if(typeof resolve == "string")
+            {
+                token = resolve;
+                resolve = null;
+                request = reject;
+                reject = null;
+            }
+            if(!request)
+            {
+                request = this.getRequest();
+            }
+            if(this._always && !token)
             {
                 debugger;
                 token = APIExtended._cacheManager.add(request);
@@ -511,7 +603,8 @@ module ghost.browser.api
                     this._previousPromise = null;
                 }
                 this._next();
-                if (data && token) {
+                if (data && token) 
+                {
                       debugger;
                        APIExtended._cacheManager.remove(token);   
                 }
@@ -561,6 +654,7 @@ module ghost.browser.api
     {
         url?:string;
     }
+
 
 
     /*

@@ -2,14 +2,16 @@
 ///<module="ghost/core"/>
 ///<module="browser/navigation"/>
 ///<module="browser/i18n"/>
+///<module="api"/>
 ///<file="Controller.ts"/>
 namespace ghost.mvc
 {
+    import APIExtended = ghost.browser.api.APIExtended;
     export class Application extends ghost.core.CoreObject
     {
         protected static _instance: Application;
         protected _navigation:ghost.browser.navigation.Navigation;
-        protected steps: string[] = ["preinit", "initUser", "init", "postinit", "ready"];
+        protected steps: string[] = ["preinit", "initUser", "init", "handleCache", "postinit", "ready"];
         protected step: number = -1;
         public static getRootURL():string
         {
@@ -34,6 +36,11 @@ namespace ghost.mvc
             {
                this._init();
             });
+        }
+        protected getUserID():any
+        {
+            throw new Error("you must override this method");
+            return null;
         }
         private _init():void
         {
@@ -62,6 +69,18 @@ namespace ghost.mvc
                     });
                 }
             }
+        }
+        public war(): ghost.browser.data.LocalForage {
+            return ghost.forage.warehouse("global");
+        }
+        protected handleCache():Promise<any>
+        {
+            debugger;
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                APIExtended.init();
+            });
+            return promise;
         }
         protected initUser():any|void
         {
