@@ -80,6 +80,8 @@ namespace ghost.io
 	export function ajax(settings:any):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:AjaxOptions):CancelablePromise<Object>;
 	export function ajax(url:string, settings?:any):CancelablePromise<Object>;
+	export function ajax(request: any, settings?: AjaxOptions): CancelablePromise<Object>;
+	export function ajax(request: any, settings?: any): CancelablePromise<Object>;
 	export function ajax(url: any, settings?: AjaxOptions & { count_failed?:number}): CancelablePromise<Object>
 	{
 		if(typeof url == "string")
@@ -91,7 +93,13 @@ namespace ghost.io
 			settings.url = url;
 		}else
 		{
-			settings = url;
+			if(settings == undefined)
+			{
+				settings = url;
+			} else if (url)
+			{
+				settings = ghost.utils.Objects.merge(url, settings);
+			}
 		}
 		var $ajax:any;
 		var promise:CancelablePromise<Object> = new CancelablePromise<Object>(function(resolve, reject):void
@@ -120,7 +128,13 @@ namespace ghost.io
 						return;
 					}
 					data = middleware(data, "error");
-					reject(data.error?data.error:data);
+					if (settings.asObject)
+					{
+						reject({ errorThrown: data.error ? data.error : data, textStatus: textStatus, jqXHR: jqXHR, data:data });
+					}else
+					{
+						reject(data.error?data.error:data);
+					}
 					return;
 				}
 
@@ -141,6 +155,7 @@ namespace ghost.io
 				}
 				if(settings.retry && textStatus != "abort")
 				{
+					debugger;
 					if(settings.retry !== RETRY_INFINITE && settings.retry!==true)
 					{
 						settings.retry = <any> settings.retry - 1;
@@ -151,8 +166,7 @@ namespace ghost.io
 					}else
 					{
 						settings.count_failed++;
-					}
-					debugger;
+					} 
 					if (navigator.onLine === false)
 					{
 						//wait

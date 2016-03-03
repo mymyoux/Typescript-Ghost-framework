@@ -180,7 +180,7 @@ module ghost.browser.api
         protected _local: ghost.browser.data.LocalForage;
         protected _instance:string;
         protected _initialized:boolean;
-        protected instance():string
+        public instance():string
         {
             if(!this._instance)
             {
@@ -202,6 +202,11 @@ module ghost.browser.api
                 debugger;
             }
             request._instance = this.instance();
+            if(request.data)
+            {
+
+                request.data._timestamp = Date.now();
+            }
             var token: string = this.generateUniqueID();
             this.war().setItem(token, request);
             return token;
@@ -246,7 +251,19 @@ module ghost.browser.api
                         }
                         if(request._instance != this.instance())
                         {
+                            debugger;
+
                             console.warn("api -reexecute: ", request);
+                            if(request.data)
+                            {
+                                if(request.data._reloaded_count == undefined)
+                                {
+                                    request.data._reloaded_count = 0;
+                                }
+                                request.data._reloaded_count++;
+                                this.war().setItem(key, request);
+                            }
+
                             this._api.then(key, request);
                         }else
                         {
@@ -257,8 +274,6 @@ module ghost.browser.api
                         debugger;
                     });
                 });
-
-                debugger;
         }, () => {
                 debugger;
             }); 
@@ -270,15 +285,16 @@ module ghost.browser.api
         private static _always: any[] = [];
         private static _cacheManager: CacheManager = new CacheManager();
         protected static _initialized:boolean;
-        public static init(name:string):void
+        protected static _id_user:string;
+        public static init(id:string , name?:string):void
         {
             if (APIExtended._initialized === true)
             {
                 return;
             }
             APIExtended._initialized  = true;
-
-            APIExtended._cacheManager.init(name);
+            APIExtended._id_user = id;
+            APIExtended._cacheManager.init(name?name:"cache_"+id);
             /*
             APIExtended._cacheManager.keys().then(()=>
             {
@@ -289,6 +305,15 @@ module ghost.browser.api
             });    */
 
 
+        }
+        protected getRequest(): any {
+            var request: any = super.getRequest();
+            if(request.data)
+            {
+                request.data._id = ghost.utils.Strings.getUniqueToken();
+                request.data._instance = APIExtended._cacheManager.instance();
+            }
+            return request;
         }
         public static clearCache():Promise<any>
         {
@@ -537,6 +562,7 @@ module ghost.browser.api
         }
         public cancel():APIExtended
         {
+            //TODO:remove saved ones
             if(this._stack && this._stacklist.length )
             {
                 var popped:any = this._stacklist.pop();
@@ -616,26 +642,29 @@ module ghost.browser.api
         {
             var promise = ghost.io.ajax(request, {asObject:true});//this.getPromise();
             this._previousPromise = promise;
-            promise.then((data: any) => {
+            promise.then((rawData: any) => {
                 if (promise === this._previousPromise) {
                     this._previousPromise = null;
                 }
                 this._next();
+                var data: any;
+                debugger;
+                if (rawData && rawData.data) {
+                    data = rawData.data;
+                }
                 if (data && token) 
                 {
                       debugger;
                        APIExtended._cacheManager.remove(token);   
                 }
+                
                 // this._promise = null;
                 if (data && data.error) {
                     if (reject)
                         reject(data);
                     return;
                 }
-                if (data && data.data)
-                {
-                    data = data.data;
-                }
+              
                 var parsed: any = this.parseResult(data);
                 this.trigger(API.EVENT_DATA, data);
                 if (resolve)
@@ -645,14 +674,40 @@ module ghost.browser.api
                     this._previousPromise = null;
                 }
                 var reason: string = "unknown";
+                if (error && token)
+                {
+                    if (error.jqXHR && error.jqXHR.status != undefined)
+                    {
+                        var status: number = error.jqXHR.status;
+                        if(status>=200 && status<400)
+                        {
+                            var good_user:boolean = true;
+                            //server good real error
+                            if (error.data) {
+                                var data: any = error.data;
+                                if (data.state_user && data.state_user.id_user != APIExtended._id_user) {
+                                    //error but bad user id
+                                    good_user = false;
+                                }
+                                if(data.api_error_code != undefined)
+                                {
+                                    if (good_user)
+                                    {
+                                        APIExtended._cacheManager.remove(token);   
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+
+                }
                 if(error && error.errorThrown)
                 {
                     reason = error.errorThrown;
                 }
                 this._next();
-                if (token) {
-                    debugger;
-                }
+              
                 if (reject)
                     reject(reason);
             });

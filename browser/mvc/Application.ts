@@ -79,7 +79,7 @@ namespace ghost.mvc
          */
         protected handleCache():boolean
         {
-            APIExtended.init("cache_"+this.getUserID());
+            APIExtended.init(this.getUserID());//init("cache_"+this.getUserID());
             return true;
             /*var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
             {
