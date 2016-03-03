@@ -17,6 +17,29 @@ namespace ghost.browser.data
         private _keys:string[];
         private _sync:any;
         private _allSync:boolean;
+        public static clearAllDebug(): void {
+            //WARNING only used this on chrome for test
+            console.warn("WARNING only used this on chrome for test");
+            try {
+                if (window.indexedDB && window.indexedDB["webkitGetDatabaseNames"]) {
+                    window.indexedDB["webkitGetDatabaseNames"]().onsuccess = function(sender, args) {
+                        if (!sender || !sender.target || !sender.target.result || !sender.target.result.length) {
+                            return;
+                        }
+                        var len: number = sender.target.result.length;
+                        for (var i = 0; i < len; i++) {
+                            console.log("delete: " + sender.target.result[i]);
+                            window.indexedDB.deleteDatabase(sender.target.result[i]);
+                        }
+                    };
+                    console.log("all database deleted");
+                }
+            }catch(error)
+            {
+                console.error(error);
+            }
+
+        }
         public static config(options:ILocalForageOptions):void
         {
             if(options.debug === true)
@@ -61,6 +84,15 @@ namespace ghost.browser.data
             }
             else
                 this._allSync = false;
+        }
+
+        /**
+         * Gets forage's name
+         * @return {string} Forage's name
+         */
+        public name():string
+        {
+            return this._name;
         }
         /**
          * Gets Item by key

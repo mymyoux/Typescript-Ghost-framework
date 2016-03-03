@@ -31,7 +31,6 @@ namespace ghost.mvc
             super();
             Application._instance = this;
             //initialization navigation for scope support
-           
             this.prerequire(()=>
             {
                this._init();
@@ -71,16 +70,70 @@ namespace ghost.mvc
             }
         }
         public war(): ghost.browser.data.LocalForage {
-            return ghost.forage.warehouse("global");
+            return ghost.forage.warehouse("global").war(this.getUserID());
         }
-        protected handleCache():Promise<any>
+        /**
+         * Handle cache for the all application
+         * Delete the cache if id_user has changed
+         * Relaunch unsucessful requests
+         */
+        protected handleCache():boolean
         {
-            debugger;
-            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            APIExtended.init("cache_"+this.getUserID());
+            return true;
+            /*var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
             {
-                APIExtended.init();
+                this.war().getItem("id_user").then((id_user: any) => {
+                    if(id_user == undefined || id_user == this.getUserID())
+                    {
+                        if(id_user == undefined)
+                        {
+                            this.war().setItem("id_user", this.getUserID()).then(() => {
+                                APIExtended.init(this.war().name());
+                                resolve();
+
+                            }, () => {
+                                debugger;
+                                APIExtended.init(this.war().name());
+                                resolve();
+                            });
+                            return;
+                        }
+                        //normal no reset
+                        APIExtended.init(this.war().name());
+
+                        resolve();
+                    }else
+                    {
+                        //new id_user 
+                        APIExtended.clearCache().then(() => {
+                            this.war().setItem("id_user", this.getUserID()).then(() =>
+                            {
+                                APIExtended.init(this.war().name());
+                                resolve();
+                                
+                            }, ()=>
+                            {
+                                debugger;
+                                APIExtended.init(this.war().name());
+                                resolve();
+                            });
+
+                        }, () => {
+                            debugger;
+                            APIExtended.init(this.war().name());
+                            resolve();
+                        });
+                    }
+                }, 
+                () => {
+                    debugger;
+                    APIExtended.init(this.war().name());
+                    resolve();
+                });
+      
             });
-            return promise;
+            return promise;*/
         }
         protected initUser():any|void
         {

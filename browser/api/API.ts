@@ -188,10 +188,10 @@ module ghost.browser.api
             }
             return this._instance;
         }
-        public war(): ghost.browser.data.LocalForage {
+        public war(name?:string): ghost.browser.data.LocalForage {
             if(!this._local)
             {
-                var name:string = "apicache";
+                name = "apicache_"+(name?name:"");
                 this._local = ghost.forage.warehouse(name);
             }
             return this._local;
@@ -206,17 +206,26 @@ module ghost.browser.api
             this.war().setItem(token, request);
             return token;
         }
+        public clear():Promise<any>
+        {
+            return this.war().clear();
+        }
         public remove(token: string): void {
             this.war().removeItem(token);
         }
         protected generateUniqueID(): string {
             return ghost.utils.Strings.getUniqueToken();
         }
-        public init():void
+        public init(name:string = null):void
         {
             if (this._initialized)
             {
-                return;
+                return; 
+            }
+            if(name)
+            {
+                this._local = null;
+                this.war(name);
             }
             this._initialized = true;
             
@@ -235,8 +244,14 @@ module ghost.browser.api
                             this.war().removeItem(key);
                             return;
                         }
-                        if(request._instance == this.instance())
+                        if(request._instance != this.instance())
+                        {
+                            console.warn("api -reexecute: ", request);
                             this._api.then(key, request);
+                        }else
+                        {
+                            console.warn("api -ignore: ", request);
+                        }
                     }, (error:any):void=>
                     {
                         debugger;
@@ -255,7 +270,7 @@ module ghost.browser.api
         private static _always: any[] = [];
         private static _cacheManager: CacheManager = new CacheManager();
         protected static _initialized:boolean;
-        public static init():void
+        public static init(name:string):void
         {
             if (APIExtended._initialized === true)
             {
@@ -263,7 +278,7 @@ module ghost.browser.api
             }
             APIExtended._initialized  = true;
 
-            APIExtended._cacheManager.init();
+            APIExtended._cacheManager.init(name);
             /*
             APIExtended._cacheManager.keys().then(()=>
             {
@@ -274,6 +289,10 @@ module ghost.browser.api
             });    */
 
 
+        }
+        public static clearCache():Promise<any>
+        {
+            return this._cacheManager.clear();
         }
 
 
@@ -578,7 +597,6 @@ module ghost.browser.api
             }
             if(this._always && !token)
             {
-                debugger;
                 token = APIExtended._cacheManager.add(request);
             }
             /* if(!this._promise)
@@ -596,7 +614,7 @@ module ghost.browser.api
         }
         protected _then(request:any, resolve:any, reject:any, token:string):APIExtended
         {
-            var promise = ghost.io.ajax(request);//this.getPromise();
+            var promise = ghost.io.ajax(request, {asObject:true});//this.getPromise();
             this._previousPromise = promise;
             promise.then((data: any) => {
                 if (promise === this._previousPromise) {
@@ -614,13 +632,22 @@ module ghost.browser.api
                         reject(data);
                     return;
                 }
+                if (data && data.data)
+                {
+                    data = data.data;
+                }
                 var parsed: any = this.parseResult(data);
                 this.trigger(API.EVENT_DATA, data);
                 if (resolve)
                     resolve.call(this, parsed, data);
-            }, (reason: string) => {
+            }, (error: any) => {
                 if (promise === this._previousPromise) {
                     this._previousPromise = null;
+                }
+                var reason: string = "unknown";
+                if(error && error.errorThrown)
+                {
+                    reason = error.errorThrown;
                 }
                 this._next();
                 if (token) {
