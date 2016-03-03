@@ -251,8 +251,6 @@ module ghost.browser.api
                         }
                         if(request._instance != this.instance())
                         {
-                            debugger;
-
                             console.warn("api -reexecute: ", request);
                             if(request.data)
                             {
@@ -648,13 +646,11 @@ module ghost.browser.api
                 }
                 this._next();
                 var data: any;
-                debugger;
                 if (rawData && rawData.data) {
                     data = rawData.data;
                 }
                 if (data && token) 
                 {
-                      debugger;
                        APIExtended._cacheManager.remove(token);   
                 }
                 
