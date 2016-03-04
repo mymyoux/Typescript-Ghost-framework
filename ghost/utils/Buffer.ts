@@ -184,7 +184,8 @@ namespace ghost.utils
         cancel():void;
         pause():void;
         resume():void;
-        now():void;
+        delayed(customDelay:number, ...args):void;
+        now():void;  
         getTimeRemaining():number;
     }
 
@@ -227,6 +228,17 @@ namespace ghost.utils
                 return func.waiting;
             }
 
+            function delayed(customDelay:number) {
+
+                args = Array.prototype.slice.call(arguments, 1);
+                clearTimeout(timer);
+                func.waiting = true;
+                time = Date.now();
+                timer = setTimeout(function() {
+                    callback.apply(func, args);
+                }, customDelay);
+            }
+
             /**
              * If the throttle's function is waiting, it will call it now
              */
@@ -267,6 +279,7 @@ namespace ghost.utils
             func.resume = resume;
             func.isWaiting = isWaiting;
             func.delay = delay;
+            func.delayed = delayed;
             func.now = now;
             return func;
         }
