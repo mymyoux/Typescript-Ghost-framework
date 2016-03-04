@@ -2,7 +2,7 @@ namespace ghost.utils
 {
     export class Objects
     {
-        public static deepEquals(a:any, b:any):boolean
+        public static deepEquals(a:any, b:any, exclude?:string[]):boolean
         {
             if(typeof a != typeof b)
             {
@@ -20,12 +20,16 @@ namespace ghost.utils
                         return false;
                     }
                 }else
-                if (b instanceof Date) 
+                if (b instanceof Date)
                 {
                     return false;
                 }
                 for(var p in a)
                 {
+                    if (exclude && exclude.indexOf(p) !== -1) {
+                        continue;
+                    }
+
                     if(!Objects.deepEquals(a[p], b[p]))
                     {
                         return false;
@@ -33,6 +37,10 @@ namespace ghost.utils
                 }
                 for(var p in b)
                 {
+                    if (exclude && exclude.indexOf(p) !== -1) {
+                        continue;
+                    }
+
                     if(!Objects.deepEquals(a[p], b[p]))
                     {
                         return false;
@@ -58,14 +66,14 @@ namespace ghost.utils
             }
             // Handle the 3 simple types, and null or undefined
             if (null == obj || "object" != typeof obj) return obj;
-        
+
             // Handle Date
             if (obj instanceof Date) {
                 var copy:Date = new Date();
                 copy.setTime(obj.getTime());
                 return copy;
             }
-        
+
             // Handle Array
             if (obj instanceof Array) {
                 var copy_array:any[] = [];
@@ -74,7 +82,7 @@ namespace ghost.utils
                 }
                 return copy_array;
             }
-        
+
             // Handle Object
             if (obj instanceof Object) {
                 var copy_object:any = {};
@@ -95,7 +103,7 @@ namespace ghost.utils
                 }
                 return copy_object;
             }
-        
+
             throw new Error("Unable to copy obj! Its type isn't supported.");
         }
         public static makeNestedObject(data:any, name:string):any
@@ -113,7 +121,7 @@ namespace ghost.utils
             return data;
         }
 
-        public static  mergeProperties(propertyKey:string, firstObject:any, secondObject:any):any 
+        public static  mergeProperties(propertyKey:string, firstObject:any, secondObject:any):any
         {
             var propertyValue:any = firstObject[propertyKey];
             var propertyValue2:any = secondObject[propertyKey];
@@ -128,7 +136,7 @@ namespace ghost.utils
         {
             return this.mergeObjects(firstObject, secondObject);
         }
-        public static mergeObjects(firstObject:any, secondObject:any):any 
+        public static mergeObjects(firstObject:any, secondObject:any):any
         {
             if(!firstObject)
             {
