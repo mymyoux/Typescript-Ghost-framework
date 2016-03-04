@@ -202,11 +202,6 @@ module ghost.browser.api
                 debugger;
             }
             request._instance = this.instance();
-            if(request.data)
-            {
-
-                request.data._timestamp = Date.now();
-            }
             var token: string = this.generateUniqueID();
             this.war().setItem(token, request);
             return token;
@@ -310,6 +305,7 @@ module ghost.browser.api
             {
                 request.data._id = ghost.utils.Strings.getUniqueToken();
                 request.data._instance = APIExtended._cacheManager.instance();
+                request.data._timestamp = Date.now();
             }
             return request;
         }
