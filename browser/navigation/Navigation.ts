@@ -78,6 +78,8 @@ namespace ghost.browser.navigation
 
         private _currentHash:string;
         protected _converseHash: boolean = false;
+
+        public static SEPARATOR: string = '#!';
         /**
          * Constructor
          * @param ready If true, will be active as soon as possible otherwise will wait for #listen() to be call
@@ -121,7 +123,7 @@ namespace ghost.browser.navigation
         {
             log.info("Change hash:"+hash);
             if(hash.split("/")[0] == Navigation._DISPLAYED_SCOPE || hash.split("_")[0] == Navigation._DISPLAYED_SCOPE)
-                window.location.hash = "#!"+hash;
+                window.location.hash = this.SEPARATOR + hash;
         }
         private _detectScope():void
         {
@@ -161,10 +163,11 @@ namespace ghost.browser.navigation
         }
         private parseHash():any
         {
-            var hash:any = window.location.hash.substring(1);
-            if (hash.indexOf('!') === 0)
-                hash = hash.substring(1);
-            debugger;
+            var hash:any = window.location.hash.substring( 1 );
+            var separator: string = Navigation.SEPARATOR.substring( 1 );
+
+            if (separator && hash.indexOf(separator) === 0)
+                hash = hash.substring(separator.length);
 
             var hashSplit:string[] = hash.split("+");
             var hashes:any = hashSplit.reduce((previous:any, big_hash:string)=>
@@ -331,7 +334,7 @@ namespace ghost.browser.navigation
                     hash+= "/"+navigationScope.getCurrentPage().params.join("/");
                 }
             }
-            return "#!"+hash;
+            return Navigation.SEPARATOR + hash;
         }
         public getDefaultPage(scope:string):string
         {
