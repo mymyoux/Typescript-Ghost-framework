@@ -121,7 +121,7 @@ namespace ghost.browser.navigation
         {
             log.info("Change hash:"+hash);
             if(hash.split("/")[0] == Navigation._DISPLAYED_SCOPE || hash.split("_")[0] == Navigation._DISPLAYED_SCOPE)
-                window.location.hash = "#"+hash;
+                window.location.hash = "#!"+hash;
         }
         private _detectScope():void
         {
@@ -162,6 +162,10 @@ namespace ghost.browser.navigation
         private parseHash():any
         {
             var hash:any = window.location.hash.substring(1);
+            if (hash.indexOf('!') === 0)
+                hash = hash.substring(1);
+            debugger;
+
             var hashSplit:string[] = hash.split("+");
             var hashes:any = hashSplit.reduce((previous:any, big_hash:string)=>
             {
@@ -196,7 +200,7 @@ namespace ghost.browser.navigation
                 if(canHaveParam)
                 {
                     page = split[1];
-                    params = split.slice(2);   
+                    params = split.slice(2);
                 }else
                 {
                     //NOT SURE
@@ -250,7 +254,7 @@ namespace ghost.browser.navigation
                 }
                 if (this._converseHash)
                 {
-                    this._currentHash = window.location.hash; 
+                    this._currentHash = window.location.hash;
                 }
 
                 window.location.hash = this._currentHash;
@@ -275,7 +279,7 @@ namespace ghost.browser.navigation
                 {
                     if(page == "back")
                     {
-        
+
                         this.popPage(scope);
                     }else
                     {
@@ -327,7 +331,7 @@ namespace ghost.browser.navigation
                     hash+= "/"+navigationScope.getCurrentPage().params.join("/");
                 }
             }
-            return "#"+hash;
+            return "#!"+hash;
         }
         public getDefaultPage(scope:string):string
         {
@@ -407,7 +411,7 @@ namespace ghost.browser.navigation
          */
         public getScope(name):NavigationScope
         {
-            
+
             if(!name)
             {
                 if(!this._DEFAULT_SCOPE)
@@ -423,8 +427,8 @@ namespace ghost.browser.navigation
             return this._scopes[name];
         }
     }
-    
-    
+
+
     /**
      * Navigation Event. Used to cancel current page change
      * @type {NavigationEvent}
@@ -483,7 +487,7 @@ namespace ghost.browser.navigation
         private _history:IPage[];
         private _current:IPage;
         private _event:NavigationEvent;
-        
+
         /**
          * Constructor
          * @param key scope's key
@@ -720,8 +724,8 @@ namespace ghost.browser.navigation
                         page:page,
                         params: params
                     };
-                   this._history.push(ipage); 
-    
+                   this._history.push(ipage);
+
                    this._current = ipage;
                    if(!fromHash)
                    {
@@ -753,7 +757,7 @@ namespace ghost.browser.navigation
                 var old:string = this._current?this._current.page:null;
                 if(!this._isCancelled(Navigation.REPLACE, old, page, params))
                 {
-                     var ipage:IPage = 
+                     var ipage:IPage =
                     {
                         page:page,
                         params: params
@@ -777,7 +781,7 @@ namespace ghost.browser.navigation
             }
             if(this._history.length>0/*>1*/)
             {
-    
+
                 var old = this._current.page;
                 if(this._history.length>count)
                 {
@@ -786,8 +790,8 @@ namespace ghost.browser.navigation
                 {
                     this._current = null;
                 }
-    
-    
+
+
                 if(!this._isCancelled(Navigation.POP, old, (this._current?this._current.page:"")))
                 {
                     this._history.splice(this._history.length-count, count);
@@ -805,7 +809,7 @@ namespace ghost.browser.navigation
          */
         public popAll():void
         {
-            this.popPage(this._history.length); 
+            this.popPage(this._history.length);
         }
         /**
          * Called during page change. Triggers events
@@ -821,12 +825,12 @@ namespace ghost.browser.navigation
             ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, this._key, type, previous, next, params);
         }
     }
-    
+
  //   Navigation = new Navigation();
     export interface IPage
     {
         page:string;
         params:any;
     }
-    
+
 }
