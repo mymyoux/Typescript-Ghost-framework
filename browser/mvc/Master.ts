@@ -58,7 +58,7 @@ namespace ghost.mvc
 			}else
 			{
                 //additional parts
-                if((name.parts || name.ractive || name.name || name.async != undefined) && name.data)
+                if ((name.parts || name.ractive || name.name || name.async != undefined || name.part != undefined) && name.data)
                 {
                     this._parts[this._parts.length-1] = name;
                     name = name.data;
@@ -299,7 +299,6 @@ namespace ghost.mvc
             var ievent: IEvent;
             while (this._bindedEvents.length)
             {
-                debugger;
                 ievent = this._bindedEvents.shift();
                 if(ievent.selector)
                     $(ievent.object).off(ievent.events, ievent.selector, ievent.handler);
@@ -453,6 +452,10 @@ namespace ghost.mvc
         	{
                 if(item.retrieveData)
                 {
+                    if(this._parts[index] && this._parts[index].part === false)
+                    {
+                        return null;
+                    }
                     if(this._parts[index] && this._parts[index].condition)
                     {
                         if(!this._parts[index].condition())
@@ -913,6 +916,11 @@ namespace ghost.mvc
     {
         data:any;
         parts?:string[];
+        /**
+         * Load part at master initialisation
+         * @type {[type]}
+         */
+        part?:boolean;
         ractive?:string;
         name?:string;
         events?:string[];
