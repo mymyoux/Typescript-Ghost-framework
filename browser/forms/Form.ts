@@ -1793,7 +1793,8 @@ namespace ghost.browser.forms
             }
             //this.trigger(ListField.EVENT_REMOVE, [{name:this.name, list:this, input:this.items[i], id:(<ItemField>this.items[i]).getID()}]);
             //this.items.splice(i, 1);
-            (<ItemField>this.items[i]).remove();
+            if (this.items[i] && (<any>this.items[i]).remove)
+                (<ItemField>this.items[i]).remove();
             this.items.splice(i, 1);
           //  this.getListItem("[data-item]", this.element).find("[data-focus]").focus();
             this.checkMinStatus();

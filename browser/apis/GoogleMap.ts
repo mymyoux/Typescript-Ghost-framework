@@ -1,5 +1,6 @@
 ///<lib="googlemaps"/>
 ///<lib="es6-promise"/>
+///<module="framework/ghost/data"/>
 namespace ghost.browser.apis
 {
 	/**
@@ -22,6 +23,10 @@ namespace ghost.browser.apis
 		}
 		public static init(key:string = null):Promise<any>
 		{
+			if (!key && ghost.data.Configuration.has("gmap_api_key"))
+			{
+				key = ghost.data.Configuration.get("gmap_api_key");
+			}
 			var promise:Promise<any> = new Promise((resolve, reject)=>
 			{
 				if(GMap.isEnabled())

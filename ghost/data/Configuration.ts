@@ -27,7 +27,7 @@ namespace ghost.data
 		{
 			return Configuration.data[key] != undefined;
 		}
-		public static get(key: string): boolean {
+		public static get(key: string): any {
 			return Configuration.data[key] != undefined ? Configuration.data[key] : null;
 		}
 		public static set(key: string, value: any): void
