@@ -15,6 +15,7 @@ namespace ghost.mvc
         private _order:string;
         private _orderDirection: number;
         protected requests:any;
+        protected _cache: number = 0;
 
         public constructor()
         {
@@ -299,11 +300,8 @@ namespace ghost.mvc
         public _onChange(key:string, model:T):void
         public _onChange(key:any, model?:T):void
         {
-            if (key instanceof ghost.events.EventDispatcher)
-            {
-                model = key;
-                key = null;
-            }
+            if(arguments.length)
+                model = arguments[arguments.length - 1];
 
             if(model)
             {
@@ -312,6 +310,36 @@ namespace ghost.mvc
             {
                 debugger;
             }
+        }
+        protected _triggerUpdateAll()
+        {
+            super._triggerUpdateAll();
+            if (this._order)
+            {
+                
+            }
+        }
+        /**
+      * @protected
+      * @type {[type]}
+      */
+        public _add(model: T): void {
+
+            super._add(model);
+            if(this._cache && model)
+            {
+                var index: number = this._models.indexOf(model);
+                if(index<this._cache && (<any>model).serialize)
+                {
+                    this.cache().setItem("model" + index, (<any>model).serialize()).then(function() {
+                        debugger;
+                    }, function() {
+                            debugger;
+                        });
+                }
+            }
+            
+
         }
         private t = 0;
         public push(...models:T[]):number

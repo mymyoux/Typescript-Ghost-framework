@@ -266,6 +266,8 @@ namespace ghost.mvc
          */
         public _onChange(model:T):void
         {
+            if (arguments.length)
+                model = arguments[arguments.length - 1];
             if(model)
             {
                 this._triggerUpdate(model);
@@ -279,21 +281,36 @@ namespace ghost.mvc
         }
         protected _triggerUpdate(model:T):void
         {
+
             this.trigger(Collection.EVENT_CHANGE, model);
+            if(!(model instanceof Model))
+            {
+                debugger;
+            }
             if(this._changed.indexOf(model)==-1)
                 this._changed.push(model);
             if(<any>this._timeout == -1)
             {
                 this._timeout = <any>setTimeout(()=>
                 {
+                    this._triggerUpdateAll();/*
                     this._timeout = <any>-1;
                     var copy:T[] = this._changed;
                     this._changed = [];
-                    this.trigger(Collection.EVENT_CHANGED, copy);
+                    this.trigger(Collection.EVENT_CHANGED, copy);*/
 
                 },0);
             }
         }
+        protected _triggerUpdateAll()
+        {
+
+            this._timeout = <any>-1;
+            var copy: T[] = this._changed;
+            this._changed = [];
+            debugger;
+            this.trigger(Collection.EVENT_CHANGED, copy);
+        } 
         public _orderChange():void
         {
             this.trigger(Collection.EVENT_CHANGE);

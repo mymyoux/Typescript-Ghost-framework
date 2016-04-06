@@ -613,6 +613,28 @@ namespace ghost.mvc
             }
             return super.toObject(keys);
         }
+        public serialize():any
+        {
+            var data: any;
+            for(var p in this)
+            {
+                if(this.hasOwnProperty(p))
+                {
+                    if(typeof this[p] != "function")
+                    {
+                        data[p] = this[p];
+                    }
+                }
+            }
+            return data;
+        }
+        public unserialize(data:any):void
+        {
+            for(var p in data)
+            {
+                this[p] = data[p];
+            }
+        }
 
     }
 
