@@ -283,7 +283,7 @@ namespace ghost.mvc
         {
 
             this.trigger(Collection.EVENT_CHANGE, model);
-            if(!(model instanceof Model))
+            if(!(model instanceof ghost.events.EventDispatcher))
             {
                 debugger;
             }
