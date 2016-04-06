@@ -308,7 +308,6 @@ namespace ghost.mvc
             this._timeout = <any>-1;
             var copy: T[] = this._changed;
             this._changed = [];
-            debugger;
             this.trigger(Collection.EVENT_CHANGED, copy);
         } 
         public _orderChange():void
