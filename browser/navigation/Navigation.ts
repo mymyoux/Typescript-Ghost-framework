@@ -161,6 +161,24 @@ namespace ghost.browser.navigation
             this._currentHash = this._buildCurrentHash();
             window.location.href = this._currentHash;
         }
+
+        public getHashByPathname( hash : string ) : string
+        {
+            if (hash.length === 0)
+            {
+                var pathnames: Array<string> = location.pathname.substr(1).split('/');
+
+                if (pathnames.length >= 3)
+                {
+                    pathnames.shift(); // delete type
+                    pathnames.shift(); // delete /c/
+                    hash = pathnames.join('/');
+                }
+            }
+
+            return hash;
+        }
+
         private parseHash():any
         {
             var hash:any = window.location.hash.substring( 1 );
@@ -168,6 +186,8 @@ namespace ghost.browser.navigation
 
             if (separator && hash.indexOf(separator) === 0)
                 hash = hash.substring(separator.length);
+
+            hash = this.getHashByPathname( hash );
 
             var hashSplit:string[] = hash.split("+");
             var hashes:any = hashSplit.reduce((previous:any, big_hash:string)=>
