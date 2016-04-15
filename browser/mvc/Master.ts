@@ -756,6 +756,59 @@ namespace ghost.mvc
                         options[p] = binded[p];
                     }
                     options.data = data;
+                    //partials
+                    options.data._partials = {};
+                    options.data.makePartial = (name)=> {
+                        var url: string = "partial/" + name;
+                       
+                        var template: any = Template.getTemplate(url); 
+                        if (!template)
+                        {
+                            if (Template.isLoading(url))
+                            {
+                                return;
+                            }
+                            Template.load(url).then(()=>
+                            {           
+                                template = Template.getTemplate(url); 
+                                if(!template)
+                                {
+                                    return;
+                                }
+                                if(!template.isParsed())
+                                {
+                                    template.parse();
+                                }
+                                this.template.partials[url] = template.parsed;
+                                //force reload
+                                this.template.set("_partials." + name, true);
+                                this.template.set("_partials." + name, false);
+                                try {
+                                    this.onPartial(name);
+                                } catch (error) {
+
+                                }
+                            });      
+                        }else
+                        {
+                            if (!this.template.partials[url])
+                            {
+                                if (!template.isParsed()) {
+                                    template.parse();
+                                }
+                                this.template.partials[url] = template;
+                                //force reload
+                                this.template.set("_partials." + name, true);
+                                this.template.set("_partials." + name, false);
+                                try {
+                                    this.onPartial(name);
+                                } catch (error) {
+
+                                }
+                            }
+                        }
+                        return url;
+                    };
 
                     options.el = container;
 
@@ -812,6 +865,9 @@ namespace ghost.mvc
                 }
             });
             return promise;
+        }
+        protected onPartial(name:string):void
+        {
         }
         protected prepareTemplate(options:any):void
         {

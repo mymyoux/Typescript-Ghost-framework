@@ -52,8 +52,12 @@ namespace ghost.mvc
         {
             return Template.instance().load(url, forceReload);
         }
+        public static isLoading(url:string): boolean
+        {
+            return Template.instance().isLoading(url);
+        }
 
-
+        private loading: any;
         /**
          * Template url
          */
@@ -74,6 +78,11 @@ namespace ghost.mvc
          * Parsed template
          */
         public parsed:any;
+        public constructor()
+        {
+            super();
+            this.loading = {};
+        }
 
         /**
          * Specify if the template is already parsed
@@ -208,11 +217,18 @@ namespace ghost.mvc
             });
             return promise;
         }
+        protected isLoading(name: string):boolean
+        {
+            return this.loading[name];
+        }
         protected load(name:string, forceReload:boolean = false):Promise<any>
         {
             console.log("template:"+name);
+
             var promise:Promise<void> = new Promise<void>((resolve:any, reject):void=>
             {
+                this.loading[name] = true;
+                var _self: any = this;
                 this.cache().getItem(name).then((template:IRawTemplate)=>
                 {
                     if(!template || forceReload)
@@ -221,6 +237,7 @@ namespace ghost.mvc
                             .then(
                                 (result:any)=>
                                 {
+                                    this.loading[name] = false;
                                     if(result.template)
                                     {
                                         result.template.url = name;
@@ -231,10 +248,15 @@ namespace ghost.mvc
                                         reject("no template");
                                     }
                                 },
-                                reject
+                                function()
+                                {
+                                    _self.loading[name] = false;
+                                    reject.apply(null, Array.prototype.slice.call(arguments));
+                                }
                             );
                     }else
                     {
+                        this.loading[name] = false;
                         resolve(this.setTemplate(template));
                     }
                 });
