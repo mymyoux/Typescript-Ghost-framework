@@ -1,10 +1,12 @@
 ///<lib="es6-promise"/>
 ///<module="events"/>
+///<file="Component"/>
 namespace ghost.mvc
 {
     export class Template extends ghost.events.EventDispatcher
     {
         public static EVENT_EXPIRED:string = "expired";
+        public static EVENT_LOADED:string = "loaded";
         protected static _instance:Template;
         public static instance():Template
         {
@@ -66,6 +68,7 @@ namespace ghost.mvc
          * Content (text)
          */
         public content:string;
+        public components: any[];
         /**
          * md5 of the template
          */
@@ -140,10 +143,13 @@ namespace ghost.mvc
                 template.parsed = rawTemplate.parsed;
             }
 
+            template.components = rawTemplate.components;
             template.url = rawTemplate.url;
             template.version = rawTemplate.version;
             template.md5 = rawTemplate.md5;
             Template._templates[template.url] = template;
+
+            this.trigger(Template.EVENT_LOADED + ":" + template.url, template);
             return template;
         }
         protected urls():Promise<string[]>
@@ -227,16 +233,108 @@ namespace ghost.mvc
 
             var promise:Promise<void> = new Promise<void>((resolve:any, reject):void=>
             {
+                var template: Template;
+                if (!forceReload && (template=Template.getTemplate(name)) != null)
+                {
+                    debugger;
+                    resolve(template);
+                    return;
+                }
+                if (this.loading[name])
+                {
+                    debugger; 
+                    this.once(Template.EVENT_LOADED+":"+name, (template:Template)=>
+                    {
+                        resolve(template);
+                    });
+                    return;
+                }
                 this.loading[name] = true;
                 var _self: any = this;
+                if (name == "autocomplete") {
+                    debugger;
+                }
                 this.cache().getItem(name).then((template:IRawTemplate)=>
                 {
+                    if (name == "autocomplete") {
+                        debugger;
+                    }
                     if(!template || forceReload)
                     {
                         ghost.io.ajax({url:this.getURLFromTemplatename(name), retry:ghost.io.RETRY_INFINITE})
                             .then(
                                 (result:any)=>
                                 {
+                                    if(name== "autocomplete")
+                                    {
+                                        debugger;
+                                    }
+                                    if(result.components)
+                                    {
+                                        result.template.components = {
+                                            Autocomplete: function() {
+                                                debugger;
+                                            }
+                                        };
+                                       /*
+                                       //components
+                                        result.template.components = result.components.map(function(data: any) {
+                                                var configComponent: any = Component.getConfig(data.name);
+                                                if (configComponent)
+                                                {
+                                                    return {
+                                                         name: data.name,
+                                                         component: Ractive.extend(configComponent)
+                                                    };
+                                                    
+                                                }
+                                            return {
+                                                name:data.name,
+
+                                                component: Ractive.extend({
+                                                    data: function() {
+
+                                                        if(data.data)
+                                                        {
+                                                            try
+                                                            {
+                                                                data = JSON.parse(data.data);
+                                                            }catch(error)
+                                                            {
+                                                                debugger;
+                                                            }
+                                                            return data;
+                                                        }
+                                                        return null;
+                                                    },
+                                                    template: function() {
+                                                        var url: string = "rcomponents/" + data.name.toLowerCase();
+                                                        var template: any = Template.getTemplate(url);
+                                                        if(template)
+                                                        {
+                                                            if (!template.isParsed()) {
+                                                                template.parse();
+                                                            }
+                                                            return template.parsed;
+                                                        }
+                                                        Template.load(url).then(() => {
+                                                            template = Template.getTemplate(url);
+                                                            if (!template) {
+                                                                return;
+                                                            }
+                                                            if (!template.isParsed()) {
+                                                                template.parse();
+                                                            }
+                                                            debugger; 
+                                                            this.resetTemplate(template.parsed);
+                                                        });
+                                                        return "";
+                                                    }
+                                                }) 
+                                            };
+                                        });    */
+
+                                    }
                                     this.loading[name] = false;
                                     if(result.template)
                                     {
@@ -256,6 +354,9 @@ namespace ghost.mvc
                             );
                     }else
                     {
+                        if (name == "autocomplete") {
+                            debugger;
+                        }
                         this.loading[name] = false;
                         resolve(this.setTemplate(template));
                     }
@@ -295,5 +396,5 @@ namespace ghost.mvc
         url:string;
         parsed:string;
         version:number;
-    }
+        components: any[];    }
 }

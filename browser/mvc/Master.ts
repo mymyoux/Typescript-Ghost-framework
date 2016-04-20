@@ -758,16 +758,67 @@ namespace ghost.mvc
                     options.data = data;
                     //partials
                     options.data._partials = {};
-                    options.data.makePartial = (name)=> {
+                    options.data._components = {};
+                    /*
+                    options.data.makeContext = function(name, data)
+                    {
                         var url: string = "partial/" + name;
+                        var template: any = Template.getTemplate(url);
+                        if (!template) {
+                            return "";
+                        }
+                        debugger;
                        
+                        return data;
+                    };*/
+                    options.partials  = {};
+                    options.components = {};
+                    /*
+                    options.components.Autocomplete = function()
+                    {
+                        debugger;
+                    };*/
+                    /*
+                    Ractive.extend({
+                        template: function()
+                        {
+
+                        }
+                    }); function()
+                    {
+                      return null;
+                    };*/
+
+                    options.data.makeComponent = (name, data) => {
+                        var url: string = "rcomponents/" + name.toLowerCase();
+                        if (!Ractive.partials[url])
+                        {
+                            Ractive.partials[url] = "";
+                            if (!Ractive.components[name])
+                            {
+                                Ractive.components[name] = Ractive.extend(Component.getConfig(name));
+                            }
+                            Component.loadTemplate(url).then((template:Template)=>
+                            {
+                                Ractive.partials[url] = '<' + name+ ' model="{{this}}"/>';
+                                this.template.set("_components." + name.toLowerCase(), true);
+                                this.template.set("_components." + name.toLowerCase(), false);
+                            });
+                        }
+                        return url;
+                    };
+
+                    options.data.makePartial = (name, data)=> {
+
+                        var url: string = "partial/" + name;
+                        if(Ractive.partials[url])
+                        {
+                            return url;
+                        }
                         var template: any = Template.getTemplate(url); 
                         if (!template)
                         {
-                            if (Template.isLoading(url))
-                            {
-                                return;
-                            }
+                            Ractive.partials[url] = "";
                             Template.load(url).then(()=>
                             {           
                                 template = Template.getTemplate(url); 
@@ -775,12 +826,11 @@ namespace ghost.mvc
                                 {
                                     return;
                                 }
-                                if(!template.isParsed())
+                                if(!template.isParsed()) 
                                 {
                                     template.parse();
                                 }
-                                this.template.partials[url] = template.parsed;
-                                //force reload
+                                Ractive.partials[url] = template.parsed;
                                 this.template.set("_partials." + name, true);
                                 this.template.set("_partials." + name, false);
                                 try {
@@ -791,12 +841,12 @@ namespace ghost.mvc
                             });      
                         }else
                         {
-                            if (!this.template.partials[url])
+                            if (!Ractive.partials[url])
                             {
                                 if (!template.isParsed()) {
                                     template.parse();
                                 }
-                                this.template.partials[url] = template;
+                                Ractive.partials[url] = template.parsed;
                                 //force reload
                                 this.template.set("_partials." + name, true);
                                 this.template.set("_partials." + name, false);
@@ -806,6 +856,8 @@ namespace ghost.mvc
 
                                 }
                             }
+                            /*if (data)
+                                return url + " " + JSON.stringify(data);*/
                         }
                         return url;
                     };
@@ -834,6 +886,18 @@ namespace ghost.mvc
                         if(!this.templateData.isParsed())
                         {
                             this.templateData.parse(options);
+                        }
+                        if (this.templateData.components)
+                        {
+                            var name: string;
+                            for (var p in this.templateData.components)
+                            {
+                                name = this.templateData.components[p].name;
+                                if(!options.components[name])
+                                {
+                                    options.components[name] = this.templateData.components[p].component;
+                                }
+                            }
                         }
                         options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
                         //debugger;
@@ -867,6 +931,9 @@ namespace ghost.mvc
             return promise;
         }
         protected onPartial(name:string):void
+        {
+        }
+        protected onComponent(name: string): void
         {
         }
         protected prepareTemplate(options:any):void
