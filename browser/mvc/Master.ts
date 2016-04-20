@@ -800,7 +800,15 @@ namespace ghost.mvc
                             }
                             Component.loadTemplate(url).then((template:Template)=>
                             {
-                                Ractive.partials[url] = '<' + name+ ' model="{{this}}"/>';
+                                var context:string = "";
+                                if(data)
+                                {
+                                    for(var p in data)
+                                    {
+                                        context+= ' '+p+'="'+data[p]+'"';
+                                    }
+                                }
+                                Ractive.partials[url] = '<' + name+ ' model="{{this}}"'+context+'/>';
                                 this.template.set("_components." + name.toLowerCase(), true);
                                 this.template.set("_components." + name.toLowerCase(), false);
                             });

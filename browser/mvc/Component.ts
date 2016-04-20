@@ -87,7 +87,8 @@ namespace ghost.mvc {
 			if(!config || !config[method])
 			{
 				console.error(method + " isn't binded on " , current);
-				throw new Error(method + " isn't binded  on " + Classes.getName(current));
+				console.error(current);
+				throw new Error(method + " isn't binded  on " + Classes.getName(current.constructor));
 			}else
 			{
 				method = config[method];
@@ -170,6 +171,20 @@ namespace ghost.mvc {
 					this.context = model;
 				}
 			}
+			var requiredData: string[] = this.getRequiredData();
+			if(requiredData)
+			{
+				for(var p in requiredData)
+				{
+					if (this.get(requiredData[p]) == undefined)
+					{
+						console.error(requiredData[p] + " is required for the component " , this); 
+						console.error(this);
+						debugger;
+						throw new Error(requiredData[p] + " is required for the component " + Classes.getName(this.constructor));
+					}
+				}
+			}
 			this.init();
 			var binded:any = this._getBindedFunctions();
 			if(binded)
@@ -203,6 +218,10 @@ namespace ghost.mvc {
 		protected getBindedFunctions(): any {
             return null;
         }
+        protected getRequiredData():string[]
+        {
+			return null;
+        }
 		public onRender(): void {
 			//debugger;
 		}
@@ -212,6 +231,10 @@ namespace ghost.mvc {
 		public onComplete(): void {
 			this.bindEvents();
 			this.activate();
+		}
+		protected getInitialData():any
+		{
+			return null;
 		}
 		protected bindEvents():void
 		{
@@ -233,6 +256,14 @@ namespace ghost.mvc {
 		{
 
 		}
+		public set(name:string, value:any):void
+		{
+			this.instance.set(name, value);
+		}
+		public get(name:string):any
+		{
+			return this.instance.get(name);
+		}
 		protected ron(name:string, callback:Function):void
 		{
 			this.instance.on(name, callback);
@@ -247,7 +278,8 @@ namespace ghost.mvc {
 		}
 		public getData(): any {
 			//debugger;
-			return null;
+			var data: any = this.getInitialData();
+			return data;
 		}
 		public getTemplate(): any {
 			var template: Template = Template.getTemplate(this.getTemplateName());
