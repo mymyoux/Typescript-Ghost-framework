@@ -138,13 +138,20 @@ namespace ghost.mvc {
 			if(binded)
 				for(var p in binded)
 				{
-					config[p] = function() { 
+					config[p] = Component.bindCallMethod(name, p);
+					/*Component.bindCallMethod(function() { 
 						return Component.callMethod(this, name, p, Array.prototype.slice.call(arguments));
-					};
+					};*/
 				}
 			return config;
 		}
-		protected context: any;
+		protected static bindCallMethod(name:string, method:string):any
+		{
+			return function() {
+				return Component.callMethod(this, name, method, Array.prototype.slice.call(arguments));
+			}
+		}
+		public context: any;
 		public constructor(protected instance: any, protected name: string) {
 			super();
 		}
@@ -255,6 +262,10 @@ namespace ghost.mvc {
 		protected disactivate():void
 		{
 
+		}
+		protected fire(event:string, ...args:any[]):void
+		{
+			this.instance.root.fire.apply(this.instance.root, Array.prototype.slice.call(arguments));
 		}
 		public set(name:string, value:any):void
 		{

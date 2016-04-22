@@ -158,7 +158,6 @@ namespace ghost.mvc
                 this.paramsFromActivation = params;
             }
         }
-
 		protected getInitialData():any[]
 		{
 			return null;
