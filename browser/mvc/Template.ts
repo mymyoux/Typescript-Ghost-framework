@@ -102,14 +102,19 @@ namespace ghost.mvc
          */
         public parse(options:any):void
         {
-            this.parsed = Ractive["parse"](this.content, options);
+            if(!this.content)
+            {
+                debugger;
+            }
+            this.parsed = Ractive["parse"](this.content, options); 
             if(window.location.host.indexOf(".local")==-1)
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,
                     md5:this.md5,
-                    version:this.version,
-                    parsed:this.parsed
+                    content:this.content,
+                    version:this.version/*,
+                    parsed:this.parsed*/
                 });
             }
 
@@ -138,6 +143,10 @@ namespace ghost.mvc
             }
             var template:Template = Template._templates[rawTemplate.url]?Template._templates[rawTemplate.url]:this.getNewInstance();
             template.content = rawTemplate.content;
+            if(!template.content)
+            {
+                debugger;
+            }
             if(rawTemplate.parsed)
             {
                 template.parsed = rawTemplate.parsed;
@@ -164,6 +173,7 @@ namespace ghost.mvc
         }
 
         protected sync():void{
+            //malmalmrlemlkeùmktetjetjem
             var templates:any[] = [];
             this.iterate(function(template:ghost.mvc.Template):void{
                 var requestTemplate:any ={url:template.url};
@@ -172,7 +182,7 @@ namespace ghost.mvc
                     requestTemplate.version = template.version
                 }else {
                     requestTemplate.md5 = template.md5;
-                }
+                } 
                 templates.push(requestTemplate);
             }).then(()=>
             {
@@ -258,6 +268,13 @@ namespace ghost.mvc
                 {
                     if (name == "autocomplete") {
                         debugger;
+                    }
+                    if(template)
+                    {
+                        if(!template.content && !template.parsed)
+                        {
+                            template = null;
+                        }
                     }
                     if(!template || forceReload)
                     {

@@ -236,7 +236,7 @@ namespace ghost.browser.data
          */
         public setItem(key:string, value:any):Promise<any>
         {
-            this.sync(key, value);
+            this.sync(key, value); 
             return this._storage.setItem(key, value);
         }
         /**
