@@ -42,10 +42,29 @@ namespace ghost.utils
             }
             return value.indexOf(start) == value.length - start.length;
         }
+        public static camel(text:string, delimiter:string = "-")
+        {
+            if(!text)
+            {
+                return text;
+            }
+            var reg: RegExp = new RegExp(delimiter, "g");
+            text = Strings.capitalizeAllWords(text.replace(reg, " "));
+            text = text.replace(/ /g, "");
+            text = text.substring(0, 1).toLowerCase() + text.substring(1);
+            return text;
+        }
         public static capitalizeAllWords(text:string):string
         {
+            if(!text)
+            {
+                return text;
+            }
             text = text.toLowerCase();
-
+            return text.replace(/\b[a-z]/g, function(letter) {
+                return letter.toUpperCase();
+            });
+            /*
             var capitalize = function(car)
             {
                 var name = text.split(car);
@@ -59,7 +78,7 @@ namespace ghost.utils
             }
             text = capitalize(" ");
             text = capitalize("'");
-            return text;
+            return text;*/
         }
         public static trim(text:string):string
         {

@@ -1,6 +1,7 @@
 ///<module="framework/ghost/utils"/>
 namespace ghost.mvc {
 	import Classes = ghost.utils.Classes;
+	import Strings = ghost.utils.Strings; 
     export class Component extends ghost.events.EventDispatcher 
     {
 		protected static packages: any[] = [];
@@ -17,12 +18,18 @@ namespace ghost.mvc {
 			return Component.getComponentClassFromPackage(name);
     	}
 		protected static getComponentClassFromPackage(name: string): Component {
+			if(name.indexOf("-")!=-1)
+			{
+				name = Strings.camel(name);
+				name = name.substring(0, 1).toUpperCase() + name.substring(1);
+			}
 			for (var p in Component.packages) {
 				if (Component.packages[p][name]) {
 					var componentClass: any = Component.packages[p][name];
 					return Component.components[name] = componentClass;
-				}
+				} 
 			}
+
 			return null;
 		}
     	public static addComponentPackage(packages:any):void
@@ -41,6 +48,11 @@ namespace ghost.mvc {
 			if(index == -1)
 			{
 				var componentClass: any = this.getComponentClass(name);
+				if(!componentClass)
+				{
+					Strings.camel(name);
+					throw new Error(name + " component class has not been found");
+				}
 				var component: Component = new componentClass(instance, name);
 				Component._instances.push(instance);
 				Component._components.push(component);
