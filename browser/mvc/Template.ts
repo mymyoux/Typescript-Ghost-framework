@@ -107,14 +107,14 @@ namespace ghost.mvc
                 debugger;
             }
             this.parsed = Ractive["parse"](this.content, options); 
-            if(window.location.host.indexOf(".local")==-1)
+            if(true || window.location.host.indexOf(".local")==-1)
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,
                     md5:this.md5,
-                    content:this.content,
-                    version:this.version/*,
-                    parsed:this.parsed*/
+                    //content:this.content,
+                    version:this.version,
+                    parsed:this.parsed
                 });
             }
 
@@ -143,7 +143,7 @@ namespace ghost.mvc
             }
             var template:Template = Template._templates[rawTemplate.url]?Template._templates[rawTemplate.url]:this.getNewInstance();
             template.content = rawTemplate.content;
-            if(!template.content)
+            if (!rawTemplate.content && !rawTemplate.parsed)
             {
                 debugger;
             }
@@ -246,9 +246,15 @@ namespace ghost.mvc
                 var template: Template;
                 if (!forceReload && (template=Template.getTemplate(name)) != null)
                 {
-                    debugger;
-                    resolve(template);
-                    return;
+                    if (!template.content && !template.parsed) {
+                        template = null;
+                        Template._templates[name] = null;
+                    }
+                    if(template)
+                    {
+                        resolve(template);
+                        return;
+                    }
                 }
                 if (this.loading[name])
                 {
@@ -371,9 +377,6 @@ namespace ghost.mvc
                             );
                     }else
                     {
-                        if (name == "autocomplete") {
-                            debugger;
-                        }
                         this.loading[name] = false;
                         resolve(this.setTemplate(template));
                     }
