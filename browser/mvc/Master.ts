@@ -391,6 +391,14 @@ namespace ghost.mvc
                 //no template - no view
                 return true;
             }
+            if (this.templateData)
+            {
+                if (!this.templateData.content && !this.templateData.parsed)
+                {
+                    debugger;
+                    this.templateData = null;
+                }
+            }
         	if(!this.templateData)
         	{
         		//var _this:Master = this;
