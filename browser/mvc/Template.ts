@@ -107,14 +107,14 @@ namespace ghost.mvc
                 debugger;
             }
             this.parsed = Ractive["parse"](this.content, options); 
-            if(true || window.location.host.indexOf(".local")==-1)
+            if(window.location.host.indexOf(".local")==-1)
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,
                     md5:this.md5,
-                    //content:this.content,
+                    content:this.content,
                     version:this.version,
-                    parsed:this.parsed
+                 //   parsed:this.parsed
                 });
             }
 
@@ -143,7 +143,7 @@ namespace ghost.mvc
             }
             var template:Template = Template._templates[rawTemplate.url]?Template._templates[rawTemplate.url]:this.getNewInstance();
             template.content = rawTemplate.content;
-            if (!rawTemplate.content && !rawTemplate.parsed)
+            if (!template.content && !rawTemplate.parsed)
             {
                 debugger;
             }
@@ -209,6 +209,7 @@ namespace ghost.mvc
                            if(Template._templates[expired])
                            {
                                Template._templates[expired].expired();
+                               delete Template._templates[expired];
                            }else
                            {
                                this.cache().removeItem(expired);
@@ -248,7 +249,7 @@ namespace ghost.mvc
                 {
                     if (!template.content && !template.parsed) {
                         template = null;
-                        Template._templates[name] = null;
+                        delete Template._templates[name]; 
                     }
                     if(template)
                     {
