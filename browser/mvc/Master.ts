@@ -210,9 +210,11 @@ namespace ghost.mvc
                             throw error;
                         },0);
                     }
-		 		}
-	 		},(error)=>
+		 		}  
+                 //LOOL
+	 		}).catch((error)=>
 	 		{
+                    debugger;
                 ghost.debug.ErrorLogger.instance().addError("master_activation_failed",error);
 	 			console.error("Master failed during preactivation", this, error);
 
@@ -393,7 +395,7 @@ namespace ghost.mvc
             }
             if (this.templateData)
             {
-                if (!this.templateData.content && !this.templateData.parsed)
+                if (!this.templateData.loaded())
                 {
                     debugger;
                     this.templateData = null;
@@ -402,13 +404,13 @@ namespace ghost.mvc
         	if(!this.templateData)
         	{
         		//var _this:Master = this;
-        		var template:string = this._getTemplate();
-        		if(!template)
+        		var templateStr:string = this._getTemplate();
+                if (!templateStr)
         		{
         			 console.warn("no template for master:", this);
                     return true;
         		}
-               var temp = Template.getTemplate(template);
+                var temp = Template.getTemplate(templateStr);
                if(temp)
                {
                    this.templateData = temp;
@@ -418,7 +420,7 @@ namespace ghost.mvc
 
         		var promise:Promise<void> = new Promise<void>((resolve, reject):void=>
         		{
-                    Template.load(template).then((template:Template)=>
+                    Template.load(templateStr).then((template: Template) =>
                     {
                         this.templateData = template;
                         if(!this.templateData)
@@ -428,24 +430,6 @@ namespace ghost.mvc
                         console.log("loaded:", this.name());
                         resolve();
                     }, reject);
-					/*ghost.io.ajax({url:template, retry:ghost.io.RETRY_INFINITE})
-	        		.then(
-        			function(result:any)
-        			{
-                        if(result.template)
-                        {
-                            result.template.url = template;
-                            _this.templateData = Template.setTemplate(result.template);
-
-                            resolve();
-
-                        }else
-                        {
-                            reject("no template");
-                        }
-    				},
-    				reject
-	    			);*/
         		});
 
                 return promise;
@@ -697,8 +681,9 @@ namespace ghost.mvc
                     this.templateRender().then(resolve, reject);
                 }else
                 {
-                    this.templateData.retrieve().then(()=>
+                    this.templateData.retrieve().then((template:Template)=>
                     {
+                        this.templateData = template;
                         this.templateRender().then(resolve, reject);
                     },function(error)
                     {
@@ -834,42 +819,41 @@ namespace ghost.mvc
                         if (!template)
                         {
                             Ractive.partials[url] = "";
-                            Template.load(url).then(()=>
+                            Template.load(url).then((template:Template) =>
                             {           
-                                template = Template.getTemplate(url); 
                                 if(!template)
                                 {
                                     return;
                                 }
-                                if(!template.isParsed()) 
-                                {
-                                    template.parse();
-                                }
-                                Ractive.partials[url] = template.parsed;
-                                this.template.set("_partials." + name, true);
-                                this.template.set("_partials." + name, false);
-                                try {
-                                    this.onPartial(name);
-                                } catch (error) {
-
-                                }
+                                template.prepareForUse().then(()=> {
+                                    Ractive.partials[url] = template.parsed;
+                                    this.template.set("_partials." + name, true);
+                                    this.template.set("_partials." + name, false);
+                                    try {
+                                        this.onPartial(name);
+                                    } catch (error) {
+                                        debugger;
+                                    }
+                                }, function() {
+                                    debugger;
+                                 });    
                             });      
                         }else
                         {
                             if (!Ractive.partials[url])
                             {
-                                if (!template.isParsed()) {
-                                    template.parse();
-                                }
-                                Ractive.partials[url] = template.parsed;
-                                //force reload
-                                this.template.set("_partials." + name, true);
-                                this.template.set("_partials." + name, false);
-                                try {
-                                    this.onPartial(name);
-                                } catch (error) {
-
-                                }
+                                template.prepareForUse().then(() => {
+                                    Ractive.partials[url] = template.parsed;
+                                    this.template.set("_partials." + name, true);
+                                    this.template.set("_partials." + name, false);
+                                    try {
+                                        this.onPartial(name);
+                                    } catch (error) {
+                                        debugger;
+                                    }
+                                }, function() {
+                                    debugger;
+                                });     
                             }
                             /*if (data)
                                 return url + " " + JSON.stringify(data);*/
@@ -896,12 +880,8 @@ namespace ghost.mvc
                         {
                             debugger;
                         }
-                        this.prepareTemplate(options);
 
-                        if(!this.templateData.isParsed())
-                        {
-                            this.templateData.parse(options);
-                        }
+
                         if (this.templateData.components)
                         {
                             var name: string;
@@ -914,11 +894,29 @@ namespace ghost.mvc
                                 }
                             }
                         }
-                        options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
+                        //JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
                         //debugger;
                         console.log("TEMPLATE", options);
 
-                        this.template = new Ractive(options);
+                        this.templateData.prepareForUse(options).then(() => {
+                            if (!this.templateData.parsed) {
+                                reject(new Error("no parsed data"));
+                                return;
+                            }
+                            options.template = this.templateData.parsed;
+                            this.template = new Ractive(options);
+                            var listener: any = binded; //this.getBindedEventListeners();
+                            if (listener) {
+                                for (var p in listener) {
+                                    this.template.on(p, listener[p]);
+
+                                }
+                            }
+                            resolve();
+                        }, reject).catch(function(error)
+                        { 
+                            reject(error);
+                        });
                     }catch(error)
                     {
                         console.error(error);
@@ -927,16 +925,7 @@ namespace ghost.mvc
                         return;
                     }
 
-                    var listener:any = binded; //this.getBindedEventListeners();
-                    if(listener)
-                    {
-                        for(var p in listener)
-                        {
-                            this.template.on(p, listener[p]);
-
-                        }
-                    }
-                    resolve();
+                   
                 }else
                 {
                     console.warn("no container for ", this);
@@ -950,18 +939,6 @@ namespace ghost.mvc
         }
         protected onComponent(name: string): void
         {
-        }
-        protected prepareTemplate(options:any):void
-        {
-            if(!this.templateData.isParsed())
-            {
-                this.templateData.parse(options);
-            }
-            options.template = this.templateData.parsed;//JSON.parse(JSON.stringify(this.templateData.parsed)); //Ractive["parse"](this.templateData.content, options.template);
-            //debugger;
-            console.log("TEMPLATE", options);
-
-            this.template = new Ractive(options);
         }
         protected rerender():void
         {
@@ -981,7 +958,7 @@ namespace ghost.mvc
             //debugger;
             if(this.isActivated())
             {
-                this.templateData.retrieve().then(()=>
+                this.templateData.retrieve().then((template:Template)=>
                 {
                    // debugger;
                     if(this.isActivated())

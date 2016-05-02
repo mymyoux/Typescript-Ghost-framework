@@ -23,6 +23,13 @@ namespace ghost.mvc
             {
                 return null;
             }
+            if (Template._templates[url])
+            {
+                if (!Template._templates[url].loaded())
+                {
+                   // delete Template._templates[url];
+                }
+            }
             return Template._templates[url];
         }
 
@@ -77,6 +84,8 @@ namespace ghost.mvc
          * Version
          */
         public version:number;
+
+        protected expired: boolean;
         /**
          * Parsed template
          */
@@ -85,6 +94,7 @@ namespace ghost.mvc
         {
             super();
             this.loading = {};
+            this.expired = false;
         }
 
         /**
@@ -107,13 +117,13 @@ namespace ghost.mvc
                 debugger;
             }
             this.parsed = Ractive["parse"](this.content, options); 
-            if(window.location.host.indexOf(".local")==-1)
+            if(true || window.location.host.indexOf(".local")==-1)
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,
                     md5:this.md5,
                     content:this.content,
-                    version:this.version,
+                    version:this.version 
                  //   parsed:this.parsed
                 });
             }
@@ -150,12 +160,16 @@ namespace ghost.mvc
             if(rawTemplate.parsed)
             {
                 template.parsed = rawTemplate.parsed;
+            }else
+            {
+                template.parsed = null;
             }
 
             template.components = rawTemplate.components;
             template.url = rawTemplate.url;
             template.version = rawTemplate.version;
             template.md5 = rawTemplate.md5;
+            template.expired = false;
             Template._templates[template.url] = template;
 
             this.trigger(Template.EVENT_LOADED + ":" + template.url, template);
@@ -208,8 +222,7 @@ namespace ghost.mvc
                            expired = data.expired[p];
                            if(Template._templates[expired])
                            {
-                               Template._templates[expired].expired();
-                               delete Template._templates[expired];
+                               Template._templates[expired].expire();
                            }else
                            {
                                this.cache().removeItem(expired);
@@ -228,8 +241,12 @@ namespace ghost.mvc
             {
                 this.cache().iterate((rawTemplate:IRawTemplate, url:string, index:number):any=>
                 {
-                    var result:any = iterator(this.setTemplate(rawTemplate));
-                    return result;
+                    if(rawTemplate.content || rawTemplate.parsed)
+                    {
+                        var result:any = iterator(this.setTemplate(rawTemplate));
+                        return result;
+                    }
+                    return undefined;
                 }).then(resolve, reject);
             });
             return promise;
@@ -245,11 +262,10 @@ namespace ghost.mvc
             var promise:Promise<void> = new Promise<void>((resolve:any, reject):void=>
             {
                 var template: Template;
-                if (!forceReload && (template=Template.getTemplate(name)) != null)
+                if (!forceReload && ((template=Template.getTemplate(name)) != null))
                 {
-                    if (!template.content && !template.parsed) {
+                    if (!template.loaded()) {
                         template = null;
-                        delete Template._templates[name]; 
                     }
                     if(template)
                     {
@@ -259,7 +275,6 @@ namespace ghost.mvc
                 }
                 if (this.loading[name])
                 {
-                    debugger; 
                     this.once(Template.EVENT_LOADED+":"+name, (template:Template)=>
                     {
                         resolve(template);
@@ -268,14 +283,8 @@ namespace ghost.mvc
                 }
                 this.loading[name] = true;
                 var _self: any = this;
-                if (name == "autocomplete") {
-                    debugger;
-                }
                 this.cache().getItem(name).then((template:IRawTemplate)=>
                 {
-                    if (name == "autocomplete") {
-                        debugger;
-                    }
                     if(template)
                     {
                         if(!template.content && !template.parsed)
@@ -289,76 +298,6 @@ namespace ghost.mvc
                             .then(
                                 (result:any)=>
                                 {
-                                    if(name== "autocomplete")
-                                    {
-                                        debugger;
-                                    }
-                                    if(result.components)
-                                    {
-                                        result.template.components = {
-                                            Autocomplete: function() {
-                                                debugger;
-                                            }
-                                        };
-                                       /*
-                                       //components
-                                        result.template.components = result.components.map(function(data: any) {
-                                                var configComponent: any = Component.getConfig(data.name);
-                                                if (configComponent)
-                                                {
-                                                    return {
-                                                         name: data.name,
-                                                         component: Ractive.extend(configComponent)
-                                                    };
-                                                    
-                                                }
-                                            return {
-                                                name:data.name,
-
-                                                component: Ractive.extend({
-                                                    data: function() {
-
-                                                        if(data.data)
-                                                        {
-                                                            try
-                                                            {
-                                                                data = JSON.parse(data.data);
-                                                            }catch(error)
-                                                            {
-                                                                debugger;
-                                                            }
-                                                            return data;
-                                                        }
-                                                        return null;
-                                                    },
-                                                    template: function() {
-                                                        var url: string = "rcomponents/" + data.name.toLowerCase();
-                                                        var template: any = Template.getTemplate(url);
-                                                        if(template)
-                                                        {
-                                                            if (!template.isParsed()) {
-                                                                template.parse();
-                                                            }
-                                                            return template.parsed;
-                                                        }
-                                                        Template.load(url).then(() => {
-                                                            template = Template.getTemplate(url);
-                                                            if (!template) {
-                                                                return;
-                                                            }
-                                                            if (!template.isParsed()) {
-                                                                template.parse();
-                                                            }
-                                                            debugger; 
-                                                            this.resetTemplate(template.parsed);
-                                                        });
-                                                        return "";
-                                                    }
-                                                }) 
-                                            };
-                                        });    */
-
-                                    }
                                     this.loading[name] = false;
                                     if(result.template)
                                     {
@@ -389,17 +328,21 @@ namespace ghost.mvc
         {
             return "integration/"+name;//this.getRootURL()+"integration/"+name;
         }
-        protected expired():void
+        protected expire():void
         {
-            this.md5 = null;
+            this.expired = true;
+            /*this.md5 = null;
             this.content = null;
-            this.parsed = null;
+            this.parsed = null;*/
             Template.cache().removeItem(this.url);
             this.trigger(Template.EVENT_EXPIRED);
         }
+        public isExpired():boolean{
+            return this.expired;
+        }
         public loaded():boolean
         {
-            if(!this.parsed && !this.content)
+            if ((!this.parsed && !this.content) || this.expired)
             {
                 return false;
             }
@@ -409,6 +352,27 @@ namespace ghost.mvc
         {
             return Template.instance().load(this.url);
         }
+        public prepareForUse(options:any = null):Promise<any>
+        {
+            var promise: Promise<any> = new Promise<any>((resolve:any, reject:any):void => {
+                if(this.loaded())
+                {
+                    if(!this.isParsed())
+                    {
+                        this.parse(options);
+                    }
+                    resolve();
+                }
+                this.retrieve().then(():void=>
+                {
+                    if (!this.isParsed()) {
+                        this.parse(options);
+                    }
+                    resolve();
+                }, reject);
+            });
+            return promise;
+        }
     }
     export interface IRawTemplate
     {
@@ -417,5 +381,7 @@ namespace ghost.mvc
         url:string;
         parsed:string;
         version:number;
-        components: any[];    }
+        components: any[];    
+        loaded:()=> boolean;
+    }
 }
