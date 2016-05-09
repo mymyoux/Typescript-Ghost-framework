@@ -75,7 +75,7 @@ namespace ghost.sgameclient
         public writeRoomUser(room:Room, user:IUser, command:string, data:any, callback:Function = null):void
         {
             this.buffer.push({command:command , data:data, callback:callback, room:room.name, user:user.id});
-            this.writeNext();
+            this.writeNext(); 
         }
         public createPrivateRoom(name:string, password:string = null, callback:Function = null):Room
         {
@@ -275,7 +275,7 @@ namespace ghost.sgameclient
                 room.removeUserByID(data.id);
             }
         }
-        private _onData(command:string, data:IApplicationData):void
+        protected _onData(command:string, data:IApplicationData):void
         {
             console.log("["+this.name+"] data", command, data);
             if(data && data.room)
@@ -330,6 +330,10 @@ namespace ghost.sgameclient
             //this.writeNext(true);    
             */
         }
+        protected postDataCallbackTreatment(time:number, request:any, data:any):any
+        {
+            return data;
+        }
         protected writeNext(): void
         protected writeNext(data?:any):void
         {
@@ -358,7 +362,7 @@ namespace ghost.sgameclient
                 }
                 this.processing = true;
                 var _this:Application = this;
-                console.log("[WRITE]-"+this.name, data);
+                //console.log("[WRITE]-"+this.name, data);
                 var request:any = {app:this.name, command:data.command, data:data.data};
                 if(data.room)
                 {
@@ -375,16 +379,21 @@ namespace ghost.sgameclient
                 {
                     request["_id"] = ghost.utils.Maths.getUniqueID();
                 }
+                var time: number = Date.now();
                 this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION, request, function(success:boolean, error:string, args:any[])
                 {
                     if(_this.buffer.length && _this.buffer[0] === data)
                     {
 
+                        if(data.callback && args && args.length)
+                        {
+                            args = _this.postDataCallbackTreatment(time, data, args);
+                        }
                         if(!success && error)
                         {
                             if(error == Const.ERROR_NEED_LOGIN)
                             {
-                                console.log("ERROR NEED LOGIN from ", data);;
+                                console.log("ERROR NEED LOGIN from ", data);
                                 return _this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, args);
                             }
                             if(error == Const.ERROR_NEED_APPLICATION_ENTER)
@@ -394,9 +403,9 @@ namespace ghost.sgameclient
                         }
                         if(data.callback)
                         {
+
                             if(success)
                             {
-
                                 data.callback.apply(null, [success].concat(args));
                             }else
                             {
@@ -423,6 +432,12 @@ namespace ghost.sgameclient
                 this.trigger(Const.EVENT_DISPOSE);
                 super.dispose();
             }
+        }
+        /**
+         * Useful for ractive include
+         */
+        public toObject(): any {
+            return this;
         }
     }
 }
