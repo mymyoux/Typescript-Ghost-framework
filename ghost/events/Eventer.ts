@@ -164,7 +164,8 @@ namespace ghost.events
             this.DOM_LOADED,
             this.HASH_CHANGE,
             this.NETWORK_ONLINE,
-            this.NETWORK_OFFLINE
+            this.NETWORK_OFFLINE,
+            this.SCREEN_RESIZE
         ];
             
         private _deviceReady:boolean = false;
@@ -222,7 +223,6 @@ namespace ghost.events
           
             //some devices don't dispatch orientationchanged event
             ROOT.addEventListener("resize", function(event) {
-                debugger;
                 _this.trigger(_this.SCREEN_ORIENTATION_CHANGE, event);
             }, false);
 

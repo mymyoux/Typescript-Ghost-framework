@@ -2,8 +2,10 @@
 ///<module="framework/browser/events"/>
 namespace ghost.graphics
 {
-	export class View
+	export class View extends ghost.events.EventDispatcher
 	{
+		public static EVENT_SIZE_CHANGE:string = "size_changed";
+		public static EVENT_CHANGE:string = "change";
 		protected canvas: HTMLCanvasElement;
 		public context: CanvasRenderingContext2D;
 		protected width: number;
@@ -13,10 +15,11 @@ namespace ghost.graphics
 		public scale:number;
 		public constructor(canvas:HTMLCanvasElement) 
 		{
+			super();
 			this.addContainer(canvas);
 			this.offsetX = this.offsetY = 0;
 			this.scale = 1;
-		}
+		} 
 		public addContainer(canvas: HTMLCanvasElement) {
 			this.canvas = canvas;
 			this.context = this.canvas.getContext("2d");
@@ -25,6 +28,7 @@ namespace ghost.graphics
 			$(window).resize(()=>
 			{
 				this.calculateCanvasSize();
+				this.trigger(View.EVENT_SIZE_CHANGE);
 			});
 		}
 		protected calculateCanvasSize():void

@@ -1,9 +1,10 @@
 ///<file="ISprite"/>
 ///<module="framework/ghost/utils"/>
+///<module="framework/ghost/events"/>
 namespace ghost.graphics
 {
 	import Maths = ghost.utils.Maths;
-	export class Sprite implements ISprite
+	export class Sprite extends ghost.events.EventDispatcher implements ISprite
 	{
 		public x: number;
 		public y: number;
@@ -14,6 +15,7 @@ namespace ghost.graphics
 		public parent: ISprite;
 		public constructor() 
 		{
+			super();
 			this.x = this.y = this.z = 0;
 			this.width = this.height = 10;
 			this.children = [];

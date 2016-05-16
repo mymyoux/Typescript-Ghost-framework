@@ -1,9 +1,11 @@
 ///<file="View"/>
+///<module="framework/ghost/events"/>
 ///<file="Sprite"/>
 namespace ghost.graphics
 {
 	export class Scene extends Sprite
 	{
+		public static EVENT_CHANGE:string = "change";
 		protected static STATE_PLAY: string = "play";
 		protected static STATE_STOP: string = "stop";
 		public views: View[];
@@ -21,6 +23,8 @@ namespace ghost.graphics
 		{
 			this.views.push(view);
 			this.viewsLength++;
+			view.on(View.EVENT_SIZE_CHANGE, this.viewChanged, this, view);
+			view.on(View.EVENT_CHANGE, this.viewChanged, this, view);
 		}
 		public play():void
 		{
@@ -29,6 +33,11 @@ namespace ghost.graphics
 				this.state_running = Scene.STATE_PLAY;
 				this.render();
 			}
+		}
+		protected viewChanged(view:View)
+		{
+			view.draw(this);
+			this.trigger(Scene.EVENT_CHANGE);
 		}
 		public draw(view: View): void {
 			var len: number = this.children.length;
