@@ -1,3 +1,5 @@
+///<lib="jquery"/>
+///<module="framework/browser/events"/>
 namespace ghost.graphics
 {
 	export class View
@@ -18,6 +20,31 @@ namespace ghost.graphics
 		public addContainer(canvas: HTMLCanvasElement) {
 			this.canvas = canvas;
 			this.context = this.canvas.getContext("2d");
+			
+			this.calculateCanvasSize();
+			$(window).resize(()=>
+			{
+				this.calculateCanvasSize();
+			});
+		}
+		protected calculateCanvasSize():void
+		{
+			if ($(this.canvas).attr("data-width")) {
+				var width: number = parseFloat($(this.canvas).attr("data-width"));
+				if ($(this.canvas).attr("data-width").indexOf("%") != -1) {
+					this.canvas.width = width / 100 * $(window).width();
+				} else {
+					this.canvas.width = width;
+				}
+			}
+			if ($(this.canvas).attr("data-height")) {
+				var height: number = parseFloat($(this.canvas).attr("data-height"));
+				if ($(this.canvas).attr("data-height").indexOf("%") != -1) {
+					this.canvas.height = height / 100 * $(window).height();
+				} else {
+					this.canvas.height = height;
+				}
+			}
 			this.width = this.canvas.width;
 			this.height = this.canvas.height;
 		}

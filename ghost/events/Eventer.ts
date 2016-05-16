@@ -20,7 +20,7 @@ namespace ghost.events
          * This event is fired when screen orientation changed or screen resize
          * @type {string}
          */
-        public SCREEN_RESIZE = "orientationchange";
+        public SCREEN_RESIZE = "resize";
         /**
          * This is an event that fires when Cordova is fully loaded.
          * @type {string}
@@ -222,6 +222,7 @@ namespace ghost.events
           
             //some devices don't dispatch orientationchanged event
             ROOT.addEventListener("resize", function(event) {
+                debugger;
                 _this.trigger(_this.SCREEN_ORIENTATION_CHANGE, event);
             }, false);
 
