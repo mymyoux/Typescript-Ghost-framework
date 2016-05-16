@@ -6,9 +6,14 @@ namespace ghost.graphics
 		public context: CanvasRenderingContext2D;
 		protected width: number;
 		protected height: number;
-		public constructor(canvas:HTMLCanvasElement)
+		public offsetX: number;
+		public offsetY: number;
+		public scale:number;
+		public constructor(canvas:HTMLCanvasElement) 
 		{
 			this.addContainer(canvas);
+			this.offsetX = this.offsetY = 0;
+			this.scale = 1;
 		}
 		public addContainer(canvas: HTMLCanvasElement) {
 			this.canvas = canvas;
@@ -19,11 +24,8 @@ namespace ghost.graphics
 		public draw(scene:Scene):void
 		{
 			this.context.clearRect(0, 0, this.width, this.height);
-			var len: number = scene.children.length;
-			for (var i: number = 0; i < len; i++)
-			{
-				scene.children[i].draw(this);
-			}
+			scene.draw(this);
+			
 		}
 	}
 }

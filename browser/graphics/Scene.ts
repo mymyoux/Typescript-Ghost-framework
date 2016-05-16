@@ -6,7 +6,7 @@ namespace ghost.graphics
 	{
 		protected static STATE_PLAY: string = "play";
 		protected static STATE_STOP: string = "stop";
-		protected views: View[];
+		public views: View[];
 		protected viewsLength: number;
 		public children: ISprite[];
 		protected state_running: string;
@@ -22,14 +22,6 @@ namespace ghost.graphics
 			this.views.push(view);
 			this.viewsLength++;
 		}
-		public draw():void
-		{
-			
-			for (var i: number = 0; i < this.viewsLength; i++)
-			{
-				this.views[i].draw(this);
-			}
-		}
 		public play():void
 		{
 			if(this.state_running !== Scene.STATE_PLAY)
@@ -38,13 +30,22 @@ namespace ghost.graphics
 				this.render();
 			}
 		}
+		public draw(view: View): void {
+			var len: number = this.children.length;
+			for (var i: number = 0; i < len; i++) {
+				this.children[i].draw(view);
+			}
+		}
 		public pause():void
 		{
 			this.state_running = Scene.STATE_STOP;
 		}
 		protected render():void
 		{
-			this.draw();
+			for (var i: number = 0; i < this.viewsLength; i++) 
+			{
+				this.views[i].draw(this);
+			}
 			if (this.state_running == Scene.STATE_PLAY)
 			{
 				requestAnimationFrame(this.render.bind(this));
