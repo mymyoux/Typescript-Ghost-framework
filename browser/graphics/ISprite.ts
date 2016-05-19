@@ -8,6 +8,6 @@ namespace ghost.graphics
 		getGlobalX(): number;
 		getGlobalY(): number;
 		getGlobalZ(): number;
-		_tick(): void;
+		_tick(round:number): void;
 	}
 }

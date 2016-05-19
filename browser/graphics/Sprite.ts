@@ -33,25 +33,25 @@ namespace ghost.graphics
 		}
 		public draw(view:View):void
 		{
-			view.context.save();
+ 			view.context.save();
 				view.context.translate(this.x, this.y);
-				view.context.fillStyle = "#FF0000";
+				view.context.fillStyle = "#0000FF";
 				view.context.fillRect(0, 0, this.width, this.height); 
 				var len: number = this.children.length;
 				for (var i = 0; i < len; i++)
 				{
 					this.children[i].draw(view);
 				}
-			view.context.restore();
+			view.context.restore(); 
 		}
-		public _tick(): void {
-			this.tick();
+		public _tick(round:number): void {
+			this.tick(round);
 			var len: number = this.children.length;
 			for (var i = 0; i < len; i++) {
-				this.children[i]._tick();
+				this.children[i]._tick(round);
 			}
 		}
-		public tick():void
+		public tick(round:number):void
 		{
 			this.x += Maths.randBetween(-10, 10);
 			if (this.x < 0) {
