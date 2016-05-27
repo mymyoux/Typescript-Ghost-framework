@@ -13,6 +13,8 @@ namespace ghost.graphics
 		public offsetX: number;
 		public offsetY: number;
 		public scale:number;
+		public caseWidth: number;
+		public caseHeight: number;
 		public constructor(canvas:HTMLCanvasElement) 
 		{
 			super();
@@ -22,7 +24,7 @@ namespace ghost.graphics
 		} 
 		public addContainer(canvas: HTMLCanvasElement) {
 			this.canvas = canvas;
-			this.context = this.canvas.getContext("2d");
+			this.context = (<any>this.canvas).getContext("2d", {alpha:false});
 			
 			this.calculateCanvasSize();
 			$(window).resize(()=>
