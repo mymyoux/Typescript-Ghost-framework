@@ -63,7 +63,7 @@ namespace ghost.utils
                 date.setSeconds(0);
                 //  date.setTime(0);
                 if (givenDate >= date) {
-                    output = "yersteday, " + Maths.toMinNumber(givenDate.getHours(), 2) + ":" + Maths.toMinNumber(givenDate.getMinutes(), 2);
+                    output = "yesterday, " + Maths.toMinNumber(givenDate.getHours(), 2) + ":" + Maths.toMinNumber(givenDate.getMinutes(), 2);
                 } else {
                     var givenTime: string = givenDate.toISOString();
                     var index: number = givenTime.lastIndexOf(":");

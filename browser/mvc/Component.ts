@@ -18,6 +18,7 @@ namespace ghost.mvc {
 			return Component.getComponentClassFromPackage(name);
     	}
 		protected static getComponentClassFromPackage(name: string): Component {
+
 			if(name.indexOf("-")!=-1)
 			{
 				name = Strings.camel(name);
