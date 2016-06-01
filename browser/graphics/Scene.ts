@@ -6,6 +6,7 @@ namespace ghost.graphics
 	export class Scene extends Sprite
 	{
 		public static EVENT_CHANGE:string = "change";
+		public static EVENT_END: string = "end";
 		protected static STATE_PLAY: string = "play";
 		protected static STATE_STOP: string = "stop";
 		public views: View[];
