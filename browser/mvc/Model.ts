@@ -65,7 +65,7 @@ namespace ghost.mvc
                     if(previous)
                         return previous[next];
                     return null;
-                }, this);
+                }, ROOT);
                 if(!model)
                 {
                     throw new Error("No Model named "+cls);

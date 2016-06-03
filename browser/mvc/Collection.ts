@@ -47,7 +47,7 @@ namespace ghost.mvc
                 var collection:Collection<any> = cls.split(".").reduce(function(previous:any, next:string):Collection<any>
                 {
                    return previous? previous[next] : null;
-                }, this);
+                }, ROOT);
 
                 if(!collection)
                 {
