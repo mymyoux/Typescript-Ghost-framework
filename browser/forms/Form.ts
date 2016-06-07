@@ -229,9 +229,14 @@ namespace ghost.browser.forms
                     //inside data-list
                     return;
                 }
+                debugger;
                 this[$this.attr("data-action")](event.currentTarget);
                 //.submit();
             });
+            if(this.$form.attr("data-autofocus") == "false")
+            {
+                return;
+            }
            // console.log($(form).find("[data-focus]").eq(0));
            // debugger;
            // $(form).find("[data-focus]").eq(0).focus();
@@ -2540,6 +2545,11 @@ namespace ghost.browser.forms
         public getValue():string
         {
             return this.picture;
+        }
+        public focus():void
+        {
+            //nothing to do
+            debugger;
         }
     }
     export class TextareaField extends Field
