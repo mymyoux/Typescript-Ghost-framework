@@ -85,6 +85,29 @@ namespace ghost.mvc
             }
             return new cls();
         }
+        public static removeInstance(cls:any):void
+        {
+            if (!cls) {
+                throw new Error("You can't remove null class");
+            }
+            if (typeof cls == "string") {
+                ///model from string
+                var model: Model = cls.split(".").reduce(function(previous: any, next: string): Model {
+                    if (previous)
+                        return previous[next];
+                    return null;
+                }, ROOT);
+                if (!model) {
+                    throw new Error("No Model named " + cls);
+                } else {
+                    cls = model;
+                }
+            }
+
+            if (Model._instances[cls]) {
+                delete Model._instances[cls];
+            }
+        }
         public static has(cls:any, searchForCollectionToo:boolean = true):boolean
         {
             if(!cls)
