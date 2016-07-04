@@ -270,6 +270,7 @@ namespace ghost.sgame
             {
                 this.users_ids.splice(index, 1);
                 this.users.splice(index, 1);
+                this.onLeaveAllRoom(user);
                 this.onLeave(user);
                 this._unbindUserEvents(user);
             }
@@ -304,6 +305,13 @@ namespace ghost.sgame
         }
         protected onEnterRoom(room: { name: string, visibility?: string, password?: string }, user: User): void {
 
+        }
+        protected onLeaveAllRoom(user: User): void {
+            var rooms: string[] = user.getRooms(this.name);
+            while(rooms.length)
+            {
+                this.onLeaveRoom(this.roomManager.getRoom(rooms.shift()), user);
+            }
         }
         protected onLeaveRoom(room: Room, user: User): void {
 

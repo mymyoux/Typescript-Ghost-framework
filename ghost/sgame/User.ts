@@ -68,6 +68,19 @@ namespace ghost.sgame
                 data:{}
             };
         }
+        public getRooms(appName: string):string[]
+        {
+            if (!this.apps[appName] || !this.apps[appName].rooms) {
+                return [];
+            }
+            var keys: string[] = [];
+            for (var p in this.apps[appName].rooms)
+            {
+                keys.push(p);
+            }
+            return keys;
+
+        }
         public onSetCustomData(room:Room, data:any):void
         {
             if (this.apps[room.appName] && this.apps[room.appName].rooms[room.name])
