@@ -242,6 +242,8 @@ namespace ghost.browser.forms
            // $(form).find("[data-focus]").eq(0).focus();
             setTimeout(()=>
             {
+                if (null === this.fields) return;
+
                 var len:number = this.fields.length;
                 for(var i:number=0; i < len ;i++)
                 {
@@ -2175,7 +2177,10 @@ namespace ghost.browser.forms
                     value = this.data[this.prefix_autocomplete+"autocompletion"][index][p];
                     if(value != null)
                     {
-                        this.data[p] = ghost.utils.Objects.clone(value);
+                        if (0 !== p.indexOf(this.prefix_autocomplete))
+                            this.data[this.prefix_autocomplete + p] = ghost.utils.Objects.clone(value);
+                        else
+                            this.data[p] = ghost.utils.Objects.clone(value);
                     }
                 }
                 this.data[this.prefix_autocomplete+"autocompleted"] = true;
