@@ -2663,9 +2663,11 @@ namespace ghost.browser.forms
             {
                 var count: number = (this.data[this.name] ? this.data[this.name].length : 0);
                 if (count >= this.min) {
-                        $(this.element).addClass("counter_success");
+                    $(this.element).addClass("counter_success");
+                    $(this.element).removeClass("counter_error");
                 } else {
                     $(this.element).removeClass("counter_success");
+                    $(this.element).addClass("counter_error");
                 }
                 this.$counter.text("" + count);
             }
