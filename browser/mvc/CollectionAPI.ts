@@ -55,7 +55,7 @@ namespace ghost.mvc
             if(name == Model.PART_DEFAULT)
                 this.readExternal(data);
         }
-        protected getRequestInstance(part?: string, params?: any): APIExtended {
+        public getRequestInstance(part?: string, params?: any): APIExtended {
             return this._getRequest(part, params);
         }
         protected _getRequest(part?:string, params?:any ):APIExtended
