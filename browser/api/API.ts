@@ -61,8 +61,15 @@ module ghost.browser.api
         }
         public config(options:IAPIOptions):T
         {
-            this._config = options;
-            if(this._config.url)
+            if(!this._config)
+            {
+                this._config = {};
+            }
+            for(var p in options)
+            {
+                this._config[p] = options[p];
+            }
+            if (options.url)
             {
                 if(this._config.url.substr(-1, 1) != "/")
                 {
@@ -160,7 +167,7 @@ module ghost.browser.api
             }
             request.data.method = this._method?this._method:'GET';
         //      request.data.__timestamp = Date.now();
-            request.retry = ghost.io.RETRY_INFINITE;
+            request.retry = this._config.retry != undefined ? this._config.retry:ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
             return request;
         }
@@ -727,6 +734,7 @@ module ghost.browser.api
     export interface IAPIOptions
     {
         url?:string;
+        retry?: any;
     }
 
 
