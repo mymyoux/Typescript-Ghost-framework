@@ -187,7 +187,6 @@ namespace ghost.mvc
         }
 
         protected sync():void{
-            //malmalmrlemlkeùmktetjetjem
             var templates:any[] = [];
             this.iterate(function(template:ghost.mvc.Template):void{
                 var requestTemplate:any ={url:template.url};
