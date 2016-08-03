@@ -407,10 +407,11 @@ namespace ghost.mvc
         {
             return this._models.slice(begin, end);
         }
+        /*
         public toString():string
         {
             return "[Collection  length=\""+this.length()+"\"]";
-        }
+        }*/
         public indexOf(model:T):number
         {
             return this._models.indexOf(model);
