@@ -192,7 +192,10 @@ namespace ghost.mvc
             else
             if(controller.scoping() != this._name && !(this._name == "" && controller.scoping()==null))
             {
-                throw new Error("Controller "+controller.getClassName()+" - scope doesn't match : "+controller.scoping()+" instead of "+this._name);
+                if (!ghost.utils.Arrays.isArray(controller.scoping()) || controller.scoping().indexOf(this._name) == -1)
+                {
+                    throw new Error("Controller "+controller.getClassName()+" - scope doesn't match : "+controller.scoping()+" instead of "+this._name);
+                }
             }
 
             if(controller.canActivate(params)===true)

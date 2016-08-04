@@ -45,7 +45,16 @@ namespace ghost.mvc
         {
             return ghost.browser.navigation.Navigation.instance;
         }
-
+        public scope(scope: Scope = null): Scope {
+            if (scope) {
+                if(this._scope && this._scope != scope)
+                {
+                    this.$container = null;
+                }
+                this._scope = scope;
+            }
+            return this._scope;
+        }
         public addData(value:IDataParts):void;
 		public addData(value:IData):void;
 		public addData(name:string, value:any):void
@@ -575,9 +584,9 @@ namespace ghost.mvc
             if(this.$container && this.$container.length)
             {
                 return this.$container.get(0);
-            }
-            console.log("get container",this.name());
-            var $scope = $("[data-scope='"+this.scoping()+"']");
+            } 
+            console.log("get container",this.name()); 
+            var $scope = $("[data-scope='" + (this._scope?this.scope().name():this.scoping()) + "']");
             if($scope.length)
             {
                  var container:HTMLElement = $scope.children("[data-container='"+this.name()+"']").get(0);
@@ -587,7 +596,7 @@ namespace ghost.mvc
 	            }
 	            this.$container = $scope.children("[data-container='"+this.name()+"']");
 	            container = this.$container.get(0);
-            return container;
+                return container;
             }
         }
         protected showContainer():void

@@ -22,7 +22,8 @@ namespace ghost.mvc
         /**
          * Scope
          */
-        private _scope:Scope;
+        protected _scope:Scope;
+
         /**
          * @protected
          * Models
@@ -55,7 +56,6 @@ namespace ghost.mvc
         {
             if(scope)
             {
-
                 this._scope = scope;
             }
             return this._scope;
