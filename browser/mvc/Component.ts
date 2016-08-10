@@ -9,6 +9,7 @@ namespace ghost.mvc {
 		protected static _components: Component[] = [];
 		protected static _instances: any[] = [];
 
+
     	public static getComponentClass(name:string):Component
     	{
     		if(Component.components[name])
@@ -164,9 +165,20 @@ namespace ghost.mvc {
 				return Component.callMethod(this, name, method, Array.prototype.slice.call(arguments));
 			}
 		}
+
+		/**
+		 *
+		 *	END STATIC PART
+		 * 
+		 */
+
+
+
+		protected _parts: any[];
 		public context: any;
 		public constructor(protected instance: any, protected name: string) {
 			super();
+			this._parts = [];
 		}
 		protected getTemplateName():string
 		{
@@ -249,6 +261,24 @@ namespace ghost.mvc {
 			//debugger;
 		}
 		public onComplete(): void {
+			if (!this._parts || !this._parts.length)
+			{
+				return this.onPostComplete();
+			}
+			Promise.all(<any[]>this._parts.map(function(item: any, index: number): Promise<any>  {
+				var promise: any;
+				if (item.parts) { 
+					promise = item.model.retrieveData(item.parts);
+				}
+				return promise;
+			})).then(() => {
+				this._parts.length = 0;
+				this.onPostComplete();
+			});
+			
+		}
+		protected onPostComplete():void
+		{
 			this.bindEvents();
 			this.activate();
 		}
@@ -302,8 +332,64 @@ namespace ghost.mvc {
 		}
 		public getData(): any {
 			//debugger;
-			var data: any = this.getInitialData();
-			return data;
+			var data: IData[]|Function[]|any[]|any = this.getInitialData();
+			if(!ghost.utils.Arrays.isArray(data))
+			{
+				return data;
+			}
+			var len: number = data ? data.length : 0;
+			var d: any, model: any, name:string;
+
+			var resultData: any = {};
+
+			for (var i: number = 0; i < len; i++)
+			{
+				d = data[i];
+				if(typeof d == "function")
+				{
+					d = this._addData(d);
+					if(!d)
+					{
+						console.error("no model found");
+						debugger;
+						continue;
+					}
+					resultData[d.name()] = d;
+				}else{
+					if(typeof d == "object")
+					{
+						//special format
+						if(d.data && d.name)
+						{
+							var result: any = this._addData(d, d.parts);
+							if(!result)
+							{
+								console.error("no model found");
+								debugger;
+								continue;
+							}
+							resultData[d.name] = result;
+						}else{
+							//mixed object
+							resultData = ghost.utils.Objects.merge(resultData, d);
+						}
+						
+					}else{
+						//unrecognized data
+						debugger;
+					}
+				}
+			}
+			return resultData;
+		}
+		protected _addData(data:any, parts?:string[]):any
+		{
+			var model:any = typeof data == "function"?ghost.mvc.Model.get(data):data;
+			if (model) {
+				this._parts.push({ model: model, parts: parts?parts:[ghost.mvc.Model.PART_DEFAULT] });
+				return model;
+			}
+			return null;
 		}
 		public getTemplate(): any {
 			var template: Template = Template.getTemplate(this.getTemplateName());
@@ -316,6 +402,20 @@ namespace ghost.mvc {
 			throw new Error("Component " + this.name + " integration not loaded");
 			return null;
 		}
-
+    }
+    export interface IComponentData
+    { 
+    	/**
+    	 * Name inside the template
+    	 */
+		name: string;
+		/**
+		 * Model / collection
+		 */
+		data: any;
+		/**
+		 * Parts to load (ghost.mvc.Model.PART_DEFAULT by default)
+		 */
+		parts?: string[];
     }
 }
