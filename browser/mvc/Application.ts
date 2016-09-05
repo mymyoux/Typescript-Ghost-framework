@@ -144,7 +144,7 @@ namespace ghost.mvc
             throw new Error("You must override this function to enable a correct usage of MVC system")
             return null;
         }
-        private prerequire(callback?:Function):void
+        protected prerequire(callback?:Function):void
         {
             //initialize
             var cls:any = this.polyglot();
