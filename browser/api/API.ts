@@ -286,6 +286,7 @@ module ghost.browser.api
         private static _cacheManager: CacheManager = new CacheManager();
         protected static _initialized:boolean;
         protected static _id_user:string;
+        protected static middlewares:any[] = [];
         public static init(id:string , name?:string):void
         {
             if (APIExtended._initialized === true)
@@ -641,6 +642,11 @@ module ghost.browser.api
         }
         protected _then(request:any, resolve:any, reject:any, token:string):APIExtended
         {
+            for (var p in APIExtended.middlewares) {
+                if (APIExtended.middlewares[p].request) {
+                    APIExtended.middlewares[p].request(request);
+                }
+            }
             var promise = ghost.io.ajax(request, {asObject:true});//this.getPromise();
             this._previousPromise = promise;
             promise.then((rawData: any) => {
@@ -728,6 +734,12 @@ module ghost.browser.api
             this._apiData = null;
             return this;
         }
+        public addMiddleware(middleware: IMiddleWare | Function): void {
+            if (typeof middleware == "function") {
+                middleware = { request: <any>middleware };
+            }
+            APIExtended.middlewares.push(middleware);
+        }
 
     }
    
@@ -748,4 +760,8 @@ module ghost.browser.api
     {
         debugger;
     });*/
+    export interface IMiddleWare {
+
+        request?: (data: any) => any | void;
+    }
 }

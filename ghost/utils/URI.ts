@@ -30,6 +30,36 @@ namespace ghost.utils
 
             return uri;
         }
+        public static buildURI(url:any, params:any = null):string
+        {
+            if(typeof url == "object")
+            {
+                params = url;
+                url = "";
+            }
+            if(params)
+            {
+                url += "?";
+                url += URI.objectToString(params);
+                debugger;
+            }
+            return url;
+        }
+        protected static objectToString(object:any, prefix:string = null):string
+        {
+            return Object.keys(object).map(function(key) {
+                if (object[key] == null)
+                {
+                    return null;   
+                }
+                if (typeof object[key] == "object") {
+                    return URI.objectToString(object[key], prefix ? prefix + "[" + key + "]" : key);
+                }
+                return (prefix ? prefix + "[" + key + "]" : key) + '=' + encodeURIComponent(object[key]);
+            }).filter(function(value){
+                return value != null;
+            }).join('&');
+        }
     }
     export interface IURI
     {
