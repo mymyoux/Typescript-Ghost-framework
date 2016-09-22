@@ -220,6 +220,12 @@ namespace ghost.core
         {
             return Hardware.getOS() == Hardware.OS_ANDROID;
         }
+
+        public static isChrome():boolean
+        {
+            var browser:string = Hardware.getBrowser().toLowerCase();
+            return browser.indexOf('chrome') === 0;
+        }
         /**
          * Specifies if the current device is a website (emulated)
          * @returns {boolean}
