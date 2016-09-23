@@ -3,9 +3,12 @@
 namespace ghost.browser.brain
 {
 	import Brain = ghost.brain.Brain;
+	import Maths = ghost.utils.Maths;
 	export class DisplayBrain
 	{
 		protected brain: Brain;
+		protected svg: any;
+		protected _updated: any;
 		public constructor()
 		{
 			this.initBrain();
@@ -24,22 +27,31 @@ namespace ghost.browser.brain
 		{
 			this.brain.tick();
 		}
+		protected updateDisplay():void
+		{
+			if (this._updated)
+			{
+				this._updated(this.brain);
+			}else{
+				this.display(); 
+			}
+		}
 		public display():void
 		{
 			var width = 960,
 				height = 500
 
-			var svg = d3.select("body").append("svg")
+			var svg = this.svg = d3.select("body").append("svg")
 				.attr("width", width)
 				.attr("height", height);
 
 			var force = (<any>d3.layout.force())
-				.gravity(.05)
-				.distance(100)
-				.charge(-100)
+				.gravity(0.05)
+				.distance(250) 
+				.charge(100)
 				.size([width, height]);
 
-			(function(brain) {
+			(this._updated = function(brain) {
 
 				brain.links = [];
 				for(var p in brain.neurons)
@@ -49,7 +61,7 @@ namespace ghost.browser.brain
 						brain.links.push({ source: brain.getNeuronIndex(brain.neurons[p]), target: brain.getNeuronIndex(brain.neurons[p].children[q]), weight: 4 });
 					}
 
-				}
+				} 
 
 				force
 					.nodes(brain.neurons)
@@ -60,15 +72,19 @@ namespace ghost.browser.brain
 					.data(brain.links)
 					.enter().append("line")
 					.attr("class", "link")
-					.style("stroke-width", function(d) { return Math.sqrt(d.weight); });
+					.style("stroke-width", function(d: any) { return Math.sqrt(Maths.randBetween(1, 10)) });
 
 				var node = svg.selectAll(".node")
 					.data(brain.neurons)
 					.enter().append("g")
-					.attr("class", function(neuron) {
-						return "node" + (neuron.isInput ? " input" : "") + (neuron.isOuptut ? " output" : "");
+					.attr("class", function(neuron: any) {
+						if(neuron.isOutput)
+						{
+							debugger;
+						}
+						return "node" + (neuron.isInput ? " input" : "") + (neuron.isOutput ? " output" : "");
 					})
-					.attr("group", function(neuron)
+					.attr("group", function(neuron: any)
 					{
 						return neuron.getID();
 					})
@@ -80,15 +96,28 @@ namespace ghost.browser.brain
 				node.append("text")
 					.attr("dx", 12)
 					.attr("dy", ".35em")
-					.text(function(neuron) { return "n " + neuron.getID();  });
+					.text(function(neuron: any) { return "n " + neuron.getID(); });	
+/*
+				node.append("text")
+					.attr("dx", 12)
+					.attr("dy", "1.35em")
+					.text(function(neuron: any) { return neuron.weights.join(", "); });	*/
+				node.append("text")
+					.attr("dx", 12)
+					.attr("dy", "2.35em")
+					.text(function(neuron: any) { return neuron.inputs.join(", "); });	
+				node.append("text")
+					.attr("dx", 12)
+					.attr("dy", "3.35em")
+					.text(function(neuron: any) { return neuron.output;});	
 
 				force.on("tick", function() {
-					link.attr("x1", function(d) { return d.source.x; })
-						.attr("y1", function(d) { return d.source.y; })
-						.attr("x2", function(d) { return d.target.x; })
-						.attr("y2", function(d) { return d.target.y; });
+					link.attr("x1", function(d: any) { return d.source.x; })
+						.attr("y1", function(d: any) { return d.source.y; })
+						.attr("x2", function(d: any) { return d.target.x; })
+						.attr("y2", function(d: any) { return d.target.y; });
 
-					node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+					node.attr("transform", function(d: any) { return "translate(" + d.x + "," + d.y + ")"; });
 				});
 			})(
 				this.brain);/*

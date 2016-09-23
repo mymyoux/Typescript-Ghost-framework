@@ -132,6 +132,7 @@ namespace ghost.brain
 			}
 			for (var i: number = this.neurons.length-1; i > this.neurons.length-length-1; i--)
 			{
+				debugger;
 				this.setOutput(this.neurons[i]);
 			}
 		}
@@ -183,6 +184,15 @@ namespace ghost.brain
 				if (index != -1) 
 				{
 					this.inputs.splice(index, 1);
+				}
+			}
+			if(neuron.isOutput)
+			{
+				index = this.outputs.indexOf(neuron);
+				if (index != -1) 
+				{
+					this.outputs.splice(index, 1);
+					this.outputsValue.splice(index, 1);
 				}
 			}
 			neuron.removeBrain();
