@@ -729,7 +729,7 @@ namespace ghost.mvc
                             if(item instanceof ghost.events.EventDispatcher)
                             {
                                 //         item.off(event, this._onModelChange, this);
-                                item.on(event, this._onModelChange, this, item,this._parts[index] && this._parts[index].name?this._parts[index].name:item.name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
+                                item.on(event, this._onModelChange, this, item,this._parts[index] && this._parts[index].name?this._parts[index].name:(<any>item).name(), this._parts[index] && this._parts[index].ractive?this._parts[index].ractive:null);
                             }else
                             {
                                 for(var p in item)
