@@ -41,7 +41,6 @@ namespace ghost.utils
             {
                 url += "?";
                 url += URI.objectToString(params);
-                debugger;
             }
             return url;
         }

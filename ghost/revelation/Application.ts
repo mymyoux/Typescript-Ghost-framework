@@ -62,7 +62,7 @@ namespace ghost.revelation
                     {
                         if(item instanceof RouteController)
                         {
-                            console.log("ADD ROUTE CONTROLLER" ,item.protype);
+                            //console.log("ADD ROUTE CONTROLLER" ,item.protype);
                             this.addRouteController(item);
                         }else
                         {

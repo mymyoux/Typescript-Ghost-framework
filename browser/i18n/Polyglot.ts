@@ -207,10 +207,10 @@ namespace ghost.browser.i18n
 		    	}else
 		    	{
 		    		//browser interface language (often not as precise as prefered one. ie en-US instead of en-GB)
-		    		locale= (window.navigator.language || window.navigator.userLanguage ? window.navigator.language || window.navigator.userLanguage:"en") ;
+		    		locale= (window.navigator.language || (<any>window.navigator).userLanguage ? window.navigator.language || (<any>window.navigator).userLanguage:"en") ;
 		    	}
 		    }else
-		    {
+		    { 
 		    	locale = options.locale;
 		    }
 		    this.locale(locale);
