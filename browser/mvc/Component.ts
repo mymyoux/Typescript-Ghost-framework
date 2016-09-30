@@ -8,6 +8,7 @@ namespace ghost.mvc {
 		protected static components: any = {};
 		protected static _components: Component[] = [];
 		protected static _instances: any[] = [];
+		public static EVENT_INIT: string = "component-init";
 
 
     	public static getComponentClass(name:string):Component
@@ -218,6 +219,7 @@ namespace ghost.mvc {
 				}
 			}
 			this.init();
+			this.fire(Component.EVENT_INIT);
 			var binded:any = this._getBindedFunctions();
 			if(binded)
 			{
