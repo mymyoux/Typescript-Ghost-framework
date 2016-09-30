@@ -106,7 +106,7 @@ namespace ghost.io
 		{
 			settings = middleware(settings, "settings");
 			$ajax = $.ajax(settings);
-			
+
 			$ajax.done(function(data, textStatus, jqXHR)
 			{
 				if(promise && promise.canceled)
@@ -119,7 +119,7 @@ namespace ghost.io
 				data = middleware(data, "success_always");
 				if(data && (data.success === false || data.error))
 				{
-					if(settings.retry === true)
+					if(settings.retry === true && data.fatal === false)
 					{
 						setTimeout(function()
 						{
@@ -166,7 +166,7 @@ namespace ghost.io
 					}else
 					{
 						settings.count_failed++;
-					} 
+					}
 					if (navigator.onLine === false)
 					{
 						//wait
@@ -185,7 +185,7 @@ namespace ghost.io
 						setTimeout(function()
 						{
 							ajax(settings).then(resolve, reject);
-						}, time); 
+						}, time);
 					}
 				}else
 				{
@@ -233,8 +233,8 @@ namespace ghost.io
 			var promise:any = new Promise(method);
 			CancelablePromise.extends(promise);
 
-			return promise; 
-		} 
+			return promise;
+		}
 		public static extends(promise:any):void
 		{
 			promise.canceled = false;
@@ -269,7 +269,7 @@ namespace ghost.io
 		public fail: (callback: Function) => CancelablePromise<T>;
 		public always: (callback: Function) => CancelablePromise<T>;
 	}
-	
+
 	export interface IMiddleWare
 	{
 		/**
