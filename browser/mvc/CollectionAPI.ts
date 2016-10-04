@@ -410,6 +410,9 @@ namespace ghost.mvc
 
             return this.length();
         }
+        public getMixins(): any[] {
+            return null;
+        }
         public readExternal(input:any[]):void
         {
             if(input)
@@ -446,6 +449,16 @@ namespace ghost.mvc
                             if(!model)
                             {
                                 model  = <any>Model.get(cls);
+                                if(this.getMixins())
+                                {
+                                    applyMixins(model, this.getMixins());
+                                    /*var mixins: any[] = this.getMixins();
+                                    for(var p in mixins)
+                                    {
+                                        applyMixins()
+                                    }*/
+                                }
+
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else
