@@ -216,7 +216,7 @@ namespace ghost.mvc {
 						debugger;
 						throw new Error(requiredData[p] + " is required for the component " + Classes.getName(this.constructor));
 					}
-				}
+				} 
 			}
 			this.init();
 			this.fire(Component.EVENT_INIT);

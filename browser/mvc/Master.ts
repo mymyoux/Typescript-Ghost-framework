@@ -9,13 +9,13 @@
 ///<module="framework/browser/debug"/>
 namespace ghost.mvc
 {
-	export class Master extends Controller
-	{
+    export class Master extends Controller {
 		/**
          * List of events
          * @type {{ACTIVATED: (ACTIVATED), DISACTIVATED: (DISACTIVATED)}}
          */
-        public static EVENTS:any = Controller.EVENTS;
+        public static EVENTS: any = Controller.EVENTS;
+        public static partials_context: any = {};
 		//private templateString:string;
         protected templateData:Template;
 		protected template:Ractive;
@@ -809,10 +809,23 @@ namespace ghost.mvc
                                         context+= ' '+p+'="'+data[p]+'"';
                                     }
                                 }
+                                Master.partials_context[name] = context;
                                 Ractive.partials[url] = '<' + name+ ' model="{{this}}"'+context+'/>';
                                 this.template.set("_components." + name.toLowerCase(), true);
                                 this.template.set("_components." + name.toLowerCase(), false);
                             });
+                        }else{
+                            var context: string = "";
+                            if (data) {
+                                for (var p in data) {
+                                    context += ' ' + p + '="' + data[p] + '"';
+                                }
+                            }
+                            if (Master.partials_context[name] != context)
+                            {
+                                Master.partials_context[name] = context;
+                                Ractive.partials[url] = '<' + name + ' model="{{this}}"' + context + '/>';
+                            }
                         }
                         return url;
                     };

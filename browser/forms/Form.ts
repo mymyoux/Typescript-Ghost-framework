@@ -2554,7 +2554,6 @@ namespace ghost.browser.forms
         public focus():void
         {
             //nothing to do
-            debugger;
         }
     }
     export class TextareaField extends Field
