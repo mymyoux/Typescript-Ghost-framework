@@ -2,7 +2,7 @@
 ///<module="io"/>
 ///<module="framework/ghost/events"/>
 ///<module="framework/ghost/utils"/>
-///<module="data"/>  
+///<module="data"/>
 module ghost.browser.api
 {
 
@@ -227,7 +227,7 @@ module ghost.browser.api
         {
             if (this._initialized)
             {
-                return; 
+                return;
             }
             if(name)
             {
@@ -235,7 +235,7 @@ module ghost.browser.api
                 this.war(name);
             }
             this._initialized = true;
-            
+
             this.war().keys().then((keys:string[]) => {
                 if (!keys || !keys.length)
                 {
@@ -276,7 +276,7 @@ module ghost.browser.api
                 });
         }, () => {
                 debugger;
-            }); 
+            });
         }
     }
 
@@ -341,7 +341,7 @@ module ghost.browser.api
         {
             super();
             this._services = [];
-            this._stacklist = []; 
+            this._stacklist = [];
         }
         public cache(quantity: number): APIExtended
         {
@@ -477,7 +477,7 @@ module ghost.browser.api
                         this._apiData.paginate.nextAll = data.paginate.next;
                     }
 
-                }                                                                                                                                                        
+                }
                 if(data.paginate.previous)
                 {
                     this._apiData.paginate.previous = data.paginate.previous;
@@ -487,6 +487,9 @@ module ghost.browser.api
                     }
 
                 }
+                if (data.paginate.limit)
+                    this._apiData.paginate.limit = data.paginate.limit;
+
                 var keys = ["allowed","direction","key","limit","previous","next"];
                 for(var p in data.paginate)
                 {
@@ -579,7 +582,7 @@ module ghost.browser.api
                 this._previousPromise = null;
             }
             return this;
-        } 
+        }
         public cancelAll():APIExtended
         {
             while(this._stacklist.length)
@@ -608,7 +611,7 @@ module ghost.browser.api
         }
 
         public then(token?:string, request?:any): APIExtended
-        public then(resolve?: any, reject?: any): APIExtended 
+        public then(resolve?: any, reject?: any): APIExtended
         public then(resolve?: any, reject?: any): APIExtended {
             var request: any;
             var token:string;
@@ -658,18 +661,18 @@ module ghost.browser.api
                 if (rawData && rawData.data) {
                     data = rawData.data;
                 }
-                if (data && token) 
+                if (data && token)
                 {
-                       APIExtended._cacheManager.remove(token);   
+                       APIExtended._cacheManager.remove(token);
                 }
-                
+
                 // this._promise = null;
                 if (data && data.error) {
                     if (reject)
                         reject(data);
                     return;
                 }
-              
+
                 var parsed: any = this.parseResult(data);
                 this.trigger(API.EVENT_DATA, data);
                 if (resolve)
@@ -698,7 +701,7 @@ module ghost.browser.api
                                 {
                                     if (good_user)
                                     {
-                                        APIExtended._cacheManager.remove(token);   
+                                        APIExtended._cacheManager.remove(token);
                                     }
                                 }
                             }
@@ -712,7 +715,7 @@ module ghost.browser.api
                     reason = error.errorThrown;
                 }
                 this._next();
-              
+
                 if (reject)
                     reject(reason);
             });
@@ -742,7 +745,7 @@ module ghost.browser.api
         }
 
     }
-   
+
     export interface IAPIOptions
     {
         url?:string;

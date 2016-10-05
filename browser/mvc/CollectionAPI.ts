@@ -11,7 +11,7 @@ namespace ghost.mvc
      */
     export class CollectionAPI<T extends IModel> extends Collection<T>
     {
-
+        protected is_fully_load:boolean = false;
         private _order:string;
         private _orderDirection: number;
         protected requests:any;
@@ -50,6 +50,11 @@ namespace ghost.mvc
 
         }
 
+        public isFullyLoad() : boolean
+        {
+            return this.is_fully_load;
+        }
+
         protected onPartData(name:string, data:any):void
         {
             if(name == Model.PART_DEFAULT)
@@ -85,9 +90,10 @@ namespace ghost.mvc
 
         public clear() : void//:Promise<any>
         {
-            this._changed     = [];
-            this.firstData    = true;
-            this.requests     = {};
+            this._changed         = [];
+            this.firstData        = true;
+            this.requests         = {};
+            this.is_fully_load    = false;
             super.clear();
         }
         public first():Promise<any>
@@ -316,7 +322,7 @@ namespace ghost.mvc
             super._triggerUpdateAll();
             if (this._order)
             {
-                
+
             }
         }
         /**
@@ -338,7 +344,7 @@ namespace ghost.mvc
                         });
                 }
             }
-            
+
 
         }
         private t = 0;
@@ -410,6 +416,18 @@ namespace ghost.mvc
 
             return this.length();
         }
+
+        private detectFullyLoad( length : number ) : void
+        {
+            var apidata : any = this.getAPIData();
+
+            if (apidata && apidata.paginate && apidata.paginate.limit && length < apidata.paginate.limit)
+            {
+                this.is_fully_load = true;
+                this.trigger(Collection.EVENT_CHANGE);
+            }
+        }
+
         public readExternal(input:any[]):void
         {
             if(input)
@@ -418,6 +436,7 @@ namespace ghost.mvc
                 if(!input.length || !input.forEach)
                 {
                     //needed to not break the flow
+                    this.detectFullyLoad( 0 );
                     this.triggerFirstData();
                     return;
                 }
@@ -460,6 +479,7 @@ namespace ghost.mvc
                         }
                     }
                 }, this);
+                this.detectFullyLoad( input.length );
                 this.triggerFirstData();
                 this.trigger(Collection.EVENT_CHANGE);
             }
