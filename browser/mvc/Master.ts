@@ -31,6 +31,7 @@ namespace ghost.mvc
         protected paramsFromActivation:any;
 
         protected _bindedEvents: IEvent[];
+        protected _activationCount: number = 0;
 
 
 		constructor()
@@ -506,7 +507,11 @@ namespace ghost.mvc
         }
         protected activation():void
         {
+            this._activationCount++;
             this.bindEvents();
+            if (this._activationCount>1)
+                this.refresh();
+
         	this.activate();
    			this.trigger(Master.EVENTS.ACTIVATED);
 
@@ -514,6 +519,15 @@ namespace ghost.mvc
             ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_RESUME, this.resume, this);
             ghost.events.Eventer.on(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
             this.postActivation();
+        }
+        protected refresh():void
+        {
+            for (var p in this._data) {
+                if(this._data[p] instanceof ghost.mvc.CollectionAPI)
+                {
+                    this._data[p].refresh();
+                }
+            }
         }
         protected postActivation():void
         {

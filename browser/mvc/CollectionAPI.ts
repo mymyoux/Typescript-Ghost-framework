@@ -27,7 +27,14 @@ namespace ghost.mvc
         {
             return ghost.forage.war( this.name() + '_collection' );
         }
-
+        protected refresh():void
+        {
+            if (this.requests[Collection.PART_DEFAULT])
+            {
+                //exists
+                this.previousAll().done();
+            }
+        }
         public order(order:string, direction:number = 1):void
         {
             this._order = order;

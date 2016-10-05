@@ -4,6 +4,8 @@
 namespace ghost.mvc
 {
 
+
+    import Strings = ghost.utils.Strings;
     //TODO:controller(view) => preload models=> load data from ajax or memory
 
 
@@ -456,7 +458,23 @@ namespace ghost.mvc
          */
         public writeExternal():any
         {
-            return this.toObject();
+            var external: any = {};
+            for(var p in this)
+            {
+                if (p == "data") {
+                    continue;
+                }
+                if (Strings.startsWith(p, "_"))
+                {
+                    continue;
+                }
+                if(typeof this[p] == "function")
+                {
+                    continue;
+                }
+                external[p] = this[p];
+            }
+            return external;
         }
 
         /**
