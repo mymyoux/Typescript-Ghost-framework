@@ -27,7 +27,14 @@ namespace ghost.mvc
         {
             return ghost.forage.war( this.name() + '_collection' );
         }
-
+        protected refresh():void
+        {
+            if (this.requests[Collection.PART_DEFAULT])
+            {
+                //exists
+                this.previousAll().done();
+            }
+        }
         public order(order:string, direction:number = 1):void
         {
             this._order = order;
@@ -428,6 +435,10 @@ namespace ghost.mvc
             }
         }
 
+        public getMixins(): any[] {
+            return null;
+        }
+
         public readExternal(input:any[]):void
         {
             if(input)
@@ -465,6 +476,16 @@ namespace ghost.mvc
                             if(!model)
                             {
                                 model  = <any>Model.get(cls);
+                                if(this.getMixins())
+                                {
+                                    applyMixins(model, this.getMixins());
+                                    /*var mixins: any[] = this.getMixins();
+                                    for(var p in mixins)
+                                    {
+                                        applyMixins()
+                                    }*/
+                                }
+
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else

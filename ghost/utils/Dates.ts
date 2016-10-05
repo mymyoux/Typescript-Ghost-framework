@@ -36,8 +36,15 @@ namespace ghost.utils
 
             return output;
         }
-        public static getReadableDate(givenDate:Date): string {
-
+        public static getReadableDate(givenDate:Date | string): string {
+            if(!(givenDate instanceof Date))
+            {
+                var tmp:any = givenDate;
+                givenDate = Dates.localFromISO(givenDate);
+                if (isNaN(givenDate.getTime())) {
+                    return tmp;
+                }
+            }
             var output: string;
             var givenTimestamp: number = givenDate.getTime();
 
