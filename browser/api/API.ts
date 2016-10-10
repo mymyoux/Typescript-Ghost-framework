@@ -327,7 +327,7 @@ module ghost.browser.api
         protected lastRequest: any;
         private _services:any[];
         private _apiData:any;
-        private _direction:number = 1;
+        private _direction:number[] = [1];
         private _cacheLength: number;
         private _name: string;
         private _always: boolean;
@@ -438,7 +438,7 @@ module ghost.browser.api
                 throw new Error("direction != keys");
             }
             //TODO:voir pour mettre le tableau ?
-            this._direction = direction[0];//Arrays.isArray(direction) ? direction[0] : direction;
+            this._direction = direction;
             return this.service("paginate", "key", id).service("paginate","direction", direction);
         }
         public param(param:string, data:any):APIExtended
@@ -488,15 +488,26 @@ module ghost.browser.api
                     this._apiData.paginate = {};
                 }
 
-                //TODO:next pour chaque propriété à paginé
-                //TODO:PHP tester le tableau
 
-                
                 
                 if(data.paginate.next)
                 {
                     this._apiData.paginate.next = data.paginate.next;
-                    if(!this._apiData.paginate.nextAll || (this._apiData.paginate.nextAll< data.paginate.next && this._direction>0) || (this._apiData.paginate.nextAll> data.paginate.next && this._direction<0) )
+                    var isNextAll: boolean = !this._apiData.paginate.nextAll;
+                    if (!isNextAll)
+                    {
+                        isNextAll = true;
+                        for (var i: number = 0; i < data.paginate.next.length; i++)
+                        {
+                            if (!((this._apiData.paginate.nextAll[i] < data.paginate.next[i] && this._direction[i] > 0) || (this._apiData.paginate.nextAll[i] > data.paginate.next[i] && this._direction[i] <0 )))
+                            {
+                                isNextAll = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isNextAll)
                     {
                         this._apiData.paginate.nextAll = data.paginate.next;
                     }
@@ -505,10 +516,26 @@ module ghost.browser.api
                 if(data.paginate.previous)
                 {
                     this._apiData.paginate.previous = data.paginate.previous;
-                    if(!this._apiData.paginate.previousAll || (this._apiData.paginate.previousAll> data.paginate.previous && this._direction>0) || (this._apiData.paginate.previousAll< data.paginate.previous && this._direction<0) )
-                    {
+
+                    var isPreviousAll: boolean = !this._apiData.paginate.previousAll;
+                    if (!isPreviousAll) {
+                        isPreviousAll = true;
+                        for (var i: number = 0; i < data.paginate.previous.length; i++) {
+                            if (!((this._apiData.paginate.previousAll[i] > data.paginate.previous[i] && this._direction[i] > 0) || (this._apiData.paginate.previousAll[i] < data.paginate.previous[i] && this._direction[i] < 0))) {
+                                isPreviousAll = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isPreviousAll) {
                         this._apiData.paginate.previousAll = data.paginate.previous;
                     }
+
+                  /*  if(!this._apiData.paginate.previousAll || (this._apiData.paginate.previousAll> data.paginate.previous && this._direction>0) || (this._apiData.paginate.previousAll< data.paginate.previous && this._direction<0) )
+                    {
+                        this._apiData.paginate.previousAll = data.paginate.previous;
+                    }*/
 
                 }
                 if (data.paginate.limit)
