@@ -438,7 +438,6 @@ module ghost.browser.api
                 debugger;   
                 throw new Error("direction != keys");
             }
-            //TODO:voir pour mettre le tableau ?
             this._direction = direction;
             return this.service("paginate", "key", id).service("paginate","direction", direction);
         }
