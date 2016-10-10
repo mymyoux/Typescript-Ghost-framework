@@ -6,6 +6,61 @@ namespace ghost.utils
 		{
 			return Array.isArray(obj);
 		}
+		public static binaryFindArray(array: any[], element: any, properties: string[], orders: number[]): IBinaryResult {
+			var minIndex = 0;
+			var maxIndex = array.length - 1;
+			var currentIndex;
+			var currentElement;
+			var property: string;
+			var len: number = properties.length;
+			var lesser: boolean;
+			var order: number;
+
+				//searchElement = property ? element[property] : element;
+
+				while (minIndex <= maxIndex) {
+					currentIndex = (minIndex + maxIndex) / 2 | 0;
+//					currentElement = property ? (array[currentIndex] ? array[currentIndex][property] : null) : array[currentIndex];
+
+					lesser = null;
+					for (var i: number = 0; i < len;i++)
+					{
+						order = orders[i];
+						if (element[properties[i]] > array[currentIndex][properties[i]])
+						{
+							lesser = true;
+							break;
+						}
+						if (element[properties[i]] < array[currentIndex][properties[i]]) {
+							lesser = false;
+							break;
+						}
+
+					}
+
+					if ((order == 1 && lesser === true) || (order == -1 && lesser === false)) {
+						minIndex = currentIndex + 1;
+					}
+					else if ((order == 1 && lesser === false) || (order == -1 && lesser === true)) {
+						maxIndex = currentIndex - 1;
+					}
+					else {
+						//==
+						return {
+							found: true,
+							index: currentIndex,
+							order:order
+						};
+					}
+				}
+
+			currentIndex = (order == 1 && lesser === true) || (order == -1 && lesser === false) ? currentIndex + 1 : currentIndex;
+			return {
+				found: false,
+				index: currentIndex,
+				order:order
+			};
+		}
 		public static binaryFind(array:any[], searchElement:any, property?:string, order:number = 1):IBinaryResult
 		{
 			var minIndex = 0;
@@ -53,5 +108,6 @@ namespace ghost.utils
 	{
 		found:boolean;
 		index:number;
+		order?: number;
 	}
 }

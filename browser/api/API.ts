@@ -9,6 +9,7 @@ module ghost.browser.api
     import Objects = ghost.utils.Objects;
     import EventDispatcher = ghost.events.EventDispatcher;
     import CancelablePromise = ghost.io.CancelablePromise;
+    import Arrays = ghost.utils.Arrays;
     export abstract class API<T extends API<any>> extends EventDispatcher
     {
         public static EVENT_DATA:any = "event_data";
@@ -287,6 +288,7 @@ module ghost.browser.api
         protected static _initialized:boolean;
         protected static _id_user:string;
         protected static middlewares:any[] = [];
+
         public static init(id:string , name?:string):void
         {
             if (APIExtended._initialized === true)
@@ -322,7 +324,7 @@ module ghost.browser.api
             return this._cacheManager.clear();
         }
 
-
+        protected lastRequest: any;
         private _services:any[];
         private _apiData:any;
         private _direction:number = 1;
@@ -336,6 +338,10 @@ module ghost.browser.api
         public static instance(inst?:API<any>):APIExtended
         {
             return <APIExtended>API.instance(inst);
+        }
+        public getLastRequest():any
+        {
+            return this.lastRequest;
         }
         public constructor()
         {
@@ -418,9 +424,21 @@ module ghost.browser.api
             }
             return this;
         }
-        public order(id:string, direction:number = 1):APIExtended
+        public order(id:string|string[], direction:number|number[] = 1):APIExtended
         {
-            this._direction = direction;
+            if(typeof direction == "number")
+            {
+                direction = [direction];
+            }
+            if (typeof id == "string") {
+                id = [id];
+            }
+            if(direction.length != id.length)
+            {
+                throw new Error("direction != keys");
+            }
+            //TODO:voir pour mettre le tableau ?
+            this._direction = direction[0];//Arrays.isArray(direction) ? direction[0] : direction;
             return this.service("paginate", "key", id).service("paginate","direction", direction);
         }
         public param(param:string, data:any):APIExtended
@@ -469,6 +487,12 @@ module ghost.browser.api
                 {
                     this._apiData.paginate = {};
                 }
+
+                //TODO:next pour chaque propriété à paginé
+                //TODO:PHP tester le tableau
+
+                
+                
                 if(data.paginate.next)
                 {
                     this._apiData.paginate.next = data.paginate.next;
@@ -650,6 +674,7 @@ module ghost.browser.api
                     APIExtended.middlewares[p].request(request);
                 }
             }
+            this.lastRequest = request;
             var promise = ghost.io.ajax(request, {asObject:true});//this.getPromise();
             this._previousPromise = promise;
             promise.then((rawData: any) => {

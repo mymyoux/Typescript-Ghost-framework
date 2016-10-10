@@ -12,10 +12,11 @@ namespace ghost.mvc
     export class CollectionAPI<T extends IModel> extends Collection<T>
     {
         protected is_fully_load:boolean = false;
-        private _order:string;
-        private _orderDirection: number;
+        private _order:string[];
+        private _orderDirection: number[];
         protected requests:any;
         protected _cache: number = 0;
+        protected _lastPart: string;
 
         public constructor()
         {
@@ -35,21 +36,29 @@ namespace ghost.mvc
                 this.previousAll().done();
             }
         }
-        public order(order:string, direction:number = 1):void
+        public order(order:string | string[], direction:number|number[] = 1):void
         {
-            this._order = order;
-            this._orderDirection = direction;
+            this._order = <string[]>(Arrays.isArray(<any>order) ? order : [order]);
+            this._orderDirection = <number[]>(Arrays.isArray(<any>direction) ? direction : [direction]);
+            while(this._orderDirection.length<this._order.length)
+            {
+                this._orderDirection.push(this._orderDirection[this._orderDirection.length-1]);
+            }
             if(this.length())
             {
-                this.sort(function(modelA:T, modelB:T):number
+                this.sort((modelA:T, modelB:T):number=>
                 {
-                    if(modelA[order] > modelB[order])
+                    for (var i: number = 0; i < this._order.length; i++)
                     {
-                        return direction>0 ? -1 : 1;
-                    }
-                    if(modelA[order] < modelB[order])
-                    {
-                        return direction>0 ? 1 : -1;
+                        if(modelA[this._order[i]] > modelB[this._order[i]])
+                        {
+                            return this._orderDirection[i] > 0 ? -1 : 1;
+                        }
+                        if(modelA[this._order[i]] < modelB[this._order[i]])
+                        {
+                            return this._orderDirection[i]> 0 ? 1 : -1;
+                        }
+                        
                     }
                     return 0;
                 });
@@ -61,7 +70,11 @@ namespace ghost.mvc
         {
             return this.is_fully_load;
         }
-
+        protected _onPartData(name:string, data):void
+        {
+            this._lastPart = name;
+            return this.onPartData(name, data);
+        }
         protected onPartData(name:string, data:any):void
         {
             if(name == Model.PART_DEFAULT)
@@ -80,7 +93,7 @@ namespace ghost.mvc
             if (!this.requests[part])
             {
                 this.requests[part] = this.getRequest(part, params);
-                this.requests[part].on(API.EVENT_DATA_FORMATTED, this.onPartData.bind(this, part));
+                this.requests[part].on(API.EVENT_DATA_FORMATTED, this._onPartData.bind(this, part));
             }
 
             return this.requests[part];
@@ -372,13 +385,13 @@ namespace ghost.mvc
                 {
                     //if list ordonned
                     if(this._order)
-                    {
-                        var result:IBinaryResult = Arrays.binaryFind(this._models, model, this._order, this._orderDirection);
+                    { 
+                        var result:IBinaryResult = Arrays.binaryFindArray(this._models, model, this._order, this._orderDirection);
                         if(result.index == undefined)
                         {
                             //handle order
 
-                               if (this._orderDirection > 0)
+                               if (result.order > 0)
                                {
                                    this._models.push(model);
                                }else
@@ -427,12 +440,30 @@ namespace ghost.mvc
         private detectFullyLoad( length : number ) : void
         {
             var apidata : any = this.getAPIData();
-
-            if (apidata && apidata.paginate && apidata.paginate.limit && length < apidata.paginate.limit)
+            var request: any;
+            var api: APIExtended = this._getRequest(this._lastPart);
+            if(api)
             {
-                this.is_fully_load = true;
-                this.trigger(Collection.EVENT_CHANGE);
+                request = api.getLastRequest(); 
             }
+            debugger;
+            if (request && request.data && request.data.paginate && request.data.paginate.direction != undefined && request.data.paginate.key)
+            {
+                if (ghost.utils.Objects.deepEquals(this._order, request.data.paginate.key) && ghost.utils.Objects.deepEquals(this._orderDirection, request.data.paginate.direction))
+                {
+                    if (apidata && apidata.paginate && apidata.paginate.limit && length < apidata.paginate.limit) {
+                        if (request.data.paginate.next || (!request.data.paginate.next && !request.data.paginate.previous))
+                        {
+                            this.is_fully_load = true;
+                            this.trigger(Collection.EVENT_CHANGE);
+                        }else{
+                            debugger; 
+                        }
+                    }
+                }
+            }
+
+          
         }
 
         public getMixins(): any[] {
@@ -444,6 +475,7 @@ namespace ghost.mvc
             if(input)
             {
 
+                debugger;
                 if(!input.length || !input.forEach)
                 {
                     //needed to not break the flow
