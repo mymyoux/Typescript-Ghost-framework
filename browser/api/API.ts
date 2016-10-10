@@ -435,6 +435,7 @@ module ghost.browser.api
             }
             if(direction.length != id.length)
             {
+                debugger;   
                 throw new Error("direction != keys");
             }
             //TODO:voir pour mettre le tableau ?

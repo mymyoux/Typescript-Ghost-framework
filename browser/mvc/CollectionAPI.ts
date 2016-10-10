@@ -446,7 +446,6 @@ namespace ghost.mvc
             {
                 request = api.getLastRequest(); 
             }
-            debugger;
             if (request && request.data && request.data.paginate && request.data.paginate.direction != undefined && request.data.paginate.key)
             {
                 if (ghost.utils.Objects.deepEquals(this._order, request.data.paginate.key) && ghost.utils.Objects.deepEquals(this._orderDirection, request.data.paginate.direction))
@@ -456,8 +455,6 @@ namespace ghost.mvc
                         {
                             this.is_fully_load = true;
                             this.trigger(Collection.EVENT_CHANGE);
-                        }else{
-                            debugger; 
                         }
                     }
                 }
@@ -475,7 +472,6 @@ namespace ghost.mvc
             if(input)
             {
 
-                debugger;
                 if(!input.length || !input.forEach)
                 {
                     //needed to not break the flow
