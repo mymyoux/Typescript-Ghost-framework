@@ -170,6 +170,13 @@ module ghost.browser.api
         //      request.data.__timestamp = Date.now();
             request.retry = this._config.retry != undefined ? this._config.retry:ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
+
+            if (request.url.indexOf(window.location.hostname) == -1)
+            {
+                //crossdomain
+                request.dataType = "jsonp";
+                
+            }
             return request;
         }
         protected parseResult(data:any):any
@@ -446,6 +453,10 @@ module ghost.browser.api
             if(!this._data)
             {
                 this._data = {};
+            }
+            if(data && data.writeExternal)
+            {
+                data = data.writeExternal();
             }
             this._data[param] = data;
             return this;

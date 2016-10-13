@@ -439,6 +439,10 @@ namespace ghost.mvc
 
         private detectFullyLoad( length : number ) : void
         {
+            if (!this._lastPart)
+            {
+                return;
+            }
             var apidata : any = this.getAPIData();
             var request: any;
             var api: APIExtended = this._getRequest(this._lastPart);
