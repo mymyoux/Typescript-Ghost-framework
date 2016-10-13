@@ -427,6 +427,15 @@ namespace ghost.browser.navigation
             this._currentHash = this._buildCurrentHash();
             window.location.href = this._currentHash;
         }
+
+        /**
+         * Pops a page of a scope
+         * @param scope scope's label
+         */
+        public size(scope:string) : number
+        {
+            return this.getScope(scope).size();
+        }
         /**
          * Gets scope
          * @param name scope's label
@@ -524,6 +533,11 @@ namespace ghost.browser.navigation
             this._history = [];
             this._current = null;
             this._event = new NavigationEvent();
+        }
+
+        public size() : number
+        {
+          return this._history.length;
         }
 
          /**

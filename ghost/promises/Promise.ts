@@ -5,7 +5,7 @@ namespace ghost.promises
 	export class _Promise
 	{
 		public static series(promises:any[]):Promise<any>
-		{	
+		{
 			var sequence:Promise<any> = Promise.resolve();
 			if(!promises || promises.length == 0)
 			{
@@ -19,7 +19,8 @@ namespace ghost.promises
 					{
 						promise = promise();
 					}
-					if(!(promise instanceof Promise))
+
+					if(!promise || (!(promise instanceof Promise) && !(promise.then instanceof Function)))
 					{
 						if(!promise)
 						{
@@ -33,7 +34,7 @@ namespace ghost.promises
 
 			});
 			return sequence;
-		}	
+		}
 	}
 	(<any>Promise).series = _Promise.series;
 }
