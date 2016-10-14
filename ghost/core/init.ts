@@ -64,7 +64,7 @@ namespace ghost
     }
     
 }
-function applyMixins(derivedCtor: any, baseCtors: any[]) {
+function applyMixins(derivedCtor: any, baseCtors: any[], config:any = null) {
     if(!derivedCtor || !baseCtors)
     {
         return;
@@ -72,8 +72,9 @@ function applyMixins(derivedCtor: any, baseCtors: any[]) {
     if (derivedCtor.prototype && typeof derivedCtor == "function")
     {
         baseCtors.forEach(baseCtor => {
+
             if (baseCtor.prototype.applyMixin) {
-                baseCtor.prototype.applyMixin(derivedCtor.prototype);
+                baseCtor.prototype.applyMixin(derivedCtor.prototype, config);
             } else {
                 Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
                     derivedCtor.prototype[name] = baseCtor.prototype[name];
@@ -85,7 +86,7 @@ function applyMixins(derivedCtor: any, baseCtors: any[]) {
         baseCtors.forEach(baseCtor => {
             if (baseCtor.prototype.applyMixin)
             {
-                baseCtor.prototype.applyMixin(derivedCtor);
+                baseCtor.prototype.applyMixin(derivedCtor, config);
             }else
             {
                 Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
