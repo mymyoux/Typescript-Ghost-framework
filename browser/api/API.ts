@@ -484,7 +484,6 @@ module ghost.browser.api
         }
         protected parseAPIData(data:any):void
         {
-            debugger;  
             if(!data)
             {
                 return;
