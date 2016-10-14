@@ -15,7 +15,7 @@ namespace ghost.mvc
          * @type {{ACTIVATED: (ACTIVATED), DISACTIVATED: (DISACTIVATED)}}
          */
         public static EVENTS: any = Controller.EVENTS;
-        public static partials_context: any = {};
+        // public static partials_context: any = {};
 		//private templateString:string;
         protected templateData:Template;
 		protected template:Ractive;
@@ -804,8 +804,9 @@ namespace ghost.mvc
                       return null;
                     };*/
 
-                    options.data.makeComponent = (name, data) => {
+                    options.data.makeComponent = (name, token, data) => {
                         var url: string = "rcomponents/" + name.toLowerCase();
+                        var urlPartial: string = "rcomponents/" + token;
                         if (!Ractive.partials[url])
                         {
                             Ractive.partials[url] = "";
@@ -823,10 +824,11 @@ namespace ghost.mvc
                                         context+= ' '+p+'="'+data[p]+'"';
                                     }
                                 }
-                                Master.partials_context[name] = context;
-                                Ractive.partials[url] = '<' + name+ ' model="{{this}}"'+context+'/>';
-                                this.template.set("_components." + name.toLowerCase(), true);
-                                this.template.set("_components." + name.toLowerCase(), false);
+                                //Master.partials_context[name] = context;
+                                Ractive.partials[url] = '<' + name+ ' model="{{this}}/>';
+                                Ractive.partials[urlPartial] = '<' + name + ' model="{{this}}"' + context + '/>';
+                                this.template.set("_components." + token.toLowerCase(), true);
+                                this.template.set("_components." + token.toLowerCase(), false);
                             });
                         }else{
                             var context: string = "";
@@ -835,13 +837,9 @@ namespace ghost.mvc
                                     context += ' ' + p + '="' + data[p] + '"';
                                 }
                             }
-                            if (Master.partials_context[name] != context)
-                            {
-                                Master.partials_context[name] = context;
-                                Ractive.partials[url] = '<' + name + ' model="{{this}}"' + context + '/>';
-                            }
+                            Ractive.partials[urlPartial] = '<' + name + ' model="{{this}}"' + context + '/>';
                         }
-                        return url;
+                        return urlPartial;
                     };
 
                     options.data.makePartial = (name, data)=> {
