@@ -17,7 +17,7 @@ namespace ghost.mvc
         protected requests:any;
         protected _cache: number = 0;
         protected _lastPart: string;
-
+        protected _mixins: any[];
         public constructor()
         {
             super();
@@ -508,9 +508,19 @@ namespace ghost.mvc
                             if(!model)
                             {
                                 model  = <any>Model.get(cls);
-                                if(this.getMixins())
+                                if (this._mixins != undefined || this.getMixins())
                                 {
-                                    applyMixins(model, this.getMixins());
+                                    if(!this._mixins)
+                                        this._mixins = this.getMixins();
+                                    this._mixins.forEach((mixin:any)=>
+                                    {
+                                        if(mixin instanceof MixinConfig)
+                                        {
+                                            applyMixins(model, [mixin.mixin], mixin.config);
+                                        }else{
+                                            applyMixins(model, [mixin]);
+                                        }
+                                    });
                                     /*var mixins: any[] = this.getMixins();
                                     for(var p in mixins)
                                     {
@@ -540,6 +550,16 @@ namespace ghost.mvc
         public toRactive():any
         {
             return this;
+        }
+    }
+    export class MixinConfig 
+    {
+        public mixin: any;
+        public config: any;
+        public constructor(mixin:any, config:any = null)
+        {
+            this.mixin = mixin;
+            this.config = config;
         }
     }
 }
