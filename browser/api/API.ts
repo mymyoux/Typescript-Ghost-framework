@@ -492,6 +492,7 @@ module ghost.browser.api
             {
                 this._apiData = {};
             }
+            var keys = ["allowed", "direction", "key", "limit", "previous", "next"];
             if(data.paginate)
             {
                 if(!this._apiData.paginate)
@@ -552,13 +553,20 @@ module ghost.browser.api
                 if (data.paginate.limit)
                     this._apiData.paginate.limit = data.paginate.limit;
 
-                var keys = ["allowed","direction","key","limit","previous","next"];
                 for(var p in data.paginate)
                 {
                     if(keys.indexOf(p)==-1)
                     {
                         this._apiData[p] = data.paginate[p];
                     }
+                }
+            }
+            keys.push("paginate");
+            for(var p in data)
+            {
+                if(keys.indexOf(p) == -1)
+                {
+                    this._apiData[p] = data[p];
                 }
             }
         }
