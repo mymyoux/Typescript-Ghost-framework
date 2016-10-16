@@ -171,11 +171,11 @@ module ghost.browser.api
             request.retry = this._config.retry != undefined ? this._config.retry:ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
 
-            if (request.url.indexOf(window.location.hostname) == -1)
+            if (request.url.indexOf(window.location.hostname) == -1 && !window['EXTENSION_CONFIG'])
             {
                 //crossdomain
                 request.dataType = "jsonp";
-                
+
             }
             return request;
         }
@@ -442,7 +442,7 @@ module ghost.browser.api
             }
             if(direction.length != id.length)
             {
-                debugger;   
+                debugger;
                 throw new Error("direction != keys");
             }
             this._direction = direction;
@@ -500,7 +500,7 @@ module ghost.browser.api
                 }
 
 
-                
+
                 if(data.paginate.next)
                 {
                     this._apiData.paginate.next = data.paginate.next;
