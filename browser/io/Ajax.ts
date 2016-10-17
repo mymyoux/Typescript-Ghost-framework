@@ -130,10 +130,10 @@ namespace ghost.io
 					data = middleware(data, "error");
 					if (settings.asObject)
 					{
-						reject({ errorThrown: data.error ? data.error : data, textStatus: textStatus, jqXHR: jqXHR, data:data });
+						reject({ errorThrown: data.api_error?data.api_error:(data.error?data.error:data), textStatus: textStatus, jqXHR: jqXHR, data:data });
 					}else
 					{
-						reject(data.error?data.error:data);
+						reject(data.api_error?data.api_error:(data.error?data.error:data));
 					}
 					return;
 				}
