@@ -501,7 +501,7 @@ module ghost.browser.api
                 }
 
 
-
+                debugger;
                 if(data.paginate.next)
                 {
                     this._apiData.paginate.next = data.paginate.next;
@@ -513,7 +513,12 @@ module ghost.browser.api
                         {
                             if (!((this._apiData.paginate.nextAll[i] < data.paginate.next[i] && this._direction[i] > 0) || (this._apiData.paginate.nextAll[i] > data.paginate.next[i] && this._direction[i] <0 )))
                             {
+                                if (this._apiData.paginate.nextAll[i] == data.paginate.next[i]) {
+                                    continue;
+                                }
                                 isNextAll = false;
+                                break;
+                            }else{
                                 break;
                             }
                         }
@@ -534,7 +539,12 @@ module ghost.browser.api
                         isPreviousAll = true;
                         for (var i: number = 0; i < data.paginate.previous.length; i++) {
                             if (!((this._apiData.paginate.previousAll[i] > data.paginate.previous[i] && this._direction[i] > 0) || (this._apiData.paginate.previousAll[i] < data.paginate.previous[i] && this._direction[i] < 0))) {
+                                if (this._apiData.paginate.previousAll[i] == data.paginate.previous[i]) {
+                                    continue;
+                                }
                                 isPreviousAll = false;
+                                break;
+                            } else {
                                 break;
                             }
                         }
