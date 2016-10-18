@@ -501,7 +501,6 @@ module ghost.browser.api
                 }
 
 
-                debugger;
                 if(data.paginate.next)
                 {
                     this._apiData.paginate.next = data.paginate.next;
