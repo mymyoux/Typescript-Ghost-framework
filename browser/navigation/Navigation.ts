@@ -802,7 +802,7 @@ namespace ghost.browser.navigation
                     this._current = ipage;
                     this._history[this._history.length-1] = ipage;
                      Navigation.changeHash(this._key+"/"+this._current.page);
-                    this._pageChange(Navigation.REPLACE, old, this._current.page);
+                    this._pageChange(Navigation.REPLACE, old, this._current.page, this._current.params);
                 }
             }
         }
@@ -834,7 +834,7 @@ namespace ghost.browser.navigation
                     this._history.splice(this._history.length-count, count);
                    // this._current = this._history.length>0?this._history[this._history.length-1]:null;
                     Navigation.changeHash(this._key+"/"+(this._current?this._current.page:""));
-                    this._pageChange(Navigation.POP, old, (this._current?this._current.page:""));
+                    this._pageChange(Navigation.POP, old, (this._current?this._current.page:""),  (this._current?this._current.params:""));
                 }
             }else
             {
@@ -857,7 +857,7 @@ namespace ghost.browser.navigation
          */
         private _pageChange(type:string, previous:string, next:string, params:any = null):void
         {
-            log.info("page change:"+type+" => " +previous+ " next="+next);
+            console.log("page change:"+type+" => " +previous+ " next="+next, params);
             this.trigger(Navigation.EVENT_PAGE_CHANGED, type, previous, next, params);
             ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, this._key, type, previous, next, params);
         }
