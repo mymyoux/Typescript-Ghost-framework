@@ -129,9 +129,17 @@ module ghost.browser.api
             }, reject);
             return <any>this;
         }
-        public done():T
+        public done():Promise<any>
         {
-            return this.then();
+            var promise: Promise<any> = new Promise<any>((resolve: any, reject: any): void => {
+                this.then((data: any): void => {
+                    resolve(data);
+                }, (error) => {
+                    reject(error);
+                });
+            });
+
+            return promise.then();
         }
         protected getConfig(name:string):any
         {
