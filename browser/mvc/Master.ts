@@ -805,11 +805,11 @@ namespace ghost.mvc
                     };*/
 
                     options.data.makeComponent = (name, token, data) => {
-                        var url: string = "rcomponents/" + name.toLowerCase();
+                        var url: string = "rcomponents/" + name.toLowerCase(); 
                         var urlPartial: string = "rcomponents/" + token;
                         if (!Ractive.partials[url])
                         {
-                            Ractive.partials[url] = "";
+                            Ractive.partials[url] = ""; 
                             if (!Ractive.components[name])
                             {
                                 Ractive.components[name] = Ractive.extend(Component.getConfig(name));
@@ -848,7 +848,7 @@ namespace ghost.mvc
                         if(Ractive.partials[url])
                         {
                             return url;
-                        }
+                        } 
                         var template: any = Template.getTemplate(url); 
                         if (!template)
                         {
@@ -860,9 +860,11 @@ namespace ghost.mvc
                                     return;
                                 }
                                 template.prepareForUse().then(()=> {
-                                    Ractive.partials[url] = template.parsed;
-                                    this.template.set("_partials." + name, true);
-                                    this.template.set("_partials." + name, false);
+                                    if (Ractive.partials[url] !== template.parsed) {
+                                        Ractive.partials[url] = template.parsed;
+                                        this.template.set("_partials." + name, true);
+                                        this.template.set("_partials." + name, false);
+                                    }
                                     try {
                                         this.onPartial(name);
                                     } catch (error) {
@@ -877,9 +879,12 @@ namespace ghost.mvc
                             if (!Ractive.partials[url])
                             {
                                 template.prepareForUse().then(() => {
-                                    Ractive.partials[url] = template.parsed;
-                                    this.template.set("_partials." + name, true);
-                                    this.template.set("_partials." + name, false);
+                                    if (Ractive.partials[url] !== template.parsed)
+                                    {
+                                        Ractive.partials[url] = template.parsed;
+                                        this.template.set("_partials." + name, true);
+                                        this.template.set("_partials." + name, false);
+                                    }
                                     try {
                                         this.onPartial(name);
                                     } catch (error) {
