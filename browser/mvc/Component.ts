@@ -332,6 +332,9 @@ namespace ghost.mvc {
 		{
 			this.instance.off(name, callback);
 		}
+		public getContainer() {
+			return $(this.instance.find("*")).parent().get(0);
+        }
 		public getData(): any {
 			//debugger;
 			var data: IData[]|Function[]|any[]|any = this.getInitialData();
