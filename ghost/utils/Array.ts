@@ -26,12 +26,12 @@ namespace ghost.utils
 					for (var i: number = 0; i < len;i++)
 					{
 						order = orders[i];
-						if (element[properties[i]] > array[currentIndex][properties[i]])
+						if (element[properties[i]] > array[currentIndex][properties[i]] || (element[properties[i]]!=null && array[currentIndex][properties[i]] == null))
 						{
 							lesser = true;
 							break;
 						}
-						if (element[properties[i]] < array[currentIndex][properties[i]]) {
+						if (element[properties[i]] < array[currentIndex][properties[i]] || (element[properties[i]] == null && array[currentIndex][properties[i]] != null) ) {
 							lesser = false;
 							break;
 						}

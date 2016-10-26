@@ -50,11 +50,11 @@ namespace ghost.mvc
                 {
                     for (var i: number = 0; i < this._order.length; i++)
                     {
-                        if(modelA[this._order[i]] > modelB[this._order[i]])
+                        if (modelA[this._order[i]] > modelB[this._order[i]] || (modelA[this._order[i]]!=null && modelB[this._order[i]]==null))
                         {
                             return this._orderDirection[i] > 0 ? -1 : 1;
                         }
-                        if(modelA[this._order[i]] < modelB[this._order[i]])
+                        if (modelA[this._order[i]] < modelB[this._order[i]] || (modelB[this._order[i]]!=null && modelA[this._order[i]] == null))
                         {
                             return this._orderDirection[i]> 0 ? 1 : -1;
                         }
