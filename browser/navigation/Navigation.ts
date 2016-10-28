@@ -767,7 +767,8 @@ namespace ghost.browser.navigation
                    if(!fromHash)
                    {
                         //log.info("not from hash:"+this._key+":"+this._current.page);
-                    Navigation.changeHash(this._key+"/"+this._current.page);
+                        //TODO:add params ? 
+                        Navigation.changeHash(this._key+"/"+this._current.page);
                    }
                    this._pageChange(Navigation.PUSH, old, this._current.page, params);
 
@@ -800,8 +801,9 @@ namespace ghost.browser.navigation
                         params: params
                     };
                     this._current = ipage;
-                    this._history[this._history.length-1] = ipage;
-                     Navigation.changeHash(this._key+"/"+this._current.page);
+                    this._history[this._history.length-1] = ipage; 
+                    //
+                     Navigation.changeHash(this._key+"/"+this._current.page+(params && params.length?"/"+params.join('/'):''));
                     this._pageChange(Navigation.REPLACE, old, this._current.page, this._current.params);
                 }
             }
@@ -833,6 +835,8 @@ namespace ghost.browser.navigation
                 {
                     this._history.splice(this._history.length-count, count);
                    // this._current = this._history.length>0?this._history[this._history.length-1]:null;
+                   // 
+                   //TODO:add params ? 
                     Navigation.changeHash(this._key+"/"+(this._current?this._current.page:""));
                     this._pageChange(Navigation.POP, old, (this._current?this._current.page:""),  (this._current?this._current.params:""));
                 }
