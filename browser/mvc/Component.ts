@@ -122,7 +122,13 @@ namespace ghost.mvc {
             {
 				return null;
             }
-            return componentClass.prototype.getBindedFunctions();
+            var binded:any = componentClass.prototype.getBindedFunctions();
+            if(!binded)
+            {
+				binded = {};
+            }
+			binded.getComponentName = componentClass.prototype.getComponentName.bind(componentClass.prototype);
+            return binded;
         }
 		public static getConfig(name:string):any
 		{
@@ -246,9 +252,15 @@ namespace ghost.mvc {
             if (this._binded === undefined)
             {
 				this._binded = this.getBindedFunctions();
+				this._binded.getComponentName = this.getComponentName.bind(this);
             }
 			return this._binded;
         }
+        protected getComponentName():string
+        {
+			return this.getClassName().toLowerCase();
+        } 
+        protected 
 		protected getBindedFunctions(): any {
             return null;
         }
