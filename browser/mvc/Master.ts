@@ -1065,6 +1065,19 @@ namespace ghost.mvc
         {
             return null;
         }
+
+        protected fireComponents(name: string, method: string, params: any = null): void {
+            var components: any[] = this.template.findAllComponents();
+            if (name) {
+                components = components.filter(function(component: any): boolean {
+                    return component.getComponentName && component.getComponentName() === name;
+                });
+            }
+            components.forEach(function(component: any) {
+                component[method].apply(component, params);
+            });
+
+        }
 	}
     export interface IPart
     {
