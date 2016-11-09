@@ -670,6 +670,10 @@ module ghost.browser.api
             }
             return this;
         }
+        public export():APIExtended
+        {
+            return this.service("excel", "use", true);
+        }
         public cancelAll():APIExtended
         {
             while(this._stacklist.length)
@@ -729,6 +733,11 @@ module ghost.browser.api
                 return this;
             }
             return this._then(request, resolve, reject, token);
+        }
+        public toURL():string
+        {
+            var request:any = this.getRequest();
+            return ghost.utils.URI.buildURI(request.url, request.data);
         }
         protected _then(request:any, resolve:any, reject:any, token:string):APIExtended
         {
