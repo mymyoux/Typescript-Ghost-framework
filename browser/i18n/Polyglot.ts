@@ -1,23 +1,8 @@
 ///<module="framework/ghost/events"/>
+///<module="io"/>
+///<module="data"/>
 namespace ghost.browser.i18n
 {
-//  Work based on : 
-//     (c) 2012 Airbnb, Inc.
-//
-//     polyglot.js may be freely distributed under the terms of the BSD
-//     license. For all licensing information, details, and documention:
-//     http://airbnb.github.com/polyglot.js
-//
-//
-// Polyglot.js is an I18n helper library written in JavaScript, made to
-// work both in the browser and in Node. It provides a simple solution for
-// interpolation and pluralization, based off of Airbnb's
-// experience adding I18n functionality to its Backbone.js and Node apps.
-//
-// Polylglot is agnostic to your translation backend. It doesn't perform any
-// translation; it simply gives you a way to manage translated phrases from
-// your client- or server-side JavaScript application.
-//
 	export interface IPolyglotOptions
 	{
 		currentLocale?:string;
@@ -27,353 +12,515 @@ namespace ghost.browser.i18n
 		locale?:string;
 	}
 
-
-//TODO:LOAD TRANSLATE A LA VOLEE + CACHE
-
+	export interface ITranslation {
+		action: string;
+		controller: string;
+		key: string;
+		name: string;
+		plurial: string;
+		singular: string;
+		shortname?: string;
+		type: string;
+		updated_time: string;
+	}
+	export interface IKey {
+		action?: string;
+		controller?: string;
+		key?: string;
+		name?: string;
+		type?: string;
+		error?: string;
+		original?: string;
+	}
 	export class Polyglot extends ghost.events.EventDispatcher
 	{
-		/**
-		 * The string that separates the different phrase possibilities.
-		 * @type {String}
-		 */
-		private static delimeter:string = '||||';
 		/**
 		 * Polyglot instance
 		 * @type {Polyglot}
 		 */
-		private static _instance:Polyglot;
-		/**
-		 * Mapping from pluralization group plural logic.
-		 * @type {any}
-		 */
-		private static pluralTypes:any = {
-			chinese:   function(n) { return 0; },
-			german:    function(n) { return n !== 1 ? 1 : 0; },
-			french:    function(n) { return n > 1 ? 1 : 0; },
-			russian:   function(n) { return n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2; },
-			czech:     function(n) { return (n === 1) ? 0 : (n >= 2 && n <= 4) ? 1 : 2; },
-			polish:    function(n) { return (n === 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2); },
-			icelandic: function(n) { return (n % 10 !== 1 || n % 100 === 11) ? 1 : 0; }
-		};
-		/**
-		 * Mapping from pluralization group to individual locales.
-		 * @type {any}
-		 */
-		private static pluralTypeToLanguages:any = {
-			chinese:   ['fa', 'id', 'ja', 'ko', 'lo', 'ms', 'th', 'tr', 'zh'],
-			german:    ['da', 'de', 'en', 'es', 'fi', 'el', 'he', 'hu', 'it', 'nl', 'no', 'pt', 'sv'],
-			french:    ['fr', 'tl', 'pt-br'],
-			russian:   ['hr', 'ru'],
-			czech:     ['cs'],
-			polish:    ['pl'],
-			icelandic: ['is']
-		};
+		private static _instance: Polyglot;
 
-		private static langToTypeMap(mapping):any 
-		{
-		    var type, langs, l, ret = {};
-		    for (type in mapping) {
-		      if (mapping.hasOwnProperty(type)) {
-		        langs = mapping[type];
-		        for (l in langs) {
-		          ret[langs[l]] = type;
-		        }
-		      }
-		    }
-		    return ret;
-	  	}
-
-		/**
-		 * Trim a string
-		 * @param  {string} str [description]
-		 * @return {string}     [description]
-		 */
-		private static trim(str:string):string
-		{
-			var trimRe:RegExp = /^\s+|\s+$/g;
-			return str.replace(trimRe, '');
+		public static instance(): Polyglot {
+			if (!Polyglot._instance) {
+				Polyglot._instance = new Polyglot();
+			}
+			return Polyglot._instance;
 		}
-
-
-		// Based on a phrase text that contains `n` plural forms separated
-		// by `delimeter`, a `locale`, and a `count`, choose the correct
-		// plural form, or none if `count` is `null`.
-		protected static choosePluralForm(text:string, locale:string, count:number):string{
-			var ret, texts, chosenText;
-			if (count != null && text) {
-			  texts = text.split(Polyglot.delimeter);
-			  chosenText = texts[Polyglot.pluralTypeIndex(locale, count)] || texts[0];
-			  ret = Polyglot.trim(chosenText);
-			} else {
-			  ret = text;
+		protected static clone(source: any): any {
+			var ret: any = {};
+			for (var prop in source) {
+				ret[prop] = source[prop];
 			}
 			return ret;
 		}
-
-		private static pluralTypeName(locale:string):any {
-			var langToPluralType = Polyglot.langToTypeMap(Polyglot.pluralTypeToLanguages);
-			return langToPluralType[locale] || langToPluralType.en;
-		}
-
-		private static pluralTypeIndex(locale:string, count:number):any {
-			return Polyglot.pluralTypes[Polyglot.pluralTypeName(locale)](count);
-		}
-
-		// ### interpolate
-		//
-		// Does the dirty work. Creates a `RegExp` object for each
-		// interpolation placeholder.
-		protected static interpolate(phrase:string, options:any):string {
-			for (var arg in options) {
-			  if (arg !== '_' && options.hasOwnProperty(arg)) {
-			    // We create a new `RegExp` each time instead of using a more-efficient
-			    // string replace so that the same argument can be replaced multiple times
-			    // in the same phrase.
-			    phrase = phrase.replace(new RegExp('\\{(\\{)?'+arg+'(\\})?\\}', 'g'), options[arg]);
-			  }
+		/**
+		 * Warn to the console
+		 * @param {string} message [description]
+		 */
+		private static warn(message: string): void {
+			if (!window.console)
+				return;
+			if (console.warn) {
+				console.warn('warn: ' + message);
+			} else {
+				console.log('warn: ' + message);
 			}
-			if(options && options.hasOwnProperty("smart_count"))
-			{
+		}
+		/**
+		 * replace data inside phrases
+		 */
+		protected static interpolate(phrase: string, options: any): string {
+			for (var arg in options) {
+				if (arg !== '_' && options.hasOwnProperty(arg)) {
+					// We create a new `RegExp` each time instead of using a more-efficient
+					// string replace so that the same argument can be replaced multiple times
+					// in the same phrase.
+					phrase = phrase.replace(new RegExp('\\{(\\{)?' + arg + '(\\})?\\}', 'g'), options[arg]);
+				}
+			}
+			if (options && options.hasOwnProperty("smart_count")) {
 				phrase = phrase.replace(/{{count}}/g, options.smart_count);
 			}
 			return phrase;
 		}
-
-		// ### warn
-		//
-		// Provides a warning in the console if a phrase key is missing.
-		private static warn(message:string):void {
-			window.console && window.console.warn && window.console.warn('WARNING: ' + message);
-		}
-
-		// ### clone
-		//
-		// Clone an object.
-		protected static clone(source:any):any {
-			var ret:any = {};
-			for (var prop in source) {
-			  ret[prop] = source[prop];
-			}
-			return ret;
-		}
-		public static instance():Polyglot
-		{
-			if(!Polyglot._instance)
-			{
-				Polyglot._instance = new Polyglot();	
-			}
-			return Polyglot._instance;
-		}
-
-		/**
-		 * Phrases
-		 * @type {any}
-		 */
-		protected phrases:any;
 		/**
 		 * Current's locale
 		 * @type {string}
 		 */
-		protected currentLocale:string;
+		protected currentLocale: string;
 		/**
-		 * Allow missing translation
-		 * @type {boolean}
-		 */
-		protected allowMissing:boolean;
+		 * Phrases
+		 * @type {any}
+		*/
+		protected phrases: any;
 		/**
 		 * Warn method
 		 * @type {[type]}
+ 		*/
+		protected warn: (message: string) => void;
+		/**
+		/**
+		 * Controller's has already been retrieved during this session - no luck to have new data
+		 * @type {string[]}
 		 */
-		protected warn:(message:string)=>void;
+		protected retrieved: string[];
+		/**
+		 * Last update date for each controllers. Useful for updates
+		 * @type {object}
+		 */
+		protected last_updated: any;
+		/**
+		 * Local cache
+		 * @type {ghost.data.Warehouse}
+		 */
+		protected _cache: ghost.browser.data.Warehouse;
+		/**
+		 * Translations have been loaded from cache (or tried to)
+		 * @type {boolean}
+		 */
+		protected _retrievedFromCache: boolean = false;
+		/**
+		 * Plurial type of the current locale.
+		 * @type {string}
+		 */
+		protected plurialForm: string;
+		protected plurialFormServer: string;
+		/**
+		 * List of controllers up to date
+		 * @type {string[]}
+		 */
+		protected _updated: any;
 
+		/**
+		 * If server doesn't support locale
+		 * @type {string}
+		 */
+		protected _serverLocale: string;
 		/**
 		 * Constructor
 		 * @param {IPolyglotOptions} options Polyglot options
 		 */
-		constructor(options?:IPolyglotOptions)
-		{
+		constructor(options?: ghost.browser.i18n.IPolyglotOptions) {
 			super();
 			options = options || {};
-		    this.phrases = {};
-		    if(options.phrases)
-		    	this.extend(options.phrases);
-		    var locale:string;
-		    if(!options.locale)
-		    {
-		    	//prefered language
-		    	if(window.navigator["languages"] && window.navigator["languages"].length>0)
-		    	{
-		    		locale= window.navigator["languages"][0];
-		    	}else
-		    	{
-		    		//browser interface language (often not as precise as prefered one. ie en-US instead of en-GB)
-		    		locale= (window.navigator.language || (<any>window.navigator).userLanguage ? window.navigator.language || (<any>window.navigator).userLanguage:"en") ;
-		    	}
-		    }else
-		    { 
-		    	locale = options.locale;
-		    }
-		    this.locale(locale);
-		    this.allowMissing = !!options.allowMissing;
-		    this.warn = options.warn || Polyglot.warn;	
-		    if(!Polyglot._instance)
-		    {
-		    	Polyglot._instance = this;
-		    }else
-		    {
-		    	console.warn("Polyglot instance already exists");
-		    }
+			this.phrases = {};
+			if (options.phrases)
+				this.extend(options.phrases);
+			var locale: string;
+			if (!options.locale) {
+				//prefered language
+				if (window.navigator["languages"] && window.navigator["languages"].length > 0) {
+					locale = window.navigator["languages"][0];
+				} else {
+					locale = (window.navigator.language || (<any>window.navigator).userLanguage ? window.navigator.language || (<any>window.navigator).userLanguage : "en");
+				}
+			} else {
+				locale = options.locale;
+			}
+			this.locale(locale);
+			//this.allowMissing = !!options.allowMissing;
+			this.warn = options.warn || Polyglot.warn;
+			if (!Polyglot._instance) {
+				Polyglot._instance = this;
+			} else {
+				console.warn("Polyglot instance already exists");
+			}
+			this.retrieved = [];
+			this.last_updated = {};
+			this._updated = {};
+			this.retrieveFromCache();
 		}
-  		/**
+
+		protected cache(): ghost.browser.data.Warehouse {
+			if (!this._cache) {
+				this._cache = ghost.cache.warehouse("polyglot");
+			}
+			return this._cache;
+		}
+		public getPartsFromKey(key: string): IKey {
+			key = ghost.utils.Strings.trim(key.toLowerCase());
+			var parts: string[] = key.split(".");
+			var index: number;
+			var type: string = null;
+			if (parts.length > 2) {
+				if ((index = parts[parts.length - 1].indexOf("-")) > -1) {
+					type = parts[parts.length - 1].substring(index + 1);
+					parts[parts.length - 1] = parts[parts.length - 1].substring(0, index);
+				}
+			}
+
+			return {
+				controller: parts[0],
+				action: parts[1],
+				key: parts.slice(2).join("."),
+				type: type,
+				name: key
+			};
+		}
+		private retrieveFromCache(): void {
+
+			if (!this._retrievedFromCache) {
+				if (false && window.location.href.indexOf(".local") != -1) {
+					this._retrievedFromCache = true;
+					this.retrieveUpdate();
+					return;
+				}
+				this._retrievedFromCache = true;
+				if (this.cache().has("locale")) {
+					if (this.cache().get("locale") != this.locale()) {
+						this.clearCache();
+						console.log("cache clear due to a language change");
+						return;
+					}
+				}
+				if (this.cache().has("phrases")) {
+					//TODO:maybe we can merge, and don't call this function at launch but on demand
+					this.phrases = this.cache().get("phrases");
+				}
+				if (this.cache().has("last_updated")) {
+					//TODO:maybe we can merge, and don't call this function at launch but on demand
+					this.last_updated = this.cache().get("last_updated");
+				}
+				if (this.cache().has("updated")) {
+					this._updated = this.cache().get("updated");
+				}
+				if (this.cache().has("serverlocale")) {
+					this.serverLocale(this.cache().get("serverlocale"));
+				}
+				this.retrieveUpdate();
+			}
+		}
+		protected getRootURL(): string {
+			if (ghost["mvc"])
+				return ghost["mvc"].Application.getRootURL();
+			return "/";
+		}
+		public retrieveUpdate(): void {
+			if (this._updated) {
+				var needsUpdate: any = {};
+				var found: boolean = false;
+				for (var p in this._updated) {
+					//not updated since 24h
+					if (this._updated[p] < Date.now() /*- 3600 * 1000 - 24*/) {
+						needsUpdate[p] = this.last_updated[p];//.push(p);
+						found = true;
+					}
+				}
+				if (found) {
+					ghost.io.ajax(this.getRootURL() + "translate/update", <any>
+						{
+							data: { controllers: needsUpdate, locale: this.locale() },
+							method: "POST"
+						}).then((result: any) => {
+							if (!result.success || !result.translations || result.translations.length == 0) {
+								if (!result.success) {
+									console.warn("Failed to update translations");
+								}
+								return;
+							}
+
+							this.extend(result.translations);
+
+							result.translations.forEach(function(item: ITranslation): void {
+								if (!this.last_updated[item.controller]) {
+									this.last_updated[item.controller] = item.updated_time;
+								} else {
+									if (this.last_updated[item.controller] < item.updated_time) {
+										this.last_updated[item.controller] = item.updated_time;
+									}
+								}
+							}, this);
+
+							for (var p in needsUpdate) {
+								this._updated[p] = Date.now();
+							}
+
+							this.cache().set("last_updated", this.last_updated);
+							this.cache().set("updated", this._updated);
+
+						}, (error) => {
+							console.warn("Failed to update translations");
+						}
+						);
+				}
+			}
+		}
+		public retrieveTranslationFromServer(key: string): void {
+			var short: string = key.split(".").slice(0, 1).join(".");
+			if (this.retrieved.indexOf(key) != - 1) {
+				//already retrieved we do nothing
+				return;
+			} else {
+				this.retrieved.push(key);
+			}
+			if (this.retrieved.indexOf(short) != -1) {
+				return;
+			} else {
+				this.retrieved.push(short);
+			}
+
+			ghost.io.ajax(this.getRootURL() + "translate/resolve", <any>
+				{
+					data: { key: key, locale: this.locale() },
+					method: "POST",
+					async: true
+				}).then((result: any) => {
+					if (!result.success || !result.translations || result.translations.length == 0) {
+						if (!result.success) {
+							console.warn("Failed to retrieved translation for ", key);
+						}
+						return;
+					}
+					if (result && result.locale && result.locale) {
+						this.serverLocale(result.locale);
+					}
+					this.extend(result.translations);
+
+
+					var date: string = result.translations.reduce(function(previous: string, item: ITranslation) {
+						if (!previous) {
+							return item.updated_time;
+						}
+						if (previous < item.updated_time) {
+							return item.updated_time;
+						}
+						return previous;
+					}, null);
+
+					if (date) {
+						var controller: string = this.getPartsFromKey(key).controller;
+						if (!this.last_updated[controller]  || this.last_updated[controller] < date) {
+							this.last_updated[controller] = date;
+							this.cache().set("last_updated", this.last_updated);
+						}
+						this._updated[controller] = Date.now();
+						this.cache().set("updated", this._updated);
+					}
+					if (result.translations) {
+						this.trigger("resolved:" + short);
+					}
+
+				}, (error) => {
+					debugger;
+					console.warn("Failed to retrieved translation for ", key);
+					//this.retrieved.push(key);
+				}
+				);
+
+		}
+		/**
+		 * Adds new translations to the polyglot. will replace existing ones
+		 * @param {ITranslation[]} morePhrases Array of new translations
+		 */
+		public extend(morePhrases: ITranslation[]): void
+		/**
+		 * Adds a new translation to the polyglot. will replace existing ones
+		 * @param {ITranslation} morePhrases A new Translation
+		 */
+		public extend(morePhrases: ITranslation): void
+		public extend(morePhrases: any): void {
+			if (!morePhrases) {
+				return;
+			}
+			if (!ghost.utils.Arrays.isArray(morePhrases)) {
+				this.addPhrase(morePhrases);
+				return;
+			}
+			morePhrases.forEach(this.addPhrase, this);
+
+			this.cache().set("phrases", this.phrases);
+		}
+		private addPhrase(phrase: ITranslation): void {
+			this.phrases[phrase.name] = phrase;
+
+			/*if(!this.last_updated[phrase.controller] || this.last_updated[phrase.controller]<phrase.updated_time)
+			{
+				this.last_updated[phrase.controller] = phrase.updated_time;
+			}*/
+
+		}
+
+		public t(key: string, options: any): string {
+			if (key === undefined ||  key === null || key == "" || key.substring(key.lastIndexOf(".") + 1) == "undefined" || key.substring(key.lastIndexOf(".") + 1) == "null") {
+				return "";
+			}
+			var result: string;
+			options = options == null ? {} : options;
+			if (typeof options === 'number') {
+				options = { smart_count: options };
+			}
+			if (options.hasOwnProperty("smart_count")) {
+				if (typeof options.smart_count != "number") {
+					if (options.smart_count === undefined || options.smart_count === null) {
+						options.smart_count = 0;
+					} else {
+						options.smart_count = parseFloat(options.smart_count);
+						if (isNaN(options.smart_count)) {
+							options.smart_count = 0;
+						}
+					}
+				}
+			}
+
+			var plurial: string = this.getPluralForm(this.serverLocale(), options.smart_count);
+
+			var phrase: ITranslation = this.phrases[key + "-" + window["mob"]["user"].type] ||  this.phrases[key] || options._;
+			if (!phrase) {
+				this.retrieveTranslationFromServer(key);
+				phrase = this.phrases[key + "-" + window["mob"]["user"].type] || this.phrases[key];
+			}
+			if (!phrase) {
+				this.warn('Missing translation for key: "' + key + '"');
+				return (options.hasOwnProperty("smart_count") ? options.smart_count + " " : "") + key;
+			}
+			if (!phrase[plurial]) {
+				//TODO: Flag missing form
+				this.warn("Missing plurial form[" + plurial + "] for key " + key);
+				return (options.hasOwnProperty("smart_count") ? options.smart_count + " " : "") + key;
+			}
+
+			return Polyglot.interpolate(phrase[plurial], options);
+		}
+		/**
+		 * Mapping from pluralization group to individual locales.
+		 * @type {any}
+		 */
+		private static pluralTypeToLocales: any = {
+			chinese: ['fa', 'id', 'ja', 'ko', 'lo', 'ms', 'th', 'tr', 'zh'],
+			german: ['da', 'de', 'en', 'es', 'fi', 'el', 'he', 'hu', 'it', 'nl', 'no', 'pt', 'sv'],
+			french: ['fr', 'tl', 'pt-br'],
+			russian: ['hr', 'ru'],
+			czech: ['cs'],
+			polish: ['pl'],
+			icelandic: ['is']
+		};
+		/**
   		 * @param {string} newLocale New Locale name
   		 */
-		public locale(newLocale?:string):string
-		{
-			if(newLocale)
-			{
-				this.currentLocale = newLocale;
+		public locale(newLocale?: string): string {
+			if (newLocale) {
+				var last: string = this.currentLocale;
+				this.currentLocale = this._convertLocale(newLocale);
+				this.plurialForm = this._getPlurialForm(this.currentLocale);
+				if (last && last != this.currentLocale) {
+					this.clear();
+				}
+				if (this.cache().has("locale") && this.cache().get("locale") != this.currentLocale) {
+					this.clearCache();
+				}
+				this.cache().set("locale", this.currentLocale);
 			}
 			return this.currentLocale;
 		}
-		// ### polyglot.extend(phrases)
-		//
-		// Use `extend` to tell Polyglot how to translate a given key.
-		//
-		//     polyglot.extend({
-		//       "hello": "Hello",
-		//       "hello_name": "Hello, %{name}"
-		//     });
-		//
-		// The key can be any string.  Feel free to call `extend` multiple times;
-		// it will override any phrases with the same key, but leave existing phrases
-		// untouched.
-		//
-		// It is also possible to pass nested phrase objects, which get flattened
-		// into an object with the nested keys concatenated using dot notation.
-		//
-		//     polyglot.extend({
-		//       "nav": {
-		//         "hello": "Hello",
-		//         "hello_name": "Hello, %{name}",
-		//         "sidebar": {
-		//           "welcome": "Welcome"
-		//         }
-		//       }
-		//     });
-		//
-		//     console.log(polyglot.phrases);
-		//     // {
-		//     //   'nav.hello': 'Hello',
-		//     //   'nav.hello_name': 'Hello, %{name}',
-		//     //   'nav.sidebar.welcome': 'Welcome'
-		//     // }
-		//
-		// `extend` accepts an optional second argument, `prefix`, which can be used
-		// to prefix every key in the phrases object with some string, using dot
-		// notation.
-		//
-		//     polyglot.extend({
-		//       "hello": "Hello",
-		//       "hello_name": "Hello, %{name}"
-		//     }, "nav");
-		//
-		//     console.log(polyglot.phrases);
-		//     // {
-		//     //   'nav.hello': 'Hello',
-		//     //   'nav.hello_name': 'Hello, %{name}'
-		//     // }
-		//
-		// This feature is used internally to support nested phrase objects.
-		public extend(morePhrases:any, prefix?:string):void
-		{
-			var phrase:string;
-		    for (var key in morePhrases) {
-		      if (morePhrases.hasOwnProperty(key)) {
-		        phrase = morePhrases[key];
-		        if (prefix) key = prefix + '.' + key;
-		        if (typeof phrase === 'object') {
-		          this.extend(phrase, key);
-		        } else {
-		          this.phrases[key] = phrase;
-		        }
-		      }
-		    }
+		public getUsedPluralForm(): string {
+			return this.plurialFormServer ? this.plurialFormServer : this.plurialForm;
 		}
-		// Clears all phrases. Useful for special cases, such as freeing
-		// up memory if you have lots of phrases but no longer need to
-		// perform any translation. Also used internally by `replace`.
-		public clear():void
-		{
-			this.phrases = {};
-		}
-		// Completely replace the existing phrases with a new set of phrases.
-	  	// Normally, just use `extend` to add more phrases, but under certain
-  		// circumstances, you may want to make sure no old phrases are lying around.
-		public replace(newPhrases:any):void
-		{
-			this.clear();
-			this.extend(newPhrases);
-		}
-		// The most-used method. Provide a key, and `t` will return the
-		// phrase.
-		//
-		//     polyglot.t("hello");
-		//     => "Hello"
-		//
-		// The phrase value is provided first by a call to `polyglot.extend()` or
-		// `polyglot.replace()`.
-		//
-		// Pass in an object as the second argument to perform interpolation.
-		//
-		//     polyglot.t("hello_name", {name: "Spike"});
-		//     => "Hello, Spike"
-		//
-		// If you like, you can provide a default value in case the phrase is missing.
-		// Use the special option key "_" to specify a default.
-		//
-		//     polyglot.t("i_like_to_write_in_language", {
-		//       _: "I like to write in %{language}.",
-		//       language: "JavaScript"
-		//     });
-		//     => "I like to write in JavaScript."
-		public t(key:string, options?:any):string
-		{
-			
-			debugger;
-			if(key === undefined || key === null)
-			{
-				return "";
+		public serverLocale(newLocale?: string): string {
+			if (newLocale) {
+				this.cache().set("serverlocale", newLocale);
+				this._serverLocale = newLocale;
+				this.plurialFormServer = this._getPlurialForm(newLocale);
 			}
-			console.log("call trad ",key, options, this);
-			var result:string;
-			options = options == null ? {} : options;
-			if (typeof options === 'number') {
-		      options = {smart_count: options};
-		    }
-		    var phrase:string = this.phrases[key] || options._ || (this.allowMissing ? key : '');
-		    if (phrase === '') {
-		      this.warn('Missing translation for key: "'+key+'"');
-
-		      //try to retrieve from Server
-		      this.retrieveTranslationFromServer(key);
-		      phrase = this.phrases[key] || options._ || (this.allowMissing ? key : '');
-
-		      //if not translation=> key is return otherwise we continue
-		      if(phrase === '')
-		      {
-		      	return key;
-		      	
-		      }
-		     }
-		      options = Polyglot.clone(options);
-		      result = Polyglot.choosePluralForm(phrase, this.currentLocale, options.smart_count);
-	    	  result = Polyglot.interpolate(result, options);
-	    
-		    return result;
+			return this._serverLocale ? this._serverLocale : this.locale();
 		}
-		public retrieveTranslationFromServer(key:string):void
-		{
+		public clear(): void {
+			console.log("CLEANING");
+			this.phrases = {};
+			this.retrieved = [];
+			this.last_updated = {};
 
+			this._updated = {};
+			this.clearCache();
+
+		}
+		private clearCache(): void {
+			this._retrievedFromCache = false;
+			console.warn("CLEAR CACHE");
+			this.cache().clear();
+		}
+		//simplication
+		private _getPlurialForm(locale: string): string {
+			for (var p in Polyglot.pluralTypeToLocales) {
+				if (Polyglot.pluralTypeToLocales[p].indexOf(locale) != -1) {
+					return p;
+				}
+			}
+			return this._getPlurialForm("en");
+		}
+		//simplication
+		private _convertLocale(locale: string): string {
+			return locale.split("-")[0];
+		}
+		/**
+		 * Mapping from pluralization group plural logic.
+		 * @type {any}
+		 */
+		private static plurals: any = {
+			chinese: function(n) { return 0; },
+			german: function(n) { return n !== 1 ? 1 : 0; },
+			french: function(n) { return n > 1 ? 1 : 0; },
+			russian: function(n) { return n % 10 === 1 && n % 100 !== 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2; },
+			czech: function(n) { return (n === 1) ? 0 : (n >= 2 && n <= 4) ? 1 : 2; },
+			polish: function(n) { return (n === 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2); },
+			icelandic: function(n) { return (n % 10 !== 1 || n % 100 === 11) ? 1 : 0; }
+		};
+
+		private getPluralForm(locale: string, quantity: number): string {
+			if (quantity === undefined ||  quantity === null) {
+				return "singular";
+			}
+			var plurialForm: any = this.getUsedPluralForm();
+			if (!plurialForm) {
+				return "singular";
+			}
+			if (typeof quantity != "number") {
+				quantity = parseFloat(<any>quantity);
+			}
+			var index: number = Polyglot.plurals[plurialForm](quantity);
+			if (index == 0) {
+				return "singular";
+			}
+			return "plurial";
 		}
 
 	}
