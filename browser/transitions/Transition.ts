@@ -900,7 +900,6 @@ namespace ghost.transitions
             this._defaultTransition = new SlideViewTransition();
             this._defaultTransition.setOptions({duration:2000});
             this._noTransition = new NoViewTransition();
-            debugger;
             this._noTransition.setOptions({duration:0});
             this._link(root);
     
@@ -1088,6 +1087,13 @@ namespace ghost.transitions
             });
         }
         /**
+       * Gets current visible view
+       * @returns {*}
+       */
+        public getCurrentView() {
+            return this._currentView;
+        }
+        /**
          * Replaces the current view by another
          * @param view new view
          * @param transition transition. default : #getDefaultTransition()
@@ -1139,14 +1145,6 @@ namespace ghost.transitions
             {
                  this._historyTransition[this._historyTransition.length-1].stop(skipToEnd, callback);
             }
-        }
-        /**
-         * Gets current visible view
-         * @returns {*}
-         */
-        public getCurrentView()
-        {
-            return this._currentView;
         }
     }
 }
