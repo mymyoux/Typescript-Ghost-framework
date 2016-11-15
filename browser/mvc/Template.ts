@@ -16,6 +16,9 @@ namespace ghost.mvc
             }
             return Template._instance;
         }
+        public static init(): void {
+            ghost.mvc.Template._instance = new Template();
+        }
         private static _templates:any = {};
         public static getTemplate(url:string):Template
         {
@@ -66,6 +69,8 @@ namespace ghost.mvc
             return Template.instance().isLoading(url);
         }
 
+
+        protected _type: string;
         private loading: any;
         /**
          * Template url
@@ -130,14 +135,25 @@ namespace ghost.mvc
 
         }
 
+
+        protected getTypeFromURL(): string {
+            if (!this._type) {
+                var parts: string[] = window.location.pathname.split("/");
+                this._type = "anonymous";
+                if (parts.length > 1) {
+                    this._type = parts[1];
+                }
+            }
+            return this._type;
+        }
         /*
          * Called by static methods for overriding
          */
 
 
-        protected cache():ghost.browser.data.LocalForage
+        protected cache(): ghost.browser.data.LocalForage 
         {
-            return ghost.forage.war("templates");
+            return ghost.forage.war("templates").war(this.getTypeFromURL());
         }
         protected getNewInstance():Template
         {
@@ -325,7 +341,7 @@ namespace ghost.mvc
         }
         protected getURLFromTemplatename(name:string):string
         {
-            return "integration/"+name;//this.getRootURL()+"integration/"+name;
+            return this.getRootURL() + "integration/" + name;//this.getRootURL()+"integration/"+name;
         }
         protected expire():void
         {

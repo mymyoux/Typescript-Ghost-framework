@@ -9,6 +9,7 @@ namespace ghost.mvc
     import APIExtended = ghost.browser.api.APIExtended;
     export class Application extends ghost.core.CoreObject
     {
+        public user: any; 
         protected static _instance: Application;
         protected _navigation:ghost.browser.navigation.Navigation;
         protected steps: string[] = ["preinit", "initUser", "init", "handleCache", "postinit", "ready"];
@@ -16,6 +17,10 @@ namespace ghost.mvc
         public static getRootURL():string
         {
             return Application._instance.getRootURL();
+        }
+        public static instance():Application
+        {
+            return Application._instance;
         }
         protected getRootURL(): string   
         {

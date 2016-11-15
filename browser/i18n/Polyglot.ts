@@ -380,7 +380,7 @@ namespace ghost.browser.i18n
 
 		}
 
-		public t(key: string, options: any): string {
+		public t(key: string, options: any = null): string {
 			if (key === undefined ||  key === null || key == "" || key.substring(key.lastIndexOf(".") + 1) == "undefined" || key.substring(key.lastIndexOf(".") + 1) == "null") {
 				return "";
 			}
@@ -398,16 +398,16 @@ namespace ghost.browser.i18n
 						if (isNaN(options.smart_count)) {
 							options.smart_count = 0;
 						}
-					}
+					} 
 				}
 			}
 
 			var plurial: string = this.getPluralForm(this.serverLocale(), options.smart_count);
 
-			var phrase: ITranslation = this.phrases[key + "-" + window["mob"]["user"].type] ||  this.phrases[key] || options._;
+			var phrase: ITranslation = this.phrases[key + "-" + ghost["mvc"].Application.instance().user.type] || this.phrases[key] || options._;
 			if (!phrase) {
 				this.retrieveTranslationFromServer(key);
-				phrase = this.phrases[key + "-" + window["mob"]["user"].type] || this.phrases[key];
+				phrase = this.phrases[key + "-" + ghost["mvc"].Application.instance().user.type] || this.phrases[key];
 			}
 			if (!phrase) {
 				this.warn('Missing translation for key: "' + key + '"');
