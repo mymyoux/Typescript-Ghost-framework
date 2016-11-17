@@ -4,7 +4,8 @@ namespace ghost.browser.abtesting{
     import APIExtended = ghost.browser.api.APIExtended;
     import ModelAPI = ghost.mvc.ModelAPI;
     import Model = ghost.mvc.Model;
-    export class ABModel extends ModelAPI {
+       import Application = ghost.mvc.Application;
+      export class ABModel extends ModelAPI {
         public static PART_UPDATE: string = "part_update";
         public static PART_CREATE: string = "part_create"; 
 
@@ -25,7 +26,7 @@ namespace ghost.browser.abtesting{
             var model: ABModel = new ABModel();
             if(!id_user)
             {
-                id_user = window["mob"].user.id_user; 
+                id_user = Application.instance().user.id_user; 
             }
             model.readExternal({ name: name, id_user: id_user, version: version });
             return model;

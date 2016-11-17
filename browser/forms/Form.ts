@@ -2477,19 +2477,7 @@ namespace ghost.browser.forms
                                   this.$input.addClass("preview");
                               }
                             this.picture = file.result;
-                            this.onChangeBinded();/*
-                            ghost.io.ajax(
-                                {
-                                    url:"/candidate/models/cv",
-                                    method:"POST",
-                                    data:{picture:file.result}
-                                }).then(function(data:any):void
-                                {
-                                    debugger;
-                                }, function(error:any):void
-                                {
-                                    debugger;
-                                });*/
+                            this.onChangeBinded();
 
                         }, (error:any):void=>
                         {
