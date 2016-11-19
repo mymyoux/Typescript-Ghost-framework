@@ -201,18 +201,18 @@ namespace ghost.core
         }
         public bind(promise:Promise):void
         {
-            var _this:any = this;
+            var _self:any = this;
             promise.success(function()
             {
-                    _this.resolve.apply(_this,Array.prototype.slice.call(arguments));
+                    _self.resolve.apply(_self,Array.prototype.slice.call(arguments));
             }).
             progress(function()
             {
-                _this.pending.apply(_this,Array.prototype.slice.call(arguments)); 
+                _self.pending.apply(_self,Array.prototype.slice.call(arguments)); 
             }).
             error(function()
             {
-                _this.reject.apply(_this,Array.prototype.slice.call(arguments));
+                _self.reject.apply(_self,Array.prototype.slice.call(arguments));
             });
         }
         public dispose():void

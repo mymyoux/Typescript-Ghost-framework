@@ -32,11 +32,11 @@ namespace ghost.sgame
             this.socket.on('data', this._onData.bind(this));
             this.socket.on('disconnect',this._onDisconnect.bind(this));
             var onevent:any = this.socket["onevent"];
-            var _this:Socket = this;
+            var _self:Socket = this;
             this.socket["onevent"] =  function(packet) {
                 var args = packet.data || [];
-                onevent.call(_this.socket, packet);    // original call
-                _this._onData.apply(_this,args);
+                onevent.call(_self.socket, packet);    // original call
+                _self._onData.apply(_self,args);
             };
         }
         private _onError(error:any):void

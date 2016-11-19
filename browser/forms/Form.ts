@@ -1352,7 +1352,7 @@ namespace ghost.browser.forms
         {
             this.onClickBind = this.onClick.bind(this);
             this.reset = [];
-            //var _this:ItemAutocomplete = this;
+            //var _self:ItemAutocomplete = this;
             this.reset = <any>this.$list.attr("data-autocomplete-reset");
             if(this.reset)
             {

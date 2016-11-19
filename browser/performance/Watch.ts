@@ -16,7 +16,7 @@ namespace ghost.performance
 
             var time:number = this.now();
 
-            var _this:any = this;
+            var _self:any = this;
             promise.then(function()
             {
                 var args:any = arguments;
@@ -24,10 +24,10 @@ namespace ghost.performance
                 {
                     args = arguments[0];
                 }
-                console.log("monitor done:"+ (_this.now()-time), args, promise);
+                console.log("monitor done:"+ (_self.now()-time), args, promise);
             }, function()
             {
-                console.error("monitor error done:"+ (_this.now()-time), arguments, promise);
+                console.error("monitor error done:"+ (_self.now()-time), arguments, promise);
             });
 
         }

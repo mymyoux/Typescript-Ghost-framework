@@ -69,17 +69,17 @@ namespace ghost.phonegap
         constructor()
         {
             super();
-            var _this = this;
+            var _self = this;
             this._interval = -1;
             this._connection = navigator["connection"];
             this._lastState = this.getType();
             ghost.events.Eventer.on(ghost.events.Eventer.NETWORK_ONLINE, function()
             {
-                _this._onStatus(true);
+                _self._onStatus(true);
             }, this);
             ghost.events.Eventer.on(ghost.events.Eventer.NETWORK_OFFLINE, function()
             {
-                _this._onStatus(false);
+                _self._onStatus(false);
             }, this);
     
         }
@@ -89,7 +89,7 @@ namespace ghost.phonegap
          */
         public setDelay(delay:number):void
         {
-            var _this = this;
+            var _self = this;
             this._delay = delay;
             if(this._interval!=-1)
             {
@@ -98,7 +98,7 @@ namespace ghost.phonegap
             }
             this._interval = <any>setInterval(function()
             {
-                _this._checkStatus();
+                _self._checkStatus();
             },this._delay);
         }
         private _checkStatus()

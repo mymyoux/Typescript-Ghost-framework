@@ -21,8 +21,13 @@ namespace ghost.browser.helpers
                 // add selected for all click children
                 $(this).children('.click').addClass("selected");
             });
-            $(document).on("click", ".link-inside", function(event)
-            {
+      $(document).on("click", ".link-inside", function(event, originalEvent = null)
+            { 
+              if(originalEvent)
+              {
+                  //already triggered
+                  return;
+              }
                 //debugger;
                var $a:JQuery = $(this).find("a");
                event.stopPropagation();
@@ -44,12 +49,12 @@ namespace ghost.browser.helpers
                 }
                if($a.attr("href"))
                {
-                   if($a.attr("target"))
+                   if ($a.attr("target") || event.metaKey || event.ctrlKey)
                    {
                        window.open($a.attr("href"), $a.attr("target"));
                    }else
                    {
-                       window.location.href = $a.attr("href");
+                       $a.trigger("click", event.originalEvent);
                    }
                }
             });

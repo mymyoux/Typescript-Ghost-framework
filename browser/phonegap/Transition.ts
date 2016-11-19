@@ -400,21 +400,21 @@ namespace ghost.phonegap
          */
         private _startViewTransition(callback)
         {
-            var _this = this;
+            var _self = this;
             if (!this._from)
             {
     
             } else
             {
-                _this.trigger(ViewTransition.START_TRANSITION);
+                _self.trigger(ViewTransition.START_TRANSITION);
                 this._beforeTransition(function ()
                 {
-                    _this._transition(_this._callback = function()
+                    _self._transition(_self._callback = function()
                     {
-                        if(_this._callback._cancelled !== true)
+                        if(_self._callback._cancelled !== true)
                         {
-                            _this._afterTransition();
-                            _this._endViewTransition(callback);
+                            _self._afterTransition();
+                            _self._endViewTransition(callback);
                         }
                     })
                 });
@@ -1055,7 +1055,7 @@ namespace ghost.phonegap
         {
     
             this.trigger(TransitionManager.VIEW_CHANGING);
-            var _this = this;
+            var _self = this;
     
     
             if(typeof from == "string")
@@ -1075,7 +1075,7 @@ namespace ghost.phonegap
 
             transition.start(function()
             {
-                _this.trigger(TransitionManager.VIEW_CHANGED);
+                _self.trigger(TransitionManager.VIEW_CHANGED);
             });
         }
         /**

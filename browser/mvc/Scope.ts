@@ -64,6 +64,7 @@ namespace ghost.mvc
              {*/
             if(next)
             {
+                debugger;
                 var controller:Controller = Controller.getController(next);
                 var doAction: boolean     = true;
 

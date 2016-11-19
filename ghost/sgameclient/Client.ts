@@ -101,11 +101,11 @@ namespace ghost.sgameclient
                 this.trigger("pong", data);
             });*/
             var onevent:any = socket.onevent;
-            var _this:Client = this;
+            var _self:Client = this;
             socket.onevent =  function(packet) {
                 var args = packet.data || [];
                 onevent.call(socket, packet);    // original call
-                _this._onData.apply(_this, args);
+                _self._onData.apply(_self, args);
             };
             socket.io.on('error', function(){console.log("error", arguments)});
             socket.io.on('connect_error', this._onConnectError.bind(this));

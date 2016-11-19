@@ -94,7 +94,7 @@ namespace ghost.mvc
             if (!data) {
                 data = [Model.PART_DEFAULT];
             }
-            var _this: Model = this;
+            var _self: Model = this;
             var promise: Promise<any> = new Promise<any>(function(accept: any, reject: any): void {
 
                 var failed: boolean = false;
@@ -107,7 +107,7 @@ namespace ghost.mvc
                         reject(new Error(name + " is not a correct part's name"));
                         return null;
                     }
-                }, _this);
+                }, _self);
                 if (failed) {
                     return;
                 }
@@ -116,9 +116,9 @@ namespace ghost.mvc
                     values.filter(function(data: any): boolean { return data !== true && !data.read ? true : false; }).map(function(data: any) {
                         data.read = true;
                         return data.data[0];
-					})//.forEach(this.readExternal, _this);
+					})//.forEach(this.readExternal, _self);
                     accept();
-                }.bind(_this), reject);
+                }.bind(_self), reject);
             });
             return promise;
         }

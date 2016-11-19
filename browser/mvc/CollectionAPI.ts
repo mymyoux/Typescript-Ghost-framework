@@ -211,7 +211,7 @@ namespace ghost.mvc
             {
                 data = [Collection.PART_DEFAULT];
             }
-            var _this:Collection<any> = this;
+            var _self:Collection<any> = this;
             var promise:Promise<any> = new Promise<any>(function(accept:any, reject:any):void
             {
 
@@ -228,7 +228,7 @@ namespace ghost.mvc
                         reject(new Error(name+" is not a correct part's name"));
                         return null;
                     }
-                }, _this);
+                }, _self);
                 if(failed)
                 {
                     return;
@@ -238,9 +238,9 @@ namespace ghost.mvc
                     //TODO:weird le data.read devrait être dans le filter ? MAIS VA TE FAIRE FOUTRE CHROME
                     values.filter(function(data:any):boolean{ return data!==true && !data.read?true:false;}).map(function(data:any){
                         data.read = true;
-                        return data.data[0];})//.forEach(this.readExternal, _this);
+                        return data.data[0];})//.forEach(this.readExternal, _self);
                     accept();
-                }.bind(_this), reject);
+                }.bind(_self), reject);
             });
             return promise;
         }

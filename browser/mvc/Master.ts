@@ -413,7 +413,7 @@ namespace ghost.mvc
             }
         	if(!this.templateData)
         	{
-        		//var _this:Master = this;
+        		//var _self:Master = this;
         		var templateStr:string = this._getTemplate();
                 if (!templateStr)
         		{
@@ -665,7 +665,7 @@ namespace ghost.mvc
         }
         protected toRactive():any
         {
-            var _this:Master = this;
+            var _self:Master = this;
             return this._data.reduce(function(previous:any, item:any, index:number)
                 {
                     if(!item.name || typeof item.name != "function")
@@ -677,8 +677,8 @@ namespace ghost.mvc
                         }
                     }else
                     {
-                        var ractiveString:string = _this._parts[index]?_this._parts[index].ractive:undefined;
-                        var name:string = _this._parts[index] && _this._parts[index].name?_this._parts[index].name:item.name();
+                        var ractiveString:string = _self._parts[index]?_self._parts[index].ractive:undefined;
+                        var name:string = _self._parts[index] && _self._parts[index].name?_self._parts[index].name:item.name();
                         //models
                         previous[name] = item.toRactive?item.toRactive(ractiveString):item instanceof Data?item.value:item.toObject();
                     }

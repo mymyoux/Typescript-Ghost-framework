@@ -41,7 +41,7 @@ namespace ghost.utils
                 {
                     throw new Error("Delay must be >= 0, maybe you are trying to use a disposed timer");
                 }
-                var _this:Timer = this;
+                var _self:Timer = this;
                 this._lastCall = Date.now();
                 if(this._isTimeout)
                 {
@@ -51,20 +51,20 @@ namespace ghost.utils
                     }
                     this._timeout = <any>setTimeout(function()
                     {
-                        _this._called++;
-                        _this._timeout = -1;
-                        _this._lastCall = Date.now();
-                        _this._callback.apply(null, _this._params);
+                        _self._called++;
+                        _self._timeout = -1;
+                        _self._lastCall = Date.now();
+                        _self._callback.apply(null, _self._params);
 
-                    }, _this._delay);
+                    }, _self._delay);
                 }else
                 {
                     this._timeout = <any>setInterval(function()
                     {
-                        _this._called++;
-                        _this._lastCall = Date.now();
-                        _this._callback.apply(null, _this._params);
-                    }, _this._delay);
+                        _self._called++;
+                        _self._lastCall = Date.now();
+                        _self._callback.apply(null, _self._params);
+                    }, _self._delay);
                 }
             }
         }

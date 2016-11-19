@@ -97,7 +97,7 @@ namespace ghost.browser.navigation
             this._scopes = {};
             ghost.events.Eventer.on(ghost.events.Eventer.HASH_CHANGE, this._onHashChange, this);
             //TODO:not sure
-            var _this:Navigation = this;
+            var _self:Navigation = this;
             if(ready)
             {
                 this.listen();
@@ -127,8 +127,8 @@ namespace ghost.browser.navigation
         }
         private _detectScope():void
         {
-            var _this:Navigation = this;
-            var hash:any = _this.parseHash();
+            var _self:Navigation = this;
+            var hash:any = _self.parseHash();
             $("[data-scope]").each(function()
             {
                 var $child = $(this).children("[data-name]");
@@ -143,7 +143,7 @@ namespace ghost.browser.navigation
                 {
                     if($child.length == 0)
                     {
-                        page = _this.getDefaultPage(scope);
+                        page = _self.getDefaultPage(scope);
                     }else
                     {
                         page = $child.eq(0).attr("data-name");
@@ -151,7 +151,7 @@ namespace ghost.browser.navigation
                 }
                 if(page)
                 {
-                    _this.pushPage($(this).attr("data-scope"), page, hash[scope]?hash[scope].params:null, true/* hash[scope]?true:false*/);
+                    _self.pushPage($(this).attr("data-scope"), page, hash[scope]?hash[scope].params:null, true/* hash[scope]?true:false*/);
                 }else
                 {
                     log.warn("No child with data-name inside a data-scope element and no default page for scope["+scope+"]");

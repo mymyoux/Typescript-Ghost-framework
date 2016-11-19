@@ -148,14 +148,14 @@ namespace ghost.phonegap
         constructor(accelerometer:any, options:{frequency})
         {
             super();
-            var _this = this;
+            var _self = this;
             this._accelerometer = accelerometer;
             this._id = accelerometer.watchAcceleration(function(data:IAcceleration):void
             {
-                _this._onSuccess(data);
+                _self._onSuccess(data);
             }, function(error:Error):void
             {
-                _this._onError(error);
+                _self._onError(error);
             }, options);
         }
         /**

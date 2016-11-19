@@ -361,7 +361,7 @@ namespace ghost.sgameclient
                     data = this.buffer[0];
                 }
                 this.processing = true;
-                var _this:Application = this;
+                var _self:Application = this;
                 //console.log("[WRITE]-"+this.name, data);
                 var request:any = {app:this.name, command:data.command, data:data.data};
                 if(data.room)
@@ -382,23 +382,23 @@ namespace ghost.sgameclient
                 var time: number = Date.now();
                 this.client.write(ghost.sgamecommon.Const.MSG_APPLICATION, request, function(success:boolean, error:string, args:any[])
                 {
-                    if(_this.buffer.length && _this.buffer[0] === data)
+                    if(_self.buffer.length && _self.buffer[0] === data)
                     {
 
                         if(data.callback && args && args.length)
                         {
-                            args = _this.postDataCallbackTreatment(time, data, args);
+                            args = _self.postDataCallbackTreatment(time, data, args);
                         }
                         if(!success && error)
                         {
                             if(error == Const.ERROR_NEED_LOGIN)
                             {
                                 console.log("ERROR NEED LOGIN from ", data);
-                                return _this.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, args);
+                                return _self.writeInternalData(Const.LOGIN_APP, Const.LOGIN_COMMAND, args);
                             }
                             if(error == Const.ERROR_NEED_APPLICATION_ENTER)
                             {
-                                return _this._enterApplication();
+                                return _self._enterApplication();
                             }
                         }
                         if(data.callback)
@@ -414,10 +414,10 @@ namespace ghost.sgameclient
                             //data.callback.apply(null, Array.prototype.slice.call(arguments));
                         }
 
-                        _this.processing = false;
+                        _self.processing = false;
 
-                        _this.buffer.shift();
-                        _this.writeNext();
+                        _self.buffer.shift();
+                        _self.writeNext();
                     }
                 });
             }

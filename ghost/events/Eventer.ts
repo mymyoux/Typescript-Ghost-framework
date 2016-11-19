@@ -179,7 +179,7 @@ namespace ghost.events
             super();
             if(!ROOT.document)
                 return;
-            var _this = this;
+            var _self = this;
             var len = this._list.length;
             
             for(var i=0; i<len; i++)
@@ -193,7 +193,7 @@ namespace ghost.events
             }
             ROOT.document.addEventListener(this.DEVICE_READY, function(event)
             {
-                _this._triggerDeviceReady(event);
+                _self._triggerDeviceReady(event);
                
             }, false);
             ROOT.addEventListener(this.DOM_LOADED, function(event)
@@ -202,28 +202,28 @@ namespace ghost.events
             }, false);
             this._checkDomReady(function(event)
             {
-                if(!_this._domReady )
+                if(!_self._domReady )
                 {
                         
-                    _this._domReady = true;
+                    _self._domReady = true;
                     ROOT["loaded"] = true;
-                    _this.trigger(_this.DOM_READY, event);
-                    _this._dispatchAllReady();
+                    _self.trigger(_self.DOM_READY, event);
+                    _self._dispatchAllReady();
                     
                 }
             });
             if(ROOT.$)
             {
                 ROOT.$(function() {
-                    _this._$Ready = true;
-                    _this.trigger(_this.$JQUERY_LIKE_READY);
-                    _this._dispatchAllReady();
+                    _self._$Ready = true;
+                    _self.trigger(_self.$JQUERY_LIKE_READY);
+                    _self._dispatchAllReady();
                 });
             }
           
             //some devices don't dispatch orientationchanged event
             ROOT.addEventListener("resize", function(event) {
-                _this.trigger(_this.SCREEN_ORIENTATION_CHANGE, event);
+                _self.trigger(_self.SCREEN_ORIENTATION_CHANGE, event);
             }, false);
 
 
@@ -318,11 +318,11 @@ namespace ghost.events
          */
         private _addListener(name, object)
         {
-            var _this = this;
+            var _self = this;
             object.addEventListener(name, function(event)
             {
                 //console.log(name, object, event);
-                _this.trigger(name, event);
+                _self.trigger(name, event);
             }, false);
         }
         private _on(name:string, listener:Function, thisObject:any):void

@@ -76,7 +76,7 @@ namespace ghost.browser.apis
                 return;
             }
             console.log("initializing");
-            var _this:Facebook = this;
+            var _self:Facebook = this;
             var toolate:boolean = false;
             var timeout:number = <any>setTimeout(function()
             {
@@ -101,9 +101,9 @@ namespace ghost.browser.apis
                     console.log("fb init..");
                     
                     FB.init(options);
-                    _this._ready = true;
+                    _self._ready = true;
                     if(callback)
-                        _this.getLoginStatus(callback);
+                        _self.getLoginStatus(callback);
                   };
               }else
               {
@@ -143,7 +143,7 @@ namespace ghost.browser.apis
             if(this.isReady())   
             {
                 console.log("FACEBOOK READY");
-                var _this:Facebook = this;
+                var _self:Facebook = this;
                 FB.login
                 (
                     function(auth:any):void 
@@ -171,7 +171,7 @@ namespace ghost.browser.apis
                                 callback(false);
                         }
                     },
-                    {scope:_this._permissions.join(",")}
+                    {scope:_self._permissions.join(",")}
                 );
             }else
             {

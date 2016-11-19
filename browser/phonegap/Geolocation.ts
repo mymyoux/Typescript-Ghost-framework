@@ -143,14 +143,14 @@ namespace ghost.phonegap
         constructor(geolocation:any, options:{frequency?:number})
         {
             super();
-            var _this = this;
+            var _self = this;
             this._geolocation = geolocation;
             this._id = geolocation.watchPosition(function(data)
             {
-                _this._onSuccess(data);
+                _self._onSuccess(data);
             }, function(error)
             {
-                _this._onError(error);
+                _self._onError(error);
             }, options);
         }
         /**

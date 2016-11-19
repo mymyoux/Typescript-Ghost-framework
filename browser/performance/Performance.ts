@@ -290,7 +290,7 @@ namespace ghost.performance
                     // Synthesise a click event, with an extra attribute so it can be tracked
                     clickEvent = document.createEvent('MouseEvents');
                     clickEvent.initMouseEvent(this.determineEventType(targetElement), true, true, window, 1, touch.screenX, touch.screenY, touch.clientX, touch.clientY, false, false, false, false, 0, null);
-                    clickEvent.forwardedTouchEvent = true;
+                    clickEvent["forwardedTouchEvent"] = true;
                     targetElement.dispatchEvent(clickEvent);
             };
             
@@ -741,7 +741,7 @@ namespace ghost.performance
                                     
                                     if (metaViewport) {
                                             // Chrome on Android with user-scalable="no" doesn't need FastClick (issue #89)
-                                            if (metaViewport.content.indexOf('user-scalable=no') !== -1) {
+                                            if (metaViewport["content"].indexOf('user-scalable=no') !== -1) {
                                                     return true;
                                             }
                                             // Chrome 32 and above with width=device-width or less don't need FastClick
