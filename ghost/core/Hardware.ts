@@ -290,7 +290,24 @@ namespace ghost.core
          */
         public static getPixelRatio():number
         {
-            return ROOT.devicePixelRatio;
+            var ratio = 1;
+            // To account for zoom, change to use deviceXDPI instead of systemXDPI
+            if (ROOT.screen && ROOT.screen.systemXDPI !== undefined && ROOT.screen.logicalXDPI !== undefined && ROOT.screen.systemXDPI > ROOT.screen.logicalXDPI) {
+                // Only allow for values > 1
+                ratio = ROOT.screen.systemXDPI / ROOT.screen.logicalXDPI;
+            }
+            else if (ROOT.devicePixelRatio !== undefined) {
+                ratio = ROOT.devicePixelRatio;
+            }
+            return ratio == undefined ? 1 : ratio; 
+        }
+        /**
+         * Gets pixel ratio. avoir weird values like 2.200000047683716
+         * @returns {number}
+         */
+        public static getPixelRatioApproximate():number
+        {
+            return Math.ceil(Hardware.getPixelRatio() * 10) / 10; 
         }
         /**
          * Gets dpi
