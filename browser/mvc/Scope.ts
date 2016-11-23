@@ -28,7 +28,7 @@ namespace ghost.mvc
             this._name = name;
             Scope._names.push(name);
             Scope._scopes.push(this);
-            if(this._name && Scope.navigation())
+            if(this._name && Scope.navigation() && !Router.hasInstance())
             {
                 // ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
                 // ghost.events.Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
@@ -49,6 +49,11 @@ namespace ghost.mvc
                         this.onPageChanging(type, previous, next, event);
                     },this);
                 }
+            }
+            if(Router.hasInstance())
+            {
+                //new system
+
             }
             log.info("New Scope : "+name);
 
@@ -198,8 +203,7 @@ namespace ghost.mvc
                     throw new Error("Controller "+controller.getClassName()+" - scope doesn't match : "+controller.scoping()+" instead of "+this._name);
                 }
             }
-
-            if(controller.canActivate(params)===true)
+            if(Router.hasInstance() || controller.canActivate(params)===true)
             {
                 log.info("Activating:");
                 log.warn(controller);

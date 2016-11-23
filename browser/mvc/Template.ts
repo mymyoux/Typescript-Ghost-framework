@@ -219,7 +219,15 @@ namespace ghost.mvc
                 {
                     return;
                 }
-                ghost.io.ajax(
+                            console.log("template_request", {
+                                   ///ad prefix
+                                   url: this.getRootURL() + "integration-sync",
+                                   data: {
+                                          templates: templates
+                                   },
+                                   method: "POST"
+                            });
+                         ghost.io.ajax(
                     {
                         ///ad prefix
                         url:this.getRootURL()+"integration-sync",

@@ -3,8 +3,10 @@
 
 ///<file="Model.ts"/>
 ///<file="Collection.ts"/>
+///<file="Router.ts"/>
 namespace ghost.mvc
 {
+  import Objects = ghost.utils.Objects; 
     /**
      * Controller
      */
@@ -72,7 +74,7 @@ namespace ghost.mvc
          */
         public scoping():string
         {
-            return null;
+            return "main";
         }
         /**
          * Adds model to the controller
@@ -98,7 +100,7 @@ namespace ghost.mvc
             this.activate();
             this.trigger(Controller.EVENTS.ACTIVATED);
         }
-        public canActivate(params?:any):string|boolean|IScopeOptions
+        public canActivate(params?:any):any
         {
             return true;
         }
@@ -116,6 +118,64 @@ namespace ghost.mvc
                 this._name = this.getClassName().replace(/controller/ig,"").toLowerCase();
             }
             return this._name;
+        }
+        public getRoutes(): IRoute[] {
+          var route: string | IRoute = this.routing();
+          if (route) {
+            if (typeof route == "string") {
+              route = { route: route, type: Router.TYPE_STATIC };
+            }
+            if (!route.scope) {
+              var scopes: any = this.scoping();
+              if (!scopes || !scopes.length) {
+                scopes = "main";
+              }
+              if (typeof scopes == "string") {
+                route.scope = scopes;
+              } else {
+                //array of scope
+                var routes: IRoute[] = [];
+                route.scope = scopes[0];
+                routes.push(route);
+                for (var i = 1; i < scopes.length; i++) {
+                  route = Objects.clone(route);
+                  (<IRoute>route).scope = scopes[i];
+                  routes.push(<IRoute>route);
+                }
+                return routes;
+              }
+            }
+            return [route];
+          }
+          var scopes: any = this.scoping();
+          route = <IRoute>{
+            type: Router.TYPE_STATIC,
+            route: null
+          };
+          if (!scopes || !scopes.length) {
+            scopes = "main";
+          }
+          if (typeof scopes == "string") {
+            route.scope = scopes;
+            route.route = scopes + "/" + this.name();
+          } else {
+            //array of scope
+            var routes: IRoute[] = [];
+            route.scope = scopes[0];
+            route.route = scopes[0] + "/" + this.name();
+            routes.push(route);
+            for (var i = 1; i < scopes.length; i++) {
+              route = Objects.clone(route);
+              (<IRoute>route).scope = scopes[i];
+              (<IRoute>route).route = scopes[i] + "/" + this.name();
+              routes.push(<IRoute>route);
+            }
+            return routes;
+          }
+          return [route];
+        }
+        public routing(): string | IRoute {
+          return this.scoping() + "/" + this.name();
         }
         public _predisactivate():void
         {
@@ -162,6 +222,23 @@ namespace ghost.mvc
          * List of controller's fullnames
          */
         private static _sFullname:string[] = [];
+        protected static onRouteMatch(index:number, route:IRoute, url:string):boolean|string
+        {
+          //check if instance already exists
+          if (!Controller._sControllerInstance[index])
+          {
+              Controller._sControllerInstance[index] = new (Controller._sControllerClass[index]);
+          }
+          var controller: Controller = Controller._sControllerInstance[index];
+          var canActivate:any = controller.canActivate(route);
+          if(canActivate === false || typeof canActivate == "string")
+          {
+              return canActivate;
+          }
+          Scope.getScope(route.scope).setCurrentController(controller, route.params);
+          console.log("on route match", index, route, url);
+          return null;
+        }
         /**
          * Adds package to parse
          * @param packg Package's name or package's class
@@ -178,27 +255,38 @@ namespace ghost.mvc
             {
                 if(/*p.indexOf("Controller") != -1 ||*/ (packg[p] && packg[p].prototype && packg[p].prototype.__isController))
                 {
-                    Controller._sControllerClass.push(packg[p]);
-                    Controller._sControllerInstance.push(null);
-                    Controller._sFullname.push(fullname+"."+p);
-                    if(autoloadScopes)
-                    {
-                        if(packg[p].prototype.scoping)
-                        {
-                            //create scopes - enable linking to navigationscope immediatly without instanciate any controller
-                            Scope.getScope(packg[p].prototype.scoping());
-                        }
+                  if (autoloadScopes) {
+                    if (packg[p].prototype.scoping) {
+                      //create scopes - enable linking to navigationscope immediatly without instanciate any controller
+                      Scope.getScope(packg[p].prototype.scoping());
                     }
-                    var name:string = (packg[p].prototype.name?packg[p].prototype.name.call(packg[p].prototype): p.replace(/controller/ig,"")).toLowerCase();
-                    var index:number = Controller._sShortname.indexOf(name);
-                    if(index ==-1)
-                        Controller._sShortname.push(name);
-                    else
-                    {
-                        log.warn(name+" is used several times as a controller's name");
-                        Controller._sShortname.splice(index, 1);
-                        Controller._sConflictsShortnames.push(name);
-                    }
+                  }
+                  var id: number = Controller._sControllerClass.length;
+                 Controller._sControllerClass.push(packg[p]);
+                  Controller._sControllerInstance.push(null);
+                  if(Router.hasInstance())
+                  {
+                     var routes: any[] = packg[p].prototype.getRoutes();
+                     for(var route of routes)
+                     {
+                       Router.instance().register(route, Controller.onRouteMatch.bind(null, id));
+                     }
+                  }
+                  if(true){
+                  
+                      Controller._sFullname.push(fullname+"."+p);
+                     
+                      var name:string = (packg[p].prototype.name?packg[p].prototype.name.call(packg[p].prototype): p.replace(/controller/ig,"")).toLowerCase();
+                      var index:number = Controller._sShortname.indexOf(name);
+                      if(index ==-1)
+                          Controller._sShortname.push(name);
+                      else
+                      {
+                          log.warn(name+" is used several times as a controller's name");
+                          Controller._sShortname.splice(index, 1);
+                          Controller._sConflictsShortnames.push(name);
+                      }
+                  }
                 }
                 if(typeof packg[p] =="object")
                     Controller.addPackage(packg[p], autoloadScopes, fullname+"."+p);

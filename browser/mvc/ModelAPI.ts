@@ -32,6 +32,10 @@ namespace ghost.mvc
 
             return this.requests[part];
         }
+        public triggerChange():void
+        {
+            this.trigger(Model.EVENT_CHANGE);
+        }
         protected getAPIData(part?: string): any {
             var api: APIExtended = this._getRequest(part);
             if (api) {

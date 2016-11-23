@@ -30,6 +30,8 @@ namespace ghost.utils
         {
             if(!value || !start)
             {
+                if (start == "" && value != undefined)
+                    return true;
                 return false;
             }
             return value.indexOf(start) == 0;

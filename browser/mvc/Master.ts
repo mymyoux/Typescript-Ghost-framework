@@ -9,7 +9,8 @@
 ///<module="framework/browser/debug"/>
 namespace ghost.mvc
 {
-    export class Master extends Controller {
+
+      export class Master extends Controller {
 		/**
          * List of events
          * @type {{ACTIVATED: (ACTIVATED), DISACTIVATED: (DISACTIVATED)}}
@@ -42,6 +43,7 @@ namespace ghost.mvc
             this._partsPromises = [];
             this._bindedEvents = [];
 		}
+
         public navigation():ghost.browser.navigation.Navigation
         {
             return ghost.browser.navigation.Navigation.instance;
@@ -120,6 +122,93 @@ namespace ghost.mvc
 			}
 			return null;
 		}
+        public collection(cls:any):any
+        {
+            var instance: any;
+            for(instance of this._data)
+            {
+                if (instance instanceof cls)
+                {
+                    return instance;
+                }
+            }
+            for(instance of this._collections)
+            {
+                if (instance instanceof cls)
+                {
+                    return instance;
+                }
+            }
+            return null;
+        }
+        public model(cls:any):any
+        {
+            var instance: any;
+            for(instance of this._data)
+            {
+                if (instance instanceof cls)
+                {
+                    return instance;
+                }
+            }
+            for (instance of this._models) {
+                if (instance instanceof cls) {
+                    return instance;
+                }
+            }
+            return null;
+        }
+        /**
+        * Adds model to the controller
+        * @param model Model
+        */
+        public addModel(model: Model, inTemplate:boolean = true): void {
+            if (this._models.indexOf(model) != -1)
+            {
+                return;
+            }
+            this._models.push(model);
+            if (inTemplate)
+            {
+                model.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, model, model.name(),this);
+                (<any>this._onModelChange)(model, model.name(), this);
+            }
+        }
+        public removeModel(model:Model):void
+        {
+            var index: number = this._models.indexOf(model);
+            if(index != -1)
+            {
+                this._models.splice(index, 1);
+                model.off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
+            }
+        }
+        public removeCollection(collection:Collection<any>):void
+        {
+            var index: number = this._collections.indexOf(collection);
+            if(index != -1)
+            {
+                this._collections.splice(index, 1);
+                collection.off(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this);
+            }
+        }
+
+        /**
+         * Adds collection to the controller
+         * @param collection Collection
+         */
+        public addCollection(collection: Collection<any>, inTemplate: boolean = true): void {
+            if (this._collections.indexOf(collection) != -1)
+            {
+                return;
+            }
+            this._collections.push(collection);
+            if (inTemplate)
+            {
+                collection.on(ghost.mvc.Model.EVENT_CHANGE, this._onModelChange, this, collection, collection.name(), this);
+                (<any>this._onModelChange)(collection, collection.name(), this);
+            }
+        }
 		protected _setData():void
 		{
 			var data:any[] = this.getInitialData();
@@ -175,6 +264,10 @@ namespace ghost.mvc
         protected getActivationParams():any
         {
             return this.paramsFromActivation;
+        }
+        public params(name:string):any
+        {
+            return this.paramsFromActivation[name];
         }
         /**
          * Called when the controller is asked for activation
@@ -661,7 +754,8 @@ namespace ghost.mvc
                     }
                 }
             }
-            this.template.set(name, data);
+            if(this.template)
+                this.template.set(name, data);
         }
         protected toRactive():any
         {

@@ -84,6 +84,14 @@ module ghost.browser.api
             this._controller = controller;
             return <any>this;
         }
+        public post():T
+        {
+            return this.method('POST');
+        }
+        public get():T
+        {
+            return this.method('GET');
+        }
         public method(method:string):T
         {
             this._method = method;
@@ -129,7 +137,7 @@ module ghost.browser.api
             }, reject);
             return <any>this;
         }
-        public done():Promise<any>
+        public async done():Promise<any>
         {
             var promise: Promise<any> = new Promise<any>((resolve: any, reject: any): void => {
                 this.then((data: any): void => {
@@ -179,7 +187,7 @@ module ghost.browser.api
             request.retry = this._config.retry != undefined ? this._config.retry:ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
 
-            if (request.url.indexOf(window.location.hostname) == -1 && !window['EXTENSION_CONFIG'])
+            if (request.url.indexOf(window.location.hostname) == -1 && !window['EXTENSION_CONFIG'] && window.location.protocol != "file:")
             {
                 //crossdomain
                 request.dataType = "jsonp";
@@ -703,22 +711,28 @@ module ghost.browser.api
 
         public then(token?:string, request?:any): APIExtended
         public then(resolve?: any, reject?: any): APIExtended
-        public then(resolve?: any, reject?: any): APIExtended {
+        public then(resolve?: any, reject?: any): APIExtended 
+        {
+            
+            this.thenp(resolve, reject);
+            return this;
+        }
+        public thenp(token?: string, request?: any): Promise<any>
+        public thenp(resolve?: any, reject?: any): Promise<any>
+        public thenp(resolve?: any, reject?: any): Promise<any> 
+        {
             var request: any;
-            var token:string;
-            if(typeof resolve == "string")
-            {
+            var token: string;
+            if (typeof resolve == "string") {
                 token = resolve;
                 resolve = null;
                 request = reject;
                 reject = null;
             }
-            if(!request)
-            {
+            if (!request) {
                 request = this.getRequest();
             }
-            if(this._always && !token)
-            {
+            if (this._always && !token) {
                 token = APIExtended._cacheManager.add(request);
             }
             /* if(!this._promise)
@@ -726,11 +740,11 @@ module ghost.browser.api
                  this._promise = this.getPromise();
              }*/
 
-            if(this._stack && this._previousPromise)
-            {
+            if (this._stack && this._previousPromise) {
                 //stack et already existing promise;
-                this._stacklist.push({ resolve: resolve, reject: reject, request: request, token:token});
-                return this;
+                return new Promise((resolvep, rejectp) => {
+                    this._stacklist.push({ resolve: resolvep, reject: rejectp, request: request, token: token });
+                }).then(resolve, reject);
             }
             return this._then(request, resolve, reject, token);
         }
@@ -739,7 +753,7 @@ module ghost.browser.api
             var request:any = this.getRequest();
             return ghost.utils.URI.buildURI(request.url, request.data);
         }
-        protected _then(request:any, resolve:any, reject:any, token:string):APIExtended
+        protected _then(request:any, resolve:any, reject:any, token:string):Promise<any>
         {
             for (var p in APIExtended.middlewares) {
                 if (APIExtended.middlewares[p].request) {
@@ -747,7 +761,8 @@ module ghost.browser.api
                 }
             }
             this.lastRequest = request;
-            var promise = ghost.io.ajax(request, {asObject:true});//this.getPromise();
+                     console.log("API_AJAX", request);
+                    var promise = ghost.io.ajax(request, {asObject:true});//this.getPromise();
             this._previousPromise = promise;
             promise.then((rawData: any) => {
                 if (promise === this._previousPromise) {
@@ -816,7 +831,7 @@ module ghost.browser.api
                 if (reject)
                     reject(reason);
             });
-            return <any>this;
+            return promise;
         }
         protected _next():void
         {

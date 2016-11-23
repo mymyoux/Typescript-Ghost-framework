@@ -41,6 +41,10 @@ namespace ghost.mvc
                this._init();
             });
         }
+        protected getRouter():Router
+        {
+            return null;
+        }
         protected getUserID():any
         {
             throw new Error("you must override this method");
@@ -48,8 +52,9 @@ namespace ghost.mvc
         }
         private _init():void
         {
-                 this.navigation();
-                 this.nextStep();
+            this.getRouter();
+             this.navigation();
+             this.nextStep();
         }
         protected nextStep():void
         {
@@ -181,11 +186,18 @@ namespace ghost.mvc
             var defaultPages:any = this.getDefaultPages();
             if(defaultPages)
             {
-                this.navigation().setDefaultPages(defaultPages);
+                if (Router.hasInstance()) {
+                    for (var url of defaultPages) {
+                        Router.instance().goto(url);
+                    }
+                } else {
+                    this.navigation().setDefaultPages(defaultPages);
+                }
             }
             this.navigation().listen();
 
             ghost.mvc.Template.sync();
+           
             return null;
 
         }
