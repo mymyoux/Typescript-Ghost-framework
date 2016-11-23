@@ -2140,7 +2140,10 @@ namespace ghost.browser.forms
                 types = ["(cities)"];
             }else
             {
-                types = types.split(",");
+                if (types === 'all')
+                    types = [];
+                else
+                    types = types.split(",");
             }
             this.types = types;
         }
