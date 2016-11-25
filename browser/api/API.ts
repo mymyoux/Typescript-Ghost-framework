@@ -137,7 +137,7 @@ module ghost.browser.api
             }, reject);
             return <any>this;
         }
-        public async done():Promise<any>
+        public done():Promise<any>
         {
             var promise: Promise<any> = new Promise<any>((resolve: any, reject: any): void => {
                 this.then((data: any): void => {
