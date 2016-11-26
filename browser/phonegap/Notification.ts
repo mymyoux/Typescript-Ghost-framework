@@ -1,19 +1,89 @@
-
+///<lib="phonegap-push"/>
+///<module="framework/ghost/events"/>
 namespace ghost.phonegap
 {
     /**
      * @private
      */
-    export class _Notification/* extends ghost.events.EventDispatcher*/
+    export class _Notification extends ghost.events.EventDispatcher
     {
+        public EVENT_REGISTRATION: string = "registration";
+        public EVENT_NOTIFICATION: string = "notification";
+        public EVENT_ERROR: string = "error"; 
         private _notifier:any;
+        protected _push: PhonegapPluginPush.PushNotification = null;
+        protected _registrationID: string;
         /**
+         * 
          * Constructor
          */
         constructor()
         {
-            //super();
-            this._notifier = ROOT.navigator["notification"];
+            super();
+                   
+        }
+        protected notifier()
+        {
+            if (!this._notifier)
+                this._notifier = window.navigator["notification"]; 
+            return this._notifier; 
+        }
+        public listenPush():void
+        { 
+            if (!this._push)
+            {
+                var phonegap: any = ghost.data.Configuration.get("phonegap");
+                if(!phonegap)
+                {
+                    console.error("no phonegap config");
+                    debugger;
+                    return;
+                }
+                this._push = PushNotification.init(phonegap);
+                this._push.on(this.EVENT_REGISTRATION, this.onRegistration.bind(this));
+                this._push.on(this.EVENT_NOTIFICATION, this.onNotification.bind(this));
+                this._push.on(this.EVENT_ERROR, this.onError.bind(this));
+            }
+        }
+        public on(name: string, callback: Function, scope?: any, ...parameters: any[]): void {
+            super.on.apply(this, Array.prototype.slice.call(arguments));
+            if (name == this.EVENT_REGISTRATION && this._registrationID != null && callback)
+            {
+                var params: any = [this._registrationID];
+                if(parameters)
+                {
+                    params = params.concat(parameters);
+                }
+                callback.apply(scope, params);
+            }
+        }
+        public once(name: string, callback: Function, scope?: any, ...parameters: any[]): void {
+            if (name == this.EVENT_REGISTRATION && this._registrationID != null) {
+                var params: any = [this._registrationID];
+                if (parameters) {
+                    params = params.concat(parameters);
+                }
+                callback.apply(scope, params);
+                return;
+            }
+            super.once.apply(this, Array.prototype.slice.call(arguments));
+        }
+        protected onRegistration(data:any):void
+        {
+            this._registrationID = data.registrationId;
+            if(this._registrationID)
+                this.trigger(this.EVENT_REGISTRATION, this._registrationID);
+            console.log("push:registration:", data);
+        }
+        protected onNotification(data: any): void
+        {
+            this.trigger(this.EVENT_NOTIFICATION, data);
+            console.log("push:notification:", data);
+        }
+        protected onError(error: any): void
+        {
+            this.trigger(this.EVENT_ERROR, error);
+            console.log("push:error:", error);
         }
         /**
          * Shows a custom alert or dialog box.
@@ -24,11 +94,13 @@ namespace ghost.phonegap
          */
         public alert(message:string, alertCallback:Function = null, title:string = "Alert", buttonName:string = "OK"):void
         {
-            if(this._notifier && this._notifier.alert)
+            if (this.notifier() && this.notifier().alert)
             {
-                this._notifier.alert(message, alertCallback, title, buttonName);
+                console.log("natif");
+                this.notifier().alert(message, alertCallback, title, buttonName);
             }else
             {
+                console.log("emulated"); 
                 alert(message);
                 if(alertCallback)
                 {
@@ -45,9 +117,9 @@ namespace ghost.phonegap
          */
         public confirm(message:string, confirmCallback:Function = null, title:string = "Confirm", buttonLabels:string[] = ["OK","Cancel"]):void
         {
-            if(this._notifier && this._notifier.confirm)
+            if(this.notifier() && this.notifier().confirm)
             {
-                 this._notifier.confirm(message, confirmCallback, title, buttonLabels.join(","));
+                 this.notifier().confirm(message, confirmCallback, title, buttonLabels.join(","));
             }else
             {
                 confirm(message);
@@ -64,8 +136,8 @@ namespace ghost.phonegap
          */
         public beep(times:number):void
         {
-            if(this._notifier && this._notifier.beep)
-                this._notifier.beep(times);
+            if(this.notifier() && this.notifier().beep)
+                this.notifier().beep(times);
             else
             {
                 console.warn("No beep API available");
@@ -77,8 +149,8 @@ namespace ghost.phonegap
          */
         public vibrate(milliseconds:number):void
         {
-            if(this._notifier && this._notifier.vibrate)
-                this._notifier.vibrate(milliseconds);
+            if(this.notifier() && this.notifier().vibrate)
+                this.notifier().vibrate(milliseconds);
             else
             {
                 console.warn("No vibration API available");

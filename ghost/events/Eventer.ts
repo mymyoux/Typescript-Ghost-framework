@@ -193,6 +193,7 @@ namespace ghost.events
             }
             ROOT.document.addEventListener(this.DEVICE_READY, function(event)
             {
+                console.log("device event triggered by phonegap");
                 _self._triggerDeviceReady(event);
                
             }, false);
@@ -233,12 +234,13 @@ namespace ghost.events
             {
                 if(!ROOT.cordova)
                 {
-                   // console.log("False Cordova is Ready");
+                    console.log("False Cordova is Ready");
                     this._triggerDeviceReady();
                     ghost.constants.cordovaEmulated = true;
                 }
                 else
                 {
+                    console.log("real cordova");   
                     //emulator
                     if(ROOT.location.href.indexOf("file://")==-1 || ROOT.location.href.indexOf("ripple")>-1 || ROOT.location.href.indexOf("local")>-1)
                     {
@@ -261,7 +263,7 @@ namespace ghost.events
         {
             if(!event)
             {
-               // console.log("DEVICE READY EMULATED");
+                console.log("DEVICE READY EMULATED");
             }
             if(!this._deviceReady)
             {
