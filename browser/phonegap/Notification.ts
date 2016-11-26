@@ -25,7 +25,7 @@ namespace ghost.phonegap
         protected notifier()
         {
             if (!this._notifier)
-                this._notifier = window.navigator["notification"]; 
+                this._notifier = ROOT.navigator["notification"]; 
             return this._notifier; 
         }
         public listenPush():void
@@ -39,7 +39,12 @@ namespace ghost.phonegap
                     debugger;
                     return;
                 }
-                this._push = PushNotification.init(phonegap);
+                if (!ROOT.PushNotification)
+                {
+                    console.error("no phonegap env");
+                    return;
+                }
+                this._push = ROOT.PushNotification.init(phonegap);
                 this._push.on(this.EVENT_REGISTRATION, this.onRegistration.bind(this));
                 this._push.on(this.EVENT_NOTIFICATION, this.onNotification.bind(this));
                 this._push.on(this.EVENT_ERROR, this.onError.bind(this));
@@ -79,6 +84,10 @@ namespace ghost.phonegap
         {
             this.trigger(this.EVENT_NOTIFICATION, data);
             console.log("push:notification:", data);
+            if (data.additionalData.test_notification)
+            {
+                this.alert(data.additionalData.test_notification);
+            }
         }
         protected onError(error: any): void
         {
