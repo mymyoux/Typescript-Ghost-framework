@@ -1,8 +1,10 @@
 ///<lib="es6-promise"/>
 ///<module="events"/>
 ///<file="Component"/>
+///<module="framework/browser/services"/>
 namespace ghost.mvc
 {
+    import Env = ghost.services.Env;
     export class Template extends ghost.events.EventDispatcher
     {
         public static EVENT_EXPIRED:string = "expired";
@@ -122,7 +124,7 @@ namespace ghost.mvc
                 debugger;
             }
             this.parsed = Ractive["parse"](this.content, options); 
-            if(window.location.host.indexOf(".local")==-1)
+            if(!Env.isLocal())
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,

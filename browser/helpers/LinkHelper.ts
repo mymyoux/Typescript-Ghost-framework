@@ -28,6 +28,7 @@ namespace ghost.browser.helpers
                   //already triggered
                   return;
               }
+            debugger;
                 //debugger;
                var $a:JQuery = $(this).find("a");
                event.stopPropagation();

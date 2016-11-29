@@ -1,8 +1,10 @@
 ///<module="framework/ghost/events"/>
 ///<module="io"/>
 ///<module="data"/>
+///<module="framework/browser/services"/>
 namespace ghost.browser.i18n
 {
+	import Env = ghost.services.Env;
 	export interface IPolyglotOptions
 	{
 		currentLocale?:string;
@@ -200,7 +202,7 @@ namespace ghost.browser.i18n
 		private retrieveFromCache(): void {
 
 			if (!this._retrievedFromCache) {
-				if (false && window.location.href.indexOf(".local") != -1) {
+				if (Env.isLocal()) {
 					this._retrievedFromCache = true;
 					this.retrieveUpdate();
 					return;
