@@ -29,6 +29,11 @@ namespace ghost.mvc
          * @type {string}
          */
         public static EVENT_CHANGED:string = "changed";
+        /***
+         * Differed event
+         * @type {string}
+         */
+        public static EVENT_REMOVE: string = "remove";
         /**
          * Default part
          * @type {string}

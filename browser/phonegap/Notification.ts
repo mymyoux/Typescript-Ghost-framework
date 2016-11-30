@@ -82,7 +82,11 @@ namespace ghost.phonegap
         }
         protected onNotification(data: any): void
         {
-            this.trigger(this.EVENT_NOTIFICATION, data);
+            if (data.additionalData && data.additionalData.type)
+            {
+                this.trigger(this.EVENT_NOTIFICATION + ":" + data.additionalData.type, data);
+            }else
+                this.trigger(this.EVENT_NOTIFICATION, data);
             console.log("push:notification:", data);
             if (data.additionalData.test_notification)
             {

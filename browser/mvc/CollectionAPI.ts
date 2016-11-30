@@ -470,7 +470,59 @@ namespace ghost.mvc
         public getMixins(): any[] {
             return null;
         }
+        public addRawModel(rawModel: any): void
+        {
+            this._addRawModel(rawModel);
+            this.trigger(Collection.EVENT_CHANGE);
+        }
+        protected _addRawModel(rawModel: any): void
+        {
+            if (!rawModel) {
+                return;
+            }
+            if (rawModel.__class) {
+                var model: T = <any>Model.get(rawModel.__class);
+                model.readExternal(rawModel);
+                this.push(model);
+            } else {
+                if (typeof rawModel == "object") {
+                    var cls: any = this.getDefaultClass();
+                    var id: string = this.getModelIDName();
+                    var model: T;
+                    if (rawModel && rawModel[id] != undefined) {
+                        model = this.getModelByID(rawModel[id]);
+                    }
+                    if (!model) {
+                        model = <any>Model.get(cls);
+                        if (this._mixins != undefined ||  this.getMixins()) {
+                            if (!this._mixins)
+                                this._mixins = this.getMixins();
+                            this._mixins.forEach((mixin: any) => {
+                                if (mixin instanceof MixinConfig) {
+                                    applyMixins(model, [mixin.mixin], mixin.config);
+                                } else {
+                                    applyMixins(model, [mixin]);
+                                }
+                            });
+                            /*var mixins: any[] = this.getMixins();
+                            for(var p in mixins)
+                            {
+                                applyMixins()
+                            }*/
+                        }
 
+                        model.readExternal(rawModel);
+                        this.push(model);
+                    } else {
+                        model.readExternal(rawModel);
+                    }
+
+                    //   this.trigger(Collection.EVENT_CHANGE, model);
+                } else {
+                    console.error("RawModel must be object, given ", rawModel);
+                }
+            }
+        }
         public readExternal(input:any[]):void
         {
             if(input)
@@ -483,65 +535,7 @@ namespace ghost.mvc
                     this.triggerFirstData();
                     return;
                 }
-                input.forEach(function(rawModel:any):void
-                {
-                    if(!rawModel)
-                    {
-                        return;
-                    }
-                    if(rawModel.__class)
-                    {
-                        var model:T = <any>Model.get(rawModel.__class);
-                        model.readExternal(rawModel);
-                        this.push(model);
-                    }else
-                    {
-                        if(typeof rawModel == "object")
-                        {
-                            var cls:any = this.getDefaultClass();
-                            var id:string = this.getModelIDName();
-                            var model:T;
-                            if(rawModel && rawModel[id] != undefined)
-                            {
-                                model = this.getModelByID(rawModel[id] );
-                            }
-                            if(!model)
-                            {
-                                model  = <any>Model.get(cls);
-                                if (this._mixins != undefined || this.getMixins())
-                                {
-                                    if(!this._mixins)
-                                        this._mixins = this.getMixins();
-                                    this._mixins.forEach((mixin:any)=>
-                                    {
-                                        if(mixin instanceof MixinConfig)
-                                        {
-                                            applyMixins(model, [mixin.mixin], mixin.config);
-                                        }else{
-                                            applyMixins(model, [mixin]);
-                                        }
-                                    });
-                                    /*var mixins: any[] = this.getMixins();
-                                    for(var p in mixins)
-                                    {
-                                        applyMixins()
-                                    }*/
-                                }
-
-                                model.readExternal(rawModel);
-                                this.push(model);
-                            }else
-                            {
-                                model.readExternal(rawModel);
-                            }
-
-                         //   this.trigger(Collection.EVENT_CHANGE, model);
-                        }else
-                        {
-                            console.error("RawModel must be object, given ", rawModel);
-                        }
-                    }
-                }, this);
+                input.forEach(this._addRawModel, this);
                 this.detectFullyLoad( input.length );
                 this.triggerFirstData();
                 this.trigger(Collection.EVENT_CHANGE);

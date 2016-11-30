@@ -237,8 +237,12 @@ namespace ghost.mvc
             {
 
                 model.on(Model.EVENT_CHANGED, this._onChange, this, model);
+                model.on(Model.EVENT_REMOVE, this._onModelRemove, this, model);
                 this._triggerUpdate(model);
             }
+        }
+        protected _onModelRemove(model:T):void{
+            this.remove(model);
         }
         public remove(model:T):void
         {
