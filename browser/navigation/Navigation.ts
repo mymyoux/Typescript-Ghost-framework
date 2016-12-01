@@ -95,6 +95,7 @@ namespace ghost.browser.navigation
             }
             Navigation.instance = this;
             this._scopes = {};
+            return;
             ghost.events.Eventer.on(ghost.events.Eventer.HASH_CHANGE, this._onHashChange, this);
             //TODO:not sure
             var _self:Navigation = this;
@@ -109,6 +110,7 @@ namespace ghost.browser.navigation
         }
         public listen():void
         {
+            return;
             ghost.$ready(()=>
             {
                 if(!this._listening)
@@ -239,6 +241,7 @@ namespace ghost.browser.navigation
          private _onHashChange(first:boolean = false):void
         {
 
+             return;
             if(window.location.hash == this._currentHash)
             {
                 return;

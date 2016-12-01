@@ -222,7 +222,7 @@ namespace ghost.mvc
          * List of controller's fullnames
          */
         private static _sFullname:string[] = [];
-        protected static onRouteMatch(index:number, route:IRoute, url:string):boolean|string
+        protected static onRouteMatch(index:number, route:IRoute, url:string):boolean|string|Scope
         {
           //check if instance already exists
           if (!Controller._sControllerInstance[index])
@@ -235,9 +235,10 @@ namespace ghost.mvc
           {
               return canActivate;
           }
-          Scope.getScope(route.scope).setCurrentController(controller, route.params);
+          var scope: Scope = Scope.getScope(route.scope);
+          scope.setCurrentController(controller, route.params);
           console.log("on route match", index, route, url);
-          return null;
+          return scope;
         }
         /**
          * Adds package to parse

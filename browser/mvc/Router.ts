@@ -5,6 +5,7 @@ namespace ghost.mvc {
      */
 	import Navigation = ghost.browser.navigation.Navigation;
 	import Strings = ghost.utils.Strings;
+	import Objects = ghost.utils.Objects;
 	export class Router extends ghost.events.EventDispatcher {
 		public static TYPE_STATIC:string = "static";
 		public static TYPE_REGEXP:string = "regexp";
@@ -22,6 +23,10 @@ namespace ghost.mvc {
 		protected regExpRoutes: any;
 		protected irouteRoutes: any;
 		protected priorities: number[];
+		protected rejected: any[];
+		protected history: any;
+		protected current: any;
+		protected listenening: boolean;
 		public constructor() {
 			super();
 			Router._instance = this;
@@ -29,6 +34,10 @@ namespace ghost.mvc {
 			this.regExpRoutes = {};
 			this.irouteRoutes = {};
 			this.priorities = [];
+			this.rejected = [];
+			this.history = {};
+			this.current = {};
+			this.listenening = true;
 			this.bindEvents();
 		}
 		public static segment(url, config:IRoute = null):IRoute{
@@ -59,13 +68,119 @@ namespace ghost.mvc {
 			}
 			return route;
 		}
-		public goto(url: string, params: any = null): void {
+		protected log(...data:any[]):void
+		{
+			console.log("route:", ...data);
+		}
+		public gotoLastReject(scope:string = "main"):void
+		{
+			this.log("goto last reject");
+			if(this.rejected.length)
+			{
+				var last: any = this.rejected.pop();
+				this.goto(last.url, last.params);
+			}
+		}
+		public back(index:number = 1, scope:string = "main"):void
+		{
+			this.log("back", index);
+			var route: any;
+			var history: any[]  = this.history[scope];
+			if(!history)
+			{
+				return;
+			}
+			index++;
+			while(index-->0 && history.length)
+			{
+				route = history.pop();
+			}
+			if(route && route!==this.current) 
+			{
+				this.goto(route.url, route.params); 
+			}
+		}
+		protected _reject(route: any): void
+		{
+			this.rejected.push(route);
+		}
+		protected _goto(route: any, save: boolean, scopename: string = "main"):void
+		{
+			//mute hash listening during manual modification
+			//browser don't throw event syncly....... but in case of
+			this.listenening = false;
+			this.log("stop listening");
+			if (save) {
+				this.current[scopename] = route;
+				if (!this.history[scopename])
+				{
+					this.history[scopename] = [];
+				}
+				this.history[scopename].push(route);
+			}
+			var url: string = "#!" + route.url;
+			for(var p in this.history)
+			{
+				if(p!=scopename && p.substring(0, 1)!="_")
+				{
+					url += "+" + this.history[p].url;
+				}
+			}
+			window.location.href = url;
+			this.log("set url:",  url);
+
+			this.listenening = true;
+			this.log("start listening");
+		}
+		protected _detectHistory(url:string, params:any):boolean|any
+		{
+			var history: any[];
+			for(var scope in this.history)
+			{
+				history = this.history[scope];
+				var last: any = history[history.length - 2];
+				if(!last)
+				{
+					continue;
+				}
+				if(last.url == url)
+				{
+					if(!params && !last.params)
+					{
+						return {
+							index: 1, scope: scope 
+						};
+					}
+					if (Objects.deepEquals(params, last.params))
+					{
+						return {
+							index: 1, scope: scope
+						};
+					}
+				}
+			}
+			return false;
+		}
+		public goto(url: string, params: any = null, save:boolean = true): void {
+			var historyResult: boolean | number;
+			if ((historyResult = this._detectHistory(url, params)) !== false)
+			{ 
+				this.log("detect history : ", historyResult);
+				return this.back((<any>historyResult).index, (<any>historyResult).scope);
+			}
+ 
+
+			if(save) 
+			{
+				var current: any = { url: url, params: params };
+			}
+			this.log("goto:" + url);
 			var result:any;
 			for (var priority of this.priorities) {
 				if (this.staticRoutes[priority]) {
 					if (this.staticRoutes[priority][url]) {
 						if (!this.staticRoutes[priority][url].callback) {
-							console.warn("route without callback", url);
+							this.log("route without callback", url);
 							return;
 						}
 						result = this.staticRoutes[priority][url].callback(this.staticRoutes[priority][url], url);
@@ -73,17 +188,25 @@ namespace ghost.mvc {
 						{
 							if(typeof result == "string")
 							{
-								console.warn("route: " + url + " needs login");
+								this.log("route: " + url + " needs login");
+								if (save)
+									this._reject(current); 
 								//new url
-								return this.goto(result);
+								return this.goto(result, null, false);
+							}
+							//maybe handle more type - assume it's always Scope
+							var scope: string;
+							if(result !== true)
+							{
+								scope = result.name();
 							}
 							//end = route found 
-							console.log("route: "+url + " found");
-							window.location.href = "#!"+url;
+							this.log(url + " found");
+							this._goto(current, save, scope);
 							return;
 						}
-						window.location.href = "#!" + result;  
-						console.warn("route: "+url+" ignored a callback");
+						//window.location.href = "#!" + result;  
+						this.log("route: " + url + " ignored a callback");
 					}
 				}
 				if (this.irouteRoutes[priority]) 
@@ -102,15 +225,21 @@ namespace ghost.mvc {
 									if (typeof result == "string") {
 										console.warn("route_seg: " + url + " needs login");
 										//new url
-										return this.goto(result);
+										if (save)
+											this._reject(current); 
+										return this.goto(result, null, false);
+									}
+									var scope: string;
+									if (result !== true) {
+										scope = result.name();
 									}
 									//end = route found 
-									console.log("route_seg: " + url + " found");
-									window.location.href = "#!" + url;
+									this.log("route_seg: " + url + " found");
+									this._goto(current, save, scope);
 									return;
 								}
-								window.location.href = "#!" + result;
-								console.warn("route_seg: " + url + " ignored a callback");
+								//window.location.href = "#!" + result;
+								this.log("route_seg: " + url + " ignored a callback");
 							}
 						}
 					}
@@ -121,6 +250,7 @@ namespace ghost.mvc {
 		}
 		public register(route: string | RegExp | IRoute, callback: Function, priority: number = null): void {
 			
+			this.log("register", route);
 			if(!route)
 			{
 				console.warn("you tried to register an empty route");
@@ -228,17 +358,42 @@ namespace ghost.mvc {
 		}
 		protected bindEvents(): void {
 			$(document).on("click", "a[href^='#']", this.onhref.bind(this));
-			//			ghost.events.Eventer.trigger(Navigation.EVENT_PAGE_CHANGED, this.onRouteChange, this);
+			ghost.events.Eventer.on(ghost.events.Eventer.HASH_CHANGE, this.onHashChange, this);
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
 			var href: string = jqueryEvent.target.getAttribute("href").substring(1);
 			if(href)
-			this.goto(href);
-
+				this.goto(href);
 		}
 
-		protected onRouteChange(): void {
-			debugger;
+		protected onHashChange(event:any): void {
+			if(!this.listenening)
+			{
+				this.log("ignoring hash change");
+				return;
+			}
+			var newHash:string = event.newURL.substring(event.newURL.indexOf("#")+1);
+			if(newHash.substring(0, 1)=="!")
+			{
+				newHash = newHash.substring(1);
+			}
+			var oldHash: string = event.oldURL.substring(event.oldURL.indexOf("#")+1);
+			if (oldHash.substring(0, 1) == "!") {
+				oldHash = oldHash.substring(1);
+			}
+			var current: any;
+			for(var p in this.current)
+			{
+				current = this.current[p];
+				this.log("of: ", p);
+				if(newHash == current.url)
+				{
+					this.log("ignore hash change", oldHash, newHash, current.url);
+					return;
+				}
+			} 
+			this.log("hash change", oldHash, newHash, this.current); 
+			this.goto(newHash);
 		}
 	}
 	export interface IRoute
