@@ -718,6 +718,20 @@ namespace ghost.browser.forms
             if(Form.customClasses.indexOf(cls) == -1)
                 Form.customClasses.push(cls);
         }
+        public static removeFieldClass(cls):void
+        {
+            var name:string = ghost.utils.Classes.getName(cls);
+            if(name && name.indexOf("ListField")!=-1)
+            {
+                Form.customListClasses.splice(name.indexOf("ListField"), 1);
+
+                return;
+            }
+            if(Form.customClasses.indexOf(cls) != -1)
+            {
+                Form.customClasses.splice(Form.customClasses.indexOf(cls), 1);
+            }
+        }
         public static getFieldList(element):any
         {
             var cls:any = ListField;
