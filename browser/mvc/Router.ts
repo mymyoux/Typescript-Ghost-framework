@@ -359,11 +359,17 @@ namespace ghost.mvc {
 		protected bindEvents(): void {
 			$(document).on("click", "a[href^='#']", this.onhref.bind(this));
 			ghost.events.Eventer.on(ghost.events.Eventer.HASH_CHANGE, this.onHashChange, this);
+			ghost.events.Eventer.on(ghost.events.Eventer.KEYBOARD_BACK_BUTTON, this.onBackButton, this);
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
 			var href: string = jqueryEvent.target.getAttribute("href").substring(1);
 			if(href)
 				this.goto(href);
+		}
+		protected onBackButton():void
+		{
+			debugger;
+			this.back(1);
 		}
 
 		protected onHashChange(event:any): void {
