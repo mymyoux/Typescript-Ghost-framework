@@ -184,9 +184,34 @@ namespace ghost.core
          * Get the device's Universally Unique Identifier (UUID).
          * @returns {string}
          */
-        public static getUUID():string
+        public static getUUID(force_generate:boolean = false):string
         {
-            return ROOT.device?ROOT.device.uuid:"uuid";
+            if ((ROOT.device && ROOT.device.uuid) || !force_generate || !ROOT.localStorage)
+            {
+                return ROOT.device?ROOT.device.uuid:"uuid";
+            }else
+            {
+                try{
+                    var token: string = ROOT.localStorage.getItem('uuid');
+                    if(token)
+                    {
+                        return token;
+                    }
+                    var _tokenCars: string[] = "0123456789abcdef".split("");
+                    var _tokenCarsLength: number = _tokenCars.length - 1;
+                    token = "gen:"+Date.now() + "";
+                    var size: number = 64;
+                    while (token.length < size) {
+                        token += _tokenCars[Math.floor(Math.random() * (_tokenCarsLength + 1))];
+                    }
+                    ROOT.localStorage.setItem('uuid', token);
+                    return token;
+                    
+                }catch(error)
+                {
+                    return "uuid";
+                }
+            }
         }
         /**
          * Get the operating system version.

@@ -118,6 +118,10 @@ namespace ghost.mvc {
 				}
 				this.history[scopename].push(route);
 			}
+			if(!route)
+			{
+				debugger;
+			}
 			var url: string = "#!" + route.url;
 			for(var p in this.history)
 			{
