@@ -187,6 +187,12 @@ namespace ghost.mvc
             if(defaultPages)
             {
                 if (Router.hasInstance()) {
+                    var found: boolean = false;
+                   if (window.location.hash != "")
+                   {
+                      found = Router.instance().goto(window.location.hash)
+                   }
+                   if(!found)
                     for (var url of defaultPages) {
                         Router.instance().goto(url);
                     }

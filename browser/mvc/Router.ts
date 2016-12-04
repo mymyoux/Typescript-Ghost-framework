@@ -81,14 +81,14 @@ namespace ghost.mvc {
 				this.goto(last.url, last.params);
 			}
 		}
-		public back(index:number = 1, scope:string = "main"):void
+		public back(index:number = 1, scope:string = "main"):boolean
 		{
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];
 			if(!history)
 			{
-				return;
+				return false;
 			}
 			index++;
 			while(index-->0 && history.length)
@@ -97,8 +97,9 @@ namespace ghost.mvc {
 			}
 			if(route && route!==this.current) 
 			{
-				this.goto(route.url, route.params); 
+				return this.goto(route.url, route.params); 
 			}
+			return false;
 		}
 		protected _reject(route: any): void
 		{
@@ -165,7 +166,18 @@ namespace ghost.mvc {
 			}
 			return false;
 		}
-		public goto(url: string, params: any = null, save:boolean = true): void {
+		public goto(url: string, params: any = null, save:boolean = true): boolean {
+			if(!url)
+			{
+				return false;
+			}
+			if(url.substring(0, 1)=="#")
+			{
+				url = url.substring(1);
+			}
+			if (url.substring(0, 1) == "!") {
+				url = url.substring(1);
+			}
 			var historyResult: boolean | number;
 			if ((historyResult = this._detectHistory(url, params)) !== false)
 			{ 
@@ -185,7 +197,7 @@ namespace ghost.mvc {
 					if (this.staticRoutes[priority][url]) {
 						if (!this.staticRoutes[priority][url].callback) {
 							this.log("route without callback", url);
-							return;
+							return false;
 						}
 						result = this.staticRoutes[priority][url].callback(this.staticRoutes[priority][url], url);
 						if(result !== false)
@@ -207,7 +219,7 @@ namespace ghost.mvc {
 							//end = route found 
 							this.log(url + " found");
 							this._goto(current, save, scope);
-							return;
+							return true;
 						}
 						//window.location.href = "#!" + result;  
 						this.log("route: " + url + " ignored a callback");
@@ -240,7 +252,7 @@ namespace ghost.mvc {
 									//end = route found 
 									this.log("route_seg: " + url + " found");
 									this._goto(current, save, scope);
-									return;
+									return true;
 								}
 								//window.location.href = "#!" + result;
 								this.log("route_seg: " + url + " ignored a callback");
@@ -251,6 +263,7 @@ namespace ghost.mvc {
 
 			}
 			console.warn("route:" + url + " not found");
+			return false;
 		}
 		public register(route: string | RegExp | IRoute, callback: Function, priority: number = null): void {
 			
