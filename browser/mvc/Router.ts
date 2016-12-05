@@ -72,14 +72,15 @@ namespace ghost.mvc {
 		{
 			console.log("route:", ...data);
 		}
-		public gotoLastReject(scope:string = "main"):void
+		public gotoLastReject(scope:string = "main"):boolean
 		{
-			this.log("goto last reject");
 			if(this.rejected.length)
 			{
 				var last: any = this.rejected.pop();
-				this.goto(last.url, last.params);
+			this.log("goto last reject", last);
+				return this.goto(last.url, last.params);
 			}
+			return false;
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
