@@ -139,6 +139,12 @@ namespace ghost.browser.forms
         }
         public retrieveFields(form:any, listname?:string)
         {
+            if(this.fields) {
+                this.fields.forEach(function(field:Field)
+                {
+                    field.off();
+                });
+            }
             if(!listname)
             {
                 listname = $(form).attr("data-list");
