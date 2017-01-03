@@ -260,7 +260,6 @@ namespace ghost.mvc {
         {
 			return this.getClassName().toLowerCase();
         } 
-        protected 
 		protected getBindedFunctions(): any {
             return null;
         }

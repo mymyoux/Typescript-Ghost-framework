@@ -222,7 +222,6 @@ module ghost.browser.api
         public add(request: any): string {
             if (!this._initialized)
             {
-                debugger;
             }
             request._instance = this.instance();
             var token: string = this.generateUniqueID();
@@ -455,6 +454,14 @@ module ghost.browser.api
             }
             this._direction = direction;
             return this.service("paginate", "key", id).service("paginate","direction", direction);
+        }
+        public params(params: any): APIExtended {
+            for(var p in params)
+            {
+                if (params[p] != null )
+                    this.param(p, params[p]);
+            }
+            return this;
         }
         public param(param:string, data:any):APIExtended
         {

@@ -139,6 +139,8 @@ namespace ghost.io
 				}
 
 				data = middleware(data, "success");
+				if(!settings)
+				debugger;
 				if(settings.asObject)
 				{
 					resolve({data:data, textStatus:textStatus, jqXHR: jqXHR});
