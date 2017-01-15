@@ -6,9 +6,9 @@ namespace ghost.sgameclient
     import Const = ghost.sgamecommon.Const;
     export class RoomManager
     {
-        private rooms:any;
-        private publics:Room[];
-        private application: Application;
+        protected rooms: any;
+        protected publics: Room[];
+        protected application: Application;
         protected _length: number;
         public constructor(application:Application)
         {

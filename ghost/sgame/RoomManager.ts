@@ -6,9 +6,9 @@ namespace ghost.sgame
     import Const = ghost.sgamecommon.Const;
     export class RoomManager
     {
-        private rooms:any;
-        private publics:Room[];
-        private appName: string;
+        protected rooms: any;
+        protected publics: Room[];
+        protected appName: string;
         public constructor(appName:string)
         { 
             this.appName = appName;
@@ -29,7 +29,7 @@ namespace ghost.sgame
            return this.rooms[name].addUser(user, password);
         }
 
-        private createRoom(name:string, visibility:string, password:string):void
+        protected createRoom(name:string, visibility:string, password:string):void
         {
             this.rooms[name] = new Room(this.appName, name, password);
             if(visibility == Const.ROOM_VISIBILITY_PUBLIC)

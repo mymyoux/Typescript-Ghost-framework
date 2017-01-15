@@ -29,7 +29,7 @@ namespace ghost.sgameclient
             this.connecting = false;
             this.processing = false;
             this.buffer = [];
-            this.roomManager = new RoomManager(this);
+            this.roomManager = this.createRoomManager();
             this.applicationConnected = false;
             //this.connect();
             if(this.client.isConnected())
@@ -37,6 +37,10 @@ namespace ghost.sgameclient
                 this._onClientConnect();
             }
             this.bindEvents();
+        }
+        protected createRoomManager():RoomManager
+        {
+            return new RoomManager(this);
         }
         public getRoomManager():RoomManager
         {
@@ -302,7 +306,7 @@ namespace ghost.sgameclient
             else*/
             if(this[name] && typeof this[name] == "function")
             {
-                this[name](data.data);
+                this[name](data);
             }else
             {
                 console.warn("["+this.name+"]"+name+" doesn't exist", data);

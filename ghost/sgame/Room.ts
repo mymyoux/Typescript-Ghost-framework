@@ -63,9 +63,9 @@ namespace ghost.sgame
             else
                 return this.users.indexOf(user)!=-1;
         }
-        public removeUser(id:string):void;
-        public removeUser(user:User):void;
-        public removeUser(user:any):void
+        public removeUser(id: string): boolean;
+        public removeUser(user: User): boolean;
+        public removeUser(user:any):boolean
         {
             var index:number = typeof user == "string"? this.usersIDs.indexOf(user):this.users.indexOf(user);
             if(index != -1)
@@ -74,7 +74,9 @@ namespace ghost.sgame
                 this.users.splice(index, 1);
                 this.usersIDs.splice(index, 1);
                 this._unbindUserEvents(user);
+                return true;
             }
+            return false;
         }
         public length():number
         {

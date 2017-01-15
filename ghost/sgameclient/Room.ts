@@ -111,6 +111,10 @@ namespace ghost.sgameclient
         {
             return this.users.length;
         }
+        public command(command: string, data: any, callback: Function = null):void
+        {
+            this.write(Const.ROOM_COMMAND_INTERNAL, {command:command, data:data}, callback);
+        }
         public write(command: string, data: any, callback: Function = null): void {
             if (!this.ready)
                 this.buffer.push({ func: "write", command: command, data: data, callback: callback });

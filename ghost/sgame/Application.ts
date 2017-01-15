@@ -25,10 +25,18 @@ namespace ghost.sgame
             this.server = server;
             this.users = [];
             this.users_ids = [];
-            this.roomManager = new RoomManager(this.name);
+            this.roomManager = this.createRoomManager(); 
             this.bindEvents();
 
             this.server.addApp(this);
+        }
+        public getName():string
+        {
+            return this.name;
+        }
+        protected createRoomManager():RoomManager
+        {
+            return new RoomManager(this.name);
         }
         public bindEvents()
         {
@@ -165,6 +173,16 @@ namespace ghost.sgame
         
             if (command == Const.ROOM_COMMAND_CUSTOM_METHOD) {
                 return this.onCustomRoomCommand(room, user, data, id_recipient, icallback);
+            }
+            if (command == Const.ROOM_COMMAND_INTERNAL) {
+                console.log("CALL INTERN");
+                if(!room[data.command+"Action"])
+                {
+                    return icallback.error(Const.ERROR_NO_METHOD, { room: roomname, user: id_recipient });
+                }
+                console.log("CALL INTERNAL EXISTS");
+
+                return room[data.command+"Action"](user, data.data, icallback);
             }
             icallback.success();
             //custom data

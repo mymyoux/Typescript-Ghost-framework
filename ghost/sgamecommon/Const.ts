@@ -19,6 +19,7 @@ namespace ghost.sgamecommon
         public static ROOM_COMMAND_USER_LEAVE = "room_user_leave";
         public static ROOM_COMMAND_USER_DATA = "room_user_data";
         public static ROOM_COMMAND_CUSTOM_METHOD= "room_custom_method";
+        public static ROOM_COMMAND_INTERNAL = "room_command_internal";
 
         public static ALL_APP:string = "*all";
         public static ROOM_VISIBILITY_PUBLIC:string = "public";
@@ -33,6 +34,7 @@ namespace ghost.sgamecommon
         public static ERROR_ROOM_ENTER_FAILED:string = "error_bad_room_enter";
         public static ERROR_NEED_APPLICATION_ENTER:string = "error_need_application_enter";
         public static ERROR_ROOM_COMMAND_CUSTOM_METHOD: string = "error_room_custom_method";
+        public static ERROR_NO_METHOD: string = "error_no_method";
 
  
         public static USER_CLASS_CHANGE:string = "user_class_change";
