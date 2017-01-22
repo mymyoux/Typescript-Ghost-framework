@@ -8,7 +8,7 @@ namespace ghost.sgame
         public name:string;
         public appName:string;
         protected password:string;
-        private users:User[];
+        protected users:User[];
         private usersIDs:string[];
         public constructor(appName:string, name:string, password:string = null)
         {
