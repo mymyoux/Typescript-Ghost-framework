@@ -7,6 +7,7 @@ namespace ghost.database
 {
     import log = ghost.logging.log;
     var Sequelize = require("sequelize");
+    var mysql = require("mysql");
     export class Database
     {
         private static _instance:Database;
@@ -15,6 +16,7 @@ namespace ghost.database
             return Database._instance;
         }
         protected db:any;
+        protected sql:any;
         public constructor(database:string, host:string, username:string, password:string, dialect:string = "mysql", options:any = null)
         {
             Database._instance = this;
@@ -30,8 +32,21 @@ namespace ghost.database
                 options.host = host;
             }
             this.db = new Sequelize(database, username, password, options);
+            this.sql = mysql.createConnection({
+                host: options.host,
+                user: username,
+                database: database,
+                password: password
+            });
+
             this.initDefine();
             this.initRelations(); 
+        }
+        public query(query:string, params:any[],callback:any)
+        public query(query:string,callback:any)
+        public query(query:string, params:any[],callback?:any)
+        {
+            this.sql.query.apply(this.sql, Array.prototype.slice.call(<any>arguments));
         }
         protected initDefine():void
         {
