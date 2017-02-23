@@ -117,9 +117,9 @@ namespace ghost.io
 					promise.setAjax(null);
 
 				data = middleware(data, "success_always");
-				if(data && (data.success === false || data.error))
+				if(data && (data.success === false || data.error || data.exception))
 				{
-					if(settings.retry === true && data.fatal === false)
+					if(settings.retry === true && data.fatal === false && (!data.exception || data.exception.fatal === false))
 					{
 						setTimeout(function()
 						{
@@ -130,10 +130,10 @@ namespace ghost.io
 					data = middleware(data, "error");
 					if (settings.asObject)
 					{
-						reject({ errorThrown: data.api_error?data.api_error:(data.error?data.error:data), textStatus: textStatus, jqXHR: jqXHR, data:data });
+						reject({ errorThrown: data.exception?data.exception:(data.api_error?data.api_error:(data.error?data.error:data)), textStatus: textStatus, jqXHR: jqXHR, data:data });
 					}else
 					{
-						reject(data.api_error?data.api_error:(data.error?data.error:data));
+						reject(data.exception?data.exception:(data.api_error?data.api_error:(data.error?data.error:data)));
 					}
 					return;
 				}
@@ -155,7 +155,6 @@ namespace ghost.io
 				}
 				if(settings.retry && textStatus != "abort")
 				{
-					debugger;
 					if(settings.retry !== RETRY_INFINITE && settings.retry!==true)
 					{
 						settings.retry = <any> settings.retry - 1;

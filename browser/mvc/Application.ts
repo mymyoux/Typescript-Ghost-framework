@@ -83,62 +83,9 @@ namespace ghost.mvc
          * Relaunch unsucessful requests
          */
         protected handleCache():boolean
-        {
-            APIExtended.init(this.getUserID());//init("cache_"+this.getUserID());
+        {  
+            APIExtended.instance().initCache();//init("cache_"+this.getUserID());
             return true;
-            /*var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
-            {
-                this.war().getItem("id_user").then((id_user: any) => {
-                    if(id_user == undefined || id_user == this.getUserID())
-                    {
-                        if(id_user == undefined)
-                        {
-                            this.war().setItem("id_user", this.getUserID()).then(() => {
-                                APIExtended.init(this.war().name());
-                                resolve();
-
-                            }, () => {
-                                debugger;
-                                APIExtended.init(this.war().name());
-                                resolve();
-                            });
-                            return;
-                        }
-                        //normal no reset
-                        APIExtended.init(this.war().name());
-
-                        resolve();
-                    }else
-                    {
-                        //new id_user 
-                        APIExtended.clearCache().then(() => {
-                            this.war().setItem("id_user", this.getUserID()).then(() =>
-                            {
-                                APIExtended.init(this.war().name());
-                                resolve();
-                                
-                            }, ()=>
-                            {
-                                debugger;
-                                APIExtended.init(this.war().name());
-                                resolve();
-                            });
-
-                        }, () => {
-                            debugger;
-                            APIExtended.init(this.war().name());
-                            resolve();
-                        });
-                    }
-                }, 
-                () => {
-                    debugger;
-                    APIExtended.init(this.war().name());
-                    resolve();
-                });
-      
-            });
-            return promise;*/
         }
         protected initUser():any|void
         {

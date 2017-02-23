@@ -15,20 +15,58 @@ module ghost.browser.api
         public static EVENT_DATA:any = "event_data";
         public static EVENT_DATA_FORMATTED:any = "event_data_formatted";
         private static _instance:API<any>;
-        public static instance(inst?:API<any>):API<any>
+        private static _instances: any = {};
+        public static instance(name?:string, cls?:API<any>):API<any>
+        public static instance(cls?:API<any>):API<any>
+        public static instance(name?:any, cls?:API<any>):API<any>
         {
-            if(inst || !API._instance)
+            if (!cls && name)
             {
-                API._instance = inst?inst:new APIExtended();
+                if(typeof name != "string")
+                {
+                    cls = name;
+                    name = null;
+                }
+            }
+
+            if(name && typeof name == "string")
+            {
+                if(!API._instances[name])
+                {
+                    API._instances[name] = cls?cls:new APIExtended();
+                    API._instances[name].instance_name = name;
+                } 
+                return API._instances[name];
+            }
+            else
+            {
+                if(cls || !API._instance)
+                {
+                    API._instance = cls?cls:new APIExtended();
+                }
             }
             return API._instance;
         }
+        public static hasInstance(name:string):boolean
+        {
+            return API._instances[name] != null;
+        }
+        public static getAllInstances():API<any>[]
+        {
+            var instances: API<any>[] = [];
+            instances.push(API._instance);
+            for(var p in API._instances)
+            {
+                instances.push(API._instances[p]);
+            }
+            return instances;
+        } 
         public static request():API<any>
         {
             return API.instance().request();
         }
 
-
+        public instance_name: string = "default";
         protected _controller:string;
         protected _action:string;
         protected _method:string;
@@ -46,6 +84,7 @@ module ghost.browser.api
             {
                 c.config(this._config);
             }
+            
             return c;
         }
         public clone():T
@@ -57,7 +96,6 @@ module ghost.browser.api
             .id(this._id)
             .data(this._data)
             .method(this._method);
-
             return clone;
         }
         public config(options:IAPIOptions):T
@@ -179,7 +217,10 @@ module ghost.browser.api
             request.retry = this._config.retry != undefined ? this._config.retry:ghost.io.RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
 
-            if (request.url.indexOf(window.location.hostname) == -1 && !window['EXTENSION_CONFIG'])
+           // var temp: string[] = window.location.hostname.split(".");
+            //var short: string = temp[temp.length - 2] + "." + temp[temp.length - 1];
+            var short: string = "/"+window.location.hostname+"/";   
+            if (request.url.indexOf(short) == -1 && !window['EXTENSION_CONFIG'])
             {
                 //crossdomain
                 request.dataType = "jsonp";
@@ -198,11 +239,14 @@ module ghost.browser.api
         }
 
     }
-    class CacheManager {
+    export class CacheManager {
         protected _api:APIExtended;
         protected _local: ghost.browser.data.LocalForage;
         protected _instance:string;
         protected _initialized:boolean;
+        public constructor()
+        { 
+        }
         public instance():string
         {
             if(!this._instance)
@@ -238,7 +282,7 @@ module ghost.browser.api
         protected generateUniqueID(): string {
             return ghost.utils.Strings.getUniqueToken();
         }
-        public init(name:string = null):void
+        public init(name:string = null, api:APIExtended = null):void
         {
             if (this._initialized)
             {
@@ -256,7 +300,7 @@ module ghost.browser.api
                 {
                     return;
                 }
-                this._api = APIExtended.request().stack(true);
+                this._api = api.request().stack(true);
                 keys.forEach((key:string):void=>
                 {
                     this.war().getItem(key).then((request:any):void=>
@@ -293,47 +337,57 @@ module ghost.browser.api
                 debugger;
             });
         }
-    }
+    } 
 
     export class APIExtended extends API<APIExtended>
     {
         private static _always: any[] = [];
-        private static _cacheManager: CacheManager = new CacheManager();
-        protected static _initialized:boolean;
-        protected static _id_user:string;
-        protected static middlewares:any[] = [];
+        protected _cacheManager: CacheManager;
+        protected  _initialized:boolean;
+        protected static middlewares: any[] = [];
 
-        public static init(id:string , name?:string):void
+        public initCache():void
         {
-            if (APIExtended._initialized === true)
+            if (this._initialized)
             {
                 return;
             }
-            APIExtended._initialized  = true;
-            APIExtended._id_user = id;
-            APIExtended._cacheManager.init(name?name:"cache_"+id);
-            /*
-            APIExtended._cacheManager.keys().then(()=>
-            {
-                debugger;
-            }, ()=>
-            {
-                debugger;
-            });    */
-
+            this._initialized = true;
+            this._cacheManager = new CacheManager();
+            this._cacheManager.init(this._config.cache?this._config.cache:"cache_"+this._config.id_user, this);
 
         }
+        // public static init(id:string , name?:string):void
+        // {
+        //     if (APIExtended._initialized === true)
+        //     {
+        //         return;
+        //     }
+        //     APIExtended._initialized  = true;
+        //     APIExtended._id_user = id;
+        //     APIExtended._cacheManager.init(name?name:"cache_"+id);
+        //     /*
+        //     APIExtended._cacheManager.keys().then(()=>
+        //     {
+        //         debugger;
+        //     }, ()=>
+        //     {
+        //         debugger;
+        //     });    */
+
+
+        // }
         protected getRequest(): any {
             var request: any = super.getRequest();
             if(request.data)
             {
                 request.data._id = ghost.utils.Strings.getUniqueToken();
-                request.data._instance = APIExtended._cacheManager.instance();
+                request.data._instance = this._cacheManager.instance();
                 request.data._timestamp = Date.now();
             }
             return request;
         }
-        public static clearCache():Promise<any>
+        public clearCache():Promise<any>
         {
             return this._cacheManager.clear();
         }
@@ -344,14 +398,17 @@ module ghost.browser.api
         private _direction:number[] = [1];
         private _cacheLength: number;
         private _name: string;
-        private _always: boolean;
+        protected _always: boolean;
         private _stack: boolean = false;
         public _instance:number = ghost.utils.Maths.getUniqueID();
         protected _previousPromise: CancelablePromise<any>;
         protected _stacklist: any[];
-        public static instance(inst?:API<any>):APIExtended
+
+        public static instance(name?: string, cls?: API<any>): APIExtended
+        public static instance(cls?: API<any>): APIExtended
+        public static instance(name?: any, cls?: API<any>): APIExtended
         {
-            return <APIExtended>API.instance(inst);
+            return <APIExtended>API.instance(name, cls);
         }
         public getLastRequest():any
         {
@@ -362,6 +419,7 @@ module ghost.browser.api
             super();
             this._services = [];
             this._stacklist = [];
+            
         }
         public cache(quantity: number): APIExtended
         {
@@ -389,9 +447,9 @@ module ghost.browser.api
         {
             return this._apiData;
         }
-        public static request():APIExtended
+        public static request(name:string = null):APIExtended
         {
-            return <APIExtended>API.instance().request();
+            return <APIExtended>API.instance(name).request();
         }
         protected hasData():boolean
         {
@@ -412,9 +470,6 @@ module ghost.browser.api
         public echo():APIExtended
         {
             return this.request().controller("echo").action("echo");
-        }
-        public test():void{
-            debugger;
         }
         protected service(serviceName:string, property:string, data):APIExtended
         {
@@ -726,7 +781,7 @@ module ghost.browser.api
             }
             if(this._always && !token)
             {
-                token = APIExtended._cacheManager.add(request);
+                token = this._cacheManager.add(request);
             }
             /* if(!this._promise)
              {
@@ -767,7 +822,7 @@ module ghost.browser.api
                 }
                 if (data && token)
                 {
-                       APIExtended._cacheManager.remove(token);
+                       this._cacheManager.remove(token);
                 }
 
                 // this._promise = null;
@@ -786,18 +841,21 @@ module ghost.browser.api
                     this._previousPromise = null;
                 }
                 var reason: string = "unknown";
+                debugger;
                 if (error && token)
                 {
+
                     if (error.jqXHR && error.jqXHR.status != undefined)
                     {
                         var status: number = error.jqXHR.status;
                         if(status>=200 && status<400)
                         {
+                            debugger;
                             var good_user:boolean = true;
                             //server good real error
                             if (error.data) {
                                 var data: any = error.data;
-                                if (data.state_user && data.state_user.id_user != APIExtended._id_user) {
+                                if (data.state_user && data.state_user.id_user != this._config.id_user) {
                                     //error but bad user id
                                     good_user = false;
                                 }
@@ -805,7 +863,7 @@ module ghost.browser.api
                                 {
                                     if (good_user)
                                     {
-                                        APIExtended._cacheManager.remove(token);
+                                        this._cacheManager.remove(token);
                                     }
                                 }
                             }
@@ -847,6 +905,16 @@ module ghost.browser.api
             }
             APIExtended.middlewares.push(middleware);
         }
+        public request(): APIExtended {
+            var c: any = super.request();
+            c._cacheManager = this._cacheManager;
+            return c;
+        }
+        public clone(): APIExtended {
+            var c: any = super.clone();
+            c._cacheManager = this._cacheManager;
+            return c;
+        }
 
     }
 
@@ -854,6 +922,9 @@ module ghost.browser.api
     {
         url?:string;
         retry?: any;
+        token?: string; 
+        id_user?: number; 
+        cache?: string; 
     }
 
 
