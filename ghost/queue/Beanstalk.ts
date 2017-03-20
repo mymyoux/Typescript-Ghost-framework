@@ -101,6 +101,7 @@ namespace ghost.queue {
                                  console.error("beanstalk mysql error: no beanstalkd with id = ", data._id_beanstalkd);
                                  return;
                              }
+                             console.log(results[0]);
                              var job: Job = new Job(this, id, data, results[0]);
                              Database.instance().query('UPDATE beanstalkd_log SET state=?,tries=? WHERE id=?', [job.state, job.tries, job.id_database], function(error) 
                              {

@@ -15,7 +15,7 @@ module ghost.browser.api
         public static EVENT_DATA:any = "event_data";
         public static EVENT_DATA_FORMATTED:any = "event_data_formatted";
         private static _instance:API<any>;
-        private static _instances: any = {};
+        protected static _instances: any = {};
         public static instance(name?:string, cls?:API<any>):API<any>
         public static instance(cls?:API<any>):API<any>
         public static instance(name?:any, cls?:API<any>):API<any>
@@ -382,7 +382,8 @@ module ghost.browser.api
             if(request.data)
             {
                 request.data._id = ghost.utils.Strings.getUniqueToken();
-                request.data._instance = this._cacheManager.instance();
+                if(this._cacheManager)
+                    request.data._instance = this._cacheManager.instance();
                 request.data._timestamp = Date.now();
             }
             return request;
@@ -393,10 +394,10 @@ module ghost.browser.api
         }
 
         protected lastRequest: any;
-        private _services:any[];
-        private _apiData:any;
-        private _direction:number[] = [1];
-        private _cacheLength: number;
+        protected _services: any[];
+        protected _apiData:any;
+        protected _direction:number[] = [1];
+        private _cacheLength: number; 
         private _name: string;
         protected _always: boolean;
         private _stack: boolean = false;
@@ -417,6 +418,7 @@ module ghost.browser.api
         public constructor()
         {
             super();
+            console.log('"CONSTRUCTOR"');
             this._services = [];
             this._stacklist = [];
             
@@ -781,6 +783,9 @@ module ghost.browser.api
             }
             if(this._always && !token)
             {
+                if(!this._cacheManager){
+                    debugger;   
+                }
                 token = this._cacheManager.add(request);
             }
             /* if(!this._promise)

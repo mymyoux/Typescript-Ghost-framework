@@ -140,7 +140,7 @@ namespace ghost.sgameclient
         }
         private bindEvents():void
         {
-            console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
+            // console.log("listen "+Const.MSG_APPLICATION+":"+this.name);
             this.client.on(Client.EVENT_CONNECT, this._onClientConnect.bind(this));
             this.client.on(Client.EVENT_RECONNECT, this._onReconnect.bind(this));
             this.client.on(Client.EVENT_DISCONNECT, this._onClientDisconnect.bind(this));
@@ -246,7 +246,7 @@ namespace ghost.sgameclient
             if(source !== this)
             {
                 var name:string = command+"Internal";
-                console.log("try "+name);
+                // console.log("try "+name);
                 if(this[name] && typeof this[name] == "function")
                 {
                     this[name](data);
@@ -262,7 +262,7 @@ namespace ghost.sgameclient
         }
         private _onDataRoom(command:string, room:Room, data:any):void
         {
-            console.log(">"+room.name+" ["+this.name+"] data", command, data);
+            // console.log(">"+room.name+" ["+this.name+"] data", command, data);
             if(command == Const.ROOM_COMMAND_USER_MESSAGE)
             {
                 room.onData(data.command, data.data);
@@ -277,7 +277,7 @@ namespace ghost.sgameclient
         }
         protected _onData(command:string, data:IApplicationData):void
         {
-            console.log("["+this.name+"] data", command, data);
+            // console.log("["+this.name+"] data", command, data);
             if(data && data.room)
             {
                 var room:Room = this.roomManager.getRoom(data.room);

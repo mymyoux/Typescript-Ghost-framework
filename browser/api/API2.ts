@@ -7,6 +7,16 @@ namespace ghost.browser.api
 		public static instance(name?: string, cls?: API2): API2
 		public static instance(cls?: API2): API2
 		public static instance(name?: any, cls?: API2): API2 {
+			if(!name)
+			{
+				for (var p in API._instances)
+				{
+					if (API._instances[p] instanceof API2)
+					{
+						return API._instances[p];
+					}
+				}
+			}
 			return <API2>API.instance(name, cls);
 		}
 		public static request(name: string = null): API2 {
@@ -23,6 +33,10 @@ namespace ghost.browser.api
 		{
 			this._path = path;
 			return this;
+		}
+		public config(options: IAPIOptions): API2
+		{
+			return <API2>super.config(options);
 		}
 		protected getRequest(): any {
 			var request: any = super.getRequest();
@@ -145,6 +159,106 @@ namespace ghost.browser.api
 			clone.path(this._path);
 			clone.always(this._always);
 			return clone;
+		}
+		protected service(serviceName: string, property: string, data): API2 {
+			super.service(serviceName, property, data);
+			return this;
+		}
+		//TODO:check if needed
+		/*
+		protected parseAPIData(data: any): void {
+			if (!data) {
+				return;
+			}
+			if (!this._apiData) {
+				this._apiData = {};
+			}
+			var keys = ["allowed", "directions", "keys", "limit", "previous", "next"];
+			if (data.paginate) {
+				if (!this._apiData.paginate) {
+					this._apiData.paginate = {};
+				}
+
+
+				if (data.paginate.next) {
+					this._apiData.paginate.next = data.paginate.next;
+					var isNextAll: boolean = !this._apiData.paginate.nextAll;
+					if (!isNextAll) {
+						isNextAll = true;
+						for (var i: number = 0; i < data.paginate.next.length; i++) {
+							if (!((this._apiData.paginate.nextAll[i] < data.paginate.next[i] && this._direction[i] > 0) || (this._apiData.paginate.nextAll[i] > data.paginate.next[i] && this._direction[i] < 0))) {
+								if (this._apiData.paginate.nextAll[i] == data.paginate.next[i]) {
+									continue;
+								}
+								isNextAll = false;
+								break;
+							} else {
+								break;
+							}
+						}
+					}
+
+					if (isNextAll) {
+						this._apiData.paginate.nextAll = data.paginate.next;
+					}
+
+				}
+				if (data.paginate.previous) {
+					this._apiData.paginate.previous = data.paginate.previous;
+
+					var isPreviousAll: boolean = !this._apiData.paginate.previousAll;
+					if (!isPreviousAll) {
+						isPreviousAll = true;
+						for (var i: number = 0; i < data.paginate.previous.length; i++) {
+							if (!((this._apiData.paginate.previousAll[i] > data.paginate.previous[i] && this._direction[i] > 0) || (this._apiData.paginate.previousAll[i] < data.paginate.previous[i] && this._direction[i] < 0))) {
+								if (this._apiData.paginate.previousAll[i] == data.paginate.previous[i]) {
+									continue;
+								}
+								isPreviousAll = false;
+								break;
+							} else {
+								break;
+							}
+						}
+					}
+
+					if (isPreviousAll) {
+						this._apiData.paginate.previousAll = data.paginate.previous;
+					}
+
+				}
+				if (data.paginate.limit)
+					this._apiData.paginate.limit = data.paginate.limit;
+
+				for (var p in data.paginate) {
+					if (keys.indexOf(p) == -1) {
+						this._apiData[p] = data.paginate[p];
+					}
+				}
+			}
+			keys.push("paginate");
+			for (var p in data) {
+				if (keys.indexOf(p) == -1) {
+					this._apiData[p] = data[p];
+				}
+			}
+		}*/
+		public order(id: string | string[], direction: number | number[] = 1): API2 {
+			if (typeof direction == "number") {
+				direction = [direction];
+			}
+			if (typeof id == "string") {
+				id = [id];
+			}
+			if (direction.length != id.length) {
+				debugger;
+				throw new Error("direction != keys");
+			}
+			this._direction = direction;
+			return this.service("paginate", "keys", id).service("paginate", "directions", direction);
+		}
+		public paginate(key: string): API2 {
+			return this.service("paginate", "keys", key);
 		}
 	}
 }

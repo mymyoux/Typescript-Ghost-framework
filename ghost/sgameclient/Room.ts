@@ -119,6 +119,19 @@ namespace ghost.sgameclient
                 this.application.writeRoom(this, command, data, callback);
             }
         }
+        public writeCustomCommand(command: string, data: any, callback: Function = null): void {
+            if (!this.ready)
+                this.buffer.push({ func: "write", command: Const.ROOM_COMMAND_CUSTOM_METHOD, data: { method: command.substring(0,1).toUpperCase()+command.substring(1), data: data }, callback: callback });
+            else {
+                this.application.writeRoom(this,  Const.ROOM_COMMAND_CUSTOM_METHOD, { method: command.substring(0, 1).toUpperCase() + command.substring(1), data: data }, callback);
+            }
+        } 
+        public writeUserCustomCommand(user: IUser, command: string, data: any, callback: Function = null): void {
+            if (!this.ready)
+                this.buffer.push({ func: "writeUser", user: user, command: Const.ROOM_COMMAND_CUSTOM_METHOD, data: { method: command.substring(0, 1).toUpperCase() + command.substring(1), data: data }, callback: callback });
+            else
+                this.application.writeRoomUser(this, user, Const.ROOM_COMMAND_CUSTOM_METHOD, { method: command.substring(0, 1).toUpperCase() + command.substring(1), data: data }, callback);
+        }
         public writeUser(user: IUser, command: string, data: any, callback: Function = null): void {
             if (!this.ready)
                 this.buffer.push({ func: "writeUser", user: user, command: command, data: data, callback: callback });

@@ -53,7 +53,7 @@ namespace ghost.sgame
         }
         private _onData(command:string, data:any):void
         {
-            log.debug(command+":", data);
+            // log.debug(command+":", data);
             var callback:Function = null;
             if(typeof arguments[arguments.length-1] == "function")
             {

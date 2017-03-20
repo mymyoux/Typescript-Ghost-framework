@@ -132,7 +132,7 @@ namespace ghost.sgame
         }
         protected onCustomDataRoom(room:Room, user:User, data:any):void
         {
-            log.info("> " + room.name + " Custom data:" + user.login, data);
+            //log.info("> " + room.name + " Custom data:" + user.login, data);
             user.onSetCustomData(room, data);
         }
         protected onCustomRoomCommand(room: Room, user: User, data: any, id_recipient: string, icallback: ICallback): void {
@@ -144,13 +144,13 @@ namespace ghost.sgame
                 icallback.success();
             }else 
             {
-                log.warn("on custom room command doesn't exist :" + data.method);
+                //log.warn("on custom room command doesn't exist :" + data.method);
                 icallback.error(Const.ERROR_ROOM_COMMAND_CUSTOM_METHOD, { room: room.name });
             }
         }
         private _onDataRoom(roomname:string, command:string, data:IApplicationMessage, user:User, id_recipient:string, icallback:ICallback):void
         {
-            log.info(">" + roomname + " [" + this.name + "] data["+command+"]>"+id_recipient+"< : " + user.login, data);
+            //log.info(">" + roomname + " [" + this.name + "] data["+command+"]>"+id_recipient+"< : " + user.login, data);
             var room:Room = this.roomManager.getRoom(roomname);
             if(!room || !room.hasUser(user))
             {
@@ -162,7 +162,6 @@ namespace ghost.sgame
                 return icallback.error(Const.ERROR_ROOM_RECIPIENT_UNKNOWN, {room:roomname, user:id_recipient});
             }
      
-        
             if (command == Const.ROOM_COMMAND_CUSTOM_METHOD) {
                 return this.onCustomRoomCommand(room, user, data, id_recipient, icallback);
             }
@@ -183,7 +182,7 @@ namespace ghost.sgame
             if(id_recipient)
             {
                 var recipient:User = room.getUser(id_recipient);
-                log.info(">WRITE ALONE MESSAGE TO " + recipient.login, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, sender: user.id, data: data });
+                //log.info(">WRITE ALONE MESSAGE TO " + recipient.login, { command: Const.ROOM_COMMAND_USER_MESSAGE, room: room.name, sender: user.id, data: data });
                 this.writeOne(recipient, Const.MSG_APPLICATION, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:{command:command, data:data}});
             }else
             for(var p in users)
@@ -191,7 +190,7 @@ namespace ghost.sgame
                 //all
                 if(users[p] != user)
                 {
-                    log.info(">WRITE MESSAGE TO "+users[p].login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
+                    //log.info(">WRITE MESSAGE TO "+users[p].login, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:data});
                     this.writeOne(users[p], Const.MSG_APPLICATION, {command:Const.ROOM_COMMAND_USER_MESSAGE, room:room.name, sender:user.id, data:{command:command, data:data}});
                 }
             }
@@ -203,19 +202,19 @@ namespace ghost.sgame
                 icallback.error(Const.ERROR_BAD_FORMAT, {app:this.name});
                 return;
             }
-            log.error("[" + this.name + "]");
-            if(user.id != undefined)
-                log.info("id:" + user.id);
-            if (user["id_user"] != undefined)
-                log.info("id_user:" + user["id_user"]);
-            if (data.room != undefined)
-                log.info("room:" + data.room);
-            if (data.user != undefined)
-                log.info("to_user:"+data.user);
-            log.info(data);
+            // //log.error("[" + this.name + "]");
+            // if(user.id != undefined)
+            //     //log.info("id:" + user.id);
+            // if (user["id_user"] != undefined)
+            //     //log.info("id_user:" + user["id_user"]);
+            // if (data.room != undefined)
+            //     //log.info("room:" + data.room);
+            // if (data.user != undefined)
+            //     //log.info("to_user:"+data.user);
+            // //log.info(data);
             if(!user.hasApp(this.name))
             {
-                log.warn("user is not in app : "+this.name);
+                //log.warn("user is not in app : "+this.name);
                 if(!user.isAllowed(this.name))
                 {
                     icallback.error(Const.ERROR_NEED_LOGIN, {app:this.name});
@@ -247,7 +246,7 @@ namespace ghost.sgame
                     this[name](data.data, user, icallback);
                 }else
                 {
-                    log.warn(name+" doesn't exist");
+                    //log.warn(name+" doesn't exist");
                 }
             }
         }
@@ -256,7 +255,7 @@ namespace ghost.sgame
             user.addApp(this.name);
             if(this.users_ids.indexOf(user.id)!=-1)
             {
-                log.warn(this.name+"["+user.id+"] "+user.login+" already exists");
+                //log.warn(this.name+"["+user.id+"] "+user.login+" already exists");
             }
             this.users.push(user);
             this.users_ids.push(user.id);

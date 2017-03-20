@@ -30,6 +30,9 @@ namespace ghost.queue {
           this.state = Job.STATE_EXECUTING;
           this.start_time = Date.now();
       }
+      public maxTries(): number {
+        return 3;
+      }
       public success()
       {
           this.state = Job.STATE_EXECUTED;
@@ -37,7 +40,7 @@ namespace ghost.queue {
       }
       public fail()
       {
-        if(this.tries<3)
+        if(this.tries<this.maxTries())
         {
           this.state = Job.STATE_RETRYING;
         }else{

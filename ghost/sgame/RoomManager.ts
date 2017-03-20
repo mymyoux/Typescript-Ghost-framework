@@ -56,8 +56,12 @@ namespace ghost.sgame
                 }
             }
         }
-        public getRoom(name:string):Room
+        public getRoom(name: string, createIfNoExists: boolean = false):Room
         {
+            if (createIfNoExists && !this.rooms[name])
+            {
+                this.createRoom(name, Const.ROOM_VISIBILITY_PUBLIC, null);   
+            }
             return this.rooms[name];
         }
         public getRooms():Room[]

@@ -138,8 +138,8 @@ namespace ghost.sgame
             user.setSocket(new Socket(socket));
             this._bindUserEvents(user);
             this.users.push(user);
-            log.info("new connection");
-            log.info(this.users);
+            // log.info("new connection");
+            // log.info(this.users);
         }
         protected _onUserChangeClass(newUser: User, user: User): void
         {
@@ -153,8 +153,8 @@ namespace ghost.sgame
                 this.users[index] = newUser;
                 this._bindUserEvents(newUser);
             }
-            log.info("on change class");
-            log.info(this.users);
+            // log.info("on change class");
+            // log.info(this.users);
             //decaler dans le temps pke le dispose(); kill les _listeners
             user.dispose();
             return;
@@ -184,7 +184,7 @@ namespace ghost.sgame
             this._unbindUserEvents(user);
             //user.dispose();// is called on disconnected
           
-            log.warn("disconnected", user);
+            // log.warn("disconnected", user);
         }
         private _onData(command:string, data:any, callback:Function, user:User):void
         {
