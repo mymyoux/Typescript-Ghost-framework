@@ -13,6 +13,7 @@ namespace ghost.queue {
       public state: string;
       public id_database: string;
       public start_time: number;
+      public hard_failed: boolean = false;
       public constructor(beanstalk:Beanstalk, id:string, data:any, databaseData?:any)
       {
           this.beanstalk = beanstalk;
@@ -38,9 +39,15 @@ namespace ghost.queue {
           this.state = Job.STATE_EXECUTED;
           this.beanstalk.success(this);
       }
+      public hardFail()
+      {
+          this.state = Job.STATE_FAILED;  
+          this.hard_failed = true;
+          this.beanstalk.fail(this);
+      }
       public fail()
       {
-        if(this.tries<this.maxTries())
+      if (this.maxTries()==0 || this.tries < this.maxTries())
         {
           this.state = Job.STATE_RETRYING;
         }else{
