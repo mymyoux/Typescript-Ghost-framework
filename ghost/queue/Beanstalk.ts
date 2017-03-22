@@ -84,6 +84,10 @@ namespace ghost.queue {
                     if(error)
                     {
                         console.error("beanstalk reserve error:", error);
+                        if(error == "DEADLINE_SOON")
+                        {
+                            this.reserve(callback);
+                        }
                         return;
                     }
                     var data:any = JSON.parse(payload.toString('utf8'));
