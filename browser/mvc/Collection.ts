@@ -486,7 +486,7 @@ namespace ghost.mvc
                     url = this.getRootURL()+url;
                 }
                 var data:any = this.getDataForServer();
-                ghost.io.ajax(url,
+                ghost.browser.io.ajax(url,
                     {
                         data:data,
                         "method":this.getMethodForServer()
@@ -568,7 +568,7 @@ namespace ghost.mvc
                     {
                         data[p] = server_data[p];
                     }
-                    ghost.io.ajax(url,
+                    ghost.browser.io.ajax(url,
                     {
                         data:data,
                         "method":request.method?request.method:this.getMethodForServer()

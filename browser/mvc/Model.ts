@@ -243,7 +243,7 @@ namespace ghost.mvc
                     {
                         data[p] = server_data[p];
                     }
-                    ghost.io.ajax(url,
+                    ghost.browser.io.ajax(url,
                     {
                         data:data,
                         "method":request.method?request.method:this.getMethodForServer()
@@ -408,10 +408,10 @@ namespace ghost.mvc
             var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
             {
                 var request:any = this.getPartRequest(name, params);
-                request.retry = ghost.io.RETRY_INFINITE;
+                request.retry = ghost.browser.io.RETRY_INFINITE;
                 request.url = this.getRootURL()+request.url;
                 request = ghost.utils.Objects.mergeObjects(request, ajaxOptions);
-                ghost.io.ajax(request).then(resolve, reject);
+                ghost.browser.io.ajax(request).then(resolve, reject);
             });
 
             return promise;

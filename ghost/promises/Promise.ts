@@ -1,4 +1,4 @@
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 
 namespace ghost.promises
 {

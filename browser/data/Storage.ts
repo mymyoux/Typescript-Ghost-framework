@@ -270,8 +270,10 @@ namespace ghost.browser.data
             }
         }
     }
+    //end:namespace
 }
 namespace ghost
 {
     export var cache:ghost.browser.data.Warehouse = new ghost.browser.data.Warehouse("root");
+    //end:namespace
 }

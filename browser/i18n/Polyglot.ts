@@ -247,7 +247,7 @@ namespace ghost.browser.i18n
 					}
 				}
 				if (found) {
-					ghost.io.ajax(this.getRootURL() + "translate/update", <any>
+					ghost.browser.io.ajax(this.getRootURL() + "translate/update", <any>
 						{
 							data: { controllers: needsUpdate, locale: this.locale() },
 							method: "POST"
@@ -299,7 +299,7 @@ namespace ghost.browser.i18n
 				this.retrieved.push(short);
 			}
 
-			ghost.io.ajax(this.getRootURL() + "translate/resolve", <any>
+			ghost.browser.io.ajax(this.getRootURL() + "translate/resolve", <any>
 				{
 					data: { key: key, locale: this.locale() },
 					method: "POST",

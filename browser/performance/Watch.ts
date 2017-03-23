@@ -1,4 +1,4 @@
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 ///<module="framework/ghost/utils"/>
 ///<module="framework/browser/api"/>
 namespace ghost.performance 

@@ -614,7 +614,7 @@ namespace ghost.debug
             return null;
         }
     }
-
+//end:namespace
 }
 
 var log = ghost.debug.Log;

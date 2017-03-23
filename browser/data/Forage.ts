@@ -1,5 +1,5 @@
 ///<module="ghost/core"/>
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 //TODO:add mozilla API and converts with Promises
 namespace ghost.browser.data
 {
@@ -300,9 +300,11 @@ namespace ghost.browser.data
             return this._warehouses[name];
         }
     }
+    //end:namespace
 }
 namespace ghost
 {
    // export var forage:ghost.data.Foragehouse = new ghost.data.Foragehouse("root");
     export var forage:ghost.browser.data.LocalForage = new ghost.browser.data.LocalForage({debug:false});
+    //end:namespace
 }

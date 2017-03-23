@@ -1,4 +1,6 @@
 ///<file="API"/>
+///<file="APIExtended"/>
+///<file="IMiddleWare"/>
 namespace ghost.browser.api
 {
 	export class API2 extends APIExtended
@@ -63,7 +65,7 @@ namespace ghost.browser.api
 				}
 			}
 			this.lastRequest = request;
-			var promise = ghost.io.ajax(request, { asObject: true });//this.getPromise();
+			var promise = ghost.browser.io.ajax(request, { asObject: true });//this.getPromise();
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
 				if (promise === this._previousPromise) {

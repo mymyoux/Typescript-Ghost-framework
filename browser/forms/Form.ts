@@ -277,10 +277,10 @@ namespace ghost.browser.forms
             }
             var data:any = {};
             data.action = "cancel";
-            ghost.io.ajax({
+            ghost.browser.io.ajax({
                     url:this.action,
                     data:data,
-                    retry:ghost.io.RETRY_INFINITE,
+                    retry:ghost.browser.io.RETRY_INFINITE,
                     method:"POST"
                 }).
             then(function(result:any):void
@@ -381,10 +381,10 @@ namespace ghost.browser.forms
             var action:string = this.getAction();
             data.action = "submit";
             console.log("SUBMIT", this, data);
-            ghost.io.ajax({
+            ghost.browser.io.ajax({
                     url:action,
                     data:data,
-                    retry:ghost.io.RETRY_INFINITE,
+                    retry:ghost.browser.io.RETRY_INFINITE,
                     method:"POST"
                 }).
             then((result:any):void=>
@@ -446,7 +446,7 @@ namespace ghost.browser.forms
             if (this.data && this.data.id_user)
                 data.id_user = this.data.id_user;
 
-            var ajax:any = ghost.io.ajax({
+            var ajax:any = ghost.browser.io.ajax({
                 url:action,
                 data:data,
                 retry:3,
@@ -522,10 +522,10 @@ namespace ghost.browser.forms
             if (this.data && this.data.id_user)
                 data.id_user = this.data.id_user;
 
-            var ajax:any = ghost.io.ajax({
+            var ajax:any = ghost.browser.io.ajax({
                     url:action,
                     data:data,
-                    retry:ghost.io.RETRY_INFINITE,
+                    retry:ghost.browser.io.RETRY_INFINITE,
                     method:"POST"
                 }).
             then((result:any):void=>
@@ -636,10 +636,10 @@ namespace ghost.browser.forms
             if (this.data && this.data.id_user)
                 data.id_user = this.data.id_user;
 
-            var ajax:any = ghost.io.ajax({
+            var ajax:any = ghost.browser.io.ajax({
                 url:action,
                 data:data,
-                retry:ghost.io.RETRY_INFINITE,
+                retry:ghost.browser.io.RETRY_INFINITE,
                 method:"POST"
             }).
                 then((result:any):void=>
@@ -693,10 +693,10 @@ namespace ghost.browser.forms
                 }, 500);
                 return;
             }
-            var ajax:any = ghost.io.ajax({
+            var ajax:any = ghost.browser.io.ajax({
                 url:action,
                 data:data,
-                retry:ghost.io.RETRY_INFINITE,
+                retry:ghost.browser.io.RETRY_INFINITE,
                 method:"POST"
             }).
                 then((result:any):void=>

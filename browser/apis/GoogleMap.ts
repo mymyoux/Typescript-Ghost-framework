@@ -1,5 +1,5 @@
 ///<lib="googlemaps"/>
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 ///<module="framework/ghost/data"/>
 namespace ghost.browser.apis
 {
@@ -251,6 +251,7 @@ namespace ghost.browser.apis
 			return promise;
 		}
 	}
+	//end:namespace
 }
 
 function __initialize__gmap()

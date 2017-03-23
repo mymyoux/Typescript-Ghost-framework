@@ -1,5 +1,5 @@
 ///<module="utils"/>
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 ///<file="mongo/Model"/>
 namespace ghost.db.mongo
 {

@@ -1,4 +1,4 @@
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 ///<module="events"/>
 ///<file="Component"/>
 namespace ghost.mvc
@@ -219,7 +219,7 @@ namespace ghost.mvc
                 {
                     return;
                 }
-                ghost.io.ajax(
+                ghost.browser.io.ajax(
                     {
                         ///ad prefix
                         url:this.getRootURL()+"integration-sync",
@@ -309,7 +309,7 @@ namespace ghost.mvc
                     }
                     if(!template || forceReload)
                     {
-                        ghost.io.ajax({url:this.getURLFromTemplatename(name), retry:ghost.io.RETRY_INFINITE})
+                        ghost.browser.io.ajax({url:this.getURLFromTemplatename(name), retry:ghost.browser.io.RETRY_INFINITE})
                             .then(
                                 (result:any)=>
                                 {

@@ -1,8 +1,10 @@
 ///<lib="jquery"/>
-///<lib="es6-promise"/>
+
 ///<module="framework/ghost/events"/>
-namespace ghost.io
+///<module="framework/ghost/io"/>
+namespace ghost.browser.io
 {
+	import CancelablePromise = ghost.io.CancelablePromise;
 	var middlewares:any[] = [];
 	function middleware(data:any, type:string):any
 	{
@@ -213,7 +215,7 @@ namespace ghost.io
 		 * retry:number if the value is numeric, it will be the number of times
 		 * a retry will be done on network error. If the data is set with .success == false
 		 * the reject method will be called.
-		 * retry: ghost.io.RETRY_INFINITE It will always retry on network errors
+		 * retry: ghost.browser.io.RETRY_INFINITE It will always retry on network errors
 		 * retry: true It will always retry even if there is no network error but data set with success == false
 		 */
 		retry?:number|boolean;
@@ -224,51 +226,7 @@ namespace ghost.io
 		 */
 		asObject?:boolean;
 	}
-	export class CancelablePromise<T>// extends Promise<T>
-	{
-		protected promise: Promise<T>;
-		public constructor(method:any)
-		{
-			var promise:any = new Promise(method);
-			CancelablePromise.extends(promise);
-
-			return promise;
-		}
-		public static extends(promise:any):void
-		{
-			promise.canceled = false;
-			promise.cancel = CancelablePromise.prototype.cancel.bind(promise);
-			promise.then = CancelablePromise.prototype.then.bind(promise);
-			promise.setAjax = CancelablePromise.prototype.setAjax.bind(promise);
-		}
-		public canceled:boolean = false;
-		private $ajax:any;
-		public cancel():void
-		{
-			if(this.$ajax)
-			{
-				this.$ajax.abort();
-				this.setAjax(null);
-			}
-
-			this.canceled = true;
-		}
-		public setAjax($ajax:any):void
-		{
-			this.$ajax = $ajax;
-		}
-		public then(resolve?: Function, reject?: Function):CancelablePromise<T>
-		{
-			var promise:any = Promise.prototype.then.call(this, resolve, reject);
-			CancelablePromise.extends(promise);
-			return promise;
-		}
-		public catch: (callback: Function) => CancelablePromise<T>;
-		public done: () => CancelablePromise<T>;
-		public fail: (callback: Function) => CancelablePromise<T>;
-		public always: (callback: Function) => CancelablePromise<T>;
-	}
-
+	
 	export interface IMiddleWare
 	{
 		/**

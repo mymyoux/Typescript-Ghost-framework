@@ -1,6 +1,6 @@
 ///<lib="sequelize"/>
 ///<lib="node"/>
-///<lib="es6-promise"/>
+///<lib="Promise"/>
 ///<module="logging"/>
 
 namespace ghost.database

@@ -1,9 +1,9 @@
 ///<lib="node"/>
 namespace ghost.io
 {
-    var mime = require("mime");
-    var fs = require("fs");
-    var path = require("path");
+    var mime;
+    var fs;
+    var path;
     export class File
     {
         private static rawMimeType:string[] = ["image/png", "image/jpg", "image/jpeg"];
@@ -13,6 +13,16 @@ namespace ghost.io
         private stats:any;
         public constructor(path:string)
         {
+            if(!mime)
+            {
+                mime = require("mime");
+            }
+            if (!fs) {
+                fs = require("fs");
+            }
+            if (!path) {
+                path = require("path");
+            }
             this.path = path;
             this.mime = undefined;
             this.extension = undefined;
