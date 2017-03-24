@@ -2,7 +2,10 @@
 ///<module="ghost/utils"/>
 ///<file="Model.ts"/>
 ///<file="IData.ts"/>
-namespace ghost.mvc
+///<file="IModel.ts"/>
+///<file="IRetrievable"/>
+///<file="IPartRequest"/>
+namespace ghost.browser.mvc
 {
     /**
      * Collection class
@@ -47,7 +50,7 @@ namespace ghost.mvc
                 var collection:Collection<any> = cls.split(".").reduce(function(previous:any, next:string):Collection<any>
                 {
                    return previous? previous[next] : null;
-                }, ROOT);
+                }, ghost.core.Root.getRoot());
 
                 if(!collection)
                 {

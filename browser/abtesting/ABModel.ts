@@ -2,9 +2,9 @@
 ///<module="framework/browser/mvc"/>
 namespace ghost.browser.abtesting{
     import APIExtended = ghost.browser.api.APIExtended;
-    import ModelAPI = ghost.mvc.ModelAPI;
-    import Model = ghost.mvc.Model;
-       import Application = ghost.mvc.Application;
+    import ModelAPI = ghost.browser.mvc.ModelAPI;
+    import Model = ghost.browser.mvc.Model;
+       import Application = ghost.browser.mvc.Application;
       export class ABModel extends ModelAPI {
         public static PART_UPDATE: string = "part_update";
         public static PART_CREATE: string = "part_create"; 

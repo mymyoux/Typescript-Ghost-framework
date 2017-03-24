@@ -3,6 +3,7 @@
 //TODO:add mozilla API and converts with Promises
 namespace ghost.browser.data
 {
+    import Root = ghost.core.Root;
     export interface ILocalForageOptions
     {
         debug?:boolean;
@@ -10,6 +11,7 @@ namespace ghost.browser.data
     var _log:any = function(){};
     export class LocalForage
     {
+        protected static _instance: LocalForage;
         private _storage:any;
         private _name:string;
         private _warehouses:any;
@@ -50,7 +52,12 @@ namespace ghost.browser.data
         private static consolelog(...args:any[]):void{
             console.log(args);
         }
-
+        public static instance(): LocalForage {
+            if (!LocalForage._instance) {
+                LocalForage._instance = new LocalForage({ debug: false });
+            }
+            return LocalForage._instance;
+        }
         /**
          * Constructor
          */
@@ -73,7 +80,7 @@ namespace ghost.browser.data
             }
             this._name = name;
             this._warehouses = {};
-            this._storage = ROOT.localforage.createInstance({name:name});
+            this._storage = Root.getRoot().localforage.createInstance({name:name});
             this._data = {};
             this._sync = {};
 

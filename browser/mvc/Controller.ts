@@ -3,7 +3,7 @@
 
 ///<file="Model.ts"/>
 ///<file="Collection.ts"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     /**
      * Controller
@@ -285,20 +285,20 @@ namespace ghost.mvc
             return Controller._sControllerClass[index];
         }
             //private _data:ghost.data.ServerIO;
-            /*public get(action:string, data:any = {}, method:string = "GET", alwaysWin:boolean = true, persistant: boolean = false):ghost.mvc.Response
+            /*public get(action:string, data:any = {}, method:string = "GET", alwaysWin:boolean = true, persistant: boolean = false):ghost.browser.mvc.Response
             {
 
-              return ghost.mvc.ServerIO.getInstance().push(this._name, action, method, data,alwaysWin,persistant );
+              return ghost.browser.mvc.ServerIO.getInstance().push(this._name, action, method, data,alwaysWin,persistant );
             }*/
             private _local:ghost.browser.data.Warehouse;
             public local():ghost.browser.data.Warehouse
             {
               if(!this._local)
               {
-                  this._local = ghost.cache.warehouse(this.getClassName());
+                this._local = ghost.browser.data.Warehouse.instance().warehouse(this.getClassName());
               }
               return this._local;
-            }
+            } 
 
 
     }

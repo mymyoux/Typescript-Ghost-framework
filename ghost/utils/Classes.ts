@@ -20,7 +20,7 @@ namespace ghost.utils
             {
                 return false;
             }
-            var root:any = ROOT;
+            var root:any = ghost.core.Root.getRoot();
             var names:string[] = name.split(".");
             var len:number = names.length;
             for(var i:number=0; i<len; i++)
@@ -44,7 +44,7 @@ namespace ghost.utils
             {
                 return null;
             }
-            var root:any = ROOT;
+            var root:any = ghost.core.Root.getRoot();
             var names:string[] = name.split(".");
             
             var len:number = names.length;

@@ -6,19 +6,19 @@ namespace ghost.utils
 	{
 		public static clickScript():void
 		{
-			ROOT.$(function()
+			ghost.core.Root.getRoot().$(function()
 			{
-				ROOT.$(document).on("click",".clicable,.clickable",function()
+				ghost.core.Root.getRoot().$(document).on("click",".clicable,.clickable",function()
 				{
-					ROOT.$(this).addClass("click");
+					ghost.core.Root.getRoot().$(this).addClass("click");
 				});
-				ROOT.$(document).on("mousedown",".clicable,.clickable",function()
+				ghost.core.Root.getRoot().$(document).on("mousedown",".clicable,.clickable",function()
 				{
-					ROOT.$(this).addClass("mousedown");
+					ghost.core.Root.getRoot().$(this).addClass("mousedown");
 				});
-				ROOT.$(document).on("mouseup",".clicable,.clickable",function()
+				ghost.core.Root.getRoot().$(document).on("mouseup",".clicable,.clickable",function()
 				{
-					ROOT.$(this).removeClass("mousedown");
+					ghost.core.Root.getRoot().$(this).removeClass("mousedown");
 				});
 			});
 		}

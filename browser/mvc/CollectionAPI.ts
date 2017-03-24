@@ -1,11 +1,14 @@
 ///<file="Collection.ts"/>
+///<file="IModel.ts"/>
 ///<module="api"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     import API = ghost.browser.api.APIExtended;
     import APIExtended = ghost.browser.api.APIExtended;
     import Arrays = ghost.utils.Arrays;
     import IBinaryResult = ghost.utils.IBinaryResult;
+    //tsc:uncomment
+    //import Model = ghost.browser.mvc.Model;
     /**
      * Collection API class
      */
@@ -26,7 +29,7 @@ namespace ghost.mvc
 
         public cache(): ghost.browser.data.LocalForage
         {
-            return ghost.forage.war( this.name() + '_collection' );
+            return ghost.browser.data.LocalForage.instance().war(this.name() + '_collection');
         }
         protected refresh():void
         {
@@ -124,7 +127,7 @@ namespace ghost.mvc
                 {
                     return resolve();
                 }
-                this.once(ghost.mvc.Collection.EVENT_FIRST_DATA, ()=>
+                this.once(ghost.browser.mvc.Collection.EVENT_FIRST_DATA, ()=>
                 {
                    resolve();
                 });

@@ -173,7 +173,7 @@ namespace ghost.browser.i18n
 
 		protected cache(): ghost.browser.data.Warehouse {
 			if (!this._cache) {
-				this._cache = ghost.cache.warehouse("polyglot");
+				this._cache = ghost.browser.data.Warehouse.instance().warehouse("polyglot");
 			}
 			return this._cache;
 		}
@@ -195,7 +195,7 @@ namespace ghost.browser.i18n
 				key: parts.slice(2).join("."),
 				type: type,
 				name: key
-			};
+			}; 
 		}
 		private retrieveFromCache(): void {
 
@@ -231,8 +231,8 @@ namespace ghost.browser.i18n
 			}
 		}
 		protected getRootURL(): string {
-			if (ghost["mvc"])
-				return ghost["mvc"].Application.getRootURL();
+			if (ghost["browser"])
+				return ghost["browser"]["mvc"].Application.getRootURL();
 			return "/";
 		}
 		public retrieveUpdate(): void {
@@ -404,10 +404,10 @@ namespace ghost.browser.i18n
 
 			var plurial: string = this.getPluralForm(this.serverLocale(), options.smart_count);
 
-			var phrase: ITranslation = this.phrases[key + "-" + ghost["mvc"].Application.instance().user.type] || this.phrases[key] || options._;
+			var phrase: ITranslation = this.phrases[key + "-" + ghost["browser"]["mvc"].Application.instance().user.type] || this.phrases[key] || options._;
 			if (!phrase) {
 				this.retrieveTranslationFromServer(key);
-				phrase = this.phrases[key + "-" + ghost["mvc"].Application.instance().user.type] || this.phrases[key];
+				phrase = this.phrases[key + "-" + ghost["browser"]["mvc"].Application.instance().user.type] || this.phrases[key];
 			}
 			if (!phrase) {
 				this.warn('Missing translation for key: "' + key + '"');

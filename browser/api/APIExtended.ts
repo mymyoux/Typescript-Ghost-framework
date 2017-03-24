@@ -19,12 +19,12 @@ module ghost.browser.api {
 		public war(name?: string): ghost.browser.data.LocalForage {
 			if (!this._local) {
 				name = "apicache_" + (name ? name : "");
-				this._local = ghost.forage.warehouse(name);
+				this._local = ghost.browser.data.LocalForage.instance().warehouse(name);
 			}
 			return this._local;
 		}
 		public add(request: any): string {
-			if (!this._initialized) {
+			if (!this._initialized) { 
 			}
 			request._instance = this.instance();
 			var token: string = this.generateUniqueID();

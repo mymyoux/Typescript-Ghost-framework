@@ -7,7 +7,7 @@
 ///<lib="ractive"/>
 ///<module="framework/ghost/promises"/>
 ///<module="framework/browser/debug"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     export class Master extends Controller {
 		/**
@@ -77,7 +77,7 @@ namespace ghost.mvc
                 //TODO:check this
                 if(typeof name == "function")
                 {
-                    name = ghost.mvc.Model.get(name, true);
+                    name = ghost.browser.mvc.Model.get(name, true);
                     if(name && !this[name.name()])
                     {
                         this[name.name()] = name;
@@ -329,7 +329,7 @@ namespace ghost.mvc
                 ghost.events.Eventer.off(ghost.events.Eventer.APPLICATION_PAUSE, this.pause, this);
                 this._data.forEach((item:any, index:number)=>
                 {
-                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.browser.mvc.Model.EVENT_CHANGE];
                     var event:string;
                     for(var p in events)
                     {
@@ -523,7 +523,7 @@ namespace ghost.mvc
         protected refresh():void
         {
             for (var p in this._data) {
-                if(this._data[p] instanceof ghost.mvc.CollectionAPI)
+                if(this._data[p] instanceof ghost.browser.mvc.CollectionAPI)
                 {
                     this._data[p].refresh();
                 }
@@ -735,7 +735,7 @@ namespace ghost.mvc
 
                     this._data.forEach((item:any, index:number)=>
                     {
-                        var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                        var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.browser.mvc.Model.EVENT_CHANGE];
                         var event:string;
                         for(var p in events)
                         {
@@ -843,7 +843,6 @@ namespace ghost.mvc
                     };
 
                     options.data.makePartial = (name, data)=> {
-
                         var url: string = "partial/" + name;
                         if(Ractive.partials[url])
                         {
@@ -1026,7 +1025,7 @@ namespace ghost.mvc
                 ghost.browser.i18n.Polyglot.instance().off("resolved", this._onTranslationChange, this);
                 this._data.forEach((item:any, index:number)=>
                 {
-                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.mvc.Model.EVENT_CHANGE];
+                    var events:string[] = this._parts[index] &&  this._parts[index].events?this._parts[index].events:[ghost.browser.mvc.Model.EVENT_CHANGE];
                     var event:string;
                     for(var p in events)
                     {

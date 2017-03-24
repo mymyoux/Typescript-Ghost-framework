@@ -1,7 +1,9 @@
 ///<module="ghost/events"/>
 ///<module="ghost/utils"/>
 ///<file="IData"/>
-namespace ghost.mvc
+///<file="IRetrievable"/>
+///<file="IPartRequest"/>
+namespace ghost.browser.mvc
 {
 
 
@@ -67,7 +69,7 @@ namespace ghost.mvc
                     if(previous)
                         return previous[next];
                     return null;
-                }, ROOT);
+                }, ghost.core.Root.getRoot());
                 if(!model)
                 {
                     throw new Error("No Model named "+cls);
@@ -98,7 +100,7 @@ namespace ghost.mvc
                     if (previous)
                         return previous[next];
                     return null;
-                }, ROOT);
+                }, ghost.core.Root.getRoot());
                 if (!model) {
                     throw new Error("No Model named " + cls);
                 } else {
@@ -500,7 +502,7 @@ namespace ghost.mvc
          */
         protected getRootURL():string
         {
-            return ghost.mvc.Application.getRootURL();
+            return ghost.browser.mvc.Application.getRootURL();
         }
         protected getMethodForServer():string
         {
@@ -679,27 +681,7 @@ namespace ghost.mvc
 
     }
 
-    export interface IRetrievable
-    {
-        retrieveFromServer(callback:Function, times?:number);
-        isRetrieved():boolean;
-    }
 
-    export interface IPartRequest
-    {
-        method?:string;
-        url?:string;
-        data?:any;
-        /**
-         * If set to false, it will replay the ajax request each times. default:true
-         */
-        cache?:boolean;
-        /**
-         * If set to true, it will erase data each times the part is requested. default:false
-         */
-        reset?:boolean;
-
-    }
 
 
 }

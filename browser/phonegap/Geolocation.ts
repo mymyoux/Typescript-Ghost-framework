@@ -201,7 +201,7 @@ namespace ghost.phonegap
          */
         constructor()
         {
-            this._geolocation = ROOT.navigator["geolocation"];
+            this._geolocation = ghost.core.Root.getRoot().navigator["geolocation"];
         }
         /**
          * Returns the device's current position as a Position object.

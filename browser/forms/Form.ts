@@ -13,7 +13,7 @@ namespace ghost.browser.forms
 //PHP :'(
 
 
-
+    var formTypes:any = {};
 
     export class CancelableEvent
     {
@@ -456,7 +456,7 @@ namespace ghost.browser.forms
                 {
                     delete this.promises[name];
                     value[0].input.setAutocomplete(result.autocomplete);
-                    this.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                    this.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
                     console.log(value[value.length-1].name);
 
 
@@ -478,7 +478,7 @@ namespace ghost.browser.forms
             this.trigger(Form.EVENT_CHANGE+":"+name, name, value);
             if(value[0].input && value[0].input.constructor && value[0].input.constructor["force_trigger"])
             {
-                this.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
             }
             console.log(Form.EVENT_CHANGE+":"+name, name, value);
             if(!this.autosave)
@@ -766,7 +766,7 @@ namespace ghost.browser.forms
                     }
                 }
             }
-            for(var p in ghost.browser.forms)
+            for (var p in formTypes)
             {
                 if(p == "Field")
                 {
@@ -774,11 +774,11 @@ namespace ghost.browser.forms
                 }
                 if(ghost.utils.Strings.endsWith(p, "Field"))
                 {
-                    if(ghost.browser.forms[p].match)
+                    if (formTypes[p].match)
                     {
-                        if(ghost.browser.forms[p].match(element))
+                        if (formTypes[p].match(element))
                         {
-                            return ghost.browser.forms[p];
+                            return formTypes[p];
                         }
                     }else
                     {
@@ -956,7 +956,7 @@ namespace ghost.browser.forms
                 this.data[this.prefix_autocomplete+"autocompletion"][index].selected = true;
             }
             if(this.form.data && this.form.data.trigger)
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
         }
         public chooseAutocomplete(index:number):void
         {
@@ -980,7 +980,7 @@ namespace ghost.browser.forms
                 this.data_saved[this.name] = ghost.utils.Objects.clone(this.data[this.name], null, true);
                 this.onChangeThrottle();
                 //this.data[this.name] = this.data["autocompletion"][index]["name"];
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
             }
         }
 
@@ -1045,7 +1045,7 @@ namespace ghost.browser.forms
                 this.itemAutocomplete = new ItemAutocomplete(this, $(this.element).find("[data-autocomplete-list]"));
 //                this.data["autocomplete"] = ListField.prototype.getListItem.call(this, )
                 this.onAutocompleteThrottle = ghost.utils.Buffer.throttle(this.triggerAutocomplete.bind(this), 50);
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
             }
             if($(this.element).attr("data-success") != undefined)
             {
@@ -1223,7 +1223,7 @@ namespace ghost.browser.forms
                 if(this.data[this.prefix_autocomplete+"autocompletion"].length)
                 {
                     this.data[this.prefix_autocomplete+"autocompletion"].length = 0;
-                    this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                    this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
                 }
                 if(!this.itemAutocomplete)
                 {
@@ -1249,7 +1249,7 @@ namespace ghost.browser.forms
                 if(this.data[this.prefix_autocomplete+"autocompletion"].length)
                 {
                     this.data[this.prefix_autocomplete+"autocompletion"].length = 0;
-                    this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                    this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
                 }
                 if(!this.itemAutocomplete)
                 {
@@ -2211,7 +2211,7 @@ namespace ghost.browser.forms
 
                 //this.onChangeThrottle();
 
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
                 ghost.browser.apis.GMap.getDetails(data.place_id).then((data:any):void=>
                 {
                     if(this.data["place_id"] != data.place_id)
@@ -2266,7 +2266,7 @@ namespace ghost.browser.forms
                     });
 
                 this.setAutocomplete(result);
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
             },function(){debugger;});
         }
     }
@@ -2294,7 +2294,7 @@ namespace ghost.browser.forms
             if(this.form.data && this.form.data.trigger)
             {
 
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
             }else
             {
                 console.warn("CheckboxField can't enable two ways binding if form data is not an EventDispatcher");
@@ -2728,7 +2728,7 @@ namespace ghost.browser.forms
     {
         public static selector:string = "[data-type='list']";
         /**
-         * Force form to trigger ghost.mvc.Model.EVENT_CHANGE from the data
+         * Force form to trigger ghost.browser.mvc.Model.EVENT_CHANGE from the data
          * Required when ractive doesn't handle two ways binding
          * @type {boolean}
          */
@@ -2763,7 +2763,7 @@ namespace ghost.browser.forms
             super.onChangeValidated();
 
             if(this.form.data && this.form.data.trigger)
-                this.form.data.trigger(ghost.mvc.Model.EVENT_CHANGE);
+                this.form.data.trigger(ghost.browser.mvc.Model.EVENT_CHANGE);
         }
     }
 
@@ -2796,5 +2796,28 @@ namespace ghost.browser.forms
         }
     }
 
+    formTypes["Form"] = Form;
+    formTypes["Validator"] = Validator;
+    formTypes["TextValidator"] = TextValidator;
+    formTypes["CheckboxValidator"] = CheckboxValidator;
+    formTypes["Field"] = Field;
+    formTypes["ItemAutocomplete"] = ItemAutocomplete;
+    formTypes["ListField"] = ListField;
+    formTypes["ItemField"] = ItemField;
+    formTypes["GMapField"] = GMapField;
+    formTypes["CheckboxField"] = CheckboxField;
+    formTypes["InputTextField"] = InputTextField;
+    formTypes["InputFileField"] = InputFileField;
+    formTypes["InputNumberField"] = InputNumberField;
+    formTypes["InputHiddenField"] = InputHiddenField;
+    formTypes["EmailTextField"] = EmailTextField;
+    formTypes["InputFileField"] = InputFileField;
+    formTypes["TextareaField"] = TextareaField;
+    formTypes["InputListField"] = InputListField;
+    formTypes["CustomInputListField"] = CustomInputListField;
+    formTypes["InputCheckboxField"] = InputCheckboxField;
+    formTypes["CustomInputListField"] = CustomInputListField;
+    formTypes["CustomInputListField"] = CustomInputListField;
+    formTypes["CustomInputListField"] = CustomInputListField;
 
 }

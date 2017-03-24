@@ -2,7 +2,7 @@
 
 ///<lib="jquery"/>
 ///<module="browser/navigation"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     /**
      * Controller with views
@@ -583,7 +583,7 @@ namespace ghost.mvc
         }
         protected getRootURL():string
         {
-            return ghost.mvc.Application.getRootURL();
+            return ghost.browser.mvc.Application.getRootURL();
         }
     }
 }

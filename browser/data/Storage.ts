@@ -63,6 +63,7 @@ namespace ghost.browser.data
 
     class LocalStorage
     {
+      
         private _storage:any;
         /**
          * Constructor
@@ -75,7 +76,7 @@ namespace ghost.browser.data
             }
             else
             {
-                this._storage = ROOT.localStorage;
+                this._storage = ghost.core.Root.getRoot().localStorage;
             }
         }
         /**
@@ -172,6 +173,14 @@ namespace ghost.browser.data
     var local:LocalStorage = new LocalStorage();
     export class Warehouse
     {
+        protected static _instance: Warehouse;
+        public static instance(): Warehouse {
+            if (Warehouse._instance) {
+                return Warehouse._instance;
+            }
+            Warehouse._instance = new Warehouse("root");
+            return Warehouse._instance;
+        }
         /**
          * @private
          */
@@ -271,9 +280,9 @@ namespace ghost.browser.data
         }
     }
     //end:namespace
-}
-namespace ghost
-{
-    export var cache:ghost.browser.data.Warehouse = new ghost.browser.data.Warehouse("root");
-    //end:namespace
-}
+}  
+// namespace ghost
+// {
+//     export var cache:ghost.browser.data.Warehouse = new ghost.browser.data.Warehouse("root");
+//     //end:namespace
+// }

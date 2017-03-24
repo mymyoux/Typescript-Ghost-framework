@@ -2,7 +2,7 @@
 namespace ghost.phonegap
 {
     var _Connection:any;
-    if(!ROOT.Connection)
+    if(!ghost.core.Root.getRoot().Connection)
     {
         _Connection = 
         {
@@ -17,7 +17,7 @@ namespace ghost.phonegap
         };
     }else
     {
-        _Connection = ROOT.Connection;
+        _Connection = ghost.core.Root.getRoot().Connection;
     }
     export class _ConnexionStatus extends ghost.events.EventDispatcher
     {

@@ -1,5 +1,7 @@
 ///<module="framework/ghost/utils"/>
-namespace ghost.mvc {
+///<file="IData"/> 
+namespace ghost.browser.mvc {
+	 
 	import Classes = ghost.utils.Classes;
 	import Strings = ghost.utils.Strings; 
     export class Component extends ghost.events.EventDispatcher 
@@ -12,7 +14,7 @@ namespace ghost.mvc {
 
 
     	public static getComponentClass(name:string):Component
-    	{
+    	{ 
     		if(Component.components[name])
     		{ 
 				return Component.components[name]; 
@@ -400,9 +402,9 @@ namespace ghost.mvc {
 		}
 		protected _addData(data:any, parts?:string[]):any
 		{
-			var model:any = typeof data == "function"?ghost.mvc.Model.get(data):data;
+			var model:any = typeof data == "function"?ghost.browser.mvc.Model.get(data):data;
 			if (model) {
-				this._parts.push({ model: model, parts: parts?parts:[ghost.mvc.Model.PART_DEFAULT] });
+				this._parts.push({ model: model, parts: parts?parts:[ghost.browser.mvc.Model.PART_DEFAULT] });
 				return model;
 			}
 			return null;
@@ -430,7 +432,7 @@ namespace ghost.mvc {
 		 */
 		data: any;
 		/**
-		 * Parts to load (ghost.mvc.Model.PART_DEFAULT by default)
+		 * Parts to load (ghost.browser.mvc.Model.PART_DEFAULT by default)
 		 */
 		parts?: string[];
     }

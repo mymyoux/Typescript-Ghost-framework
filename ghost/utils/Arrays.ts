@@ -1,3 +1,4 @@
+///<file="IBinaryResult"/>
 namespace ghost.utils
 {
 	export class Arrays
@@ -102,12 +103,5 @@ namespace ghost.utils
 				index: currentIndex
 			};
 		}
-	}
-
-	export interface IBinaryResult
-	{
-		found:boolean;
-		index:number;
-		order?: number;
 	}
 }

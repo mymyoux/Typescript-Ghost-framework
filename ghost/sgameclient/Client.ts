@@ -90,11 +90,11 @@ namespace ghost.sgameclient
                 io = require("socket.io-client");
             }
 
-            if(ROOT._isNode)
+            if(ghost.core.Root.getRoot()._isNode)
             {
                 console.log("Node environment");
             }
-            var socket = ROOT._isNode?require('socket.io-client')(this.url, this.options):io(this.url, this.options);
+            var socket = ghost.core.Root.getRoot()._isNode?require('socket.io-client')(this.url, this.options):io(this.url, this.options);
             socket.on('connect', this._onConnect.bind(this));
             socket.on('event', this._onEvent.bind(this));
        /*     socket.on('*', (data:any)=>{

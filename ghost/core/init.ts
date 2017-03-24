@@ -1,24 +1,25 @@
-var ROOT:any;
-try
-{
-    ROOT = window;
-    window["ROOT"] = ROOT;
-    ROOT._isNode = false;
-}catch(error)
-{
-    try
-   	{
+///<file="Root.ts"/>
+// var ROOT:any;
+// try
+// {
+//     ROOT = window;
+//     window["ROOT"] = ROOT;
+//     ROOT._isNode = false;
+// }catch(error)
+// {
+//     try
+//    	{
 
-    	ROOT = eval("global");
-    	ROOT.ROOT = ROOT;
-   	}catch(error)
-   	{
+//     	ROOT = eval("global");
+//     	ROOT.ROOT = ROOT;
+//    	}catch(error)
+//    	{
 
-   	}
-    ROOT._isNode = true;
-}
+//    	}
+//     ROOT._isNode = true;
+// }
 
-namespace ghost
+ namespace ghost
 {
     export function hasClass(name?:string):boolean
     {
@@ -27,7 +28,7 @@ namespace ghost
             return false;
         }
         var names:string[] = name.split(".");
-        var root:any = ROOT;
+        var root:any = ghost.core.Root.getRoot();
         var len:number = names.length;
         for(var i:number=0; i<len; i++)
         {
@@ -48,7 +49,7 @@ namespace ghost
             return null;
         }
         var names:string[] = name.split(".");
-        var root:any = ROOT;
+        var root: any = ghost.core.Root.getRoot();
         var len:number = names.length;
         for(var i:number=0; i<len; i++)
         {

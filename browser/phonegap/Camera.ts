@@ -1,7 +1,7 @@
 namespace ghost.phonegap
 {
     var _Camera:any;
-    if(!ROOT.Camera)
+    if(!ghost.core.Root.getRoot().Camera)
     {
         _Camera = 
         {
@@ -30,7 +30,7 @@ namespace ghost.phonegap
         };
     }else
     {
-        _Camera = ROOT.Camera;
+        _Camera = ghost.core.Root.getRoot().Camera;
     }
     /**
      * @private
@@ -111,7 +111,7 @@ namespace ghost.phonegap
          */
         constructor()
         {
-            this._camera = ROOT.navigator["camera"];
+            this._camera = ghost.core.Root.getRoot().navigator["camera"];
         }
         /**
          * Gets picture from saved photos. ie: on android there is no difference between this function and #getPictureFromLibrary()

@@ -1,7 +1,7 @@
 ///<lib="Promise"/>
 ///<module="events"/>
 ///<file="Component"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     export class Template extends ghost.events.EventDispatcher
     {
@@ -17,9 +17,9 @@ namespace ghost.mvc
             return Template._instance;
         }
         public static init(): void {
-            ghost.mvc.Template._instance = new Template();
+            ghost.browser.mvc.Template._instance = new Template();
         }
-        private static _templates:any = {};
+        private static _templates:any = {}; 
         public static getTemplate(url:string):Template
         {
             if(!Template._templates)
@@ -199,12 +199,12 @@ namespace ghost.mvc
 
         protected getRootURL():string
         {
-            return ghost.mvc.Application.getRootURL();
+            return ghost.browser.mvc.Application.getRootURL();
         }
 
         protected sync():void{
             var templates:any[] = [];
-            this.iterate(function(template:ghost.mvc.Template):void{
+            this.iterate(function(template:ghost.browser.mvc.Template):void{
                 var requestTemplate:any ={url:template.url};
                 if(template.version)
                 {

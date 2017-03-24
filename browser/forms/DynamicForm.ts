@@ -4,7 +4,7 @@ namespace ghost.browser.forms
     /**
      * Form managment
      */
-    export class DynamicForm extends ghost.mvc.Model
+    export class DynamicForm extends ghost.browser.mvc.Model
     {
         /**
          * For each data will have a true or false value

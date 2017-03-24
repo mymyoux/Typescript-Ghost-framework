@@ -13,7 +13,7 @@ namespace ghost.phonegap
         constructor()
         {
             //super();
-            this._notifier = ROOT.navigator["notification"];
+            this._notifier = ghost.core.Root.getRoot().navigator["notification"];
         }
         /**
          * Shows a custom alert or dialog box.

@@ -29,11 +29,11 @@ namespace ghost.utils
 			$container.append($div.children());
 			Integration.loadPages(pages, selector, $container);
 			return;*/
-			ROOT.$.ajax(page,{async:false})
+			ghost.core.Root.getRoot().$.ajax(page,{async:false})
 			  .done(function(data) {
 			  		try
 			  		{
-			  			var $page:JQuery = ROOT.$(data);
+			  			var $page:JQuery = ghost.core.Root.getRoot().$(data);
 			  			
 		  			}catch(error)
 		  			{

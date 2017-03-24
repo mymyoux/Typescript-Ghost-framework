@@ -6,7 +6,7 @@ namespace ghost.phonegap
     //simulate cordova for non phonegap projet
     if(ghost.core.Hardware.isBrowser())
     {
-        if(!ROOT.cordova)
+        if(!ghost.core.Root.getRoot().cordova)
         {
             console.log("False Cordova is Ready");
             ghost.events.Eventer._triggerDeviceReady();
@@ -15,12 +15,12 @@ namespace ghost.phonegap
         else
         {
             //emulator
-            if(ROOT.location.href.indexOf("file://")==-1 || ROOT.location.href.indexOf("ripple")>-1 || ROOT.location.href.indexOf("local")>-1)
+            if(ghost.core.Root.getRoot().location.href.indexOf("file://")==-1 || ghost.core.Root.getRoot().location.href.indexOf("ripple")>-1 || ghost.core.Root.getRoot().location.href.indexOf("local")>-1)
             {
                 ghost.constants.cordovaEmulated = true;
                 console.log("Cordova['emulated'] is Ready");
                 
-                if(ROOT.location.href.indexOf("ripple")==-1)
+                if(ghost.core.Root.getRoot().location.href.indexOf("ripple")==-1)
                 {
                     ghost.events.Eventer._triggerDeviceReady();
                 }

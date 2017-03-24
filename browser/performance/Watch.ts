@@ -32,7 +32,7 @@ namespace ghost.performance
 
         }
         private static now():number{
-            return ROOT["performance"] && ROOT["performance"].now?ROOT["performance"].now():Date.now();
+            return ghost.core.Root.getRoot()["performance"] && ghost.core.Root.getRoot()["performance"].now?ghost.core.Root.getRoot()["performance"].now():Date.now();
         }
         private static addWatch(watch:any):void
         {

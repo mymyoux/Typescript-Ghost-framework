@@ -1,7 +1,7 @@
 ///<module="ghost/events"/>
 ///<module="ghost/browser/debug"/>
 ///<file="Controller.ts"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     /**
      * Scope

@@ -29,11 +29,11 @@ namespace ghost.core
     {
         public static isNode():boolean
         {
-            return ROOT._isNode;
+            return ghost.core.Root.getRoot()._isNode;
         }
         public static isBrowser():boolean
         {
-            return !ROOT._isNode;
+            return !ghost.core.Root.getRoot()._isNode;
         }
         public static OS_NODE:string = "Node_Environment";
         /**
@@ -93,7 +93,7 @@ namespace ghost.core
          */
         public static getCordovaVersion():any
         {
-            return ROOT.device?ROOT.device.cordova:0;
+            return ghost.core.Root.getRoot().device?ghost.core.Root.getRoot().device.cordova:0;
         }
         /**
          * Gets app version
@@ -108,11 +108,11 @@ namespace ghost.core
          */
         public static getOS():string
         {
-            if(ROOT.device)
+            if(ghost.core.Root.getRoot().device)
             {
-                return ROOT.device.platform;
+                return ghost.core.Root.getRoot().device.platform;
             }
-            var agent = ROOT && ROOT.navigator && ROOT.navigator.userAgent?navigator.userAgent.toLowerCase():"node";
+            var agent = ghost.core.Root.getRoot() && ghost.core.Root.getRoot().navigator && ghost.core.Root.getRoot().navigator.userAgent?navigator.userAgent.toLowerCase():"node";
             if(agent.indexOf("android")!=-1)
             {
                 return Hardware.OS_ANDROID;
@@ -178,7 +178,7 @@ namespace ghost.core
         }
         public static getLanguage():string
         {
-            return ROOT && ROOT.navigator && ROOT.navigator.language?ROOT.navigator.language:"en";
+            return ghost.core.Root.getRoot() && ghost.core.Root.getRoot().navigator && ghost.core.Root.getRoot().navigator.language?ghost.core.Root.getRoot().navigator.language:"en";
         }
         /**
          * Get the device's Universally Unique Identifier (UUID).
@@ -186,7 +186,7 @@ namespace ghost.core
          */
         public static getUUID():string
         {
-            return ROOT.device?ROOT.device.uuid:"uuid";
+            return ghost.core.Root.getRoot().device?ghost.core.Root.getRoot().device.uuid:"uuid";
         }
         /**
          * Get the operating system version.
@@ -194,7 +194,7 @@ namespace ghost.core
          */
         public static getOSVersion():string
         {
-            return ROOT.device?ROOT.device.version:"unkown";
+            return ghost.core.Root.getRoot().device?ghost.core.Root.getRoot().device.version:"unkown";
         }
         /**
          * Get the device's model name.
@@ -202,7 +202,7 @@ namespace ghost.core
          */
         public static getModel():string
         {
-            return ROOT.device?ROOT.device.model:"unkown";
+            return ghost.core.Root.getRoot().device?ghost.core.Root.getRoot().device.model:"unkown";
         }
         /**
          * Specifies if the current device is iOS Device
@@ -266,7 +266,7 @@ namespace ghost.core
          */
         public static getScreenHeight():number
         {
-            return ROOT.innerHeight;
+            return ghost.core.Root.getRoot().innerHeight;
         }
         /**
          * Gets screen width in pixels
@@ -274,7 +274,7 @@ namespace ghost.core
          */
         public static getScreenWidth():number
         {
-            return ROOT.innerWidth;
+            return ghost.core.Root.getRoot().innerWidth;
         }
         /**
          * Gets screen orientation
@@ -282,7 +282,7 @@ namespace ghost.core
          */
         public static getOrientation():number
         {
-            return ROOT["orientation"];
+            return ghost.core.Root.getRoot()["orientation"];
         }
         /**
          * Gets pixel ratio. 1 = 160 dpi, 2 = 320 dpi...
@@ -292,12 +292,12 @@ namespace ghost.core
         {
             var ratio = 1;
             // To account for zoom, change to use deviceXDPI instead of systemXDPI
-            if (ROOT.screen && ROOT.screen.systemXDPI !== undefined && ROOT.screen.logicalXDPI !== undefined && ROOT.screen.systemXDPI > ROOT.screen.logicalXDPI) {
+            if (ghost.core.Root.getRoot().screen && ghost.core.Root.getRoot().screen.systemXDPI !== undefined && ghost.core.Root.getRoot().screen.logicalXDPI !== undefined && ghost.core.Root.getRoot().screen.systemXDPI > ghost.core.Root.getRoot().screen.logicalXDPI) {
                 // Only allow for values > 1
-                ratio = ROOT.screen.systemXDPI / ROOT.screen.logicalXDPI;
+                ratio = ghost.core.Root.getRoot().screen.systemXDPI / ghost.core.Root.getRoot().screen.logicalXDPI;
             }
-            else if (ROOT.devicePixelRatio !== undefined) {
-                ratio = ROOT.devicePixelRatio;
+            else if (ghost.core.Root.getRoot().devicePixelRatio !== undefined) {
+                ratio = ghost.core.Root.getRoot().devicePixelRatio;
             }
             return ratio == undefined ? 1 : ratio; 
         }
@@ -315,7 +315,7 @@ namespace ghost.core
          */
         public static getDPI():number
         {
-            return 160*ROOT.devicePixelRatio;
+            return 160*ghost.core.Root.getRoot().devicePixelRatio;
         }
         /**
          * Checks if the device is currently on portrait mode
@@ -323,7 +323,7 @@ namespace ghost.core
          */
         public static isPortrait():boolean
         {
-            return ROOT["orientation"] %180 == 0;
+            return ghost.core.Root.getRoot()["orientation"] %180 == 0;
         }
         /**
          * Checks if the device is currently on landscape mode

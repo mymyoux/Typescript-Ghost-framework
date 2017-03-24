@@ -4,7 +4,7 @@
 ///<file="ControllerView.ts"/>
 ///<lib="ractive"/>
 ///
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     export class View extends ghost.core.CoreObject
     {
@@ -372,7 +372,7 @@ namespace ghost.mvc
         }
         protected getRootURL():string
         {
-            return ghost.mvc.Application.getRootURL();
+            return ghost.browser.mvc.Application.getRootURL();
         }
 
     }

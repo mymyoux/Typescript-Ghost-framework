@@ -177,28 +177,28 @@ namespace ghost.events
         constructor()
         {
             super();
-            if(!ROOT.document)
+            if(!ghost.core.Root.getRoot().document)
                 return;
             var _self = this;
             var len = this._list.length;
             
             for(var i=0; i<len; i++)
             {
-                this._addListener(this._list[i], ROOT.document);
+                this._addListener(this._list[i], ghost.core.Root.getRoot().document);
             }
             len = this._listWindow.length;
             for(i=0; i<len; i++)
             {
-                this._addListener(this._listWindow[i], ROOT);
+                this._addListener(this._listWindow[i], ghost.core.Root.getRoot());
             }
-            ROOT.document.addEventListener(this.DEVICE_READY, function(event)
+            ghost.core.Root.getRoot().document.addEventListener(this.DEVICE_READY, function(event)
             {
                 _self._triggerDeviceReady(event);
                
             }, false);
-            ROOT.addEventListener(this.DOM_LOADED, function(event)
+            ghost.core.Root.getRoot().addEventListener(this.DOM_LOADED, function(event)
             {
-                ROOT["loaded"] = true;
+                ghost.core.Root.getRoot()["loaded"] = true;
             }, false);
             this._checkDomReady(function(event)
             {
@@ -206,15 +206,15 @@ namespace ghost.events
                 {
                         
                     _self._domReady = true;
-                    ROOT["loaded"] = true;
+                    ghost.core.Root.getRoot()["loaded"] = true;
                     _self.trigger(_self.DOM_READY, event);
                     _self._dispatchAllReady();
                     
                 }
             });
-            if(ROOT.$)
+            if(ghost.core.Root.getRoot().$)
             {
-                ROOT.$(function() {
+                ghost.core.Root.getRoot().$(function() {
                     _self._$Ready = true;
                     _self.trigger(_self.$JQUERY_LIKE_READY);
                     _self._dispatchAllReady();
@@ -222,7 +222,7 @@ namespace ghost.events
             }
           
             //some devices don't dispatch orientationchanged event
-            ROOT.addEventListener("resize", function(event) {
+            ghost.core.Root.getRoot().addEventListener("resize", function(event) {
                 _self.trigger(_self.SCREEN_ORIENTATION_CHANGE, event);
             }, false);
 
@@ -231,7 +231,7 @@ namespace ghost.events
             //simulate cordova for non phonegap projet
             if(ghost.core.Hardware.isBrowser())
             {
-                if(!ROOT.cordova)
+                if(!ghost.core.Root.getRoot().cordova)
                 {
                    // console.log("False Cordova is Ready");
                     this._triggerDeviceReady();
@@ -240,12 +240,12 @@ namespace ghost.events
                 else
                 {
                     //emulator
-                    if(ROOT.location.href.indexOf("file://")==-1 || ROOT.location.href.indexOf("ripple")>-1 || ROOT.location.href.indexOf("local")>-1)
+                    if(ghost.core.Root.getRoot().location.href.indexOf("file://")==-1 || ghost.core.Root.getRoot().location.href.indexOf("ripple")>-1 || ghost.core.Root.getRoot().location.href.indexOf("local")>-1)
                     {
                         ghost.constants.cordovaEmulated = true;
                   //      console.log("Cordova['emulated'] is Ready");
 
-                        if(ROOT.location.href.indexOf("ripple")==-1)
+                        if(ghost.core.Root.getRoot().location.href.indexOf("ripple")==-1)
                         {
                             this._triggerDeviceReady();
                         }
@@ -278,14 +278,14 @@ namespace ghost.events
         private _checkDomReady(callback:any):void
         {
             /* Mozilla, Chrome, Opera */
-            if (ROOT.document.addEventListener) {
-                ROOT.document.addEventListener("DOMContentLoaded", callback, false);
+            if (ghost.core.Root.getRoot().document.addEventListener) {
+                ghost.core.Root.getRoot().document.addEventListener("DOMContentLoaded", callback, false);
                 return;
             }
             /* Safari, iCab, Konqueror */
-            if (/KHTML|WebKit|iCab/i.test(ROOT.navigator.userAgent)) {
+            if (/KHTML|WebKit|iCab/i.test(ghost.core.Root.getRoot().navigator.userAgent)) {
                 var DOMLoadTimer = setInterval(function () {
-                    if (/loaded|complete/i.test(ROOT.document.readyState)) {
+                    if (/loaded|complete/i.test(ghost.core.Root.getRoot().document.readyState)) {
                         callback();
                         clearInterval(DOMLoadTimer);
                     }

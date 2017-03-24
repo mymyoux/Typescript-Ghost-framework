@@ -6,7 +6,7 @@ namespace ghost.performance
     {
         public static fastclick(root:any = null):void
         {
-            if(!ROOT.FastClick)
+            if(!ghost.core.Root.getRoot().FastClick)
             {
                 Performance._setupFastclick();
             }
@@ -14,7 +14,8 @@ namespace ghost.performance
             {
                 root = document.body;
             }
-            new ROOT.FastClick(document.body);
+            var root: any = ghost.core.Root.getRoot();
+            new root.FastClick(document.body);
         }
         
         
@@ -774,7 +775,7 @@ namespace ghost.performance
                     'use strict';
                     return new FastClick(layer);
             };
-            ROOT.FastClick = FastClick;
+            ghost.core.Root.getRoot().FastClick = FastClick;
         }
         
         

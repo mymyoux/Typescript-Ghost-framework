@@ -1,6 +1,6 @@
 ///<file="Model.ts"/>
 ///<module="api"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
 	import API = ghost.browser.api.APIExtended;
     import APIExtended = ghost.browser.api.APIExtended;
@@ -51,7 +51,7 @@ namespace ghost.mvc
                 if (!this.firstData) {
                     return resolve();
                 }
-                this.once(ghost.mvc.Model.EVENT_FIRST_DATA, () => {
+                this.once(ghost.browser.mvc.Model.EVENT_FIRST_DATA, () => {
 					resolve();
                 });
             });

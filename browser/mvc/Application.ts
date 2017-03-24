@@ -4,7 +4,7 @@
 ///<module="browser/i18n"/>
 ///<module="api"/>
 ///<file="Controller.ts"/>
-namespace ghost.mvc
+namespace ghost.browser.mvc
 {
     import APIExtended = ghost.browser.api.APIExtended;
     export class Application extends ghost.core.CoreObject
@@ -22,7 +22,7 @@ namespace ghost.mvc
         {
             return Application._instance;
         }
-        protected getRootURL(): string   
+        public getRootURL(): string   
         {
                 var pathname: string = window.location.pathname;
                 var index: number = pathname.indexOf("/", 1);
@@ -74,8 +74,8 @@ namespace ghost.mvc
                 }
             }
         }
-        public war(): ghost.browser.data.LocalForage {
-            return ghost.forage.warehouse("global").war(this.getUserID());
+        public war(): ghost.browser.data.LocalForage { 
+            return ghost.browser.data.LocalForage.instance().warehouse("global").war(this.getUserID());
         }
         /**
          * Handle cache for the all application
@@ -132,7 +132,7 @@ namespace ghost.mvc
             }
             this.navigation().listen();
 
-            ghost.mvc.Template.sync();
+            ghost.browser.mvc.Template.sync();
             return null;
 
         }
