@@ -454,11 +454,9 @@ module ghost.browser.api {
 				request = this.getRequest();
 			}
 			if (this._always && !token) {
-				if (!this._cacheManager) {
-					debugger;
-				}
-				token = this._cacheManager.add(request);
-			}
+				if(this._cacheManager)
+					token = this._cacheManager.add(request);
+			} 
             /* if(!this._promise)
              {
                  this._promise = this.getPromise();
@@ -493,7 +491,7 @@ module ghost.browser.api {
 				if (rawData && rawData.data) {
 					data = rawData.data;
 				}
-				if (data && token) {
+				if (data && token && this._cacheManager) {
 					this._cacheManager.remove(token);
 				}
 
@@ -529,7 +527,7 @@ module ghost.browser.api {
 									good_user = false;
 								}
 								if (data.api_error_code != undefined) {
-									if (good_user) {
+									if (good_user && this._cacheManager) {
 										this._cacheManager.remove(token);
 									}
 								}
