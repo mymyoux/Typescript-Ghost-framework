@@ -3,6 +3,8 @@
 
 namespace ghost.sgameclient
 {
+    //tsc:uncomment
+    //import Application = ghost.sgameclient.Application;
     import Const = ghost.sgamecommon.Const;
     export class RoomManager
     {

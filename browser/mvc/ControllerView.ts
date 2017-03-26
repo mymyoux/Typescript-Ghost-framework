@@ -4,6 +4,8 @@
 ///<module="browser/navigation"/>
 namespace ghost.browser.mvc
 {
+    //tsc:uncomment
+    //import Navigation = ghost.browser.navigation.Navigation;
     /**
      * Controller with views
      */

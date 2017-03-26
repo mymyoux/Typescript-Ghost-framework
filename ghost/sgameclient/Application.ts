@@ -4,6 +4,10 @@
 ///<file="Client"/>
 namespace ghost.sgameclient
 {
+    //tsc:uncomment
+    //import RoomManager = ghost.sgameclient.RoomManager;
+    //tsc:uncomment
+    //import Room = ghost.sgameclient.Room;
     import IApplicationMessage = ghost.sgamecommon.IApplicationMessage;
     import Buffer = ghost.utils.Buffer;
     import MFunction = ghost.utils.MFunction;

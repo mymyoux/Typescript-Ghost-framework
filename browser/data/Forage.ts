@@ -81,7 +81,7 @@ namespace ghost.browser.data
             this._name = name;
             this._warehouses = {};
             this._storage = Root.getRoot().localforage.createInstance({name:name});
-            this._data = {};
+            this._data = {}; 
             this._sync = {};
 
             if (false === ghost.core.Hardware.hasCookieEnable())

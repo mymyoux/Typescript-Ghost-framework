@@ -51,7 +51,7 @@ namespace ghost.logging
         private static levels:any = {};
 		public static info(...data: any[]): void {
             for (var p in data) {
-                log.log(data[p], log.LEVEL_INFO);
+                //log.log(data[p], log.LEVEL_INFO);
             }
         }
 		/**
@@ -61,7 +61,7 @@ namespace ghost.logging
         public static warn(...data: any[]): void {
             for (var p in data) {
 
-                log.log(data[p], log.LEVEL_WARN);
+                //log.log(data[p], log.LEVEL_WARN);
             }
         }
         /**
@@ -71,7 +71,7 @@ namespace ghost.logging
         public static debug(...data: any[]): void {
             for (var p in data) {
 
-                log.log(data[p], log.LEVEL_DEBUG);
+                //log.log(data[p], log.LEVEL_DEBUG);
             }
         }
         /**
@@ -81,7 +81,7 @@ namespace ghost.logging
         public static error(...data: any[]): void {
             for (var p in data) {
 
-                log.log(data[p], log.LEVEL_ERROR);
+                //log.log(data[p], log.LEVEL_ERROR);
             }
         }
         public static level(levelMin:string):void
@@ -94,7 +94,7 @@ namespace ghost.logging
 			var stackline: any = log.getStackTrace(2);
 			if(stackline && stackline.cls)
 			{
-				log.levels[stackline.cls] = index;
+				//log.levels[stackline.cls] = index;
 			}
 			
         }

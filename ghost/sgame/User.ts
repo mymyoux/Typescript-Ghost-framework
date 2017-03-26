@@ -2,6 +2,8 @@
 ///<file="Socket"/>
 namespace ghost.sgame
 {
+    //tsc:uncomment
+    //import Room = ghost.sgame.Room;
     import Const = ghost.sgamecommon.Const;
     import log = ghost.logging.log;
     import Objects = ghost.utils.Objects;
@@ -60,7 +62,7 @@ namespace ghost.sgame
         {
             if (!this.apps[appName])
             {
-                log.warn("user:"+this.id+" try to go in the room "+name+" but is not in the app "+appName);
+                //log.warn("user:"+this.id+" try to go in the room "+name+" but is not in the app "+appName);
                 return;
             }
             this.apps[appName].rooms[name] = {
@@ -116,7 +118,7 @@ namespace ghost.sgame
         public removeRoom(appName:string, name:string):void
         {
             if (!this.apps[appName]) {
-                log.warn("user:" + this.id + " try to leave the room " + name + " but is not in the app " + appName);
+                //log.warn("user:" + this.id + " try to leave the room " + name + " but is not in the app " + appName);
                 return;
             }
             delete this.apps[appName].rooms[name];

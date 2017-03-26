@@ -6,6 +6,8 @@
 ///<file="Controller.ts"/>
 namespace ghost.browser.mvc
 {
+    //tsc:uncomment
+    //import Navigation = ghost.browser.navigation.Navigation;
     import APIExtended = ghost.browser.api.APIExtended;
     export class Application extends ghost.core.CoreObject
     {

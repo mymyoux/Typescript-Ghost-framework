@@ -2,13 +2,28 @@
 ///<file="IData"/>
 ///<file="Controller"/>
 ///<file="Template"/>
+///<file="IDataParts"/>
+///<file="Data"/>
+///<file="IModel"/> 
 
 
 ///<lib="ractive"/>
+
+//tsc:uncomment
+/////<reference path="typings/globals/ractive/index.d.ts"/>;
+
 ///<module="framework/ghost/promises"/>
 ///<module="framework/browser/debug"/>
 namespace ghost.browser.mvc
 {
+    //tsc:uncomment
+    //import Navigation = ghost.browser.navigation.Navigation;
+    //tsc:uncomment
+    //import Scope = ghost.browser.mvc.Scope;
+    //tsc:uncomment
+    //import CollectionAPI = ghost.browser.mvc.CollectionAPI;
+    //tsc:uncomment
+    //import Component = ghost.browser.mvc.Component;
     export class Master extends Controller {
 		/**
          * List of events
@@ -18,8 +33,8 @@ namespace ghost.browser.mvc
         // public static partials_context: any = {};
 		//private templateString:string;
         protected templateData:Template;
-		protected template:Ractive;
-		private templateOptions:IRactiveOptions;
+		protected template:any;
+		private templateOptions:any;
 		protected _firstActivation:boolean = true;
 		protected _data:any[];
 		protected _activated:boolean = false;
@@ -135,7 +150,7 @@ namespace ghost.browser.mvc
 
         protected cache(): ghost.browser.data.LocalForage
         {
-            return ghost.forage.war( this.name() + '_controller' );
+            return ghost.browser.data.LocalForage.instance().war( this.name() + '_controller' );
         }
 
         /**

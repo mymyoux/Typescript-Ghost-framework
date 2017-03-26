@@ -519,15 +519,15 @@ namespace ghost.browser.mvc
                                     {
                                         if(mixin instanceof MixinConfig)
                                         {
-                                            applyMixins(model, [mixin.mixin], mixin.config);
+                                            ghost.core.applyMixins(model, [mixin.mixin], mixin.config);
                                         }else{
-                                            applyMixins(model, [mixin]);
+                                            ghost.core.applyMixins(model, [mixin]);
                                         }
                                     });
                                     /*var mixins: any[] = this.getMixins();
                                     for(var p in mixins)
                                     {
-                                        applyMixins()
+                                        ghost.core.applyMixins()
                                     }*/
                                 }
 

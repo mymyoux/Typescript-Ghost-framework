@@ -1,7 +1,8 @@
 ///<lib="Promise"/>
 ///<module="framework/ghost/utils"/>
 ///<module="framework/browser/api"/>
-namespace ghost.performance 
+
+namespace ghost.browser.performance
 {
     import BufferFunction = ghost.utils.BufferFunction;
     import Buffer = ghost.utils.Buffer;

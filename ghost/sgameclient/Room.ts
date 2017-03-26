@@ -2,6 +2,8 @@
 ///<module="events"/>
 namespace ghost.sgameclient
 {
+    //tsc:uncomment
+    //import Application = ghost.sgameclient.Application;
     import Const = ghost.sgamecommon.Const;
     import Objects = ghost.utils.Objects;
     export class Room extends ghost.events.EventDispatcher

@@ -3,8 +3,11 @@
 
 ///<file="Model.ts"/>
 ///<file="Collection.ts"/>
+///<file="IScopeOptions.ts"/>
 namespace ghost.browser.mvc
 {
+  //tsc:uncomment
+  //import Scope = ghost.browser.mvc.Scope;
     /**
      * Controller
      */
@@ -195,7 +198,7 @@ namespace ghost.browser.mvc
                         Controller._sShortname.push(name);
                     else
                     {
-                        log.warn(name+" is used several times as a controller's name");
+                        //log.warn(name+" is used several times as a controller's name");
                         Controller._sShortname.splice(index, 1);
                         Controller._sConflictsShortnames.push(name);
                     }

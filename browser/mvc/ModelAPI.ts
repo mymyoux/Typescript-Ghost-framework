@@ -14,7 +14,7 @@ namespace ghost.browser.mvc
             
         }
 		public cache(): ghost.browser.data.LocalForage {
-            return ghost.forage.war(this.name() + '_model');
+            return ghost.browser.data.LocalForage.instance().war(this.name() + '_model');
         }
         protected onPartData(name: string, data: any): void {
             if (name == Model.PART_DEFAULT)

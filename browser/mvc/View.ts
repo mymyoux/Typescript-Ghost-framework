@@ -11,8 +11,8 @@ namespace ghost.browser.mvc
         protected _controller:ControllerView;
         public _models:Model[] = [];
         public _collections:Collection<any>[] = [];
-        public template:Ractive;
-        protected options:IRactiveOptions;
+        public template:any;
+        protected options:any;
         private _name:string;
         protected $container:JQuery;
         private first:boolean = true;
@@ -141,7 +141,7 @@ namespace ghost.browser.mvc
                 }*/
                 //console.warn("Ractive options", this.options);
 
-                this.template = new Ractive(this.options);
+                this.template = new Ractive(<any>this.options);
 
                  var listener:any = this.getBindedEventListeners();
                 if(listener)

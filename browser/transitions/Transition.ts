@@ -3,7 +3,8 @@
 namespace ghost.transitions
 {
     
-    
+    //tsc:uncomment
+    //import Navigation = ghost.browser.navigation.Navigation;
     
     /**
      * Css helper for prefixed properties

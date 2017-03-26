@@ -188,6 +188,6 @@ namespace ghost.sgameclient
             }
         }
     }
-    if(typeof module != "undefined")
-        module.exports = ghost;
+    // if(typeof module != "undefined")
+    //     module.exports = ghost;
 }

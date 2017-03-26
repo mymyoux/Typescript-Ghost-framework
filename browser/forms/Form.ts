@@ -272,7 +272,7 @@ namespace ghost.browser.forms
             this.trigger(Form.EVENT_CANCEL, this.toObject());
            /* if(!this.action)
             {
-                log.warn("unable to cancel the form - no action attribute found for the form");
+                //log.warn("unable to cancel the form - no action attribute found for the form");
                 return;
             }
             var data:any = {};
@@ -285,11 +285,11 @@ namespace ghost.browser.forms
                 }).
             then(function(result:any):void
             {
-                log.error(result);
+                //log.error(result);
 
             }, function(error:any):void
             {
-                log.error(error);
+                //log.error(error);
             });*/
         }
 
@@ -360,7 +360,7 @@ namespace ghost.browser.forms
             }
             if(!this.action)
             {
-                log.warn("unable to autosave the form - no action attribute found for the form");
+                //log.warn("unable to autosave the form - no action attribute found for the form");
                 return;
             }
             for(var p in this.promises)
@@ -653,7 +653,7 @@ namespace ghost.browser.forms
                 }, (error:any):void=>
                 {
                     delete this.promises[name];
-                    log.error(error);
+                    //log.error(error);
                 });
             this.promises[name] = ajax;
         }
@@ -707,7 +707,7 @@ namespace ghost.browser.forms
                 {
                     debugger;
                     delete this.promises[name];
-                    log.error(error);
+                    //log.error(error);
                 });
             this.promises[name] = ajax;
         }

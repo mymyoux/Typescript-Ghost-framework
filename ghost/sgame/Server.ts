@@ -54,7 +54,7 @@ namespace ghost.sgame
         }
         protected createServer(options:any):any
         {
-            log.info("createServer : "+(options.secure?"https":"http"));
+            //log.info("createServer : "+(options.secure?"https":"http"));
             var express = require('express');
             var fs = require("fs");
             var app = express();
@@ -85,7 +85,7 @@ namespace ghost.sgame
                         
                     }catch(error)
                     {
-                        log.error(error);
+                        //log.error(error);
                     }
                 });
             }
@@ -130,7 +130,7 @@ namespace ghost.sgame
 
                 this.server.listen(this.port);
                 
-                log.info("listen from port "+this.port);
+                //log.info("listen from port "+this.port);
             }
         }
         private _onConnection(socket:any):void {
@@ -222,7 +222,7 @@ namespace ghost.sgame
                             }
                         }else
                         {
-                            log.warn("try to callback twice", arguments);
+                            //log.warn("try to callback twice", arguments);
                             throw new Error("twice");
                         }
                     }

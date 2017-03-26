@@ -2,6 +2,7 @@
 ///<module="ghost/utils"/>
 ///<file="IData"/>
 ///<file="IRetrievable"/>
+///<file="IModel"/>
 ///<file="IPartRequest"/>
 namespace ghost.browser.mvc
 {
@@ -9,7 +10,8 @@ namespace ghost.browser.mvc
 
     import Strings = ghost.utils.Strings;
     //TODO:controller(view) => preload models=> load data from ajax or memory
-
+    //tsc:uncomment
+    //import Collection = ghost.browser.mvc.Collection;
 
     /**
      * Model class

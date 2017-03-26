@@ -80,7 +80,7 @@ namespace ghost.debug
             for(var p in data)
             {
 
-                Log.log(data[p], Log.LEVEL_INFO);
+                //log.log(data[p], Log.LEVEL_INFO);
             }
         }
         /**
@@ -92,7 +92,7 @@ namespace ghost.debug
             for(var p in data)
             {
 
-                Log.log(data[p], Log.LEVEL_WARN);
+                //log.log(data[p], Log.LEVEL_WARN);
             }
         }
         /**
@@ -104,7 +104,7 @@ namespace ghost.debug
             for(var p in data)
             {
 
-                Log.log(data[p], Log.LEVEL_DEBUG);
+                //log.log(data[p], Log.LEVEL_DEBUG);
             }
         }
         /**
@@ -116,7 +116,7 @@ namespace ghost.debug
             for(var p in data)
             {
 
-                Log.log(data[p], Log.LEVEL_ERROR);
+                //log.log(data[p], Log.LEVEL_ERROR);
             }
         }
         private static gradient:ghost.utils.Gradient;
@@ -125,9 +125,9 @@ namespace ghost.debug
         {
             if(!Log.gradient)
             {
-                Log.gradient = new ghost.utils.Gradient();
-                Log.gradient.setColours("#000000", "#FF0000", "#FF00FF", "#FFFFFF");
-                Log.gradient.setMax(15);
+                //log.gradient = new ghost.utils.Gradient();
+                //log.gradient.setColours("#000000", "#FF0000", "#FF00FF", "#FFFFFF");
+                //log.gradient.setMax(15);
 
             }
             return Log.gradient;
@@ -167,11 +167,11 @@ namespace ghost.debug
             var index:number;
             if((index = Log._white.indexOf(cls))!=-1)
             {
-                Log._white.splice(index, 1);
+                //log._white.splice(index, 1);
             }
             if((index = Log._black.indexOf(cls))==-1)
             {
-                Log._black.push(cls);
+                //log._black.push(cls);
             }
         }
         /**
@@ -203,11 +203,11 @@ namespace ghost.debug
             var index:number;
             if((index = Log._black.indexOf(cls))!=-1)
             {
-                Log._black.splice(index, 1);
+                //log._black.splice(index, 1);
             }
             if((index = Log._white.indexOf(cls))==-1)
             {
-                Log._white.push(cls);
+                //log._white.push(cls);
             }
         }
         /**
@@ -223,7 +223,7 @@ namespace ghost.debug
                     return;
                 }
             }
-            Log._black.length = 0;
+            //log._black.length = 0;
         }
         /**
          * Blacklist all classes.
@@ -241,9 +241,9 @@ namespace ghost.debug
             }
             if(force)
             {
-                Log._white.length = 0;
+                //log._white.length = 0;
             }
-            Log._black = [Log.BLACKLIST_ALL];
+            //log._black = [Log.BLACKLIST_ALL];
         }
 
 
@@ -254,13 +254,13 @@ namespace ghost.debug
         {
             if((<any>console).groupCollapsed)
             {
-                Log._hasColors = true;
+                //log._hasColors = true;
             }
             var white:string[] = ghost.browser.data.Cookies.getCookie("LOG_WHITE");
             if(white)
             {
-                Log._white = white;
-                Log._white.sort();
+                //log._white = white;
+                //log._white.sort();
                 if(Log._hasColors)
                     (<any>console).groupCollapsed("%c[LOG_LOAD]White:"+JSON.stringify( Log._white),'color:#339900; font-weight:bold;');
                 else
@@ -278,13 +278,13 @@ namespace ghost.debug
                 }
                 if(Log._hasColors)
                     (<any>console).groupEnd();
-                Log._manuallyLogged = true;
+                //log._manuallyLogged = true;
             }
             var black:string[] = ghost.browser.data.Cookies.getCookie("LOG_BLACK");
             if(black)
             {
-                Log._black = black;
-                Log._black.sort();
+                //log._black = black;
+                //log._black.sort();
                 if(Log._hasColors)
                     (<any>console).groupCollapsed("%c[LOG_LOAD]Black:"+JSON.stringify( Log._black),'color:#CC0000; font-weight:bold;');
                 else
@@ -301,12 +301,12 @@ namespace ghost.debug
                 }
                 if(Log._hasColors)
                     (<any>console).groupEnd();
-                Log._manuallyLogged = true;
+                //log._manuallyLogged = true;
             }
             var known:string[] = ghost.browser.data.Cookies.getCookie("LOG_KNOWN");
             if(known)
             {
-                 Log._known = known;
+                 //log._known = known;
             }/*
             if(!Log._manuallyLogged)
             {
@@ -360,7 +360,7 @@ namespace ghost.debug
         public static showAllClasses():void
         {
             (<any>console).group("%c[LOG_CLASSES]",'color:#339900; font-weight:bold;');
-            Log._classes.sort();
+            //log._classes.sort();
             var len:number = Log._classes.length;
             for(var i:number=0; i<len; i++)
             {
@@ -401,10 +401,10 @@ namespace ghost.debug
             var stackline:any = Log.getStackTrace(3);
             if(stackline && stackline.cls && Log._classes.indexOf(stackline.cls)==-1)
             {
-                Log._classes.push(stackline.cls);
+                //log._classes.push(stackline.cls);
                 if(Log._known.indexOf(stackline.cls)==-1)
                 {
-                    Log._known.push(stackline.cls);
+                    //log._known.push(stackline.cls);
                     ghost.browser.data.Cookies.setCookie("LOG_KNOWN", Log._known);
                     if(Log._manuallyLogged && Log._black.indexOf(Log.BLACKLIST_ALL)!=-1)
                     {
@@ -439,7 +439,7 @@ namespace ghost.debug
 
             if(!Log.colors[stackline.cls])
             {
-                Log.colors[stackline.cls] = Log.getColours().getColour(Log.count++, true);
+                //log.colors[stackline.cls] = Log.getColours().getColour(Log.count++, true);
                 //Log.colors[stackline.cls] = Log.getColours().getColour(ghost.utils.Maths.randBetween(0, Log.getColours().getMax(), true);
             }
             color =  Log.colors[stackline.cls] ;
@@ -619,12 +619,12 @@ namespace ghost.debug
 
 var log = ghost.debug.Log;
 
-log.init();
+//log.init();
 if(document.location.href.indexOf("local")==-1 && document.location.href.indexOf("remote")==-1)
 {
-    log.hideAll();
+    //log.hideAll();
 }else
 {
-    log.showAll();
+    //log.showAll();
 
 }

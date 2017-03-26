@@ -2,7 +2,9 @@
 ///<module="sgamecommon"/>
 namespace ghost.sgame
 {
-    import Socketio = SocketIO.Socket;
+    //tsc:uncomment
+    /////<reference path="typings/globals/socket.io/index.d.ts"/>;
+  //  import Socketio = SocketIO.Socket;
     import Const = ghost.sgamecommon.Const;
     import log = ghost.logging.log;
     export class Socket extends ghost.events.EventDispatcher
@@ -12,10 +14,10 @@ namespace ghost.sgame
         public static EVENT_DESTROYED:string = "destroy";
         public static EVENT_DISCONNECTED:string = "disconnected";
 
-        private socket:Socketio;
+        private socket:any;
         private connected:boolean;
 
-        public constructor(socket:Socketio)
+        public constructor(socket: any)
         {
             super();
             this.connected = true;  
@@ -41,10 +43,10 @@ namespace ghost.sgame
         }
         private _onError(error:any):void
         {
-            log.error("socketerror", error);
+            //log.error("socketerror", error);
             if(error && error.stack)
             {
-                log.error(error.stack);
+                //log.error(error.stack);
             }
         }
         private _onDisconnect():void
@@ -63,7 +65,7 @@ namespace ghost.sgame
         }
         private _onEvent(data:any):void
         {
-            log.info("event", data);
+            //log.info("event", data);
         }
 
         public write(command:string, data:any):void

@@ -1,8 +1,11 @@
 ///<module="ghost/events"/>
 ///<module="ghost/browser/debug"/>
 ///<file="Controller.ts"/>
+///<file="IScopeOptions.ts"/>
 namespace ghost.browser.mvc
 {
+    //tsc:uncomment
+    //import Navigation = ghost.browser.navigation.Navigation;
     /**
      * Scope
      */
@@ -24,7 +27,7 @@ namespace ghost.browser.mvc
         constructor(name:string)
         {
             super();
-            log.hide();
+            //log.hide();
             this._name = name;
             Scope._names.push(name);
             Scope._scopes.push(this);
@@ -50,7 +53,7 @@ namespace ghost.browser.mvc
                     },this);
                 }
             }
-            log.info("New Scope : "+name);
+            //log.info("New Scope : "+name);
 
         }
         public name():string
@@ -59,7 +62,7 @@ namespace ghost.browser.mvc
         }
         private _onPageChanged(type:string, previous:string, next:string, params:any = null):void
         {
-            log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
+            //log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
             /* if(name == this._name)
              {*/
             if(next)
@@ -76,7 +79,7 @@ namespace ghost.browser.mvc
 
                     if(controller)
                     {
-                        log.warn("Loading : "+next);
+                        //log.warn("Loading : "+next);
                         this.setCurrentController(controller, params);
                     }
                 }
@@ -95,7 +98,7 @@ namespace ghost.browser.mvc
          * @param next Next's page
          * @param event NavigationEvent - cancelable
          */
-        protected onPageChanging(type:string, previous:string, next:string, event:ghost.browser.navigation.NavigationEvent):void
+        protected onPageChanging(type:string, previous:string, next:string, event:any):void
         {
             var controller:Controller = Controller.getController(next);
 
@@ -200,8 +203,8 @@ namespace ghost.browser.mvc
 
             if(controller.canActivate(params)===true)
             {
-                log.info("Activating:");
-                log.warn(controller);
+                // log.info("Activating:");
+                // log.warn(controller);
                 this.removeCurrentController();
                 this._currentController = controller;
                 this._currentController.scope(this);
@@ -215,7 +218,7 @@ namespace ghost.browser.mvc
          */
         public removeCurrentController():void
         {
-            log.info("remove current controller");
+            // log.info("remove current controller");
             if(this._currentController != null)
             {
                 this._currentController._predisactivate();
@@ -396,9 +399,5 @@ namespace ghost.browser.mvc
             return this._controllers;
         }
     }
-    export interface IScopeOptions
-    {
-        scope?:string;
-        name?:string;
-    }
+
 }

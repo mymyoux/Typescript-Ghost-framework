@@ -153,7 +153,7 @@ namespace ghost.browser.mvc
 
         protected cache(): ghost.browser.data.LocalForage 
         {
-            return ghost.forage.war("templates").war(this.getTypeFromURL());
+            return ghost.browser.data.LocalForage.instance().war("templates").war(this.getTypeFromURL());
         }
         protected getNewInstance():Template
         {
