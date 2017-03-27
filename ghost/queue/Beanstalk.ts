@@ -1,9 +1,11 @@
 ///<lib="node"/>
 ///<module="events"/>
 ///<module="database"/>
+///<module="utils"/>
 namespace ghost.queue {
     var beanstalk = require("fivebeans");
     import Database = ghost.database.Database;
+    import Maths = ghost.utils.Maths;
     export class Beanstalk extends ghost.events.EventDispatcher
     {
         public static EVENT_CONNECTED:string = "connected";
@@ -79,8 +81,11 @@ namespace ghost.queue {
         }
         public reserve(callback:any):void
         { 
+            var id: number = Maths.getUniqueID();
+            console.log('reserve:' + id);
             this.beanstalk.reserve((error: any, id: string, payload: any): void =>
                 {
+                    console.log('reserved:' + id);
                     if(error)
                     {
                         console.error("beanstalk reserve error:", error);
