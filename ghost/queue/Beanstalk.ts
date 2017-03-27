@@ -81,11 +81,11 @@ namespace ghost.queue {
         }
         public reserve(callback:any):void
         { 
-            var id: number = Maths.getUniqueID();
-            console.log('reserve:' + id);
+            var reserve_id: number = Maths.getUniqueID();
+            console.log('reserve:' + reserve_id);
             this.beanstalk.reserve((error: any, id: string, payload: any): void =>
                 {
-                    console.log('reserved:' + id);
+                console.log('reserved:' + reserve_id);
                     if(error)
                     {
                         console.error("beanstalk reserve error:", error);
