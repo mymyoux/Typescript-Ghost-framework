@@ -78,8 +78,8 @@ namespace ghost.queue {
             this.beanstalk.watch(tube, callback);
         }
         public reserve(callback:any):void
-        {
-            this.beanstalk.reserve( (error:any, id:string, payload:any):void=>
+        { 
+            this.beanstalk.reserve_with_timeout(0, (error: any, id: string, payload: any): void =>
                 {
                     if(error)
                     {
