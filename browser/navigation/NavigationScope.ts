@@ -5,6 +5,8 @@
 
 namespace ghost.browser.navigation {
     //tsc:uncomment
+    //import Navigation = ghost.browser.navigation.Navigation;
+    //tsc:uncomment
     /////<reference path="typings/globals/socket.io-client/index.d.ts"/>;
     //tsc:uncomment
     /////<reference path="typings/globals/node/index.d.ts"/>;

@@ -1,5 +1,6 @@
 ///<file="Collection.ts"/>
 ///<file="IModel.ts"/>
+///<file="MixinConfig.ts"/>
 ///<module="api"/>
 namespace ghost.browser.mvc
 {
@@ -553,16 +554,6 @@ namespace ghost.browser.mvc
         public toRactive():any
         {
             return this;
-        }
-    }
-    export class MixinConfig 
-    {
-        public mixin: any;
-        public config: any;
-        public constructor(mixin:any, config:any = null)
-        {
-            this.mixin = mixin;
-            this.config = config;
         }
     }
 }

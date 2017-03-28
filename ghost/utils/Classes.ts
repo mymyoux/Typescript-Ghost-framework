@@ -44,6 +44,9 @@ namespace ghost.utils
             {
                 return null;
             }
+            if (typeof require === "function" && typeof require["specified"] === "function") {
+                return require(name);
+            }
             var root:any = ghost.core.Root.getRoot();
             var names:string[] = name.split(".");
             

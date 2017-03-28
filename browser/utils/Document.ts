@@ -1,4 +1,4 @@
-namespace ghost.utils
+namespace ghost.browser.utils
 {
 	export class Document
 	{

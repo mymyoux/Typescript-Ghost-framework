@@ -12,6 +12,10 @@
 //tsc:uncomment
 /////<reference path="typings/globals/ractive/index.d.ts"/>;
 
+//tsc:uncomment
+//import _Promise = ghost.promises._Promise;
+
+
 ///<module="framework/ghost/promises"/>
 ///<module="framework/browser/debug"/>
 namespace ghost.browser.mvc
@@ -52,6 +56,8 @@ namespace ghost.browser.mvc
 		constructor()
 		{
 			super();
+            //tsc:uncomment
+            //_Promise;
 			this._data = [];
             this._parts = [];
             this._partsPromises = [];

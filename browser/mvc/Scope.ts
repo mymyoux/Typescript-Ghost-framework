@@ -322,6 +322,9 @@ namespace ghost.browser.mvc
         {
             if(Scope._navigation === undefined)
             {
+                //tsc:uncomment
+                //Scope._navigation = Navigation.instance;
+                //tsc:delete
                 Scope._navigation = ghost.utils.Classes.get("ghost.browser.navigation.Navigation").instance;
             }
             return Scope._navigation;

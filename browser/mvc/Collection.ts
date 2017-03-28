@@ -17,10 +17,10 @@ namespace ghost.browser.mvc
          * @type {string}
          */
         public static PART_DEFAULT:string = "default";
-        public static EVENT_RETRIEVED:string = Model.EVENT_RETRIEVED;
-        public static EVENT_CHANGE:string = "change";
+        public static EVENT_RETRIEVED: string = "loaded";
+           public static EVENT_CHANGE:string = "change";
         public static EVENT_CHANGED:string = "changed";
-        public static EVENT_FIRST_DATA: string = Model.EVENT_FIRST_DATA;
+        public static EVENT_FIRST_DATA: string = "first_data";
 
         /**
          * Model's instances

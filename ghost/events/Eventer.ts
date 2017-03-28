@@ -277,6 +277,9 @@ namespace ghost.events
         
         private _checkDomReady(callback:any):void
         {
+            if (ghost.core.Root.getRoot().document.readyState === "complete" || ghost.core.Root.getRoot().document.readyState === "loaded" || ghost.core.Root.getRoot().document.readyState == "interactive") {
+                return callback();
+            }
             /* Mozilla, Chrome, Opera */
             if (ghost.core.Root.getRoot().document.addEventListener) {
                 ghost.core.Root.getRoot().document.addEventListener("DOMContentLoaded", callback, false);
