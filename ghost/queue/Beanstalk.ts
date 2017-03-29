@@ -8,6 +8,7 @@ namespace ghost.queue {
     import Maths = ghost.utils.Maths;
     export class Beanstalk extends ghost.events.EventDispatcher
     {
+        public static EVENT_DEADLINE_SOON:string = "DEADLINE_SOON";
         public static EVENT_CONNECTED:string = "connected";
         public static EVENT_ERROR:string = "error";
         public static EVENT_DISCONNECTED:string = "disconnected";
@@ -79,23 +80,41 @@ namespace ghost.queue {
             this.watched[tube] = true;
             this.beanstalk.watch(tube, callback);
         }
+        public touch(id):void
+        {
+            // console.log("touch:"+id);
+            this.beanstalk.touch(id, function(error)
+            {
+                console.log("touch error:", error);
+            });
+        }
         public reserve(callback:any):void
         { 
             var reserve_id: number = Maths.getUniqueID();
             console.log('reserve:' + reserve_id);
             this.beanstalk.reserve((error: any, id: string, payload: any): void =>
                 {
-                console.log('reserved:' + reserve_id);
+                console.log('reserved:' + reserve_id+" => "+id);
                     if(error)
                     {
                         console.error("beanstalk reserve error:", error);
-                        if(error == "DEADLINE_SOON")
+                        console.log(id);
+                        console.log(payload);
+                        if(error == Beanstalk.EVENT_DEADLINE_SOON)
                         {
-                            this.reserve(callback);
+                            this.trigger(Beanstalk.EVENT_DEADLINE_SOON);
+                            setTimeout(()=>
+                            {
+                                console.log("retry");
+                                this.reserve(callback);
+                            }, 5000);
+                        }else{
+                            console.log("no deadline");
                         }
                         return;
                     }
                     var data:any = JSON.parse(payload.toString('utf8'));
+                    
                     if(data && data._id_beanstalkd)
                     {
                         Database.instance().query('SELECT * FROM beanstalkd_log WHERE id=?', [data._id_beanstalkd], (error, results, fields)=>
@@ -111,6 +130,7 @@ namespace ghost.queue {
                                  return;
                              }
                              var job: Job = new Job(this, id, data, results[0]);
+                             console.log("job reserver["+reserve_id+"] => "+job.id);
                              Database.instance().query('UPDATE beanstalkd_log SET state=?,tries=? WHERE id=?', [job.state, job.tries, job.id_database], function(error) 
                              {
                                  if (error) {
