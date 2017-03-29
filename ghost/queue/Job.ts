@@ -41,6 +41,7 @@ namespace ghost.queue {
       }
       public hardFail()
       {
+        console.log("hard faile:"+this.id);
           this.state = Job.STATE_FAILED;  
           this.hard_failed = true;
           this.beanstalk.fail(this);
