@@ -1,5 +1,6 @@
 namespace ghost.revelation
 {
+
     export interface IMiddleWare
     {
         path:string;

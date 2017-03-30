@@ -1,5 +1,6 @@
 ///<file="Server"/>
 ///<file="RouteController"/>
+///<file="Route"/>
 ///<file="IMiddleWare"/>
 ///<module="framework/ghost/core"/>
 ///<module="framework/ghost/utils"/>

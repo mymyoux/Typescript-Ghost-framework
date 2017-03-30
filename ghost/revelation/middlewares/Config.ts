@@ -5,6 +5,8 @@
 ///<lib="node"/>
 namespace ghost.revelation.middlewares
 {
+    //tsc:uncomment
+    //import Application = ghost.revelation.Application;
     var path_module = require("path");
     var fs_module = require("fs");
     export class Config implements ghost.revelation.IMiddleWare

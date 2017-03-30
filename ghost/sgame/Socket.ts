@@ -4,7 +4,7 @@ namespace ghost.sgame
 {
     //tsc:uncomment
     /////<reference path="typings/globals/socket.io/index.d.ts"/>;
-  //  import Socketio = SocketIO.Socket;
+    
     import Const = ghost.sgamecommon.Const;
     import log = ghost.logging.log;
     export class Socket extends ghost.events.EventDispatcher

@@ -4,6 +4,8 @@
 ///<lib="node"/>
 namespace ghost.revelation.middlewares
 {
+    //tsc:uncomment
+    //import Application = ghost.revelation.Application;
     var path_module = require("path");
     export class Ractive implements ghost.revelation.IMiddleWare
     {

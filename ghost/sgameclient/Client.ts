@@ -17,13 +17,13 @@ namespace ghost.sgameclient
         public static EVENT_ERROR:string = "error";
         public static EVENT_ERROR_CONNECTION:string = "error_connection";
         private url:string;
-        private options: SocketIOClient.ConnectOpts;
+        private options: any;
         private socket:any;
         private buffer:Buffer;
         protected connecting: boolean;
         private disconnected:boolean;
         private _hasBeenConnected: boolean;
-        public constructor(url: string, options?: SocketIOClient.ConnectOpts)
+        public constructor(url: string, options?: any)
         {
             super();
             this._hasBeenConnected = false;
@@ -32,7 +32,7 @@ namespace ghost.sgameclient
             this.init(url, options);
             this.buffer = new Buffer();
         }
-        public init(url: string, options?: SocketIOClient.ConnectOpts): void
+        public init(url: string, options?: any): void
         {
             this.url = url;
             this.options = options;
@@ -84,17 +84,18 @@ namespace ghost.sgameclient
         }
         private _connect():void
         {
+            var root:any = ghost.core.Root.getRoot();
             //test
-            if(typeof io == "undefined")
+            if(typeof root.io == "undefined")
             {
-                io = require("socket.io-client");
+                root.io = require("socket.io-client");
             }
 
             if(ghost.core.Root.getRoot()._isNode)
             {
                 console.log("Node environment");
             }
-            var socket = ghost.core.Root.getRoot()._isNode?require('socket.io-client')(this.url, this.options):io(this.url, this.options);
+            var socket = ghost.core.Root.getRoot()._isNode?require('socket.io-client')(this.url, this.options):root.io(this.url, this.options);
             socket.on('connect', this._onConnect.bind(this));
             socket.on('event', this._onEvent.bind(this));
        /*     socket.on('*', (data:any)=>{

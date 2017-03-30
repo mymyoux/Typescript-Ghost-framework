@@ -1,6 +1,7 @@
 ///<lib="jquery"/>
-namespace ghost.browser.helpers 
+namespace ghost.browser.helpers
 {
+    
     export class LinkHelper 
     {
         public static listen():void

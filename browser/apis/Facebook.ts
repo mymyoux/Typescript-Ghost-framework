@@ -100,7 +100,7 @@ namespace ghost.browser.apis
                     }
                     console.log("fb init..");
                     
-                    FB.init(options);
+                    FB.init(<any>options);
                     _self._ready = true;
                     if(callback)
                         _self.getLoginStatus(callback);
@@ -114,7 +114,7 @@ namespace ghost.browser.apis
                 $("body").append('<div id="fb-root"></div>');
             }
 //            alert("ok");
-            if(window["fbAsyncInit"] && window["fbAsyncInit"].hasRun)
+            if(window["fbAsyncInit"] && (<any>window["fbAsyncInit"]).hasRun)
             {
                 console.log("call FB ASYNC");
                 window["fbAsyncInit"]();

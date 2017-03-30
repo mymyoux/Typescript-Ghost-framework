@@ -1,6 +1,7 @@
 ///<lib="node"/>
 ///<lib="socketio"/>
 ///<file="User"/>
+///<file="ICallback"/>
 ///<module="events"/>
 ///<module="sgamecommon"/>
 ///<module="logging"/>
@@ -9,7 +10,7 @@ namespace ghost.sgame
 {
     import Const = ghost.sgamecommon.Const;
     import log = ghost.logging.log;
-    //import Socket = SocketIO.Socket;
+    
     export class Server extends ghost.events.EventDispatcher
     {
         public static EVENT_ERROR:string = "error";
@@ -267,14 +268,6 @@ namespace ghost.sgame
             super.destroy();
         }
     }
-    export interface ICallback
-    {
-        called:boolean;
-        handled:boolean;
-        success:Function;
-        error:Function;
-    }
-
 
 
 }

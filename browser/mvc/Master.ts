@@ -828,12 +828,12 @@ namespace ghost.browser.mvc
                     options.data.makeComponent = (name, token, data) => {
                         var url: string = "rcomponents/" + name.toLowerCase(); 
                         var urlPartial: string = "rcomponents/" + token;
-                        if (!Ractive.partials[url])
+                        if (!(<any>Ractive).partials[url])
                         {
-                            Ractive.partials[url] = ""; 
-                            if (!Ractive.components[name])
+                            (<any>Ractive).partials[url] = ""; 
+                            if (!(<any>Ractive).components[name])
                             {
-                                Ractive.components[name] = Ractive.extend(Component.getConfig(name));
+                                (<any>Ractive).components[name] = Ractive.extend(Component.getConfig(name));
                             }
                             Component.loadTemplate(url).then((template:Template)=>
                             {
@@ -846,8 +846,8 @@ namespace ghost.browser.mvc
                                     }
                                 }
                                 //Master.partials_context[name] = context;
-                                Ractive.partials[url] = '<' + name+ ' model="{{this}}/>';
-                                Ractive.partials[urlPartial] = '<' + name + ' model="{{this}}"' + context + '/>';
+                                (<any>Ractive).partials[url] = '<' + name+ ' model="{{this}}/>';
+                                (<any>Ractive).partials[urlPartial] = '<' + name + ' model="{{this}}"' + context + '/>';
                                 this.template.set("_components." + token.toLowerCase(), true);
                                 this.template.set("_components." + token.toLowerCase(), false);
                             });
@@ -858,21 +858,21 @@ namespace ghost.browser.mvc
                                     context += ' ' + p + '="' + data[p] + '"';
                                 }
                             }
-                            Ractive.partials[urlPartial] = '<' + name + ' model="{{this}}"' + context + '/>';
+                            (<any>Ractive).partials[urlPartial] = '<' + name + ' model="{{this}}"' + context + '/>';
                         }
                         return urlPartial;
                     };
 
                     options.data.makePartial = (name, data)=> {
                         var url: string = "partial/" + name;
-                        if(Ractive.partials[url])
+                        if((<any>Ractive).partials[url])
                         {
                             return url;
                         } 
                         var template: any = Template.getTemplate(url); 
                         if (!template)
                         {
-                            Ractive.partials[url] = "";
+                            (<any>Ractive).partials[url] = "";
                             Template.load(url).then((template:Template) =>
                             {           
                                 if(!template)
@@ -880,8 +880,8 @@ namespace ghost.browser.mvc
                                     return;
                                 }
                                 template.prepareForUse().then(()=> {
-                                    if (Ractive.partials[url] !== template.parsed) {
-                                        Ractive.partials[url] = template.parsed;
+                                    if ((<any>Ractive).partials[url] !== template.parsed) {
+                                        (<any>Ractive).partials[url] = template.parsed;
                                         this.template.set("_partials." + name, true);
                                         this.template.set("_partials." + name, false);
                                     }
@@ -896,12 +896,12 @@ namespace ghost.browser.mvc
                             });      
                         }else
                         {
-                            if (!Ractive.partials[url])
+                            if (!(<any>Ractive).partials[url])
                             {
                                 template.prepareForUse().then(() => {
-                                    if (Ractive.partials[url] !== template.parsed)
+                                    if ((<any>Ractive).partials[url] !== template.parsed)
                                     {
-                                        Ractive.partials[url] = template.parsed;
+                                        (<any>Ractive).partials[url] = template.parsed;
                                         this.template.set("_partials." + name, true);
                                         this.template.set("_partials." + name, false);
                                     }

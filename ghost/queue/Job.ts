@@ -1,6 +1,12 @@
 ///<lib="node"/>
 namespace ghost.queue {
+
+
+
     export class Job{
+
+
+      
       protected beanstalk: Beanstalk;
       public static STATE_EXECUTING: string = "executing";
       public static STATE_EXECUTED: string = "executed";

@@ -16,6 +16,8 @@ colors.setTheme({
 });
 namespace ghost.revelation
 {
+    
+
 	export class Server
 	{
 		private express:any;

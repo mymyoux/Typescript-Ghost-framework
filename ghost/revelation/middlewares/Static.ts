@@ -4,6 +4,8 @@
 ///<lib="node"/>
 namespace ghost.revelation.middlewares
 {
+    //tsc:uncomment
+    //import Application = ghost.revelation.Application;
     var express_module = require("express");
     export class Static implements ghost.revelation.IMiddleWare
     {
