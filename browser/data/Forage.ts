@@ -3,6 +3,86 @@
 //TODO:add mozilla API and converts with Promises
 namespace ghost.browser.data
 {
+     export class FakeLocalStorage
+    {
+        public _storage : any;
+        /**
+         * Constructor
+         */
+        constructor()
+        {
+            // super();
+        }
+
+        public instance():any
+        {
+            return this;
+        }
+        
+        public getItem(key:string):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( null );
+            });
+            return promise;
+        }
+
+        public setItem(key:string, value:string):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( null );
+            });
+            return promise;
+        }
+
+        public key(key:string):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( null );
+            });
+            return promise;
+        }
+
+        public removeItem(key:string):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( null );
+            });
+            return promise;
+        }
+
+        public clear():Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( null );
+            });
+            return promise;
+        }
+
+        public keys():Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( [] );
+            });
+            return promise;
+        }
+
+        public iterate( func : any ):Promise<any>
+        {
+            var promise:Promise<any> = new Promise<any>((resolve:any, reject:any):void=>
+            {
+                resolve( undefined );
+            });
+            return promise;
+        }
+    }
+
     import Root = ghost.core.Root;
     export interface ILocalForageOptions
     {
@@ -80,7 +160,11 @@ namespace ghost.browser.data
             }
             this._name = name;
             this._warehouses = {};
-            this._storage = Root.getRoot().localforage.createInstance({name:name});
+
+            if (ghost.core.Hardware.getOS() === 'iOS')
+                this._storage = new ghost.browser.data.FakeLocalStorage();
+            else
+                this._storage = Root.getRoot().localforage.createInstance({name:name});
             this._data = {}; 
             this._sync = {};
 

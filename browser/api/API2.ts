@@ -36,6 +36,10 @@ namespace ghost.browser.api
 			this._path = path;
 			return this;
 		}
+		public param(param: string, data: any): API2 {
+			super.param(param, data);
+			return this;
+		}
 		public config(options: IAPIOptions): API2
 		{
 			return <API2>super.config(options);
