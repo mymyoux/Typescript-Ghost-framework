@@ -2,6 +2,7 @@
 ///<module="debug"/>
 ///<lib="jquery"/>
 ///<file="NavigationEvent"/>
+///<file="IPage"/>
 
 namespace ghost.browser.navigation {
     //tsc:uncomment
@@ -328,10 +329,5 @@ namespace ghost.browser.navigation {
         }
     }
 
-    //   Navigation = new Navigation();
-    export interface IPage {
-        page: string;
-        params: any;
-    }
 
 }

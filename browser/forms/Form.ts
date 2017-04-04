@@ -2412,13 +2412,13 @@ namespace ghost.browser.forms
             {
                 $(this.element).append('<input type="file" name="'+$(this.element).attr("data-field")+'">');
             }
-            this.inputFile = $(this.element).find("input[type='file']").get(0);
+            this.inputFile = <any>$(this.element).find("input[type='file']").get(0);
             this.$triggerInput = $(this.element).find("[data-trigger]").addBack("[data-trigger]");
             if(!this.$triggerInput.length)
             {
                 this.$triggerInput = this.$input;
             }
-            this.preview = $(this.element).find("[data-preview]").get(0);
+            this.preview = <any>$(this.element).find("[data-preview]").get(0);
             if(this.preview)
             {
 

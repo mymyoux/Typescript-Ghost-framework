@@ -1,5 +1,7 @@
 ///<module="framework/ghost/brain"/>
 ///<lib="d3"/>
+//tsc:uncomment
+//import * as d3 from "d3";
 namespace ghost.browser.brain
 {
 	import Brain = ghost.brain.Brain;
@@ -45,7 +47,7 @@ namespace ghost.browser.brain
 				.attr("width", width)
 				.attr("height", height);
 
-			var force = (<any>d3.layout.force())
+			var force = (<any>d3).layout.force()
 				.gravity(0.05)
 				.distance(250) 
 				.charge(100)

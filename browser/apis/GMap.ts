@@ -84,7 +84,7 @@ namespace ghost.browser.apis
 					return;
 				}
 				var obj= $(".gmap").length?$(".gmap"):$('<div class="g_map hidden">').appendTo('body');
-				var service:any = new google.maps.places["PlacesService"](obj.get(0));
+				var service:any = new google.maps.places["PlacesService"](<any>obj.get(0));
 				service.getDetails(data,
 					function(result, status){
 						if(status === google.maps.places.PlacesServiceStatus.OK)
@@ -118,7 +118,7 @@ namespace ghost.browser.apis
 					return;
 				}
 				var obj= $(".gmap").length?$(".gmap"):$('<div class="g_map hidden">').appendTo('body');
-				var service:any = new google.maps.places["PlacesService"](obj.get(0));
+				var service:any = new google.maps.places["PlacesService"](<any>obj.get(0));
 				service.textSearch(data,
 					function(result, status){
 						if(status === google.maps.places.PlacesServiceStatus.OK)
@@ -152,7 +152,7 @@ namespace ghost.browser.apis
 					return;
 				}
 				var obj= $(".gmap").length?$(".gmap"):$('<div class="g_map hidden">').appendTo('body');
-				var service:any = new google.maps.places["PlacesService"](obj.get(0));
+				var service:any = new google.maps.places["PlacesService"](<any>obj.get(0));
 				service.nearbySearch(data,
 					function(result, status){
 						if(status === google.maps.places.PlacesServiceStatus.OK)

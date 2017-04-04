@@ -6,6 +6,8 @@ namespace ghost.browser.mvc
 {
     //tsc:uncomment
     //import Navigation = ghost.browser.navigation.Navigation;
+    //tsc:uncomment
+    //import IPage = ghost.browser.navigation.IPage;
     /**
      * Scope
      */
