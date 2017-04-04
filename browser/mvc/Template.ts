@@ -16,10 +16,10 @@ namespace ghost.browser.mvc
             }
             return Template._instance;
         }
-        public static init(): void {
+        public static init(data:any = null): void {
             ghost.browser.mvc.Template._instance = new Template();
         }
-        private static _templates:any = {}; 
+        protected static _templates:any = {}; 
         public static getTemplate(url:string):Template
         {
             if(!Template._templates)
@@ -71,7 +71,7 @@ namespace ghost.browser.mvc
 
 
         protected _type: string;
-        private loading: any;
+        protected loading: any;
         /**
          * Template url
          */
