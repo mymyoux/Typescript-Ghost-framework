@@ -1,6 +1,7 @@
 ///<lib="Promise"/>
 ///<module="events"/>
 ///<file="Component"/>
+///<file="IRawTemplate"/>
 namespace ghost.browser.mvc
 {
     export class Template extends ghost.events.EventDispatcher
@@ -389,14 +390,5 @@ namespace ghost.browser.mvc
             return promise;
         }
     }
-    export interface IRawTemplate
-    {
-        md5:string;
-        content:string;
-        url:string;
-        parsed:string;
-        version:number;
-        components: any[];    
-        loaded:()=> boolean;
-    }
+ 
 }

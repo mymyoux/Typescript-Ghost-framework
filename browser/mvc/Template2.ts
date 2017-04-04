@@ -2,6 +2,7 @@
 ///<module="events"/>
 ///<module="framework/browser/api"/>
 ///<file="Template"/>
+///<file="IRawTemplate"/>
 namespace ghost.browser.mvc
 {
     import API2 = ghost.browser.api.API2;
