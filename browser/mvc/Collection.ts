@@ -46,8 +46,12 @@ namespace ghost.browser.mvc
             }
             if(typeof cls == "string")
             {
-                ///collection from string
-                var collection:Collection<any> = cls.split(".").reduce(function(previous:any, next:string):Collection<any>
+                var collection:Collection<any>
+                //tsc:uncomment
+                //collection = require(cls.replace("/\./g","/"));
+                //tsc:uncomment
+                //if(!collection) 
+                collection = cls.split(".").reduce(function(previous:any, next:string):Collection<any>
                 {
                    return previous? previous[next] : null;
                 }, ghost.core.Root.getRoot());

@@ -65,13 +65,20 @@ namespace ghost.browser.mvc
             }
             if(typeof cls == "string")
             {
-                ///model from string
-                var model:Model = cls.split(".").reduce(function(previous:any, next:string):Model
+                var model:Model
+                //tsc:uncomment
+                //model = require(cls.replace("/\./g","/"));
+                //tsc:uncomment
+                //if(!model)
+                model = cls.split(".").reduce(function(previous:any, next:string):Model
                 {
                     if(previous)
+                    {
                         return previous[next];
+                    }
                     return null;
                 }, ghost.core.Root.getRoot());
+
                 if(!model)
                 {
                     throw new Error("No Model named "+cls);

@@ -1,5 +1,6 @@
 ///<lib="Promise"/>
 ///<file="IMiddleWare"/>
+///<file="IAPIOptions"/>
 ///<module="io"/>
 ///<module="framework/ghost/events"/>
 ///<module="framework/ghost/utils"/>
@@ -251,15 +252,6 @@ module ghost.browser.api
     
     
 
-    export interface IAPIOptions
-    {
-        url?:string;
-        retry?: any;
-        token?: string; 
-        id_user?: number; 
-        cache?: string; 
-        jsonp?: boolean;
-    }
 
 
 

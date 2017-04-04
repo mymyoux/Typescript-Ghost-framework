@@ -12,7 +12,10 @@ namespace ghost.browser.forms
 //verifier les images
 //PHP :'(
 
-
+//tsc:uncomment
+//import {ajax} from "browser/io/Ajax";
+//tsc:uncomment
+//import {RETRY_INFINITE} from "browser/io/Ajax";
     var formTypes:any = {};
 
     export class CancelableEvent
@@ -446,7 +449,7 @@ namespace ghost.browser.forms
             if (this.data && this.data.id_user)
                 data.id_user = this.data.id_user;
 
-            var ajax:any = ghost.browser.io.ajax({
+            var req:any = ghost.browser.io.ajax({
                 url:action,
                 data:data,
                 retry:3,
@@ -466,7 +469,7 @@ namespace ghost.browser.forms
                     delete this.promises[name];
                 });
 
-            this.promises[name] = ajax;
+            this.promises[name] = req;
         }
         protected additionalData():any
         {
@@ -522,7 +525,7 @@ namespace ghost.browser.forms
             if (this.data && this.data.id_user)
                 data.id_user = this.data.id_user;
 
-            var ajax:any = ghost.browser.io.ajax({
+            var req:any = ghost.browser.io.ajax({
                     url:action,
                     data:data,
                     retry:ghost.browser.io.RETRY_INFINITE,
@@ -541,7 +544,7 @@ namespace ghost.browser.forms
                delete this.promises[name];
             });
 
-            this.promises[name] = ajax;
+            this.promises[name] = req;
         }
         private getObjectID(data:any):string
         {
@@ -636,7 +639,7 @@ namespace ghost.browser.forms
             if (this.data && this.data.id_user)
                 data.id_user = this.data.id_user;
 
-            var ajax:any = ghost.browser.io.ajax({
+            var req:any = ghost.browser.io.ajax({
                 url:action,
                 data:data,
                 retry:ghost.browser.io.RETRY_INFINITE,
@@ -655,7 +658,7 @@ namespace ghost.browser.forms
                     delete this.promises[name];
                     //log.error(error);
                 });
-            this.promises[name] = ajax;
+            this.promises[name] = req;
         }
         public onRemove(dataItems:IChangeData[]):void
         {
@@ -693,7 +696,7 @@ namespace ghost.browser.forms
                 }, 500);
                 return;
             }
-            var ajax:any = ghost.browser.io.ajax({
+            var req:any = ghost.browser.io.ajax({
                 url:action,
                 data:data,
                 retry:ghost.browser.io.RETRY_INFINITE,
@@ -709,7 +712,7 @@ namespace ghost.browser.forms
                     delete this.promises[name];
                     //log.error(error);
                 });
-            this.promises[name] = ajax;
+            this.promises[name] = req;
         }
         public static addFieldClass(cls):void
         {

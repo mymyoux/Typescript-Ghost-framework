@@ -1,4 +1,5 @@
 ///<file="API"/>
+///<file="IAPIOptions"/>
 ///<file="APIExtended"/>
 ///<file="IMiddleWare"/>
 namespace ghost.browser.api
