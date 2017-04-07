@@ -38,6 +38,10 @@ import {IMiddleWare} from "./IMiddleWare";
 			super();
 			this._always = true;
 		}
+		public param(param: string, data: any): API2 {
+			super.param(param, data);
+			return this;
+		}
 		public path(path:string):API2
 		{
 			this._path = path;
