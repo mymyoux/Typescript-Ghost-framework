@@ -57,7 +57,6 @@ import {IMiddleWare} from "./IMiddleWare";
 				request.url = this._config.url + this._path;
 			if (this._config[API2.API_TOKEN])
 			{
-				debugger;
 				if(!request.data)
 				{
 					request.data = {};
