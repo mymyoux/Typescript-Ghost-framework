@@ -141,7 +141,7 @@ import {IRawTemplate} from "./IRawTemplate";
                 debugger;
             }
             this.parsed = Ractive["parse"](this.content, options); 
-            if(window.location.host.indexOf(".local")==-1)
+            if(window.location.host.indexOf(".local")==-1 && window.location.host.indexOf("local.")==-1)
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,

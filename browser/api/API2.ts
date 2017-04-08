@@ -57,6 +57,7 @@ import {IMiddleWare} from "./IMiddleWare";
 				request.url = this._config.url + this._path;
 			if (this._config[API2.API_TOKEN])
 			{
+				debugger;
 				if(!request.data)
 				{
 					request.data = {};
@@ -153,7 +154,7 @@ import {IMiddleWare} from "./IMiddleWare";
 			{
 				this.parseAPIData(data.api_data);
 			}
-			if(data.data)
+			if(data.data !== undefined)
 			{
 				if (data.data) {
 					this.trigger(API.EVENT_DATA_FORMATTED, data.data);

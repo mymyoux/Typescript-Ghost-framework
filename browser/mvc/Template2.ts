@@ -145,6 +145,10 @@ import {API2} from "browser/api/API2";
                                     this.loading[name] = false;
                                     if(result.template)
                                     {
+                                        result.template = 
+                                        {
+                                            content:result.template,
+                                            version:result.version};
                                         result.template.url = name;
                                         resolve(this.setTemplate(result.template));
 
