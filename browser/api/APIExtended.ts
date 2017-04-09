@@ -159,7 +159,7 @@ import {Objects} from "ghost/utils/Objects";
 		protected _apiData: any;
 		protected _direction: number[] = [1];
 		private _cacheLength: number;
-		private _name: string;
+		protected _name: string;
 		protected _always: boolean;
 		private _stack: boolean = false;
 		public _instance: number = Maths.getUniqueID();
@@ -486,7 +486,14 @@ import {Objects} from "ghost/utils/Objects";
 				this._stacklist.push({ resolve: resolve, reject: reject, request: request, token: token });
 				return this;
 			}
-			return this._then(request, resolve, reject, token);
+			return this._then(request, resolve, function()
+			{
+				if(reject)
+				{
+					console.log("api_error", arguments, request);
+					reject.apply(null, Array.prototype.slice.call(arguments))
+				}
+			}, token);
 		}
 		public toURL(): string {
 			var request: any = this.getRequest();

@@ -20,6 +20,7 @@ import {MixinConfig} from "./MixinConfig";
 import {APIExtended as API} from "browser/api/APIExtended";
     //convert-import
 import {APIExtended} from "browser/api/APIExtended";
+import {API2} from "browser/api/API2";
     //convert-import
 import {Arrays} from "ghost/utils/Arrays";
     //convert-import
@@ -313,8 +314,8 @@ import {Model} from "browser/mvc/Model";
             }
             return null;
         }
-        public request(name: string): APIExtended {
-            return API.request().name("controller_" + this.controller()+"_"+this.name() + "_" + name);
+        public request(name: string): any {
+            return API2.request().name("controller_" + this.controller()+"_"+this.name() + "_" + name);
         }
         public getModelByID(id:any):T
         {

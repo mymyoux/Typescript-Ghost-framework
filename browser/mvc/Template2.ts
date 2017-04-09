@@ -154,7 +154,7 @@ import {API2} from "browser/api/API2";
 
                                     }else
                                     {
-                                        reject("no template");
+                                        reject("no template:"+name);
                                     }
                                 },
                                 function()

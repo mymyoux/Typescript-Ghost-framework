@@ -29,7 +29,7 @@ import {IMiddleWare} from "./IMiddleWare";
 			return <API2>API.instance(name, cls);
 		}
 		public static request(name: string = null): API2 {
-			return <API2>API.instance(name).request();
+			return <API2>API2.instance(name).request();
 		}
 
 		protected _path: string;
@@ -161,6 +161,10 @@ import {IMiddleWare} from "./IMiddleWare";
 				return data.data;
 			}
 			return data;
+		}
+		public name(name: string): API2 {
+			this._name = name;
+			return this;
 		}
 		public request(): API2 {
 			var c: any = super.request();
