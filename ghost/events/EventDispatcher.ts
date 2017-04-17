@@ -1,6 +1,7 @@
 //convert
  /* ghost.utils.Maths.*/
 import {Maths} from "ghost/utils/Maths";
+import {Classes} from "ghost/utils/Classes";
 //convert
  /* ghost.core.CoreObject
 */

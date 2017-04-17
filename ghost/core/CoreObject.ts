@@ -27,13 +27,14 @@ window.onerror = function(err, url, line){
             //TODO:remove instances
             this.__instance = CoreObject.__id++;//Maths.getUniqueID();
         }
+        
         /**
          * Gets current Classname
          * @returns {string}
          */
         public getClassName()
         {
-            if(this._className == undefined)
+            if(!this._className)
             {
                 if(this["constructor"]["name"])
                 {

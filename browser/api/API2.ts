@@ -42,6 +42,10 @@ import {IMiddleWare} from "./IMiddleWare";
 			super.param(param, data);
 			return this;
 		}
+		public params(params:any): API2 {
+			super.params(params);
+			return this;
+		}
 		public path(path:string):API2
 		{
 			this._path = path;
@@ -68,6 +72,14 @@ import {IMiddleWare} from "./IMiddleWare";
 				delete request.data.method;
 			}
 			return request;
+		}
+		public then(token?: string, request?: any): any 
+		public then(resolve?: any, reject?: any): any
+		public then(resolve?: any, reject?: any): any{
+			return new Promise<any>((rs, rj)=>
+			{
+				super.then(rs, rj);
+			}).then(resolve, reject);
 		}
 		protected _then(request: any, resolve: any, reject: any, token: string): APIExtended {
 			for (var p in APIExtended.middlewares) {
@@ -161,6 +173,10 @@ import {IMiddleWare} from "./IMiddleWare";
 				return data.data;
 			}
 			return data;
+		}
+		public always(value: boolean): API2 {
+			super.always(value);
+			return this;
 		}
 		public name(name: string): API2 {
 			this._name = name;

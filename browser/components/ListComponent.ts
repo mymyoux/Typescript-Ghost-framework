@@ -337,4 +337,8 @@ export class ListComponent extends Component {
         console.log("proxy:" + type);
         this.fire.apply(this, Array.prototype.slice.call(arguments));
     }
+    protected getTemplateName():string
+    {
+        return "rcomponents/list";
+    }
 }

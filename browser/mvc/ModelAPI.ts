@@ -11,6 +11,7 @@ import {APIExtended as API} from "browser/api/APIExtended";
 import {APIExtended} from "browser/api/APIExtended";
 	export class ModelAPI extends Model
 	{
+        public static PART_LOAD:string = "load";
 		private requests: any;
 		
 		public constructor() {
@@ -24,6 +25,18 @@ import {APIExtended} from "browser/api/APIExtended";
         protected onPartData(name: string, data: any): void {
             if (name == Model.PART_DEFAULT)
                 this.readExternal(data);
+        }
+        public load(id:number):Promise<any>
+        {
+            return new Promise<any>((resolve:any, reject:any):void=>
+            {
+                this.getRequest(ModelAPI.PART_LOAD, id).then((data:any)=>
+                {
+                    this.readExternal(data);
+                    this.trigger(ModelAPI.EVENT_CHANGE);
+                    resolve(this);
+                }, reject);
+            });
         }
         protected _getRequest(part?: string, params?: any): APIExtended {
             if (typeof part !== "string") {
@@ -130,12 +143,18 @@ import {APIExtended} from "browser/api/APIExtended";
 		protected getRequestInstance(part?: string, params?: any): APIExtended {
 			return this._getRequest(part, params); 
         }
-		protected getRequest(name: string, params: any = null): APIExtended {
-			throw new Error("You need to override #getRequest()");
-            switch (name) {
+		protected getRequest(name: string, params: any = null): APIExtended
+        {
+            switch(name)
+            {
                 case Model.PART_DEFAULT:
+                    return this.request(name).controller(this.controller()).action(this.name());
+                    break;
+                case ModelAPI.PART_LOAD:
+                    return this.request(name).controller(this.name()).action("get").param("id", params);
                     break;
             }
+            throw new Error('part '+name+' is not implemented');
             return null;
         }
 	}

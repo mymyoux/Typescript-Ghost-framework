@@ -40,7 +40,7 @@ import {Hardware} from "ghost/core/Hardware";
 			if (!this._initialized)
 			{
 				this._initialized = true;
-				window.onerror = this.onError.bind(this);
+				//window.onerror = this.onError.bind(this);
 			}
     	}
     	public addError(error:any):void
@@ -94,6 +94,7 @@ import {Hardware} from "ghost/core/Hardware";
     	}
 		public onError(message: string, url: string, line: number, column: number, error: any)
 		{
+			debugger;
 			var data: UncaughtError = new UncaughtError(
 				{
 					message: message,

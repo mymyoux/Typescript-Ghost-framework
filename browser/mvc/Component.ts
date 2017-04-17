@@ -71,7 +71,11 @@ import {Strings} from "ghost/utils/Strings";
 				var componentClass: any = this.getComponentClass(name);
 				if(!componentClass)
 				{
-					Strings.camel(name);
+					//Strings.camel(name);
+					if(name.indexOf("Component") == -1)
+					{
+						return Component.getComponentForInstance(instance, name+"Component");
+					}
 					throw new Error(name + " component class has not been found");
 				}
 				var component: Component = new componentClass(instance, name);
@@ -255,6 +259,7 @@ import {Strings} from "ghost/utils/Strings";
 					{
 						method = this[method];
 					}
+					this.instance[p] = method.bind(this);
 					this.ron(p, method.bind(this));
 				}
 			}
