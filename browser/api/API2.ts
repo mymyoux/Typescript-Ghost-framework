@@ -43,6 +43,11 @@ import {IMiddleWare} from "./IMiddleWare";
 			return this;
 		}
 		public params(params:any): API2 {
+			for(var p in params)
+			{
+				if(params[p] === null || params[p]===undefined)
+					delete params[p];
+			}
 			super.params(params);
 			return this;
 		}

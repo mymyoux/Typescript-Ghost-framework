@@ -56,6 +56,17 @@ import {Maths} from "ghost/utils/Maths";
             text = text.substring(0, 1).toLowerCase() + text.substring(1);
             return text;
         }
+        public static uncamel(text:string, delimiter:string = "_")
+        {
+            if(!text)
+            {
+                return text;
+            }
+            var reg: RegExp = /[A-Z]/g;
+            text = text.replace(/[A-Z]/g, " $1");
+            text = text.replace(/ /g,delimiter);
+            return text.toLowerCase();
+        }
         public static capitalizeAllWords(text:string):string
         {
             if(!text)
