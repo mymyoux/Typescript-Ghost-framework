@@ -149,12 +149,9 @@ import {APIExtended} from "browser/api/APIExtended";
             {
                 case Model.PART_DEFAULT:
                     return this.request(name).controller(this.controller()).action(this.name());
-                    break;
                 case ModelAPI.PART_LOAD:
                     return this.request(name).controller(this.name()).action("get").param("id", params);
-                    break;
             }
             throw new Error('part '+name+' is not implemented');
-            return null;
         }
 	}

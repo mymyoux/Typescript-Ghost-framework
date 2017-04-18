@@ -197,8 +197,8 @@ import {Objects} from "ghost/utils/Objects";
             for (var p in this) {
                 if (this.hasOwnProperty(p))
                     if (p.substring(0, 1) != "_" && p !="socket") {
-                        if (typeof this[p] == "object" && this[p].inspect) {
-                            data[p] = this[p].inspect();
+                        if (typeof this[p] == "object" && this[p]["inspect"]) {
+                            data[p] = this[p]["inspect"]();
                         } else {
                             data[p] = this[p];
                         }

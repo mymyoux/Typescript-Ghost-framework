@@ -154,7 +154,6 @@ import {Root} from "ghost/core/Root";
             {
                 return  Hardware.OS_Website;
             }
-            return null;
         }
         public static getBrowser():string
         {

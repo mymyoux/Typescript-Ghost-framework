@@ -136,7 +136,6 @@ import {Strings} from "ghost/utils/Strings";
 				}  
 				return func.apply(current, args);
 			}
-			return null;
 		}
 		protected static getBindedFunctions(name:string): any {
             var componentClass: any = this.getComponentClass(name);
@@ -439,7 +438,6 @@ import {Strings} from "ghost/utils/Strings";
 				return template.parsed;
 			}
 			throw new Error("Component " + this.name + " integration not loaded");
-			return null;
 		}
     }
     export interface IComponentData

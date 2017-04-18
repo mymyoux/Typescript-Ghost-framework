@@ -174,10 +174,6 @@ import {log} from "ghost/logging/log";
             // log.info(this.users);
             //decaler dans le temps pke le dispose(); kill les _listeners
             user.dispose();
-            return;
-            setTimeout(() => {
-                user.dispose();
-            },0);
         }
         protected _unbindUserEvents(user: User): void {
             if (user.socket)

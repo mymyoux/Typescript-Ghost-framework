@@ -455,8 +455,8 @@ import {Gradient} from "ghost/utils/Colours";
             var line:string = "%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+"%c"+(stackline.cls?stackline.cls+"::":"")+"%c"+stackline.func+"()%c_%c";
             var colours:string[] = ['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;', 'color:black;font-weight:lighter;', 'color:grey;font-weight:lighter;'];
 
-
-            if(typeof data == "object" || typeof data == "function" || typeof data == "xml" || data ==null)
+ 
+            if(typeof data == "object" || typeof data == "function" /*|| typeof data == "xml"*/ || data ==null)
             {
                 (<any>console).groupCollapsed.apply(console, [line].concat(colours).concat([data]));
             }else
@@ -468,100 +468,6 @@ import {Gradient} from "ghost/utils/Colours";
             func.apply(console,[codeline, 'color:black;']);
             console.trace();
             (<any>console).groupEnd();
-
-            return;
-
-
-                colors =['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;','color:black;font-weight:lighter;','color:grey;font-weight:lighter;', 'color:'+color+';font-weight:bold;','color:grey;font-weight:lighter;','font-weight:lighter;'];
-                (<any>console).groupCollapsed.apply(console, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+txt].concat(colors));
-                if(isData)
-                    func.apply(console,[data]);
-                func.apply(console,[line, 'color:black;']);
-                console.trace();
-                (<any>console).groupEnd();
-
-            var display:any = data.reduce(function(previous:any[], item:any):any
-            {
-                 if(typeof item == "object" || typeof item == "function" || typeof item == "xml" || item ==null)
-                 {
-                    previous.push(item);
-                 }else
-                 {
-                    //console.log(onsole.log("add" + item)
-                    previous.push("%c"+item+"%c");
-                    previous.push('color:red;font-weight:bold;');
-                 }
-
-                 return previous;
-            }, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+"%c"+(stackline.cls?stackline.cls+"::":"")+"%c"+stackline.func+"()%c_%c", ]);
-
-            console.log.apply(console, display);
-            return;
-
-            var isData:boolean = false;
-            var dataStr:string;
-
-
-
-
-
-            if((typeof data == "object" || typeof data == "function" || typeof data == "xml") && data!=null)
-            {
-                try
-                {
-                    isData = true;
-                    dataStr = JSON.stringify(data);
-                    if(dataStr == null)
-                    {
-                        dataStr = data + "";
-                    }
-                }catch(error)
-                {
-                    dataStr = data + "";
-                }
-            }else
-            {
-                dataStr = data+"";
-            }
-            var index:number;
-            if(dataStr!=null)
-            {
-
-                if((index=dataStr.indexOf("\n"))!=-1)
-                {
-                    dataStr = dataStr.substring(0, index)+"...";
-                    isData = true;
-                }
-                if(dataStr.length>50)
-                {
-                    dataStr = dataStr.substring(0, 50)+"...";
-                    isData = true;
-                }
-
-            }
-
-            if(stackline)
-            {
-
-                var txt:string = "%c"+(stackline.cls?stackline.cls+"::":"")+"%c"+stackline.func+"()%c_%c"+dataStr+"%c_%c";
-                var line:string = "%c"+stackline.file+":"+stackline.line+":"+stackline.column+"";
-                var colors:string[] = [];
-
-
-                colors =['color:'+color+';font-weight:lighter;', 'color:'+color+';font-weight:lighter;','color:black;font-weight:lighter;','color:grey;font-weight:lighter;', 'color:'+color+';font-weight:bold;','color:grey;font-weight:lighter;','font-weight:lighter;'];
-                (<any>console).groupCollapsed.apply(console, ["%c"+(level!=Log.LEVEL_INFO?"["+level+"]":"\t")+"\t"+txt].concat(colors));
-                if(isData)
-                    func.apply(console,[data]);
-                func.apply(console,[line, 'color:black;']);
-                console.trace();
-                (<any>console).groupEnd();
-
-
-            }else
-            {
-                //uncomment si on veut logger sur un autre navigateur que chrome
-                //console.log(data+"");
-            }
         }
         public static getStackTrace(line:number = 0):any
         {

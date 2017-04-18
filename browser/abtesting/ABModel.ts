@@ -103,7 +103,6 @@ import {Application} from "browser/mvc/Application";
                         }
                     }
                     return request;
-                    break;
                 case ABModel.PART_UPDATE:
 
                     var request: APIExtended = this.request(name).controller("ab").method("POST").action("update");
@@ -124,7 +123,6 @@ import {Application} from "browser/mvc/Application";
                             request = request.param(key, this[key]);
                     }
                     return request;
-                    break
             }
             return null;
         }

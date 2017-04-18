@@ -1208,10 +1208,10 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
         }
         public validate():boolean
         {
-            if(false && !this.useValidator)
-            {
-                return true;
-            }
+            // if(false && !this.useValidator)
+            // {
+            //     return true;
+            // }
             if(this.isValid())
             {
                 $(this.element).attr("data-success", "success");
@@ -1223,7 +1223,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
                 {
                     this.$error.text(this.getError());
                 }
-                return false;
+                return false; 
             }
         }
         protected initialValidate():void

@@ -310,7 +310,6 @@ import {Model} from "browser/mvc/Model";
             {
                 case Model.PART_DEFAULT:
                     return this.request(name).controller(this.controller()).action(this.name());
-                    break;
             }
             return null;
         }
@@ -423,19 +422,21 @@ import {Model} from "browser/mvc/Model";
                         }else
                         {
                             ///test before remove this false
-                            if(false && result.index == this._models.length)
-                            {
-                                this._models.push(model);
-                            }else
-                            {
-                                this._models.splice(result.index, 0, model);
-                                /*
-                                debugger; splice doesnt seems to work with ractive.0.8
-                                var temp1 = this._models.slice(0, result.index);
-                                var temp2 = this._models.slice(result.index);
-                                temp1.push(model);
-                                this._models =  temp1.concat(temp2);*/
-                            }
+                            
+                            // if(false && result.index == this._models.length)
+                            // {
+                            //     this._models.push(model);
+                            // }else
+                            // {
+                            //     this._models.splice(result.index, 0, model);
+                            //     /*
+                            //     debugger; splice doesnt seems to work with ractive.0.8
+                            //     var temp1 = this._models.slice(0, result.index);
+                            //     var temp2 = this._models.slice(result.index);
+                            //     temp1.push(model);
+                            //     this._models =  temp1.concat(temp2);*/
+                            // }
+                             this._models.splice(result.index, 0, model);
                             /*
 
                             if (this._orderDirection > 0) {

@@ -301,17 +301,6 @@ import {Collection} from "browser/mvc/Collection";
         {
             debugger;
              throw new Error("you must override getPartRequest function");
-            switch(name)
-            {
-                case Model.PART_DEFAULT:
-                    return {
-                        method:"GET",
-                        url:"data",
-                        data:{}
-                    };
-                break;
-            }
-            return null;
         }
 
         public retrieveData(data:string[] = [Model.PART_DEFAULT], params:any = null):Promise<any>
@@ -415,7 +404,6 @@ import {Collection} from "browser/mvc/Collection";
         public getFullClassName():string
         {
             throw new Error("You must override this function and set a complete class name return");
-            return null;
         }
 
 

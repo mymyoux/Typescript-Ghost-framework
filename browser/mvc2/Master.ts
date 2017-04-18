@@ -204,8 +204,8 @@ export class Master
         {
             if(typeof this[p] == "function" && p.substring(0, 1)=="$" && restricted.indexOf(p)==-1)
             {
-                this.$addMethod(p.substring(1), this[p].bind(this));
-            }
+                this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
+            } 
         }
     }
     protected renderVue():void

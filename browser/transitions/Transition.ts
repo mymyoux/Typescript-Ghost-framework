@@ -366,7 +366,6 @@ import {Navigation} from "browser/navigation/Navigation";
             if(!from)
             {
                 throw(new Error("You must give a view to show"));
-                return;
             }
     
             this._from = from;
@@ -656,16 +655,12 @@ import {Navigation} from "browser/navigation/Navigation";
             {
                 case SlideViewTransition.DIRECTION_UP:
                     return 0;
-                    break;
                 case SlideViewTransition.DIRECTION_DOWN:
                     return 0;
-                    break;
                 case SlideViewTransition.DIRECTION_LEFT:
                     return scale;
-                    break;
                 case SlideViewTransition.DIRECTION_RIGHT:
                     return -scale;
-                    break;
             }
         }
         private _getStartY()
@@ -676,16 +671,12 @@ import {Navigation} from "browser/navigation/Navigation";
             {
                 case SlideViewTransition.DIRECTION_UP:
                     return scale;
-                    break;
                 case SlideViewTransition.DIRECTION_DOWN:
                     return -scale;
-                    break;
                 case SlideViewTransition.DIRECTION_LEFT:
                     return 0;
-                    break;
                 case SlideViewTransition.DIRECTION_RIGHT:
                     return 0;
-                    break;
             }
         }
         private _getEndX()
@@ -696,16 +687,12 @@ import {Navigation} from "browser/navigation/Navigation";
             {
                 case SlideViewTransition.DIRECTION_UP:
                     return 0;
-                    break;
                 case SlideViewTransition.DIRECTION_DOWN:
                     return 0;
-                    break;
                 case SlideViewTransition.DIRECTION_LEFT:
                     return -scale;
-                    break;
                 case SlideViewTransition.DIRECTION_RIGHT:
                     return scale;
-                    break;
             }
         }
         private _getEndY()
@@ -716,16 +703,12 @@ import {Navigation} from "browser/navigation/Navigation";
             {
                 case SlideViewTransition.DIRECTION_UP:
                     return -scale;
-                    break;
                 case SlideViewTransition.DIRECTION_DOWN:
                     return scale;
-                    break;
                 case SlideViewTransition.DIRECTION_LEFT:
                     return 0;
-                    break;
                 case SlideViewTransition.DIRECTION_RIGHT:
                     return 0;
-                    break;
             }
         }
         /**
@@ -766,7 +749,7 @@ import {Navigation} from "browser/navigation/Navigation";
                 y = this._getEndY();
             }
         /*    if(this._options.reverse)
-            {
+            { 
                 x = -x;
                 y = -y;
             }*/

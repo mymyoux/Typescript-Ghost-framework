@@ -73,14 +73,14 @@ import {Model} from "browser/mvc/Model";
                         key = p.substring(5).toLowerCase();
                         if(this.data[key] && this.data[key].length>0)
                         {
-                            this[p]();
+                            (<any>this[p])();
                         }
                     }
                 }
-                //all are validated
-                for(var p in this.data)
+                //all are validated 
+                for(var q in this.data)
                 {
-                    this.validated[p] = true;
+                    this.validated[q] = true;
                 }
             }
         }

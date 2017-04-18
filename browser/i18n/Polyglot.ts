@@ -214,9 +214,9 @@ import {Arrays} from "ghost/utils/Arrays";
 			}; 
 		}
 		private retrieveFromCache(): void {
-
+ 
 			if (!this._retrievedFromCache) {
-				if (false && window.location.href.indexOf(".local") != -1) {
+				if (window.location.href.indexOf(".local") != -1 && window.location.href.indexOf("local.") != -1) {
 					this._retrievedFromCache = true;
 					this.retrieveUpdate();
 					return;
@@ -247,9 +247,7 @@ import {Arrays} from "ghost/utils/Arrays";
 			}
 		}
 		protected getRootURL(): string {
-			
-				return Application.instance().getRootURL();
-			return "/";
+			return Application.instance().getRootURL();
 		}
 		public retrieveUpdate(): void {
 			if (this._updated) {

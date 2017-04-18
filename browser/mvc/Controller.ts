@@ -251,7 +251,6 @@ import {Scope} from "browser/mvc/Scope";
                     {
                         console.warn("No controller registered that correspond to the instance given - you must use Controller.addPackage()", controller);
                         throw new Error();
-                        return null;
                     }
                     console.warn("No controller registered that correspond to the class constructor given - you must use Controller.addPackage()");
                     return null;

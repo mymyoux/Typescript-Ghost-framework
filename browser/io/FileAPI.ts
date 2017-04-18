@@ -13,12 +13,6 @@
 				{
 					resolve(null);
 					return;
-					input.addEventListener("change", ()=>
-					{
-
-						this.loadFile(input).then(resolve, reject);
-					});
-					return;
 				}
 				var textType = /.*javascript/;
 

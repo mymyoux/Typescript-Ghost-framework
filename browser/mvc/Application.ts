@@ -64,8 +64,7 @@ import {APIExtended} from "browser/api/APIExtended";
         protected getUserID():any
         {
             throw new Error("you must override this method");
-            return null;
-        }
+        } 
         private _init():void
         {
                  this.navigation();
@@ -114,7 +113,6 @@ import {APIExtended} from "browser/api/APIExtended";
         public getPackage():any
         {
             throw new Error("You must override this function to enable a correct usage of MVC system")
-            return null;
         }
         protected prerequire(callback?:Function):void
         {

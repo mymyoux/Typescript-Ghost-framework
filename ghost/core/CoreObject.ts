@@ -51,7 +51,6 @@ window.onerror = function(err, url, line){
         public getFullClassName():string
         {
             throw new Error("you must implement getFullClassName method before using it");
-            return null;
         }
         public getUniqueInstance():number
         {

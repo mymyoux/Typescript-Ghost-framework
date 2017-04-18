@@ -178,7 +178,6 @@ import {IPartRequest} from "./IPartRequest";
         public getFullClassName():string
         {
             throw new Error("You must override this function and set a complete class name return");
-            return null;
         }
         public name():string
         {
@@ -611,19 +610,7 @@ import {IPartRequest} from "./IPartRequest";
         }
         protected getPartRequest(name:string, params:any = null):IPartRequest
         {
-            debugger;
             throw new Error("you must override getPartRequest function");
-            switch(name)
-            {
-                case require("./Model").Model.PART_DEFAULT:
-                    return {
-                        method:"GET",
-                        url:"data",
-                        data:{}
-                    };
-                break;
-            }
-            return null;
         }
         public retrieveData(data:string[] = [Collection.PART_DEFAULT], params:any = null):Promise<any>
         {
@@ -761,15 +748,11 @@ import {IPartRequest} from "./IPartRequest";
         public toObject():any
         {
             return this._models;
-            return this._models.map(function(model:T):any
-            {
-                return model.toObject();
-            });
         }
 
         public toRactive():void
         {
             return this.toObject();
-        }
+        } 
 
     }
