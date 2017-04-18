@@ -26,4 +26,9 @@ export interface IModelConfig
      * @default false
      */
     always?:boolean;
+    /**
+     * If true will check for path, params keys & params value for dynamic values
+     * @default false
+     */
+    replaceDynamicParams?:boolean;
 }

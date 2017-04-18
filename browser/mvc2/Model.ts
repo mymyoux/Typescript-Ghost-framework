@@ -5,17 +5,23 @@ import {Strings} from "ghost/utils/Strings";
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {IModelConfig} from "./IModelConfig";
+import {ModelLoadRequest} from "./ModelLoadRequest";
 export class Model extends EventDispatcher
 {
     public static EVENT_CHANGE:string = "change";
     public static EVENT_FIRST_DATA:string = "first_data";
     public static EVENT_FORCE_CHANGE:string = "force_change";
-    public static PATH_CREATE:string = ".create";
-    public static PATH_GET:string = ".get";
-    public static PATH_DELETE:string = ".delete";
+    public static PATH_CREATE:()=>ModelLoadRequest = 
+        ()=>new ModelLoadRequest("%root-path%/create", null,{replaceDynamicParams:true});
+    public static PATH_GET:()=>ModelLoadRequest = 
+        ()=>new ModelLoadRequest("%root-path%/get", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+    public static PATH_DELETE:()=>ModelLoadRequest = 
+        ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+    public static PATH_UPDATE:()=>ModelLoadRequest = 
+        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
     private _firstData:boolean;
     private _pathLoaded:any = {};
-    protected _modelName:string;
+    protected _modelName:string; 
     public constructor()
     {
         super();
@@ -55,6 +61,20 @@ export class Model extends EventDispatcher
         }
         this.triggerChange(key);
     }
+    protected getIDName():string
+    {
+        var name:string = this.getModelName();
+        return  "id_"+Strings.uncamel(name);
+    }
+    public getID():number
+    {
+        if(this["id"])
+        {
+            return this["id"];
+        }else{
+            return this[this.getIDName()];
+        }
+    }   
     protected triggerChange(key:string):void
     {
         this.trigger(Model.EVENT_CHANGE, key, this[key]);
@@ -138,9 +158,54 @@ export class Model extends EventDispatcher
         }
         return external;
     }
-    
-    public load(path:string|Function, params:any, config:IModelConfig = null):API2|Promise<any>
+    private static regexp = /%([^%]+)%/g;
+    /**
+     * Replace %key% in strings
+     * 
+     */
+    protected replace(value:string):string
     {
+        var results:any[] = value.match(Model.regexp);
+        if(results)
+        {
+            results.map(function(key:string):string
+            {
+                return key.replace(/%/g,'');
+            }).forEach((key:string):void=>
+            {
+                if(key == "root-path")
+                {
+                    value = value.replace('%root-path%', this.getRootPath());
+                }else
+                if(key == "id-name")
+                {
+                    value = value.replace('%id-name%', this.getIDName());
+                }else
+                if(key == "id")
+                {
+                    value = value.replace('%id%', ""+this.getID());
+                }else
+                {
+                    if(this[key])
+                    {
+                        if(typeof this[key] == "function")
+                        {
+                            value = value.replace('%'+key+'%', this[key]());
+                        }else
+                        {
+                            value = value.replace('%'+key+'%', this[key]);
+                        }
+                    }
+                }
+            });
+        }
+        return value;
+    }
+    public load(path:string|Function|ModelLoadRequest, params:any, config:IModelConfig = null):API2|Promise<any>
+    {
+
+        if(!config)
+            config = {};
         if(typeof path == "function")
         {
             path = path.call(this);
@@ -149,8 +214,57 @@ export class Model extends EventDispatcher
         {
             params = params.call(this);
         }
-        if(!config)
-            config = {};
+        
+        if(path instanceof ModelLoadRequest)
+        {
+            if(path.config)
+            {
+                for(var p in path.config)
+                {
+                    config[p] = path.config[p];
+                }
+            }
+            if(!params)
+                params = {};
+            if(path.params)
+            {
+                for(var p in path.params)
+                {
+                    params[p] = path.params[p];
+                }
+            }
+            path = path.path;
+        }
+        if(config.replaceDynamicParams)
+        {
+            path = this.replace(<string>path);
+            if(params)
+            {
+                var k:string;
+                for(var p in params)
+                {
+                    
+                    if(Model.regexp.test(params[p]))
+                    {
+                        params[p] = this.replace(params[p]);
+                        if(params[p] == "undefined")
+                        {
+                            delete params[p];
+                        }
+                    }
+                    if(Model.regexp.test(p))
+                    {
+                        k =  this.replace(p);
+                        if(k!=p)
+                        {
+                            params[k] = params[p];
+                            delete params[p];
+                        }
+                    }
+                }
+
+            }
+        }
         if(config.execute !== false && config.ignorePathLoadState !== true)
         {
             //already loaded
