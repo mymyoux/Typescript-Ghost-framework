@@ -134,6 +134,10 @@ namespace ghost.browser.mvc
                                     this.loading[name] = false;
                                     if(result.template)
                                     {
+                                         result.template = 
+                                        {
+                                            content:result.template,
+                                            version:result.version};
                                         result.template.url = name;
                                         resolve(this.setTemplate(result.template));
 

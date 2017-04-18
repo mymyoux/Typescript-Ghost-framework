@@ -14,6 +14,7 @@ namespace ghost.sgame
         private apps:any;
         public id:string;
         public login:string;
+        public ip:string;
         public constructor()
         {
             super(); 
@@ -27,8 +28,19 @@ namespace ghost.sgame
                 this.socket.off(Socket.EVENT_DISCONNECTED, this.onDisconnected, this);
             }
             this.socket = socket; 
+            
             if(this.socket) 
+            {
                 this.socket.once(Socket.EVENT_DISCONNECTED, this.onDisconnected, this);
+                try
+                {
+                    //console.log('config ip', this.socket.socket[""]);
+                    this.ip = this.socket["socket"]["handshake"].address;
+                }catch(error)
+                {
+
+                }
+            }
         }
         public write(command:string, data:any):void
         {

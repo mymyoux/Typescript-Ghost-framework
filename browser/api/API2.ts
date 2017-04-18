@@ -32,6 +32,10 @@ namespace ghost.browser.api
 			super();
 			this._always = true;
 		}
+		public param(param: string, data: any): API2 {
+			super.param(param, data);
+			return this;
+		}
 		public path(path:string):API2
 		{
 			this._path = path;
@@ -143,7 +147,7 @@ namespace ghost.browser.api
 			{
 				this.parseAPIData(data.api_data);
 			}
-			if(data.data)
+			if(data.data !== undefined)
 			{
 				if (data.data) {
 					this.trigger(API.EVENT_DATA_FORMATTED, data.data);
