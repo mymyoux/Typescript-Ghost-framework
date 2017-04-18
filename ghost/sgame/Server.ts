@@ -153,6 +153,7 @@ import {log} from "ghost/logging/log";
             user.setSocket(new Socket(socket));
             this._bindUserEvents(user);
             this.users.push(user);
+            console.log("connexion:");
             // log.info("new connection");
             // log.info(this.users);
         }
@@ -165,8 +166,9 @@ import {log} from "ghost/logging/log";
             var index: number = this.users.indexOf(user);
             if(index != -1)
             {
-                this.users[index] = newUser;
+                this.users[index] = newUser; 
                 this._bindUserEvents(newUser);
+                console.log("new user", newUser);
             }
             // log.info("on change class");
             // log.info(this.users);
@@ -182,6 +184,7 @@ import {log} from "ghost/logging/log";
                 user.socket.off(Socket.EVENT_DATA, this._onData, this);
             user.off(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this);
             user.off(Const.USER_DISCONNECTED, this._onUserDisconnected, this);
+            user.off("loggued", this._onUserLoggued, this);
         }
         protected _bindUserEvents(user:User):void
         {
@@ -189,6 +192,11 @@ import {log} from "ghost/logging/log";
                 user.socket.on(Socket.EVENT_DATA, this._onData, this, user);
             user.on(Const.USER_CLASS_CHANGE, this._onUserChangeClass, this, user);
             user.on(Const.USER_DISCONNECTED, this._onUserDisconnected, this, user);
+            user.on("loggued", this._onUserLoggued, this, user);
+        }
+        protected _onUserLoggued(user:User):void
+        {
+            console.log("CONNECTED", user);
         }
         protected _onUserDisconnected(user: User): void {
             var index: number = this.users.indexOf(user);
