@@ -32,21 +32,61 @@ window.onerror = function(err, url, line){
          * Gets current Classname
          * @returns {string}
          */
-        public getClassName()
+        public getClassName():string
         {
             if(!this._className)
             {
-                if(this["constructor"]["name"])
+                if(typeof this == "object")
                 {
-                    this._className = this["constructor"]["name"];
-                }else
-                {
-                    var funcNameRegex = /function (.{1,})\(/;
-                    var results  = (funcNameRegex).exec(this["constructor"].toString());
-                    this._className = (results && results.length > 1) ? results[1] : "";
+                    if(this["constructor"]["name"])
+                    {
+                        this._className = this["constructor"]["name"];
+                    }else
+                    {
+                        var funcNameRegex = /function (.{1,})\(/;
+                        var results  = (funcNameRegex).exec(this["constructor"].toString());
+                        this._className = (results && results.length > 1) ? results[1] : "";
+                    }
+                }else{
+
+                    if(this["name"])
+                    {
+                       return this["name"];
+                    }else
+                    {
+                        var funcNameRegex = /function (.{1,})\(/;
+                        var results  = (funcNameRegex).exec(this["toString"]());
+                        return (results && results.length > 1) ? results[1] : "";
+                    }
                 }
             }
             return this._className;
+        }
+        public static getClassName():string
+        {
+                if(typeof this == "object")
+                {
+                    if(this["constructor"]["name"])
+                    {
+                        return  this["constructor"]["name"];
+                    }else
+                    {
+                        var funcNameRegex = /function (.{1,})\(/;
+                        var results  = (funcNameRegex).exec(this["constructor"].toString());
+                        return (results && results.length > 1) ? results[1] : "";
+                    }
+                }else{
+
+                    if(this["name"])
+                    {
+                       return this["name"];
+                    }else
+                    {
+                        var funcNameRegex = /function (.{1,})\(/;
+                        var results  = (funcNameRegex).exec(this["toString"]());
+                        return (results && results.length > 1) ? results[1] : "";
+                    }
+                }
         }
         public getFullClassName():string
         {

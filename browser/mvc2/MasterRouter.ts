@@ -8,7 +8,7 @@ export class MasterRouter
     {
         for(var p in cls)
         {
-            if(cls[p].prototype.route)
+            if(cls[p] && cls[p].prototype && cls[p].prototype.route)
             {
                 this.addMaster(cls[p]);
             }

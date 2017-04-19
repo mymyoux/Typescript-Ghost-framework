@@ -102,8 +102,11 @@ export class Model extends EventDispatcher
     {
         if(!this._modelName)
         {
-            this._modelName = this.getClassName();
-            this._modelName = this._modelName.replace('Model', '').toLowerCase();
+            var name:string = this.getClassName();
+            name =  name.replace('Model', '').toLowerCase();
+            if(typeof this == "function")
+                return name;
+            this._modelName = name;
         }
         return this._modelName;
     }

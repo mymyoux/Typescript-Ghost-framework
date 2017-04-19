@@ -175,7 +175,9 @@ export class Master
     }
     protected $getModel(model:any):any
     {
-        return this.$getData(model.prototype.getModelName());
+        var name:string = model.prototype.getModelName.call(model);
+        debugger;
+        return this.$getData(model.prototype.getModelName.call(model));
     }
     protected $addMethod(name:string):void;
     protected $addMethod(name:string, method:Function):void
