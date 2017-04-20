@@ -56,6 +56,10 @@ import {IMiddleWare} from "./IMiddleWare";
 			this._path = path;
 			return this;
 		}
+		public getPath():string
+		{
+			return this._path;
+		}
 		public config(options: IAPIOptions): API2
 		{
 			return <API2>super.config(options);

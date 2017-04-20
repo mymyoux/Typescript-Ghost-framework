@@ -314,7 +314,7 @@ import {Model} from "browser/mvc/Model";
             return null;
         }
         public request(name: string): any {
-            return API2.request().name("controller_" + this.controller()+"_"+this.name() + "_" + name);
+            return API.request().name("controller_" + this.controller()+"_"+this.name() + "_" + name);
         }
         public getModelByID(id:any):T
         {

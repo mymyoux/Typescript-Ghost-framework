@@ -106,9 +106,9 @@ export class Master
     protected bootTemplate():Promise<any>
     {
         var templatePath:string;
-        if(typeof this["template"] == "function")
+        if(typeof this["templatePath"] == "function")
         {
-            templatePath = this["template"]();
+            templatePath = this["templatePath"]();
             
         }else
         if(typeof this["path"] == "function")
@@ -146,7 +146,7 @@ export class Master
             this.vueConfig.data[name] = value;
             return;
         }
-        this.template.$set(this.template, name, value);
+        this.template.$set(this.template[name], name, value);
     }
     protected $getData(name:string):any
     {
@@ -170,13 +170,17 @@ export class Master
             name = null;
         }
         model = Inst.get(model);
-        this.$addData(name?name:model.getModelName(), model);
+        name = name?name:model.getModelName();
+        model.on(model.constructor.EVENT_FORCE_CHANGE, this.onModelChanged, this, name, model);
+        this.$addData(name, model);
         return model;
     }
+    protected $getModel(name:string):any
+    protected $getModel(model:any):any
     protected $getModel(model:any):any
     {
-        var name:string = model.prototype.getModelName.call(model);
-        debugger;
+        if(typeof model == "string")
+            return this.$getData(model);
         return this.$getData(model.prototype.getModelName.call(model));
     }
     protected $addMethod(name:string):void;
@@ -193,19 +197,24 @@ export class Master
         }
         this.vueConfig.methods[name] = method;
     }
+    protected onModelChanged(name:string, model:any):void
+    {
+        this.$addData(name, model);
+    }
     protected bootVue():void
     {
         this.vueConfig = {
             el:this.getContainer(),
             name:this._getName(),
             template:this._template.getContent()
-        };
-        var restricted:string[] = ["$addData","$addMethod","$addComputedProperty"];
+        }; 
+        var restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData"];
         //add $Methods by defaut
         for(var p in this)
         {
             if(typeof this[p] == "function" && p.substring(0, 1)=="$" && restricted.indexOf(p)==-1)
             {
+                console.log('bind:'+p);
                 this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
             } 
         }
