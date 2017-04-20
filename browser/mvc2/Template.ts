@@ -1,7 +1,8 @@
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Auth} from "./Auth";
-export class Template
+import {CoreObject} from "ghost/core/CoreObject";
+export class Template extends CoreObject
 {
     protected static _templates:any = {};
     protected static _api:API2;
@@ -29,11 +30,12 @@ export class Template
     {
         return LocalForage.instance().war("templates2").war(Auth.check()?Auth.type():"visitor");
     }
-    protected content:string;
+    protected template:string;
     protected version:number;
+    public components:string[];
     public constructor(public name:string)
     {
-
+        super();
     }
     public load():Promise<any>
     {
@@ -48,11 +50,25 @@ export class Template
     }
     protected readExternal(data:any):void
     {
-        this.content = data.template;
+        this.template = data.template;
         this.version = data.version;
+        this.components = data.components;
+    }
+    public hasComponent():boolean
+    { 
+        return this.components && this.components.length!=0;
     }
     public getContent():string
     {
-        return this.content;
+        return this.template;
+    }
+    public mounted():void
+    {
+        debugger;
+        if(!window["k"])
+        {
+            window["k"] = [];
+        }
+        window["k"].push(this);
     }
 }

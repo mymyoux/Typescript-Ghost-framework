@@ -12,7 +12,7 @@ export type Constructor<T extends ModelClass> = new(...args: any[]) => T;
 
 export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
     type T =  typeof Model.prototype;
-    return class extends Model {
+    return class Collection extends Model {
         public static PATH_GET:()=>ModelLoadRequest = 
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
         public models:T[];
@@ -311,7 +311,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
 }
 export function Unique<X extends Constructor<ModelClass>>( Model: X) {
     type T =  typeof Model.prototype;
-    return class extends Model {
+    return class Unique extends Model {
         protected __isUnique:boolean = true;
         public models:T[];
         private _unicity:string[];
@@ -466,7 +466,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
 }
 export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
     type T =  typeof Model.prototype;
-    return class extends Model {
+    return class Sorted extends Model {
         protected __isSorted:boolean = true;
         public models:T[];
         private _order:string[];

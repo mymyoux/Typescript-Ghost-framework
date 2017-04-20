@@ -2,6 +2,7 @@ import {Router} from "./Router";
 import {IRoute} from "./IRoute";
 import {Template} from "./Template";
 import {Inst} from "./Inst";
+import {Component} from "./Component";
 import {Classes} from "ghost/utils/Classes";
 export class Master 
 {
@@ -115,10 +116,17 @@ export class Master
         {
             templatePath = this["path"]();
         }
-        if(templatePath){
+        if(templatePath)
+        {
+          
             return Template.get(templatePath).then((template:Template)=>
             {
                 this._template = template;
+                if(!this._template.hasComponent())
+                {
+                    return;
+                }
+                this._template.components.map(this.$addComponent.bind(this));
             });
         }
         return null;
@@ -126,6 +134,13 @@ export class Master
     protected bindVue():void
     {
         throw new Error('override this');
+    }
+    protected $addComponent(name:string):void
+    {
+        if(!Vue.component('component-'+name))
+            Vue.component('component-'+name, Component.load.bind(Component, name));
+
+
     }
     protected $addComputedProperty(name:string, computed:Function):void
     {
@@ -208,7 +223,7 @@ export class Master
             name:this._getName(),
             template:this._template.getContent()
         }; 
-        var restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData"];
+        const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
         //add $Methods by defaut
         for(var p in this)
         {
@@ -222,5 +237,11 @@ export class Master
     protected renderVue():void
     {
         window["template"] = this.template = new Vue(this.vueConfig);
+        this.template.$on('new-component',this.onNewComponent.bind(this));
+    }
+    protected onNewComponent(component:Component):void
+    {
+        debugger;
+        component.setParent(this);
     }
 }

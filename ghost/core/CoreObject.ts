@@ -20,7 +20,7 @@ window.onerror = function(err, url, line){
          * Classname
          */
         private _className:string;
-        private __instance:number;
+        protected __instance:number;
         private static __id:number = 0;
         constructor()
         {

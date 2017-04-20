@@ -1,6 +1,7 @@
 import {MasterRouter} from "./MasterRouter";
 import {Template} from "./Template";
 import {Auth} from "./Auth";
+import {Component} from "./Component";
 
 import {Configuration} from "ghost/data/Configuration";
 import {APIExtended as API} from "browser/api/APIExtended";
@@ -8,7 +9,7 @@ import {API2} from "browser/api/API2";
 import {Objects} from "ghost/utils/Objects";
 export class Application
 {
-    protected steps:string[] = ["initAPI", "initUser","initTemplate","initRoute"];
+    protected steps:string[] = ["initAPI", "initUser","initTemplate","initComponents","initRoute"];
     public constructor()
     {
 
@@ -127,6 +128,13 @@ export class Application
     protected initTemplate():void
     {
         Template.setApi(API2.instance());
+    }
+    protected initComponents():void
+    {
+       if(this["components"])
+        {
+            Component.addPackage(this["components"]);
+        }
     }
     protected initRoute():void
     {
