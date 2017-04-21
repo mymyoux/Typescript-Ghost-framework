@@ -2,6 +2,7 @@ import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Auth} from "./Auth";
 import {CoreObject} from "ghost/core/CoreObject";
+import {Component} from "./Component";
 export class Template extends CoreObject
 {
     protected static _templates:any = {};
@@ -15,8 +16,19 @@ export class Template extends CoreObject
                 return  resolve(Template._templates[name]);
             }
             var template:Template = Template._templates[name] = new Template(name);
-            template.load().then(resolve, reject);
+            template.load().then(()=>
+            {
+                if(template.hasComponent())
+                {
+                    template.components.map(this.addComponent.bind(this));
+                }
+            }, reject).then(function(){resolve(template);}, reject);
         });
+    }
+    private static addComponent(name:string):void
+    {
+        if(!Vue.component('component-'+name))
+            Vue.component('component-'+name, Component.load.bind(Component, name));
     }
     public static setApi(api:API2):void
     {

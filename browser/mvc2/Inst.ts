@@ -8,6 +8,7 @@ export class Inst
     {
         if(!cls)
         {
+            debugger;
             throw new Error("You can't instantiate null class");
         }
         if(typeof cls == "object")

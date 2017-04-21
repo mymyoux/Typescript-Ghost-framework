@@ -6,14 +6,15 @@ import {Component} from "./Component";
 import {Classes} from "ghost/utils/Classes";
 export class Master 
 {
-    protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue"];
+    protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bootComponents"];
     protected _template:Template;
     protected template:any;
     protected container:HTMLElement;
     protected vueConfig:any;
+    protected components:Component[];
     public constructor() 
     {
-        
+        this.components = [];
     }
     /**
      * Called by MasterRouter on initilisation
@@ -122,11 +123,11 @@ export class Master
             return Template.get(templatePath).then((template:Template)=>
             {
                 this._template = template;
-                if(!this._template.hasComponent())
-                {
-                    return;
-                }
-                this._template.components.map(this.$addComponent.bind(this));
+                // if(!this._template.hasComponent())
+                // {
+                //     return;
+                // }
+                // this._template.components.map(this.$addComponent.bind(this));
             });
         }
         return null;
@@ -138,9 +139,9 @@ export class Master
     protected $addComponent(name:string):void
     {
         if(!Vue.component('component-'+name))
+        {
             Vue.component('component-'+name, Component.load.bind(Component, name));
-
-
+        }
     }
     protected $addComputedProperty(name:string, computed:Function):void
     {
@@ -183,6 +184,11 @@ export class Master
         {
             model = name;
             name = null;
+        }
+        if(!model)
+        {
+            console.warn('model given is null');
+            return;
         }
         model = Inst.get(model);
         name = name?name:model.getModelName();
@@ -229,19 +235,60 @@ export class Master
         {
             if(typeof this[p] == "function" && p.substring(0, 1)=="$" && restricted.indexOf(p)==-1)
             {
-                console.log('bind:'+p);
-                this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
+                if(p.substring(1, 2) == "$")
+                {
+                    this.$addComputedProperty(p.substring(2), (<any>this[p])());
+                }else
+                {
+                    this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
+                }
             } 
         }
     }
     protected renderVue():void
     {
         window["template"] = this.template = new Vue(this.vueConfig);
+    }
+    protected bootComponents():void
+    {
         this.template.$on('new-component',this.onNewComponent.bind(this));
     }
-    protected onNewComponent(component:Component):void
+    private onNewComponent(component:Component):void
     {
-        debugger;
         component.setParent(this);
+        this.components.push(component);
+    }
+    private removeComponent(component:Component):void
+    {
+        var index:number = this.components.indexOf(component);
+        if(index != -1)
+        {
+            this.components.splice(index, 1); 
+        }
+    }
+    public getComponent(componentClass:typeof Component):Component
+    public getComponent(name:string):Component
+    public getComponent(index:number):Component
+    public getComponent(component:any):Component
+    {
+        if(typeof component == "number")
+        {
+            return this.components[component];
+        }
+        if(typeof component == "string")
+        {
+            for(var comp of this.components)
+            {
+                if(typeof component == "string" && comp.getComponentName()==component)
+                {
+                    return comp;
+                }
+                if(typeof component == "function" && comp.constructor === component)
+                {
+                    return comp;
+                }
+            }
+        }
+        return null;
     }
 }
