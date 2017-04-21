@@ -71,6 +71,7 @@ export class Master
      */
     public handleRoute(url:string, route:IRoute):boolean
     {
+        console.log('[master] handle route: ',this);
         return true;
     }
      /**
@@ -78,20 +79,26 @@ export class Master
      */
     public handleActivation(url:string, route:IRoute):void
     {
-        this._nextActivationStep(this.activationSteps.shift());
+        console.log('[master] handle activation: ',this);
+        this._nextActivationStep(0);
     }
-    private _nextActivationStep(step:string):void
+    public handleDisactivation():void
     {
-        if(!step)
+        this.disactivate();
+        this.dispose();
+    }
+    private _nextActivationStep(step:number):void
+    {
+        if(step>=this.activationSteps.length)
         {
             return this.activate();
         }
-        var result:Promise<any> = this[step]();
+        var result:Promise<any> = this[this.activationSteps[step]]();
         if(!result)
-            return this._nextActivationStep(this.activationSteps.shift());
+            return this._nextActivationStep(step+1);
         result.then(()=>
         {
-            this._nextActivationStep(this.activationSteps.shift());
+            this._nextActivationStep(step+1);
         }, (error:any)=>
         {
             debugger;
@@ -104,6 +111,25 @@ export class Master
     protected activate():void
     {
 
+    }
+    protected disactivate():void
+    {
+        
+    }
+    private dispose():void
+    {
+        console.log("[master] dispose:", this);
+        this.disposeTemplate();
+    }
+    protected disposeTemplate():void
+    {
+        if(this.template)
+        {
+            this.template.$destroy();
+            $(this.template.$el).remove();
+            this.template = null;
+            this.container = null;
+        }
     }
     protected bootTemplate():Promise<any>
     {
@@ -224,6 +250,7 @@ export class Master
     }
     protected bootVue():void
     {
+        this.disposeTemplate();
         this.vueConfig = {
             el:this.getContainer(),
             name:this._getName(),

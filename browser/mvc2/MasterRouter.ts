@@ -4,6 +4,7 @@ export class MasterRouter
 {
     protected static instances:any[] = [];
     protected static instancesClass:any[] = [];
+    protected static _scopes:any = {};
     public static addPackage(cls:any):void
     {
         for(var p in cls)
@@ -48,8 +49,17 @@ export class MasterRouter
         }
         object = MasterRouter.instances[index];
         var load:any = object.handleRoute(url, route);
-        if(load === true)
+        if(load !== false && typeof load != "string")
         {
+            var scope:string = object.scope();
+            if(scope)
+            {
+                if(MasterRouter._scopes[scope] && MasterRouter._scopes[scope]!==object)
+                {
+                    MasterRouter._scopes[scope].handleDisactivation();
+                }
+                MasterRouter._scopes[scope] = object;
+            }
             object.handleActivation(url, route);
         }
         return load;

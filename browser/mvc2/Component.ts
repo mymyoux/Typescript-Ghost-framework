@@ -37,13 +37,17 @@ export class Component extends CoreObject
         
         return new Promise<any>((resolve, reject)=>
         {
-            Template.get(name).then((template:Template)=>
+            Template.get(name.replace(/-/g,'/')).then((template:Template)=>
             {
                 var cls:any = Component.components[name];
                 if(!cls) 
                 {
-                    console.warn('use default class component for '+name);
-                    cls = Component;
+                     cls = Component.components[name.replace(/-/g,'')];
+                     if(!cls)
+                     {
+                        console.warn('use default class component for '+name);
+                        cls = Component;
+                     }
                 }
                 var methods:string[] = [];
                 var computed:string[] = [];
@@ -282,6 +286,13 @@ export class Component extends CoreObject
     {
         throw new Error("you can't use component#$addComputedProperty you must use $$method syntax instead");
     }
+    protected $addComponent(name:string):void
+    {
+        if(!Vue.component('component-'+name))
+        {
+            Vue.component('component-'+name, Component.load.bind(Component, name));
+        }
+    }
     protected onModelChanged(name:string, model:any):void
     {
         this.$addData(name, model);
@@ -351,6 +362,7 @@ export class Component extends CoreObject
     }
     public dispose():void
     {
+        console.log("[component] dispose:", this);
         if(this.parent)
         {
             this.parent.removeComponent(this);
