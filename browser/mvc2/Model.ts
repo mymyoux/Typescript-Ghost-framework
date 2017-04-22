@@ -224,7 +224,6 @@ export class Model extends EventDispatcher
     public load(path:string|Function|ModelLoadRequest):Promise<any>
     public load(path:string|Function|ModelLoadRequest, params?:any, config:IModelConfig = null):API2|Promise<any>
     {
-
         if(!config)
             config = {};
         if(typeof path == "function")
