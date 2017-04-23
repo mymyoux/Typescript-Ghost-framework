@@ -21,6 +21,8 @@ export class Component extends CoreObject
         var name:string = cls.prototype.getComponentName.call(cls.prototype);
         Component.components[name] = cls;
         console.log("add component:"+name);
+        // if(!Vue.component('component-'+name))
+        //     Vue.component('component-'+name, Component.load.bind(Component, name));
     }
     private static getComponentFromVue(vue:any):Component
     {
@@ -180,6 +182,8 @@ export class Component extends CoreObject
     private mounted():void
     {
         this.template.$parent.$emit('new-component', this);
+        if(this["onMounted"])
+            this["onMounted"]();
     }
     public setParent(parent:any):void
     {
