@@ -39,7 +39,7 @@ export class Component extends CoreObject
         
         return new Promise<any>((resolve, reject)=>
         {
-            Template.get(name.replace(/-/g,'/')).then((template:Template)=>
+            Template.get("components/"+name.replace(/-/g,'/')).then((template:Template)=>
             {
                 var cls:any = Component.components[name];
                 if(!cls) 
