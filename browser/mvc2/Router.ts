@@ -111,7 +111,6 @@
 		}
 		protected _goto(route: any, save: boolean, scopename: string = "main"):void
 		{
-			window["r"] = this;
 			//mute hash listening during manual modification
 			//browser don't throw event syncly....... but in case of
 			this.listenening = false;
@@ -403,7 +402,6 @@
 			var hash:string = window.location.hash;
 			if(hash.length>1)
 				this.onHashChange({newURL:window.location.href, oldURL:window.location.href.substring(0, window.location.href.indexOf("#"))});
-			debugger;
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
 			var href: string = jqueryEvent.target.getAttribute("href").substring(1);
@@ -429,19 +427,31 @@
 			if (oldHash.substring(0, 1) == "!") {
 				oldHash = oldHash.substring(1);
 			}
+			var hashes:string[] = newHash.split('+');
 			var current: any;
-			for(var p in this.current)
+			var hash:string;
+			var i:number = 0;
+			while(i<hashes.length)
 			{
-				current = this.current[p];
-				this.log("of: ", p);
-				if(newHash == current.url)
+				hash = hashes[i];
+				for(var p in this.current)
 				{
-					this.log("ignore hash change", oldHash, newHash, current.url);
-					return;
-				}
-			} 
-			this.log("hash change", oldHash, newHash, this.current); 
-			this.goto(newHash);
+					current = this.current[p];
+					this.log("of: ", p);
+					if(hash == current.url)
+					{
+						this.log("ignore hash change", oldHash, hash, current.url);
+						hashes.splice(i, 1);
+						continue;
+					}
+				} 
+				i++;
+			}
+			for(hash of hashes)
+			{
+				this.log("hash change", oldHash, hash, this.current); 
+				this.goto(hash);
+			}
 		}
 	}
 
