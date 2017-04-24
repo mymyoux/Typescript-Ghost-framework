@@ -12,6 +12,7 @@ export class Master
     protected container:HTMLElement;
     protected vueConfig:any;
     protected components:Component[];
+    protected params:any;
     public constructor() 
     {
         this.components = [];
@@ -24,7 +25,22 @@ export class Master
     {
         if(typeof this["path"] == "function")
         {
-            var route:IRoute = Router.static(this["path"]());
+            var path:string = this["path"]();
+            var type:string = Router.TYPE_STATIC;
+            if(typeof path == "string")
+            {
+                if(path.indexOf(':')!=-1)
+                {
+                    type = Router.TYPE_SEGMENT;
+                }
+            }else
+            {
+                if(path instanceof RegExp)
+                {
+                    type = Router.TYPE_REGEXP;
+                }
+            }
+            var route:IRoute = Router[type](path);
             route.scope = this.scope();
             return route;
         }
@@ -81,8 +97,16 @@ export class Master
      */
     public handleActivation(url:string, route:IRoute):void
     {
+        if(route.params)
+        {
+            this.params = route.params;
+        }
         console.log('[master] handle activation: ',this);
         this._nextActivationStep(0);
+    }
+    public param(name:string):any
+    {
+        return this.params?this.params[name]:null;
     }
     public handleDisactivation():void
     {

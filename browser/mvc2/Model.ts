@@ -71,6 +71,11 @@ export class Model extends EventDispatcher
             return this[this.getIDName()];
         }
     }   
+    public setID(value:number):void
+    {
+        this.id = value;
+        this[this.getIDName()] = value;
+    }
     protected triggerChange(key:string):void
     {
         this.trigger(Model.EVENT_CHANGE, key, this[key]);

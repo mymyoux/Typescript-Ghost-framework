@@ -71,6 +71,20 @@
 			}
 			return route;
 		}
+		public static regexp(regexp, config:IRoute = null):IRoute{
+			var route: IRoute = {
+				route: regexp,
+				type: Router.TYPE_REGEXP
+			};
+			if (config)
+			{ 
+				for(var p in config)
+				{
+					route[p] = config[p];
+				}
+			}
+			return route;
+		}
 		protected log(...data:any[]):void
 		{
 			console.log("route:", ...data);
