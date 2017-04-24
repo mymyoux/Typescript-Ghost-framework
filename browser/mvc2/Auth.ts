@@ -1,3 +1,6 @@
+import {LocalForage} from "browser/data/Forage";
+import {Router} from "./Router";
+
 export class Auth
 {
     protected static _user:any;
@@ -5,9 +8,19 @@ export class Auth
     {
         return  Auth._user && Auth._user.id_user;
     }
+    public static listenLogout():void
+    {
+        Router.instance().register('logout',this.logout.bind(this));
+    }
     public static setUser(user:any):void
     {
         Auth._user = user;
+        if(user && user.token)
+        {
+            this.cache().setItem('user', user.writeExternal?user.writeExternal():user);
+        }else{
+            this.cache().setItem('user', null);
+        }
     }
     public static user():any
     {
@@ -20,5 +33,19 @@ export class Auth
      public static type():string
     {
         return  Auth._user?Auth._user.type:null;
+    }
+    public static getCacheUser():Promise<any>
+    {
+        return this.cache().getItem('user');
+    }
+    public static logout():void
+    {
+        this.cache().setItem('user', null).then(()=>
+        {
+            window.location.href="/logout";
+        });
+    }
+    public static cache(): LocalForage {
+        return LocalForage.instance().war("auth");
     }
 }

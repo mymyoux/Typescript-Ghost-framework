@@ -9,7 +9,7 @@ import {API2} from "browser/api/API2";
 import {Objects} from "ghost/utils/Objects";
 export class Application
 {
-    protected steps:string[] = ["initAPI", "initUser","initTemplate","initComponents","initRoute"];
+    protected steps:string[] = ["initAPI", "initAuth","initUser","initTemplate","initComponents","initRoute"];
     public constructor()
     {
 
@@ -102,6 +102,10 @@ export class Application
             }else
                 api.instance(config.name, new api()).config(config);
         }
+    }
+    protected initAuth():void
+    {
+        Auth.listenLogout();
     }
     protected initAPI():void
     {
