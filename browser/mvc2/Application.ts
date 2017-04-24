@@ -145,6 +145,7 @@ export class Application
         {
             MasterRouter.addPackage(this["controllers"]);
             MasterRouter.listen();
+            MasterRouter.parseInitialUrl(); 
         }
     }
     protected ready():void

@@ -68,4 +68,8 @@ export class MasterRouter
     {
         Router.instance().listen();
     }
+    public static parseInitialUrl():void
+    {
+        Router.instance().parseInitialUrl();
+    }
 }

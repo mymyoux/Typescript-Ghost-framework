@@ -111,6 +111,7 @@
 		}
 		protected _goto(route: any, save: boolean, scopename: string = "main"):void
 		{
+			window["r"] = this;
 			//mute hash listening during manual modification
 			//browser don't throw event syncly....... but in case of
 			this.listenening = false;
@@ -130,9 +131,9 @@
 			var url: string = "#!" + route.url;
 			for(var p in this.history)
 			{
-				if(p!=scopename && p.substring(0, 1)!="_")
+				if(p!=scopename && p.substring(0, 1)!="_" && this.history[p].length)
 				{
-					url += "+" + this.history[p].url;
+					url += "+"+ this.history[p][this.history[p].length-1].url;
 				}
 			}
 			window.location.href = url;
@@ -169,6 +170,19 @@
 				}
 			}
 			return false;
+		}
+		/**
+		 * Set default route for a scope
+		 * @param url 
+		 * @param params 
+		 * @param save 
+		 */
+		public gotoDefault(url: string, scope:string): void
+		{
+			if(!this.current[scope])
+			{
+				this.goto(url);
+			}
 		}
 		public goto(url: string, params: any = null, save:boolean = true): boolean {
 			if(!url)
@@ -214,8 +228,8 @@
 								return this.goto(result, null, false);
 							}
 							//maybe handle more type - assume it's always Scope
-							var scope: string;
-							if(result !== true)
+							var scope: string = this.staticRoutes[priority][url].scope;
+							if(result !== true && result.name())
 							{
 								scope = result.name();
 							}
@@ -384,6 +398,13 @@
 			Eventer.on(Eventer.HASH_CHANGE, this.onHashChange, this);
 			Eventer.on(Eventer.KEYBOARD_BACK_BUTTON, this.onBackButton, this);
 		}
+		public parseInitialUrl():void
+		{
+			var hash:string = window.location.hash;
+			if(hash.length>1)
+				this.onHashChange({newURL:window.location.href, oldURL:window.location.href.substring(0, window.location.href.indexOf("#"))});
+			debugger;
+		}
 		protected onhref(jqueryEvent: any, event: any): void {
 			var href: string = jqueryEvent.target.getAttribute("href").substring(1);
 			if(href)
@@ -391,10 +412,8 @@
 		}
 		protected onBackButton():void
 		{
-			debugger;
 			this.back(1);
 		}
-
 		protected onHashChange(event:any): void {
 			if(!this.listenening)
 			{

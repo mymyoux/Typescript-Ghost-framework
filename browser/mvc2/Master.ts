@@ -24,7 +24,9 @@ export class Master
     {
         if(typeof this["path"] == "function")
         {
-            return Router.static(this["path"]());
+            var route:IRoute = Router.static(this["path"]());
+            route.scope = this.scope();
+            return route;
         }
         return null;
     }
