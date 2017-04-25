@@ -173,7 +173,6 @@ export class Model extends EventDispatcher
             }
             external[p] = this[p];
         }
-        debugger;
         return external;
     }
     private static regexp = /%([^%]+)%/g;
