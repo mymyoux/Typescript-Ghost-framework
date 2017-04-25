@@ -52,6 +52,8 @@ export class Template extends CoreObject
         }
          var templates:any[] = [];
         return  this.cache().iterate(function(template:any):void{
+            if(!template)
+                return;
             var requestTemplate:any ={url:template.name};
             requestTemplate.version = template.version
             templates.push(requestTemplate);
