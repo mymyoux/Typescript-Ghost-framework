@@ -7,6 +7,7 @@ export class Template extends CoreObject
 {
     protected static _templates:any = {};
     protected static _api:API2;
+    protected static cacheEnabled:boolean = true;
     public static get(name:string):Promise<any>
     {
         return new Promise<any>((resolve, reject):void=>
@@ -15,15 +16,68 @@ export class Template extends CoreObject
             {
                 return  resolve(Template._templates[name]);
             }
-            var template:Template = Template._templates[name] = new Template(name);
-            template.load().then(()=>
+
+            this.cache().getItem(name).then((data:any):void=>
             {
-                if(template.hasComponent())
+                var template:Template = Template._templates[name] = new Template(name);
+                if(this.cacheEnabled && data)
                 {
-                    template.components.map(this.addComponent.bind(this));
+                    template.readExternal(data);
+                    if(template.hasComponent())
+                    {
+                        template.components.map(this.addComponent.bind(this));
+                    }
+                    resolve(template);
+                    return;
                 }
-            }, reject).then(function(){resolve(template);}, reject);
+                template.load().then(()=>
+                {
+                    if(template.hasComponent())
+                    {
+                        template.components.map(this.addComponent.bind(this));
+                    }
+                    if(this.cacheEnabled)
+                        this.cache().setItem(name, template.writeExternal());
+                }, reject).then(function(){resolve(template);}, reject);
+
+            });
+
         });
+    }
+    public static sync():Promise<any>
+    {
+        if(!this.cacheEnabled)
+        {
+            return null;
+        }
+         var templates:any[] = [];
+        return  this.cache().iterate(function(template:any):void{
+            var requestTemplate:any ={url:template.name};
+            requestTemplate.version = template.version
+            templates.push(requestTemplate);
+        }).then(()=>
+        {
+            if(!templates.length)
+            { 
+                return;
+            }
+            return API2.request().path('vue/get-expired').param("templates", templates);
+        }).then((data:any)=>
+        { 
+            //no expired or no cached templates
+           if(!data || !data.length)
+                return; 
+            
+            data.forEach((name:string):void=>
+            { 
+                console.log('template-expired: '+name);
+                this.cache().setItem(name, null);
+            });
+        });
+    }
+    public static useCache(value:boolean):void
+    {
+        this.cacheEnabled = value;
     }
     private static addComponent(name:string):void
     {
@@ -60,11 +114,15 @@ export class Template extends CoreObject
             }, reject);
         });
     }
-    protected readExternal(data:any):void
+    public readExternal(data:any):void
     {
         this.template = data.template;
         this.version = data.version;
         this.components = data.components;
+    }
+    public writeExternal():any
+    {
+        return {name:this.name, template:this.template, version:this.version, components:this.components};
     }
     public hasComponent():boolean
     { 

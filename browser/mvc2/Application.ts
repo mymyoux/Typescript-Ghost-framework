@@ -7,6 +7,8 @@ import {Configuration} from "ghost/data/Configuration";
 import {APIExtended as API} from "browser/api/APIExtended";
 import {API2} from "browser/api/API2";
 import {Objects} from "ghost/utils/Objects";
+import {Inst} from "./Inst";
+import {Step} from "../performance/Step";
 export class Application
 {
     protected steps:string[] = ["initAPI", "initAuth","initUser","initTemplate","initComponents","initRoute"];
@@ -27,12 +29,17 @@ export class Application
     {
         if(!step)
             return this.ready();
+        Inst.get(Step).register('application-init-'+step);
         console.log("step:"+ step);
         var promise:Promise<any> = this[step]();
         if(!promise)
+        {
+            Inst.get(Step).register('application-init-'+step);
             return this._step(this.steps.shift());
+        }
         promise.then(()=>
         {
+            Inst.get(Step).register('application-init-'+step);
             this._step(this.steps.shift());
         }, function(error:any)
         {
@@ -132,6 +139,11 @@ export class Application
     protected initTemplate():void
     {
         Template.setApi(API2.instance());
+        if(window.location.href.indexOf("local.") != -1 || window.location.href.indexOf(".local") != -1 )
+        {
+            Template.useCache(false);
+        }
+        Template.sync();
     }
     protected initComponents():void
     {

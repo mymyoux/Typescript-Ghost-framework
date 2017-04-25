@@ -4,6 +4,7 @@ import {Template} from "./Template";
 import {Inst} from "./Inst";
 import {Component} from "./Component";
 import {Classes} from "ghost/utils/Classes";
+import {Step} from "browser/performance/Step";
 export class Master 
 {
     protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bootComponents"];
@@ -119,11 +120,16 @@ export class Master
         {
             return this.activate();
         }
+        Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
         var result:Promise<any> = this[this.activationSteps[step]]();
         if(!result)
+        {
+            Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
             return this._nextActivationStep(step+1);
+        }
         result.then(()=>
         {
+            Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
             this._nextActivationStep(step+1);
         }, (error:any)=>
         {
@@ -172,8 +178,10 @@ export class Master
         if(templatePath)
         {
           
+            Inst.get(Step).register(this._getName()+'-load-template');
             return Template.get(templatePath).then((template:Template)=>
             {
+                Inst.get(Step).register(this._getName()+'-load-template');
                 this._template = template;
                 // if(!this._template.hasComponent())
                 // {

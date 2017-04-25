@@ -141,19 +141,32 @@
 			{
 				debugger;
 			}
-			var url: string = "#!" + route.url;
-			for(var p in this.history)
-			{
-				if(p!=scopename && p.substring(0, 1)!="_" && this.history[p].length)
-				{
-					url += "+"+ this.history[p][this.history[p].length-1].url;
-				}
-			}
+			// var url: string = "#!" + route.url;
+			// for(var p in this.history)
+			// {
+			// 	if(p!=scopename && p.substring(0, 1)!="_" && this.history[p].length)
+			// 	{
+			// 		url += "+"+ this.history[p][this.history[p].length-1].url;
+			// 	}
+			// }
+			var url:string = this._buildURL();
 			window.location.href = url;
 			this.log("set url:",  url);
 
 			this.listenening = true;
 			this.log("start listening");
+		}
+		protected _buildURL():string
+		{
+			var url:string = "";
+			for(var p in this.history)
+			{
+				if(p.substring(0, 1)!="_" && this.history[p].length)
+				{
+					url += (url?"+":"")+ this.history[p][this.history[p].length-1].url;
+				}
+			}
+			return "#!"+url;
 		}
 		protected _detectHistory(url:string, params:any):boolean|any
 		{
