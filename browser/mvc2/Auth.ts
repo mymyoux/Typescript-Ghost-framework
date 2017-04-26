@@ -19,7 +19,7 @@ export class Auth
         {
             this.cache().setItem('user', user.writeExternal?user.writeExternal():user);
         }else{
-            this.cache().setItem('user', null);
+            this.cache().removeItem('user');
         }
     }
     public static user():any
@@ -40,7 +40,7 @@ export class Auth
     }
     public static logout():void
     {
-        this.cache().setItem('user', null).then(()=>
+        this.cache().removeItem('user').then(()=>
         {
             window.location.href="/logout";
         });

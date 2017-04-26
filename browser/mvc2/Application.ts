@@ -145,7 +145,7 @@ export class Application
         Template.setApi(API2.instance());
         if(this.isLocal()) 
         {
-            Template.useCache(false);
+            //Template.useCache(false);
         }
         Template.sync();
     }

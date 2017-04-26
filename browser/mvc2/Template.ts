@@ -1,10 +1,11 @@
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Auth} from "./Auth";
-import {CoreObject} from "ghost/core/CoreObject";
+import {EventDispatcher} from "ghost/events/EventDispatcher";
 import {Component} from "./Component";
-export class Template extends CoreObject
+export class Template extends EventDispatcher
 {
+    public static EVENT_CHANGE:string = "change";
     protected static _templates:any = {};
     protected static _api:API2;
     protected static cacheEnabled:boolean = true;
@@ -72,8 +73,22 @@ export class Template extends CoreObject
             
             data.forEach((name:string):void=>
             { 
+                var template:Template = Template._templates[name];
                 console.log('template-expired: '+name);
                 this.cache().setItem(name, null);
+                if(template)
+                {
+                    template.load().then(()=>
+                    {
+                        if(template.hasComponent())
+                        {
+                            template.components.map(this.addComponent.bind(this));
+                        }
+                        template.trigger(Template.EVENT_CHANGE);
+                        if(this.cacheEnabled)
+                            this.cache().setItem(name, template.writeExternal());
+                    });
+                }
             });
         });
     }

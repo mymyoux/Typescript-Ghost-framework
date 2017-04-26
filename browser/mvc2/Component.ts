@@ -1,6 +1,8 @@
 import {Template} from "./Template";
 import {CoreObject} from "ghost/core/CoreObject";
 import {Inst} from "./Inst";
+import {Step} from "browser/performance/Step";
+
 export class Component extends CoreObject
 {
     protected static components:any = {};
@@ -36,11 +38,13 @@ export class Component extends CoreObject
     }
     public static load(name:string):Promise<any>
     {
-        
+        window["component"] = this;
         return new Promise<any>((resolve, reject)=>
         {
+            Inst.get(Step).register('component-'+name+'-init');
             Template.get("components/"+name.replace(/-/g,'/')).then((template:Template)=>
             {
+                template.once(Template.EVENT_CHANGE, this.onTemplateUpdated, this, template, name);
                 var cls:any = Component.components[name];
                 if(!cls) 
                 {
@@ -68,14 +72,14 @@ export class Component extends CoreObject
                         //this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
                     } 
                 }
-                resolve(
-                {
-                    template:template.getContent(),
+               var componentDefinition:any = {
+                  
                     props:cls.prototype.props(),
                     methods:methods.reduce(function(previous:any, method:string):any
                     {   
                         previous[method] = function(...data:any[])
                         {
+                            console.log("comp-call-"+method+":"+this._uid+" "+name);
                             var component:Component = Component.getComponentFromVue(this);
                             if(!component)
                                 return;
@@ -96,6 +100,7 @@ export class Component extends CoreObject
                     }, {}),
                     beforeCreate:function()
                     {
+                        console.log("comp-before-create:"+this._uid+" "+name);
                         (new cls(this)).boot();
                     },
                     mounted:function()
@@ -107,6 +112,7 @@ export class Component extends CoreObject
                     },
                     beforeDestroy:function()
                     {
+                        console.log("comp-before-destroyed:"+this._uid+" "+name);
                         var index:number = Component.instancesVue.indexOf(this);
                         if(index != -1)
                         {
@@ -117,6 +123,10 @@ export class Component extends CoreObject
                             debugger;
                         }
                     },
+                     destroyed:function()
+                    {
+                        console.log("comp-destroyed:"+this._uid+" "+name);
+                    },
                     data:function()
                     {
                         var component:Component = Component.getComponentFromVue(this);
@@ -124,9 +134,43 @@ export class Component extends CoreObject
                             return null;
                         return component.data();
                     },
+                };
+                Object.defineProperty(componentDefinition, "template",
+                {
+                    get:function()
+                    {
+                        console.log("comp-get-template:"+name);
+                        return template.getContent()
+                    },
+                      enumerable: true,
+                    configurable: true
                 });
+                resolve(componentDefinition
+                );
             });
         });
+    }
+    private static onTemplateUpdated(template:Template, name:string):void
+    {
+        debugger;
+        this.reloadComponentTemplate(name);
+        for(var component of Component.instances)
+        {
+            if(component instanceof Component.components[name])
+            {
+                component.onTemplateUpdated();
+            }
+        }
+
+        //this.template.$root.$emit('reload-component', this);
+    }
+    private static reloadComponentTemplate(name:string):void
+    {
+        delete Vue["options"].components["component-"+name];
+        if(!Vue.component('component-'+name))
+        {
+            Vue.component('component-'+name, Component.load.bind(Component, name));
+        }
     }
     /**
      * @see https://vuejs.org/v2/guide/components.html#Prop-Validation
@@ -149,6 +193,11 @@ export class Component extends CoreObject
     public boot():void
     {
         this._nextStep(this.steps.shift());
+    }
+    private onTemplateUpdated():void
+    {
+        if(this.template && this.template.$root)
+            this.template.$root.$emit('updated-component', this);
     }
     private _nextStep(step:string):void
     {

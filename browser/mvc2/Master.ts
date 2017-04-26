@@ -192,6 +192,49 @@ export class Master
         }
         return null;
     }
+    protected onTemplateUpdated():void
+    {
+       console.log('comp-master: old template removed');
+        if(this.template)
+       {
+           this.template.$destroy();
+           $(this.template.$el).remove();
+       } 
+       console.log('comp-master: new template render');
+       this.container = null;
+       var config:any = {
+            el:this.getContainer(),
+             name:this._getName(),
+            template:this._template.getContent(),
+       }
+       if(this.vueConfig.data)
+       {
+           config.data = {};
+           for(var p in this.vueConfig.data)
+           {
+               config.data[p] = this.vueConfig.data[p];
+           }
+       }
+       if(this.vueConfig.computed)
+       {
+           config.computed = {};
+           for(var p in this.vueConfig.computed)
+           {
+               config.computed[p] = this.vueConfig.computed[p];
+           }
+       }
+       if(this.vueConfig.methods)
+       {
+           config.methods = {};
+           for(var p in this.vueConfig.methods)
+           {
+               config.methods[p] = this.vueConfig.methods[p];
+           }
+       }
+       debugger;
+       this.vueConfig = config;
+       this.renderVue();
+    }
     protected bindVue():void
     {
         throw new Error('override this');
@@ -213,13 +256,13 @@ export class Master
     }
     protected $addData(name:string, value:any):void
     {
+        if(!this.vueConfig.data)
+        {
+            this.vueConfig.data = {};
+        }
+        this.vueConfig.data[name] = value;
         if(!this.template)
         {
-            if(!this.vueConfig.data)
-            {
-                this.vueConfig.data = {};
-            }
-            this.vueConfig.data[name] = value;
             return;
         }
         this.template.$set(this.template, name, value);
@@ -309,10 +352,16 @@ export class Master
     protected renderVue():void
     {
         window["template"] = this.template = new Vue(this.vueConfig);
+        this._template.once(Template.EVENT_CHANGE,this.onTemplateUpdated.bind(this));
     }
     protected bootComponents():void
     {
         this.template.$on('new-component',this.onNewComponent.bind(this));
+        this.template.$on('updated-component',this.onUpdatedComponent.bind(this));
+    }
+    private onUpdatedComponent(component:Component):void
+    {
+        this.onTemplateUpdated();
     }
     private onNewComponent(component:Component):void
     {
