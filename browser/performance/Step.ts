@@ -25,7 +25,7 @@ export class _Step
         var start:number = window["time_start"]?window["time_start"]:this.steps[0].time;
         for(var t of this.steps)
         {
-            console.log(t.name+": "+(t.time - start)+" ms" +(t.time2?' => '+(t.time2-t.time)+"ms":''));
+            console["log"](t.name+": "+(t.time - start)+" ms" +(t.time2?' => '+(t.time2-t.time)+"ms":''));
         }
     }
 }
