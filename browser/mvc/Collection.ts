@@ -623,7 +623,7 @@ import {IPartRequest} from "./IPartRequest";
             {
 
                 var failed:boolean = false;
-                var promises:Promise<any>[] = data.map(function(name:string)
+                var promises:Promise<any>[] = <any>data.map(function(name:string)
                 {
                     if(this.hasPart(name, params))
                     {

@@ -113,10 +113,10 @@ import {APIExtended} from "browser/api/APIExtended";
                 data = [Model.PART_DEFAULT];
             }
             var _self: Model = this;
-            var promise: Promise<any> = new Promise<any>(function(accept: any, reject: any): void {
+            var promise: Promise<any> = new Promise<any>((accept: any, reject: any): void=> {
 
                 var failed: boolean = false;
-                var promises: Promise<any>[] = data.map(function(name: string) {
+                var promises: Promise<any>[] = <any>data.map((name: string)=> {
                     if (this.hasPart(name, params)) {
                         return this.getPartPromise(name, params);
                     } else {
@@ -125,7 +125,7 @@ import {APIExtended} from "browser/api/APIExtended";
                         reject(new Error(name + " is not a correct part's name"));
                         return null;
                     }
-                }, _self);
+                });
                 if (failed) {
                     return;
                 }

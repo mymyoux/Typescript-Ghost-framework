@@ -2151,7 +2151,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
                             this._values[index][0][this.additionals[p]] = this.data[this.additionals[p]];
                         }
                     }
-                    this.trigger(Field.EVENT_CHANGE, this._values[index], item, this._values[index].name);
+                    this.trigger(Field.EVENT_CHANGE, this._values[index], item, (<any>this._values[index]).name);
                 }, this);
                 this._inputs.length = this._values.length = 0;
             }else
