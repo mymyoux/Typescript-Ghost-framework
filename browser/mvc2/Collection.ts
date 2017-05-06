@@ -167,6 +167,10 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             if(input["data"])
             {
                 input = input["data"];
+            } 
+            if(!Arrays.isArray(input))
+            {
+                input = [input];
             }
             if(input)
             {
