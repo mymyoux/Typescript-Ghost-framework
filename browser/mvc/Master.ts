@@ -1016,6 +1016,7 @@ import {Component} from "browser/mvc/Component";
                    
                 }else
                 {
+                    debugger;
                     console.warn("no container for ", this);
                     reject("no container for "+this);
                 }

@@ -303,7 +303,6 @@
 						}
 					}
 				}
-
 			}
 			console.warn("route:" + url + " not found");
 			return false;
@@ -431,7 +430,8 @@
 				this.onHashChange({newURL:window.location.href, oldURL:window.location.href.substring(0, window.location.href.indexOf("#"))});
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
-			var href: string = jqueryEvent.target.getAttribute("href").substring(1);
+
+			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
 			if(href)
 				this.goto(href);
 		}

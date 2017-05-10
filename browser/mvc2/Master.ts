@@ -231,7 +231,6 @@ export class Master
                config.methods[p] = this.vueConfig.methods[p];
            }
        }
-       debugger;
        this.vueConfig = config;
        this.renderVue();
     }

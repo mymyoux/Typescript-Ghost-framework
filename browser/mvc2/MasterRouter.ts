@@ -64,6 +64,14 @@ export class MasterRouter
         }
         return load;
     }
+    public static disactivate(scope:string):void
+    {
+        if(MasterRouter._scopes[scope])
+        {
+            MasterRouter._scopes[scope].handleDisactivation();
+            MasterRouter._scopes[scope] = null;
+        }
+    }
     public static listen():void
     {
         Router.instance().listen();

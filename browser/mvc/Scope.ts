@@ -229,6 +229,7 @@ import {IPage} from "browser/navigation/IPage";
                 this._currentController._preactivate(params);
             }
             this.trigger(Scope.EVENT_CHANGE, (this._currentController?this._currentController.name():null));
+            Eventer.trigger("scope_change", this.name());
             return this._currentController;
         }
         /**

@@ -148,7 +148,19 @@ import {APIExtended} from "browser/api/APIExtended";
             {
                 this.navigation().setDefaultPages(defaultPages);
             }
-            this.navigation().listen();
+            var url:string;
+            for(var p in defaultPages){
+                if(!url)
+                {
+                    url = "#!";
+                }else
+                {
+                    url+="+";
+                }
+                url+= p+"/"+defaultPages[p];
+            }
+            this.navigation().listen(); 
+            window.location.href = url;
 
             Template.sync();
             return null;
@@ -170,8 +182,8 @@ import {APIExtended} from "browser/api/APIExtended";
         protected navigation():Navigation
         {
             if(!this._navigation)
-            {
-                this._navigation = new Navigation(false);
+            { 
+                this._navigation = Navigation.instance?Navigation.instance:new Navigation(false);
             }
             return this._navigation;
         }
