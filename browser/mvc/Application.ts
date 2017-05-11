@@ -160,7 +160,10 @@ import {APIExtended} from "browser/api/APIExtended";
                 url+= p+"/"+defaultPages[p];
             }
             this.navigation().listen(); 
-            window.location.href = url;
+            setTimeout(()=>
+            {
+              window.location.href = url.toLowerCase();
+            }, 0);
 
             Template.sync();
             return null;

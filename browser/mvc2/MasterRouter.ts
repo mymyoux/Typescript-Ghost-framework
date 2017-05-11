@@ -1,5 +1,6 @@
 import {Router} from "./Router";
 import {IRoute} from "./IRoute";
+import {Scope} from "browser/mvc/Scope";
 export class MasterRouter
 {
     protected static instances:any[] = [];
@@ -33,6 +34,7 @@ export class MasterRouter
     }
     public static register(route:IRoute, cls:any)
     {
+        
         Router.instance().register(route, this.onRoute.bind(null, cls));
     }
     protected static onRoute(cls:any, route:IRoute, url:string):any
@@ -48,18 +50,33 @@ export class MasterRouter
             object.boot();
         }
         object = MasterRouter.instances[index];
+         //TODO:remove only for mvc1 compatibility
+        if(object.scoping && route.scope)
+        {
+            object.scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
+        }
         var load:any = object.handleRoute(url, route);
         if(load !== false && typeof load != "string")
         {
             var scope:string = object.scope();
             if(scope)
             {
-                if(MasterRouter._scopes[scope] && MasterRouter._scopes[scope]!==object)
+                //TODO:remove only for mvc1 compatibility
+                if(typeof scope != "string")
                 {
+                    scope = (<any>scope).name();
+                }
+                if(MasterRouter._scopes[scope] && (MasterRouter._scopes[scope]!==object || MasterRouter._scopes[scope].scoping))
+                {
+                    console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);
                     MasterRouter._scopes[scope].handleDisactivation();
                 }
                 MasterRouter._scopes[scope] = object;
+            }else
+            {
+                debugger;
             }
+            console.log("[MASTERROUTER]activation:"+scope+" => "+url, object);
             object.handleActivation(url, route);
         }
         return load;
@@ -79,5 +96,9 @@ export class MasterRouter
     public static parseInitialUrl():void
     {
         Router.instance().parseInitialUrl();
+    }
+    public static getCurrentMaster(scope:string):any
+    {
+        return MasterRouter._scopes[scope];
     }
 }

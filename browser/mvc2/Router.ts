@@ -12,7 +12,7 @@
 		public static TYPE_SEGMENT:string = "segment";
 		private static REGEXP_SEGMENT: RegExp = /:([^:\/\?]+)/g;
 		protected static _instance: Router;
-		public static instance(): Router {
+		public static instance(): any {
             if(!this._instance)
             {
                 this._instance = new Router();
@@ -141,6 +141,7 @@
 			{
 				debugger;
 			}
+			console.log("__goto "+scopename+" ",route);
 			// var url: string = "#!" + route.url;
 			// for(var p in this.history)
 			// {
@@ -211,6 +212,7 @@
 			}
 		}
 		public goto(url: string, params: any = null, save:boolean = true): boolean {
+			console.log("[bridge-non]goto:"+url);
 			if(!url)
 			{
 				return false;
@@ -396,7 +398,7 @@
 				route.paramsNames.push(temp[1]);
 			}
 
-
+			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
 			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
 
 
@@ -477,7 +479,7 @@
 			for(hash of hashes)
 			{
 				this.log("hash change", oldHash, hash, this.current); 
-				this.goto(hash);
+				setTimeout(this.goto.bind(this, hash),0);
 			}
 		}
 	}

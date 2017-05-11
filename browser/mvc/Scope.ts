@@ -24,6 +24,7 @@ import {Navigation} from "browser/navigation/Navigation";
     
     //convert-import
 import {IPage} from "browser/navigation/IPage";
+import {MasterRouter} from "browser/mvc2/MasterRouter";
     /**
      * Scope
      */
@@ -250,7 +251,8 @@ import {IPage} from "browser/navigation/IPage";
          */
         public getCurrentController():Controller
         {
-            return this._currentController;
+            return <any>require("browser/mvc2/MasterRouter").MasterRouter.getCurrentMaster(this.name());
+         //   return this._currentController;
         }
         /**
          * Gets controller linked to the scope.
