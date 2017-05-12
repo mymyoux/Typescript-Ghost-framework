@@ -13,6 +13,7 @@ import {IPage} from "./IPage";
     
     //convert-import
 import {Navigation} from "browser/navigation/Navigation";
+import {Router} from "browser/mvc2/Router";
     
     ///<reference path="typings/globals/socket.io-client/index.d.ts"/>;
     
@@ -321,6 +322,7 @@ import {Eventer} from "ghost/events/Eventer";
          */
         public popAll(): void {
             this.popPage(this._history.length);
+            Router.instance().backAll(this._key);
         }
         /**
          * Called during page change. Triggers events

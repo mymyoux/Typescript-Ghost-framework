@@ -101,12 +101,17 @@
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
+			debugger;
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];
 			if(!history)
 			{
 				return false;
+			}
+			if(index == -1)
+			{
+				history.length = 0;
 			}
 			index++;
 			while(index-->0 && history.length)
@@ -117,7 +122,13 @@
 			{
 				return this.goto(route.url, route.params); 
 			}
+			this.trigger('remove_all', scope);
 			return false;
+		}
+		public backAll(scope:string = "main"):void
+		{
+			debugger;
+			this.back(-1, scope);
 		}
 		protected _reject(route: any): void
 		{
@@ -212,7 +223,7 @@
 			}
 		}
 		public goto(url: string, params: any = null, save:boolean = true): boolean {
-			console.log("[bridge-non]goto:"+url);
+			console.log("[bridge-non]goto:"+url, save);
 			if(!url)
 			{
 				return false;
@@ -253,6 +264,7 @@
 								if (save)
 									this._reject(current); 
 								//new url
+								debugger;
 								return this.goto(result, null, false);
 							}
 							//maybe handle more type - assume it's always Scope
@@ -288,6 +300,7 @@
 										//new url
 										if (save)
 											this._reject(current); 
+											debugger;
 										return this.goto(result, null, false);
 									}
 									var scope: string;

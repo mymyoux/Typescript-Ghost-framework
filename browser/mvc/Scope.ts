@@ -52,6 +52,7 @@ import {MasterRouter} from "browser/mvc2/MasterRouter";
             Scope._scopes.push(this);
             if(this._name && Scope.navigation())
             {
+                debugger;
                 // Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
                 // Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
                 //better than using Eventer
@@ -80,7 +81,8 @@ import {MasterRouter} from "browser/mvc2/MasterRouter";
             return this._name;
         }
         private _onPageChanged(type:string, previous:string, next:string, params:any = null):void
-        {
+        {  
+            debugger;
             //log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
             /* if(name == this._name)
              {*/
@@ -238,6 +240,7 @@ import {MasterRouter} from "browser/mvc2/MasterRouter";
          */
         public removeCurrentController():void
         {
+            debugger;
             // log.info("remove current controller");
             if(this._currentController != null)
             {

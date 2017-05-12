@@ -92,6 +92,17 @@ export class MasterRouter
     public static listen():void
     {
         Router.instance().listen();
+        Router.instance().on('remove_all',this.onRemoveAll);
+    }
+    public static onRemoveAll(scope:string):void
+    {
+        debugger; 
+        if(MasterRouter._scopes[scope])
+        {
+            console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);
+            MasterRouter._scopes[scope].handleDisactivation();
+        }
+        MasterRouter._scopes[scope] = null;
     }
     public static parseInitialUrl():void
     {
