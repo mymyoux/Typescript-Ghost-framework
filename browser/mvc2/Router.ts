@@ -437,6 +437,7 @@
                 //already listening
                 return;
             }
+			debugger;
             this.listenening = true;
 			$(document).on("click", "a[href^='#']", this.onhref.bind(this));
 			Eventer.on(Eventer.HASH_CHANGE, this.onHashChange, this);
@@ -450,6 +451,7 @@
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
 
+debugger;
 			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
 			if(href)
 				this.goto(href);
@@ -464,6 +466,7 @@
 				this.log("ignoring hash change");
 				return;
 			}
+			debugger;
 			var newHash:string = event.newURL.substring(event.newURL.indexOf("#")+1);
 			if(newHash.substring(0, 1)=="!")
 			{

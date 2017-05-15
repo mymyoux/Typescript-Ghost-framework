@@ -335,6 +335,14 @@ export class Component extends CoreObject
         this.$addData(name, model);
         return model;
     }
+    protected $getModel(name:string):any
+    protected $getModel(model:any):any
+    protected $getModel(model:any):any
+    {
+        if(typeof model == "string")
+            return this.$getData(model);
+        return this.$getData(model.prototype.getModelName.call(model));
+    }
     protected $addComputedProperty(name:string, computed:Function):void
     {
         throw new Error("you can't use component#$addComputedProperty you must use $$method syntax instead");
