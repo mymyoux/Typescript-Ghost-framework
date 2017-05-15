@@ -9,17 +9,17 @@ export class Model extends EventDispatcher
     public static EVENT_CHANGE:string = "change";
     public static EVENT_FIRST_DATA:string = "first_data";
     public static EVENT_FORCE_CHANGE:string = "force_change";
-    public static PATH_CREATE:()=>ModelLoadRequest = 
+    public static PATH_CREATE:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/create", null,{replaceDynamicParams:true});
-    public static PATH_GET:()=>ModelLoadRequest = 
+    public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/get", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
-    public static PATH_DELETE:()=>ModelLoadRequest = 
+    public static PATH_DELETE:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
-    public static PATH_UPDATE:()=>ModelLoadRequest = 
+    public static PATH_UPDATE:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
     private _firstData:boolean;
     private _pathLoaded:any = {};
-    protected _modelName:string; 
+    protected _modelName:string;
     public id:number;
     private _invalidated:boolean;
     public constructor()
@@ -55,7 +55,7 @@ export class Model extends EventDispatcher
             //TODO:add possibility to set key.object1.name = 'value'
             this[key] = value;
         }
-        this.triggerChange(key);
+        this.triggerForceChange(key);
     }
     protected getIDName():string
     {
@@ -70,7 +70,7 @@ export class Model extends EventDispatcher
         }else{
             return this[this.getIDName()];
         }
-    }   
+    }
     public setID(value:number):void
     {
         this.id = value;
@@ -178,7 +178,7 @@ export class Model extends EventDispatcher
     private static regexp = /%([^%]+)%/g;
     /**
      * Replace %key% in strings
-     * 
+     *
      */
     protected replace(value:string):string
     {
@@ -239,7 +239,7 @@ export class Model extends EventDispatcher
         {
             params = params.call(this);
         }
-        
+
         if(path instanceof ModelLoadRequest)
         {
             if(path.config)
@@ -268,7 +268,7 @@ export class Model extends EventDispatcher
                 var k:string;
                 for(var p in params)
                 {
-                    
+
                     if(Model.regexp.test(params[p]))
                     {
                         params[p] = this.replace(params[p]);
@@ -305,7 +305,7 @@ export class Model extends EventDispatcher
         if(config.marksPathAsLoaded !== false)
         {
             this._pathLoaded[<string>path] = true;
-        }            
+        }
         var request:API2 = this.getPathRequest(<string>path, params, config)
         .always(config.always===true);
         if(config.execute !== false)
@@ -356,7 +356,7 @@ export interface IModelConfig
      */
     ignorePathLoadState?:boolean;
     /**
-     * Call will be cached if failed 
+     * Call will be cached if failed
      * @default false
      */
     always?:boolean;
@@ -374,5 +374,5 @@ export class ModelLoadRequest
     {
 
     }
-    
+
 }
