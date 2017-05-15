@@ -12,7 +12,7 @@
 		public static TYPE_SEGMENT:string = "segment";
 		private static REGEXP_SEGMENT: RegExp = /:([^:\/\?]+)/g;
 		protected static _instance: Router;
-		public static instance(): Router {
+		public static instance(): any {
             if(!this._instance)
             {
                 this._instance = new Router();
@@ -101,12 +101,17 @@
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
+			debugger;
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];
 			if(!history)
 			{
 				return false;
+			}
+			if(index == -1)
+			{
+				history.length = 0;
 			}
 			index++;
 			while(index-->0 && history.length)
@@ -117,7 +122,13 @@
 			{
 				return this.goto(route.url, route.params); 
 			}
+			this.trigger('remove_all', scope);
 			return false;
+		}
+		public backAll(scope:string = "main"):void
+		{
+			debugger;
+			this.back(-1, scope);
 		}
 		protected _reject(route: any): void
 		{
@@ -141,6 +152,7 @@
 			{
 				debugger;
 			}
+			console.log("__goto "+scopename+" ",route);
 			// var url: string = "#!" + route.url;
 			// for(var p in this.history)
 			// {
@@ -211,6 +223,7 @@
 			}
 		}
 		public goto(url: string, params: any = null, save:boolean = true): boolean {
+			console.log("[bridge-non]goto:"+url, save);
 			if(!url)
 			{
 				return false;
@@ -251,6 +264,7 @@
 								if (save)
 									this._reject(current); 
 								//new url
+								debugger;
 								return this.goto(result, null, false);
 							}
 							//maybe handle more type - assume it's always Scope
@@ -286,6 +300,7 @@
 										//new url
 										if (save)
 											this._reject(current); 
+											debugger;
 										return this.goto(result, null, false);
 									}
 									var scope: string;
@@ -396,7 +411,7 @@
 				route.paramsNames.push(temp[1]);
 			}
 
-
+			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
 			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
 
 
@@ -477,7 +492,7 @@
 			for(hash of hashes)
 			{
 				this.log("hash change", oldHash, hash, this.current); 
-				this.goto(hash);
+				setTimeout(this.goto.bind(this, hash),0);
 			}
 		}
 	}

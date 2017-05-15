@@ -266,7 +266,7 @@ import {Eventer} from "ghost/events/Eventer";
         ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
-
+            debugger;
             if(window.location.hash == this._currentHash)
             {
                 return;

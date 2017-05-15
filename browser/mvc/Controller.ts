@@ -103,6 +103,16 @@ import {Scope} from "browser/mvc/Scope";
         {
             this._collections.push(collection);
         }
+        public handleActivation(url:string, route:any):void
+        {
+            var splits:string[] = url.split("/").slice(2);
+            return this._preactivate(splits);
+        }
+        public handleDisactivation():void
+        {
+            this._predisactivate();
+            this.unscope();
+        }
         /**
          * called by scope
          */

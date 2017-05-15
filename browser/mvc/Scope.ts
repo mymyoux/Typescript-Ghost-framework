@@ -24,6 +24,7 @@ import {Navigation} from "browser/navigation/Navigation";
     
     //convert-import
 import {IPage} from "browser/navigation/IPage";
+import {MasterRouter} from "browser/mvc2/MasterRouter";
     /**
      * Scope
      */
@@ -51,6 +52,7 @@ import {IPage} from "browser/navigation/IPage";
             Scope._scopes.push(this);
             if(this._name && Scope.navigation())
             {
+                debugger;
                 // Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
                 // Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
                 //better than using Eventer
@@ -79,7 +81,8 @@ import {IPage} from "browser/navigation/IPage";
             return this._name;
         }
         private _onPageChanged(type:string, previous:string, next:string, params:any = null):void
-        {
+        {  
+            debugger;
             //log.info(name+" - page changed : "+this._name+" |"+type+" => " +previous+"=>"+next);
             /* if(name == this._name)
              {*/
@@ -237,6 +240,7 @@ import {IPage} from "browser/navigation/IPage";
          */
         public removeCurrentController():void
         {
+            debugger;
             // log.info("remove current controller");
             if(this._currentController != null)
             {
@@ -250,7 +254,8 @@ import {IPage} from "browser/navigation/IPage";
          */
         public getCurrentController():Controller
         {
-            return this._currentController;
+            return <any>require("browser/mvc2/MasterRouter").MasterRouter.getCurrentMaster(this.name());
+         //   return this._currentController;
         }
         /**
          * Gets controller linked to the scope.
