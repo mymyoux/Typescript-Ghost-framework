@@ -21,6 +21,7 @@ import {Arrays} from "ghost/utils/Arrays";
 ///<module="api"/>
 //convert-files
 import {Controller} from "./Controller";
+import {Router} from "browser/mvc2/Router";
 
     
     //convert-import
@@ -147,6 +148,10 @@ import {APIExtended} from "browser/api/APIExtended";
             if(defaultPages)
             {
                 this.navigation().setDefaultPages(defaultPages);
+            }
+            for(var p in defaultPages)
+            {
+              //  Router.instance().gotoDefault(p, defaultPages[p]);
             }
             var url:string;
             for(var p in defaultPages){

@@ -52,7 +52,6 @@ import {MasterRouter} from "browser/mvc2/MasterRouter";
             Scope._scopes.push(this);
             if(this._name && Scope.navigation())
             {
-                debugger;
                 // Eventer.trigger(Navigation.EVENT_PAGE_CHANGED+":"+this._key, type, previous, next);
                 // Eventer.on(Scope.navigation().EVENT_PAGE_CHANGED, this._onPageChanged, this);
                 //better than using Eventer

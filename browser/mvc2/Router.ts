@@ -127,8 +127,12 @@
 		}
 		public backAll(scope:string = "main"):void
 		{
-			debugger;
 			this.back(-1, scope);
+			setTimeout(()=>
+			{
+
+			window.location.href = this._buildURL();
+			}, 0);
 		}
 		protected _reject(route: any): void
 		{
@@ -303,7 +307,7 @@
 											debugger;
 										return this.goto(result, null, false);
 									}
-									var scope: string;
+									var scope: string = route.scope;
 									if (result !== true) {
 										scope = result.name();
 									}
