@@ -13,7 +13,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             resizable:true,
             sortable:false,
             filterable:false,
-            visible:true
+            visible:true,
+            link:false
         };
         constructor(...args: any[]) {
             super(...args);
@@ -51,6 +52,10 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         public bindColumns()
         {
         } 
+        protected onClick(item:any, column:IColumn):void
+        {
+            
+        }
         protected addColumn(name:string, options?:IColumn)
         {
             if(!options)
@@ -97,6 +102,7 @@ export interface IColumn
     resizable?:boolean;
     headerClasses?:string[];
     columns?:string[];
+    link?:boolean|string;
 
     //order
     up?:boolean;
