@@ -5,6 +5,7 @@ import {Inst} from "./Inst";
 
 
 export {Unique, Sorted} from "./Collection";
+export {Table} from "./components/Table"; 
 
 type Constructor<T extends {}> = new(...args: any[]) => T;
 export function Singleton<X extends Constructor<{}>>( Child:X ) {

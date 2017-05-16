@@ -22,7 +22,7 @@
                 // add selected for all click children
                 $(this).children('.click').addClass("selected");
             });
-      $(document).on("click", ".link-inside", function(event, originalEvent = null)
+             $(document).on("click", ".link-inside", function(event, originalEvent = null)
             { 
               if(originalEvent)
               {
