@@ -160,6 +160,14 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             return this._request;
         } 
+        public loadGet():Promise<any>
+        {
+            var request:API2 =  this["request"]();
+            return request.then(function(data)
+            {
+                return data;
+            });
+        }
        public readExternal(input:any[], path?:string, api?:API2):void
         {
             if(!input)
@@ -595,5 +603,11 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
                 }
             }
         }
+         public request():API2
+        {
+            var request:API2 = super["request"]();
+            request.order(this._order, this._orderDirection);
+            return request;
+        } 
     }
 }

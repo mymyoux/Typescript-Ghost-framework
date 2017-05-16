@@ -317,6 +317,7 @@ export class Model extends EventDispatcher
                     this.readExternal(data, <string>path);
                     this.validate();
                 }
+                return data;
             }, (error:any)=>
             {
                 debugger;
