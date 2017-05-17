@@ -167,7 +167,7 @@
 			// 	}
 			// }
 			var url:string = this._lastURL = this._buildURL();
-			window.location.href = url;
+		//	window.location.href = url;
 				setTimeout(function()
 				{
 								window.location.href  = url;
@@ -456,8 +456,8 @@
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
 
-debugger;
 			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
+console.log("[router:href]"+href);
 			if(href)
 				this.goto(href);
 		}
@@ -476,7 +476,7 @@ debugger;
 				this.log("ignoring hash change - same url");
 				return;
 			}
-			debugger;
+			console.log("[router:href-change]"+event.newURL);
 			var newHash:string = event.newURL.substring(event.newURL.indexOf("#")+1);
 			if(newHash.substring(0, 1)=="!")
 			{
