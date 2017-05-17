@@ -6,7 +6,7 @@ export class Auth
     protected static _user:any;
     public static check():any
     {
-        return  Auth._user && Auth._user.id_user;
+        return  Auth._user && Auth._user.getID();
     }
     public static listenLogout():void
     {
@@ -28,7 +28,7 @@ export class Auth
     }
     public static id():number
     {
-        return  Auth._user?Auth._user.id_user:null;
+        return  Auth._user?Auth._user.getID():null;
     }
      public static type():string
     {

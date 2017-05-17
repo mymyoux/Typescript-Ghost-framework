@@ -25,7 +25,7 @@ import {NavigationEvent} from "./NavigationEvent";
     //convert-import
 import {Eventer} from "ghost/events/Eventer";
       export class Navigation extends EventDispatcher
-    {
+    { 
         /**
          * Events triggered when a page change
          * @type {string}
@@ -102,16 +102,17 @@ import {Eventer} from "ghost/events/Eventer";
          */
         constructor(ready:boolean = true)
         {
-            super();
+            super(); 
             //log.hide();
             if(Navigation.instance)
             {
                 //TODO:allow this ?
                 throw new Error("There is already an instance of navigation");
-            }
+            } 
             Navigation.instance = this;
             this._scopes = {};
-            Eventer.on(Eventer.HASH_CHANGE, this._onHashChange, this);
+            if(this.listeningHash())
+                Eventer.on(Eventer.HASH_CHANGE, this._onHashChange, this);
             //TODO:not sure
             var _self:Navigation = this;
             if(ready)
@@ -119,19 +120,26 @@ import {Eventer} from "ghost/events/Eventer";
                 this.listen();
             }
         }
+        public listeningHash():boolean
+        {
+            return true;
+        }
         public conserveHash(value: boolean): boolean
         {
             return this._converseHash = value;
         }
-        public listen():void
+        public listen():void 
         {
             Eventer.once(Eventer.$APPLICATION_READY, () =>
             {
                 if(!this._listening)
                 {
                     this._listening = true;
-                    this._detectScope();
-                    this._onHashChange(true);
+                    if(this.listeningHash())
+                    {
+                        this._detectScope();
+                        this._onHashChange(true);
+                    }
                 }
             });
         }
@@ -195,9 +203,13 @@ import {Eventer} from "ghost/events/Eventer";
             return hash;
         }
 
-        private parseHash():any
+        public parseHash(hashToParse:string = null):any
         {
-            var hash:any = window.location.hash.substring( 1 );
+            if(!hashToParse)
+            {
+                hashToParse  =window.location.hash.substring(1);
+            }
+            var hash:any = hashToParse;
             var separator: string = Navigation.SEPARATOR.substring( 1 );
 
             if (separator && hash.indexOf(separator) === 0)
@@ -254,7 +266,7 @@ import {Eventer} from "ghost/events/Eventer";
         ///pourquoi plusieurs call pour le même hash ?
          private _onHashChange(first:boolean = false):void
         {
-
+            debugger;
             if(window.location.hash == this._currentHash)
             {
                 return;

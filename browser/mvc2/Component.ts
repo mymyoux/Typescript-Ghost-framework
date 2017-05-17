@@ -26,6 +26,13 @@ export class Component extends CoreObject
         // if(!Vue.component('component-'+name))
         //     Vue.component('component-'+name, Component.load.bind(Component, name));
     }
+    public static addVueComponent(name:string, options?:any):void
+    {
+        if(!Vue.component('component-'+name))
+        {
+            Vue.component('component-'+name, Component.load.bind(Component, name, options));
+        }
+    }
     private static getComponentFromVue(vue:any):Component
     {
         var index:number = Component.instancesVue.indexOf(vue);
@@ -36,7 +43,7 @@ export class Component extends CoreObject
         debugger;
         return null;
     }
-    public static load(name:string):Promise<any>
+    public static load(name:string, options?:any):Promise<any>
     {
         window["component"] = this;
         return new Promise<any>((resolve, reject)=>
@@ -72,9 +79,13 @@ export class Component extends CoreObject
                         //this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
                     } 
                 }
+
+
+                var props:any = options && options.props?options.props:cls.prototype.props();
+                
                var componentDefinition:any = {
                   
-                    props:cls.prototype.props(),
+                    props:props,
                     methods:methods.reduce(function(previous:any, method:string):any
                     {   
                         previous[method] = function(...data:any[])
@@ -334,6 +345,14 @@ export class Component extends CoreObject
         model.on(model.constructor.EVENT_FORCE_CHANGE, this.onModelChanged, this, name, model);
         this.$addData(name, model);
         return model;
+    }
+    protected $getModel(name:string):any
+    protected $getModel(model:any):any
+    protected $getModel(model:any):any
+    {
+        if(typeof model == "string")
+            return this.$getData(model);
+        return this.$getData(model.prototype.getModelName.call(model));
     }
     protected $addComputedProperty(name:string, computed:Function):void
     {

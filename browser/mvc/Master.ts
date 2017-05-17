@@ -424,20 +424,32 @@ import {Component} from "browser/mvc/Component";
                 {
                     this.templateData.off(Template.EVENT_EXPIRED, this._onTemplateExpired, this);
                 }
+                console.log("[master] Disativated ", this);
             	this._activated = false;
                 this.postDisactivate();
             }
+        } 
+        public boot():void
+        {
+
         }
+        public handleRoute(url:string, route:any):any
+        {
+            return this.canActivate(route.params);
+        }
+        
         protected postDisactivate():void
         {
 
         }
         public isActivated():boolean
         {
+            console.log("[master]isActivated", this, this._activated);
         	return this._activated;
         }
         protected initializeFirstData():Promise<any>|boolean
         {
+            console.log("[master]initializeFirstData", this);
             console.log(this, this._data);
         	if(this._data.length)
         	{
@@ -448,6 +460,7 @@ import {Component} from "browser/mvc/Component";
         }
         protected initializeView():Promise<any>|boolean
         {
+            console.log("[master]initialView-start", this);
             if(!this.scoping())
             {
                 //no template - no view
@@ -487,6 +500,7 @@ import {Component} from "browser/mvc/Component";
                         {
                             debugger;
                         }
+                        console.log("[master]initialView-end", this);
                         console.log("loaded:", this.name());
                         resolve();
                     }, reject);
@@ -494,10 +508,12 @@ import {Component} from "browser/mvc/Component";
 
                 return promise;
         	}
+            console.log("[master]initialView-end");
         	return true;
         }
         protected initializeData():Promise<any>|boolean
         {
+            console.log("[master]initialData-start", this);
             var params:any = this.getActivationParams();
         	var promises:Promise<any>[] = <any>this._data.map((item:any, index:number)=>
         	{
@@ -527,6 +543,7 @@ import {Component} from "browser/mvc/Component";
                         this._partsPromises.push(promise);
                         return true;
                     }
+                    
         		  return promise;
                 }
                 return null;
@@ -544,10 +561,12 @@ import {Component} from "browser/mvc/Component";
             {
                 this.bindAsyncEvents();
             }
+            console.log("[master]initialData-end-sync", this);
         	return Promise.all(promises);
         }
         protected firstActivation():Promise<any>|boolean
         {
+               console.log("[master]firstactivation-start", this);
         	if(!this._firstActivation)
         	{
         		return true;
@@ -557,6 +576,7 @@ import {Component} from "browser/mvc/Component";
         }
         protected activation():void
         {
+            console.log("[master]activationend-sync", this);
             this._activationCount++;
             this.bindEvents();
             if (this._activationCount>1)
@@ -1016,6 +1036,7 @@ import {Component} from "browser/mvc/Component";
                    
                 }else
                 {
+                    debugger;
                     console.warn("no container for ", this);
                     reject("no container for "+this);
                 }

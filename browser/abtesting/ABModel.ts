@@ -10,7 +10,13 @@ import {ModelAPI} from "browser/mvc/ModelAPI";
 import {Model} from "browser/mvc/Model";
        //convert-import
 import {Application} from "browser/mvc/Application";
+/**
+ * ABTesting model
+ */
       export class ABModel extends ModelAPI {
+          /**
+           * Static method
+           */
         public static PART_UPDATE: string = "part_update";
         public static PART_CREATE: string = "part_create"; 
 

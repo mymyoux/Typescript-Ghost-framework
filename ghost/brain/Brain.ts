@@ -10,8 +10,14 @@ import {IBrainData} from "./IBrainData";
 //convert-files
 import {INeuronData} from "./INeuronData";
 
+	/**
+	 * Brain data
+	 */
 	export class Brain
 	{
+		/**
+		 * Neuron's id
+		 */
 		protected neuronsID: number[];
 		protected neurons: Neuron[];
 		protected inputs: Neuron[];
@@ -27,6 +33,19 @@ import {INeuronData} from "./INeuronData";
 			this.outputs = [];
 			this.outputsValue = [];
 		}
+		/**
+		 * resume big 
+		 * oerker 
+		 * eokr erke roekre roke
+		 * rerk eokrek eokrekr
+		 * ekrokr e
+		 * orke orkeo rkeorke kre
+		 * koker o
+		 * ekrk oekre krok
+		 * @example okok oekro ekrke okerk o
+		 * @notice ok
+		 * @param data test param
+		 */
 		public readExternal(data:IBrainData): void
 		{
 			var len: number = data.neurons.length;
@@ -68,6 +87,11 @@ import {INeuronData} from "./INeuronData";
 				}
 			}
 		}
+		/**
+		 * get neuron index
+		 * @param neuron Neuron 
+		 * @return index of neuron
+		 */
 		public getNeuronIndex(neuron:Neuron):number
 		{
 			return this.neurons.indexOf(neuron);

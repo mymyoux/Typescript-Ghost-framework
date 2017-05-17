@@ -12,7 +12,7 @@
 		public static TYPE_SEGMENT:string = "segment";
 		private static REGEXP_SEGMENT: RegExp = /:([^:\/\?]+)/g;
 		protected static _instance: Router;
-		public static instance(): Router {
+		public static instance(): any {
             if(!this._instance)
             {
                 this._instance = new Router();
@@ -101,12 +101,17 @@
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
+			debugger;
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];
 			if(!history)
 			{
 				return false;
+			}
+			if(index == -1)
+			{
+				history.length = 0;
 			}
 			index++;
 			while(index-->0 && history.length)
@@ -117,7 +122,17 @@
 			{
 				return this.goto(route.url, route.params); 
 			}
+			this.trigger('remove_all', scope);
 			return false;
+		}
+		public backAll(scope:string = "main"):void
+		{
+			this.back(-1, scope);
+			setTimeout(()=>
+			{
+
+			window.location.href = this._buildURL();
+			}, 0);
 		}
 		protected _reject(route: any): void
 		{
@@ -141,6 +156,7 @@
 			{
 				debugger;
 			}
+			console.log("__goto "+scopename+" ",route);
 			// var url: string = "#!" + route.url;
 			// for(var p in this.history)
 			// {
@@ -211,6 +227,7 @@
 			}
 		}
 		public goto(url: string, params: any = null, save:boolean = true): boolean {
+			console.log("[bridge-non]goto:"+url, save);
 			if(!url)
 			{
 				return false;
@@ -251,6 +268,7 @@
 								if (save)
 									this._reject(current); 
 								//new url
+								debugger;
 								return this.goto(result, null, false);
 							}
 							//maybe handle more type - assume it's always Scope
@@ -286,9 +304,10 @@
 										//new url
 										if (save)
 											this._reject(current); 
+											debugger;
 										return this.goto(result, null, false);
 									}
-									var scope: string;
+									var scope: string = route.scope;
 									if (result !== true) {
 										scope = result.name();
 									}
@@ -303,7 +322,6 @@
 						}
 					}
 				}
-
 			}
 			console.warn("route:" + url + " not found");
 			return false;
@@ -397,7 +415,7 @@
 				route.paramsNames.push(temp[1]);
 			}
 
-
+			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
 			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
 
 
@@ -419,6 +437,7 @@
                 //already listening
                 return;
             }
+			debugger;
             this.listenening = true;
 			$(document).on("click", "a[href^='#']", this.onhref.bind(this));
 			Eventer.on(Eventer.HASH_CHANGE, this.onHashChange, this);
@@ -431,7 +450,9 @@
 				this.onHashChange({newURL:window.location.href, oldURL:window.location.href.substring(0, window.location.href.indexOf("#"))});
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
-			var href: string = jqueryEvent.target.getAttribute("href").substring(1);
+
+debugger;
+			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
 			if(href)
 				this.goto(href);
 		}
@@ -445,6 +466,7 @@
 				this.log("ignoring hash change");
 				return;
 			}
+			debugger;
 			var newHash:string = event.newURL.substring(event.newURL.indexOf("#")+1);
 			if(newHash.substring(0, 1)=="!")
 			{
@@ -477,7 +499,7 @@
 			for(hash of hashes)
 			{
 				this.log("hash change", oldHash, hash, this.current); 
-				this.goto(hash);
+				setTimeout(this.goto.bind(this, hash),0);
 			}
 		}
 	}

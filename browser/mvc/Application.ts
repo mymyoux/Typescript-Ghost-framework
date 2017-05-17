@@ -21,6 +21,7 @@ import {Arrays} from "ghost/utils/Arrays";
 ///<module="api"/>
 //convert-files
 import {Controller} from "./Controller";
+import {Router} from "browser/mvc2/Router";
 
     
     //convert-import
@@ -148,7 +149,26 @@ import {APIExtended} from "browser/api/APIExtended";
             {
                 this.navigation().setDefaultPages(defaultPages);
             }
-            this.navigation().listen();
+            for(var p in defaultPages)
+            {
+              //  Router.instance().gotoDefault(p, defaultPages[p]);
+            }
+            var url:string;
+            for(var p in defaultPages){
+                if(!url)
+                {
+                    url = "#!";
+                }else
+                {
+                    url+="+";
+                }
+                url+= p+"/"+defaultPages[p];
+            }
+            this.navigation().listen(); 
+            setTimeout(()=>
+            {
+              window.location.href = url.toLowerCase();
+            }, 0);
 
             Template.sync();
             return null;
@@ -170,8 +190,8 @@ import {APIExtended} from "browser/api/APIExtended";
         protected navigation():Navigation
         {
             if(!this._navigation)
-            {
-                this._navigation = new Navigation(false);
+            { 
+                this._navigation = Navigation.instance?Navigation.instance:new Navigation(false);
             }
             return this._navigation;
         }
