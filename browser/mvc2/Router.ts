@@ -31,6 +31,7 @@
 		protected history: any;
 		protected current: any;
 		protected listenening: boolean;
+		protected _lastURL:string;
 		public constructor() {
 			super();
 			Router._instance = this;
@@ -165,8 +166,12 @@
 			// 		url += "+"+ this.history[p][this.history[p].length-1].url;
 			// 	}
 			// }
-			var url:string = this._buildURL();
+			var url:string = this._lastURL = this._buildURL();
 			window.location.href = url;
+				setTimeout(function()
+				{
+								window.location.href  = url;
+				},0);
 			this.log("set url:",  url);
 
 			this.listenening = true;
@@ -437,7 +442,6 @@
                 //already listening
                 return;
             }
-			debugger;
             this.listenening = true;
 			$(document).on("click", "a[href^='#']", this.onhref.bind(this));
 			Eventer.on(Eventer.HASH_CHANGE, this.onHashChange, this);
@@ -464,6 +468,11 @@ debugger;
 			if(!this.listenening)
 			{
 				this.log("ignoring hash change");
+				return;
+			}
+			if(this._lastURL == window.location.hash)
+			{
+				this.log("ignoring hash change - same url");
 				return;
 			}
 			debugger;
@@ -499,7 +508,8 @@ debugger;
 			for(hash of hashes)
 			{
 				this.log("hash change", oldHash, hash, this.current); 
-				setTimeout(this.goto.bind(this, hash),0);
+				this.goto(hash);
+				//setTimeout(this.goto.bind(this, hash),0);
 			}
 		}
 	}

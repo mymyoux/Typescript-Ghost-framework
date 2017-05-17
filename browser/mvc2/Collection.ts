@@ -610,7 +610,16 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
          public request():API2
         {
             var request:API2 = super["request"]();
-            request.order(this._order, this._orderDirection);
+            if(this._order && !this._orderDirection)
+            {
+                this._orderDirection = [];
+                while(this._orderDirection.length<this._order.length)
+                {
+                    this._orderDirection.push(-1);
+                }
+            }
+            if(this._order)
+                request.order(this._order, this._orderDirection);
             return request;
         } 
     }
