@@ -226,6 +226,7 @@
 		 */
 		public gotoDefault(url: string, scope:string): void
 		{
+			console.log("GOTO DEFAULT:"+url+" :: "+scope);
 			if(!this.current[scope])
 			{
 				this.goto(url);

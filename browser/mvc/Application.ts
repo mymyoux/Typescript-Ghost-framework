@@ -22,6 +22,7 @@ import {Arrays} from "ghost/utils/Arrays";
 //convert-files
 import {Controller} from "./Controller";
 import {Router} from "browser/mvc2/Router";
+import {MasterRouter} from "browser/mvc2/MasterRouter";
 
     
     //convert-import
@@ -154,6 +155,7 @@ import {APIExtended} from "browser/api/APIExtended";
               //  Router.instance().gotoDefault(p, defaultPages[p]);
             }
             var url:string;
+            var pages:string[] = [];
             for(var p in defaultPages){
                 if(!url)
                 {
@@ -162,13 +164,20 @@ import {APIExtended} from "browser/api/APIExtended";
                 {
                     url+="+";
                 }
+                pages.push(p+"/"+defaultPages[p]);
                 url+= p+"/"+defaultPages[p];
             }
             this.navigation().listen(); 
-            setTimeout(()=>
+            MasterRouter.listen();
+            MasterRouter.parseInitialUrl(); 
+            for(var p in defaultPages)
             {
-              window.location.href = url.toLowerCase();
-            }, 0);
+                Router.instance().gotoDefault(p.toLowerCase()+"/"+defaultPages[p].toLowerCase(),p);
+            }
+            // setTimeout(()=>
+            // {
+            //   window.location.href = url.toLowerCase();
+            // }, 0);
 
             Template.sync();
             return null;
