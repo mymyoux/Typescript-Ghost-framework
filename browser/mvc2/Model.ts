@@ -218,9 +218,25 @@ export class Model extends EventDispatcher
         }
         return value;
     }
-    public loadGet():Promise<any>
+    public loadGet(params?:any):Promise<any>
     {
-        return this.load(this.constructor["PATH_GET"]);
+        return this.load(this.constructor["PATH_GET"], params);
+    }
+    public loadCreate(params?:any):Promise<any>
+    {
+        return this.load(this.constructor["PATH_CREATE"], params);
+    }
+    public loadUpdate(params?:any):Promise<any>
+    {
+        return this.load(this.constructor["PATH_UPDATE"], params);
+    }
+    public loadDelete(params?:any):Promise<any>
+    {
+        return this.load(this.constructor["PATH_DELETE"], params);
+    }
+    public loadCV(params?:any):Promise<any>
+    {
+        return this.load("user/cv", params, {});
     }
     public load(path:string|Function|ModelLoadRequest, params:any, config:IModelConfig&{execute:false}):API2
     public load(path:string|Function|ModelLoadRequest, params:any, config:IModelConfig&{execute:true}):Promise<any>
