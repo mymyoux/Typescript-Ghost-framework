@@ -54,7 +54,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         } 
         protected onClick(item:any, column:IColumn):void
         {
-            
+
         }
         protected addColumn(name:string, options?:IColumn)
         {

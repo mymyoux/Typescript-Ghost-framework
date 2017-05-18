@@ -82,7 +82,7 @@ export class Component extends CoreObject
 
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
-                
+
                var componentDefinition:any = {
                   
                     props:props,
@@ -365,6 +365,28 @@ export class Component extends CoreObject
             Vue.component('component-'+name, Component.load.bind(Component, name));
         }
     }
+    public $proxy(method:string, ...params):void
+    {
+        if(this["$"+method])
+        {
+            return this["$"+method](...params);
+        }else
+        {
+            var transfert:any[] = [method].concat(params);
+            this.emit("proxy", ...transfert);
+        }
+    }
+     public $rproxy(method:string, ...params):void
+    {
+        if(this["$"+method])
+        {
+            return this["$"+method](...params);
+        }else
+        {
+            var transfert:any[] = [method].concat(params);
+            this.remit("proxy", ...transfert);
+        }
+    }
     protected onModelChanged(name:string, model:any):void
     {
         this.$addData(name, model);
@@ -376,6 +398,7 @@ export class Component extends CoreObject
     protected bootComponents():void
     {
         this.template.$on('new-component',this.onNewComponent.bind(this));
+        this.template.$on('proxy',this.$proxy.bind(this));
     }
     private onNewComponent(component:Component):void
     {

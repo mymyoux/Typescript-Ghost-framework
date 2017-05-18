@@ -24,7 +24,7 @@ export class TableComponent extends Component
             "list":
             {
                 required:true
-            }            
+            }        
         };
     }
     protected $click(item:any, column:any, event:any):void

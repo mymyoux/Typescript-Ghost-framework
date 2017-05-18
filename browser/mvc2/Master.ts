@@ -348,6 +348,16 @@ export class Master
             } 
         }
     }
+    public $proxy(method:string, ...params):void
+    {
+        if(this["$"+method])
+        {
+            return this["$"+method](...params);
+        }else
+        {
+            console.warn("proxy method not found:"+method);
+        }
+    }
     protected renderVue():void
     {
         window["template"] = this.template = new Vue(this.vueConfig);
@@ -357,6 +367,7 @@ export class Master
     {
         this.template.$on('new-component',this.onNewComponent.bind(this));
         this.template.$on('updated-component',this.onUpdatedComponent.bind(this));
+        this.template.$on('proxy',this.$proxy.bind(this));
     }
     private onUpdatedComponent(component:Component):void
     {
