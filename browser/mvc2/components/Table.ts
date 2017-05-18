@@ -82,7 +82,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                 options.prop = name;
             }else
             {
-                Component.addVueComponent("table-"+options.type, {props:["item","column"]});
+                console.log("ICI");
+                Component.addVueComponent("table-"+options.type, {props:["item","column","data"]});
                 options.type = "component-table-"+options.type;
             }
            

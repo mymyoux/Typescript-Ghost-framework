@@ -24,7 +24,17 @@ export class TableComponent extends Component
             "list":
             {
                 required:true
-            }            
+            }     ,
+            "data":
+            {
+                required:false,
+                default:null
+            }     ,
+            "alert":
+            {
+                required:false,
+                default:null
+            }
         };
     }
     protected $click(item:any, column:any, event:any):void
@@ -35,12 +45,9 @@ export class TableComponent extends Component
         }
         this.$getModel('list').onClick(item, column);
     }
+
     protected $paginate():void {
         this.$getModel("list").nextAll().then();
-    }
-
-    protected $openSearch(event):void 
-    {
     }
 
     protected $show():void{
