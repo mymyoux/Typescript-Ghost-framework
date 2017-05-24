@@ -135,6 +135,11 @@
 			window.location.href = this._buildURL();
 			}, 0);
 		}
+
+		public getHistorySize(scope:string = "main") : number
+		{
+			return Object.keys(this.history[scope]).length;
+		}
 		protected _reject(route: any): void
 		{
 			this.rejected.push(route);
