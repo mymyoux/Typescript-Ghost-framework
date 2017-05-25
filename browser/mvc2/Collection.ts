@@ -160,9 +160,15 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             return this._request;
         }
-        public loadGet():Promise<any>
+        public loadGet(params?:any):Promise<any>
         {
-            var request:API2 =  this["request"]();
+            var request:API2 =  this.request();
+
+            for (var key in params)
+            {
+                request.param(key, params[key]);
+            }
+
             return request.then(function(data)
             {
                 return data;
