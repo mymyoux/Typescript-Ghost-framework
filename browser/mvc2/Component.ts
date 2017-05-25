@@ -2,6 +2,7 @@ import {Template} from "./Template";
 import {CoreObject} from "ghost/core/CoreObject";
 import {Inst} from "./Inst";
 import {Step} from "browser/performance/Step";
+import {Polyglot2} from "../i18n/Polyglot2";
 
 export class Component extends CoreObject
 {
@@ -43,6 +44,7 @@ export class Component extends CoreObject
         debugger;
         return null;
     }
+    
     public static load(name:string, options?:any):Promise<any>
     {
         window["component"] = this;
@@ -64,7 +66,7 @@ export class Component extends CoreObject
                 }
                 var methods:string[] = [];
                 var computed:string[] = [];
-                const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
+                const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$rproxy"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
@@ -113,6 +115,14 @@ export class Component extends CoreObject
                     {
                         console.log("comp-before-create:"+this._uid+" "+name);
                         (new cls(this)).boot();
+                    },
+                    beforeMount:function()
+                    {
+                        debugger;
+                        var component:Component = Component.getComponentFromVue(this);
+                        if(!component)
+                            return;
+                        component.beforeMounted();
                     },
                     mounted:function()
                     {
@@ -188,6 +198,7 @@ export class Component extends CoreObject
      */
     
     protected parent:any;
+    protected root:any;
     private _shortName:string;
     private _dataLoaded:boolean;
     private vueConfig:any;
@@ -200,6 +211,15 @@ export class Component extends CoreObject
         this.components = [];
         Component.instances.push(this);
         Component.instancesVue.push(this.template);
+    }
+    public $trad(key:string, options?:any):any
+    {   
+        var prefix:string = this.root.getTradKey();
+        if(prefix)
+        {
+            key = prefix+"."+key;
+        }
+        return Polyglot2.instance().t(key, options);
     }
     public boot():void
     {
@@ -239,15 +259,23 @@ export class Component extends CoreObject
     {
         return null;
     }
-    private mounted():void
+    private beforeMounted():void
     {
         this.template.$parent.$emit('new-component', this);
+    }
+    private mounted():void
+    {
+        //this.template.$parent.$emit('new-component', this);
         if(this["onMounted"])
             this["onMounted"]();
     }
     public setParent(parent:any):void
     {
         this.parent = parent;
+    }
+    public setRoot(root:any):void
+    {
+        this.root = root;
     }
     public $test()
     {
@@ -403,6 +431,7 @@ export class Component extends CoreObject
     private onNewComponent(component:Component):void
     {
         component.setParent(this);
+        component.setRoot(this.root);
         this.components.push(component);
     }
     private removeComponent(component:Component):void
@@ -464,5 +493,6 @@ export class Component extends CoreObject
             this.parent = null;
             this.template = null;
         }
+        this.root = null;
     }
 }
