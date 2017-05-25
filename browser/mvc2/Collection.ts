@@ -8,21 +8,21 @@ import {Objects} from "ghost/utils/Objects";
 
 
 export type Constructor<T extends ModelClass> = new(...args: any[]) => T;
- 
+
 
 export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
     type T =  typeof Model.prototype;
     return class Collection extends Model {
-        public static PATH_GET:()=>ModelLoadRequest = 
+        public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
-        public models:T[];
+        public models:T[] = [];
         private _request:API2;
         protected _isFullLoaded:boolean;
         constructor(...args: any[]) {
             super(...args);
-            this.models = []; 
+            this.models = [];
         }
-        public clear():void 
+        public clear():void
         {
             this._isFullLoaded = false;
             this._request = null;
@@ -31,7 +31,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         protected getRootPath():string
         {
             return super.getModelName();
-        } 
+        }
         public getModelName():string
         {
             if(!this._modelName)
@@ -141,7 +141,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         {
             return this.models.reduce(callback, initialValue);
         }
-        
+
         public toArray():T[]
         {
             return this.splice();
@@ -159,7 +159,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 this._request.on(API2.EVENT_DATA, this.readExternal, this, this._request.getPath(), this._request);
             }
             return this._request;
-        } 
+        }
         public loadGet():Promise<any>
         {
             var request:API2 =  this["request"]();
@@ -175,7 +175,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             if(input["data"])
             {
                 input = input["data"];
-            } 
+            }
             if(!Arrays.isArray(input))
             {
                 input = [input];
@@ -188,7 +188,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     //needed to not break the flow
                     this.detectedFullLoad( api );
                     this.triggerFirstData();
-                    this.trigger(this.constructor["EVENT_CHANGE"]);
+                    this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
                     return;
                 }
                 input.forEach(function(rawModel:any):void
@@ -209,7 +209,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                         {
                             var cls:any = Model;
                             var model:T;
-                            if(rawModel) 
+                            if(rawModel)
                             {
                                 if(rawModel && rawModel.id != undefined)
                                 {
@@ -264,7 +264,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 }, this);
                 this.detectedFullLoad( api );
                 this.triggerFirstData();
-                this.trigger(this.constructor["EVENT_CHANGE"]);
+                this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
             }
         }
         protected detectedFullLoad(api:API2):void
@@ -277,7 +277,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             var request: any;
             if(api)
             {
-                request = api.getLastRequest(); 
+                request = api.getLastRequest();
             }
             if (request && request.data && request.data.paginate && request.data.paginate.direction != undefined && request.data.paginate.key)
             {
@@ -289,7 +289,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 }
             }
         }
-    
 
         public next(quantity:number):API2
         public next():API2
@@ -345,7 +344,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
             super["clear"]();
             this._buildKeys();
         }
-        
+
         private _buildKeys():void
         {
             this._keys = [];
@@ -433,7 +432,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
             for(var p in models)
             {
                 model = models[p];
-                //TODO:check borns 
+                //TODO:check borns
                 if((id = this.indexOf(model))==-1 || id<index || id>index+howMany)
                 {
                     modelsToSplice.push(model);
@@ -483,7 +482,7 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
         public models:T[];
         private _order:string[];
         private _orderDirection: number[];
-        protected _isFullLoaded:boolean; 
+        protected _isFullLoaded:boolean;
         constructor(...args: any[]) {
             super(...args);
             if(this["__isUnique"] === true)
@@ -507,7 +506,7 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
                 {
                     //if list ordonned
                     if(this._order)
-                    { 
+                    {
                         var result:IBinaryResult = Arrays.binaryFindArray(this.models, model, this._order, this._orderDirection);
                         if(result.index == undefined)
                         {
@@ -575,7 +574,7 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
                         {
                             return this._orderDirection[i]> 0 ? 1 : -1;
                         }
-                        
+
                     }
                     return 0;
                 });
@@ -592,7 +591,7 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
             var request: any;
             if(api)
             {
-                request = api.getLastRequest(); 
+                request = api.getLastRequest();
             }
             if (request && request.data && request.data.paginate && request.data.paginate.direction != undefined && request.data.paginate.key)
             {
@@ -621,6 +620,6 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
             if(this._order)
                 request.order(this._order, this._orderDirection);
             return request;
-        } 
+        }
     }
 }
