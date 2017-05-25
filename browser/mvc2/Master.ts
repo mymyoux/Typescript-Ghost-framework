@@ -5,6 +5,7 @@ import {Inst} from "./Inst";
 import {Component} from "./Component";
 import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
+import {Polyglot} from "browser/i18n/Polyglot";
 export class Master 
 {
     protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bootComponents"];
@@ -332,7 +333,7 @@ export class Master
             name:this._getName(),
             template:this._template.getContent()
         }; 
-        const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
+        const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy"];
         //add $Methods by defaut
         for(var p in this)
         {
@@ -348,6 +349,26 @@ export class Master
             } 
         }
     }
+    public $proxy(method:string, ...params):void
+    {
+        if(this["$"+method])
+        {
+            return this["$"+method](...params);
+        }else
+        {
+            console.warn("proxy method not found:"+method);
+        }
+    }
+    public $trad(key:string, options?:any):any
+    {   
+        //force update : this.template.$forceUpdate();
+        return Polyglot.instance().t(key,options);
+    }
+    public getTradKey():string
+    {
+        return this._getName().toLowerCase();
+    }
+
     protected renderVue():void
     {
         window["template"] = this.template = new Vue(this.vueConfig);
@@ -357,6 +378,11 @@ export class Master
     {
         this.template.$on('new-component',this.onNewComponent.bind(this));
         this.template.$on('updated-component',this.onUpdatedComponent.bind(this));
+        this.template.$on('proxy',this.$proxy.bind(this));
+        this.template.$on('trad', function()
+        {
+            debugger;
+        });
     }
     private onUpdatedComponent(component:Component):void
     {
@@ -365,6 +391,7 @@ export class Master
     private onNewComponent(component:Component):void
     {
         component.setParent(this);
+        component.setRoot(this);
         this.components.push(component);
     }
     private removeComponent(component:Component):void

@@ -9,9 +9,10 @@ import {API2} from "browser/api/API2";
 import {Objects} from "ghost/utils/Objects";
 import {Inst} from "./Inst";
 import {Step} from "../performance/Step";
+import {Polyglot2} from "../i18n/Polyglot2";
 export class Application
 {
-    protected steps:string[] = ["initAPI", "initAuth","initUser","initTemplate","initComponents","initRoute"];
+    protected steps:string[] = ["initAPI", "initAuth","initUser","initTemplate","initPolyglot","initComponents","initRoute"];
     public constructor()
     {
 
@@ -148,6 +149,10 @@ export class Application
             Template.useCache(false);
         }
         Template.sync();
+    }
+    protected initPolyglot():void
+    {
+        Polyglot2.instance().init(!this.isLocal());
     }
     protected initComponents():void
     {
