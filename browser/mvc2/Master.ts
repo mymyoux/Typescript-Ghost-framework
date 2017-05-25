@@ -6,6 +6,7 @@ import {Component} from "./Component";
 import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
 import {Polyglot} from "browser/i18n/Polyglot";
+import {Strings} from "ghost/utils/Strings";
 export class Master 
 {
     protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bootComponents"];
@@ -175,6 +176,16 @@ export class Master
         if(typeof this["path"] == "function")
         {
             templatePath = this["path"]();
+            //segment url
+            var index:number;
+            if((index=templatePath.indexOf(":"))!=-1)
+            {
+                templatePath = templatePath.substring(0, index);
+                if(Strings.endsWith(templatePath, "/"))
+                {
+                    templatePath = templatePath.substring(0, templatePath.length-1);
+                }
+            }
         }
         if(templatePath)
         {
@@ -371,7 +382,7 @@ export class Master
 
     protected renderVue():void
     {
-        window["template"] = this.template = new Vue(this.vueConfig);
+        this.template = new Vue(this.vueConfig);
         this._template.once(Template.EVENT_CHANGE,this.onTemplateUpdated.bind(this));
     }
     protected bootComponents():void

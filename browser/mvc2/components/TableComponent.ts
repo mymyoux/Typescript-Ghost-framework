@@ -52,12 +52,7 @@ export class TableComponent extends Component
 
     protected $show():void{
     }
-    protected $debug(data:any):void
-    {
-        debugger;
-    }
    
     public activate():void{
-        debugger;
     }
 }

@@ -118,7 +118,6 @@ export class Component extends CoreObject
                     },
                     beforeMount:function()
                     {
-                        debugger;
                         var component:Component = Component.getComponentFromVue(this);
                         if(!component)
                             return;
