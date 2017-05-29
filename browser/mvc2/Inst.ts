@@ -4,9 +4,9 @@ export class Inst
     private static _instances:any[] =[];
     private static _instancesCls:any[] =[];
     // private static _modelsInst:any[] =[];
-    public static get(cls:any, id?:number):any
-    public static get(name:string, id?:number):any
-    public static get(cls:any, id?:number):any
+    public static get(cls:any, id?:number, collection?:any):any
+    public static get(name:string, id?:number, collection?:any):any
+    public static get(cls:any, id?:number, collection?:any):any
     {
         if(!cls)
         {
@@ -39,17 +39,25 @@ export class Inst
         }
         if(id !== undefined)
         {
-            for(var p in this._instances)
+            if(collection)
             {
-                if(this._instances[p] instanceof cls)
+                model = Inst.get(collection).getModelByID(id);
+                if(model)
+                    return model;
+            }else
+            {
+                for(var p in this._instances)
                 {
-                    model = this._instances[p].getModelByID(id);
-                    if(model.constructor === cls)
-                    { 
-                        return model;
+                    if(this._instances[p] instanceof cls)
+                    {
+                        model = this._instances[p].getModelByID(id);
+                        if(model.constructor === cls)
+                        { 
+                            return model;
+                        }
                     }
-                }
-            }   
+                }   
+            }
             model = new cls();
             model.setID(id);
             return model;
