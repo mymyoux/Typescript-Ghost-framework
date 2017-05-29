@@ -5,11 +5,11 @@ import {Inst} from "./Inst";
 import {Component} from "./Component";
 import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
-import {Polyglot} from "browser/i18n/Polyglot";
+import {Polyglot2} from "browser/i18n/Polyglot2";
 import {Strings} from "ghost/utils/Strings";
 export class Master 
 {
-    protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bootComponents"];
+    protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bindPolyglot","bootComponents"];
     protected _template:Template;
     protected template:any;
     protected container:HTMLElement;
@@ -152,6 +152,7 @@ export class Master
     }
     private dispose():void
     {
+        Polyglot2.instance().off("resolved", this.onPolyglotResolved, this);
         console.log("[master] dispose:", this);
         this.disposeTemplate();
     }
@@ -246,6 +247,7 @@ export class Master
        this.vueConfig = config;
        this.renderVue();
     }
+    
     protected bindVue():void
     {
         throw new Error('override this');
@@ -373,7 +375,7 @@ export class Master
     public $trad(key:string, options?:any):any
     {   
         //force update : this.template.$forceUpdate();
-        return Polyglot.instance().t(key,options);
+        return Polyglot2.instance().t(key,options);
     }
     public getTradKey():string
     {
@@ -384,6 +386,15 @@ export class Master
     {
         this.template = new Vue(this.vueConfig);
         this._template.once(Template.EVENT_CHANGE,this.onTemplateUpdated.bind(this));
+    }
+    protected bindPolyglot():void
+    {
+        Polyglot2.instance().on("resolved", this.onPolyglotResolved, this);
+    }
+    protected onPolyglotResolved():void
+    {
+        if(this.template)
+            this.template.$forceUpdate();
     }
     protected bootComponents():void
     {

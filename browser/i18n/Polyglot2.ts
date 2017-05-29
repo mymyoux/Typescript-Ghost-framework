@@ -78,10 +78,12 @@ import {Auth} from "browser/mvc2/Auth";
 				console.log('warn: ' + message);
 			}
 		}
+		protected static regexpKey:RegExp =  new RegExp('\\{\\{([^\\} ]+)\\}\\}', 'g');
 		/**
 		 * replace data inside phrases
 		 */
 		protected static interpolate(phrase: string, options: any): string {
+			//TODO:maybe remove this first part ?
 			for (var arg in options) {
 				if (arg !== '_' && options.hasOwnProperty(arg)) {
 					// We create a new `RegExp` each time instead of using a more-efficient
@@ -92,6 +94,29 @@ import {Auth} from "browser/mvc2/Auth";
 			}
 			if (options && options.hasOwnProperty("smart_count")) {
 				phrase = phrase.replace(/{{count}}/g, options.smart_count);
+			}
+
+
+			//replace complex keys
+			//TODO:maybe replace all remaining keys by '' to avoid visual effect
+			if(options && this.regexpKey.test(phrase))
+			{
+				var results:string[] = phrase.match(this.regexpKey);
+				for(var key of results)
+				{
+					var keys:string[] = key.substring(2, key.length-2).split(".");
+					var value:any = options[keys[0]];
+					for(var i:number=1; i<keys.length; i++)
+					{
+						if(value == undefined)
+							continue;
+						value = value[keys[i]];
+					}
+					if(value != undefined)
+					{
+						phrase = phrase.replace(new RegExp(key,'g'), value);
+					}
+				}
 			}
 			return phrase;
 		}
@@ -288,7 +313,6 @@ import {Auth} from "browser/mvc2/Auth";
 		}
 		public retrieveTranslationFromServer(key: string): void {
 			var short: string = this.parseKey(key).controller;//key.split(".").slice(0, 1).join(".")+".";
-			debugger;
 			if (this.retrieved.indexOf(key) != - 1) {
 				//already retrieved we do nothing
 				return;
@@ -366,7 +390,7 @@ import {Auth} from "browser/mvc2/Auth";
 			this.cache().set("phrases", this.phrases);
 		}
 		private addPhrase(phrase: ITranslation): void {
-			this.phrases[phrase.name] = phrase;
+			this.phrases[phrase.key] = phrase;
 
 			/*if(!this.last_updated[phrase.controller] || this.last_updated[phrase.controller]<phrase.updated_time)
 			{
@@ -379,6 +403,7 @@ import {Auth} from "browser/mvc2/Auth";
 			if (key === undefined ||  key === null || key == "" || key.substring(key.lastIndexOf(".") + 1) == "undefined" || key.substring(key.lastIndexOf(".") + 1) == "null") {
 				return "";
 			}
+		
 			var result: string;
 			options = options == null ? {} : options;
 			if (typeof options === 'number') {
