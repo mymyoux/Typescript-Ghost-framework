@@ -330,9 +330,9 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
     type T =  typeof Model.prototype;
     return class Unique extends Model {
         protected __isUnique:boolean = true;
-        public models:T[];
-        private _unicity:string[];
-        private _keys:string[];
+        public models:T[] = [];
+        private _unicity:string[] = [];
+        private _keys:string[] = [];
         public unicity(key:string | string[]):void
         {
             if(!Arrays.isArray(key))
