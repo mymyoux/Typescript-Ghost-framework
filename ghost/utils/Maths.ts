@@ -43,6 +43,18 @@
             }
             return Math.random()*(max-min)+min;
         }
+         public static randomize ( myArray:any[] ):any[] {
+                var i = myArray.length;
+                if ( i == 0 ) return myArray;
+                while ( --i ) {
+                    var j = Math.floor( Math.random() * ( i + 1 ) );
+                    var tempi = myArray[i];
+                    var tempj = myArray[j];
+                    myArray[i] = tempj;
+                    myArray[j] = tempi;
+                }
+                return myArray;
+            }
         /**
          * Gets Winding Number
          * @param points Array of Points (x ,y)
