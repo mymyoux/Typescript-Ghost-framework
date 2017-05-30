@@ -9,6 +9,7 @@ import {IAPIOptions} from "./IAPIOptions";
 import {APIExtended} from "./APIExtended";
 //convert-files
 import {IMiddleWare} from "./IMiddleWare";
+import {Strings} from "ghost/utils/Strings";
 
 	export class API2 extends APIExtended
 	{
@@ -85,18 +86,26 @@ import {IMiddleWare} from "./IMiddleWare";
 		public then(token?: string, request?: any): any 
 		public then(resolve?: any, reject?: any): any
 		public then(resolve?: any, reject?: any): any{
+			if(typeof resolve == "string")
+				return super.then(resolve, reject);
 			return new Promise<any>((rs, rj)=>
 			{
 				super.then(rs, rj);
 			}).then(resolve, reject);
 		}
-		protected _then(request: any, resolve: any, reject: any, token: string): APIExtended {
+		protected _then(request: any, resolve: any, reject: any, token: string): API2 {
 			for (var p in APIExtended.middlewares) {
 				if (APIExtended.middlewares[p].request) {
 					APIExtended.middlewares[p].request(request);
 				}
 			}
 			this.lastRequest = request;
+			if(Strings.endsWith(request.url, "undefined/undefined"))
+			{
+				debugger;
+				console.error("UNDEFINED URL", request);
+				return resolve();
+			}
 			var promise = ajax(request, { asObject: true });//this.getPromise();
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
