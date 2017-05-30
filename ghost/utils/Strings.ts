@@ -36,13 +36,13 @@ import {Maths} from "ghost/utils/Maths";
             }
             return value.indexOf(start) == 0;
         }
-         public static endsWith(value:string, start:string):boolean
+         public static endsWith(value:string, end:string):boolean
         {
-            if(!value || !start)
+            if(!value || !end)
             {
                 return false;
             }
-            return value.indexOf(start) == value.length - start.length;
+            return value.indexOf(end) == value.length - end.length;
         }
         public static camel(text:string, delimiter:string = "-")
         {
