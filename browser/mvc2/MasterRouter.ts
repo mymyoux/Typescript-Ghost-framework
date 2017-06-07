@@ -53,12 +53,14 @@ export class MasterRouter
          //TODO:remove only for mvc1 compatibility
         if(object.scoping && route.scope)
         {
+            console.log("prescope:", route.scope);
             object.scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
         }
         var load:any = object.handleRoute(url, route);
         if(load !== false && typeof load != "string")
         {
             var scope:string = object.scope();
+            console.log("scope:", scope);
             if(scope)
             {
                 //TODO:remove only for mvc1 compatibility
@@ -66,15 +68,23 @@ export class MasterRouter
                 {
                     scope = (<any>scope).name();
                 }
-                if(MasterRouter._scopes[scope] && (MasterRouter._scopes[scope]!==object || MasterRouter._scopes[scope].scoping))
+                console.log("scope_name:", scope);
+                if(MasterRouter._scopes[scope] && (MasterRouter._scopes[scope]!==object || MasterRouter._scopes[scope].scope().name()!=scope))
                 {
+                console.log("remove_old:", MasterRouter._scopes[scope]);
                     console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);
                     MasterRouter._scopes[scope].handleDisactivation();
+                }else
+                if(MasterRouter._scopes[scope]===object)
+                {
+                        MasterRouter._scopes[scope].handleDisactivation();
+                        MasterRouter._scopes[scope].scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
                 }
+                console.log("add_new:", object);
                 MasterRouter._scopes[scope] = object;
+                object._activated = false;
             }else
             {
-                debugger;
             }
             console.log("[MASTERROUTER]activation:"+scope+" => "+url, object);
             object.handleActivation(url, route);
@@ -96,7 +106,7 @@ export class MasterRouter
     }
     public static onRemoveAll(scope:string):void
     {
-        debugger; 
+        debugger;
         if(MasterRouter._scopes[scope])
         {
             console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);
