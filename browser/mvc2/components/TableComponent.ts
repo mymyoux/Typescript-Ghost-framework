@@ -37,6 +37,7 @@ export class TableComponent extends Component
             }
         };
     }
+
     protected $click(item:any, column:any, event:any):void
     {
         if(column.link !== true)
