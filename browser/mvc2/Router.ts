@@ -10,7 +10,7 @@
 		public static TYPE_STATIC:string = "static";
 		public static TYPE_REGEXP:string = "regexp";
 		public static TYPE_SEGMENT:string = "segment";
-		private static REGEXP_SEGMENT: RegExp = /:([^:\/\?]+)/g;
+		private static REGEXP_SEGMENT: RegExp = /:([^:\/\?\+]+)/g;
 		protected static _instance: Router;
 		public static instance(): any {
             if(!this._instance)
@@ -102,7 +102,6 @@
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
-			debugger;
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];
@@ -122,6 +121,9 @@
 			if(route && route!==this.current) 
 			{
 				return this.goto(route.url, route.params); 
+			}else
+			{
+				debugger;
 			}
 			this.trigger('remove_all', scope);
 			return false;
@@ -134,6 +136,11 @@
 
 			window.location.href = this._buildURL();
 			}, 0);
+		}
+
+		public getHistorySize(scope:string = "main") : number
+		{
+			return Object.keys(this.history[scope]).length;
 		}
 		protected _reject(route: any): void
 		{
@@ -420,9 +427,8 @@
 			{
 				route.paramsNames.push(temp[1]);
 			}
-
-			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
-			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?]+)(\??)/g, "$2$3([^\/]+)$3").replace(/\//g, "\\/"));
+			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
+			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
 
 
 			return route;
@@ -459,7 +465,13 @@
 			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
 console.log("[router:href]"+href);
 			if(href)
-				this.goto(href);
+			{
+				var hrefs:string[] = href.split("+");
+				for(href of hrefs)
+				{
+					this.goto(href);
+				}
+			}
 		}
 		protected onBackButton():void
 		{

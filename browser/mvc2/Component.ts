@@ -2,6 +2,7 @@ import {Template} from "./Template";
 import {CoreObject} from "ghost/core/CoreObject";
 import {Inst} from "./Inst";
 import {Step} from "browser/performance/Step";
+import {Polyglot2} from "../i18n/Polyglot2";
 
 export class Component extends CoreObject
 {
@@ -33,6 +34,10 @@ export class Component extends CoreObject
             Vue.component('component-'+name, Component.load.bind(Component, name, options));
         }
     }
+    public static hasComponent(name:string):boolean
+    {
+        return  this.components[name] != undefined || Vue.component('component-'+name) != undefined;
+    }
     private static getComponentFromVue(vue:any):Component
     {
         var index:number = Component.instancesVue.indexOf(vue);
@@ -43,6 +48,7 @@ export class Component extends CoreObject
         debugger;
         return null;
     }
+    
     public static load(name:string, options?:any):Promise<any>
     {
         window["component"] = this;
@@ -64,7 +70,7 @@ export class Component extends CoreObject
                 }
                 var methods:string[] = [];
                 var computed:string[] = [];
-                const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
+                const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$rproxy"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
@@ -82,7 +88,7 @@ export class Component extends CoreObject
 
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
-                
+
                var componentDefinition:any = {
                   
                     props:props,
@@ -113,6 +119,13 @@ export class Component extends CoreObject
                     {
                         console.log("comp-before-create:"+this._uid+" "+name);
                         (new cls(this)).boot();
+                    },
+                    beforeMount:function()
+                    {
+                        var component:Component = Component.getComponentFromVue(this);
+                        if(!component)
+                            return;
+                        component.beforeMounted();
                     },
                     mounted:function()
                     {
@@ -188,10 +201,11 @@ export class Component extends CoreObject
      */
     
     protected parent:any;
+    protected root:any;
     private _shortName:string;
     private _dataLoaded:boolean;
     private vueConfig:any;
-    protected steps:string[] = ["bindVue","bootComponents"];
+    protected steps:string[] = ["bindVue","bindPolyglot","bootComponents"];
     protected components:Component[];
     public constructor(public template:any)
     {
@@ -200,6 +214,15 @@ export class Component extends CoreObject
         this.components = [];
         Component.instances.push(this);
         Component.instancesVue.push(this.template);
+    }
+    public $trad(key:string, options?:any):any
+    {   
+        var prefix:string = this.root.getTradKey();
+        if(prefix)
+        {
+            key = prefix+"."+key;
+        }
+        return Polyglot2.instance().t(key, options);
     }
     public boot():void
     {
@@ -239,15 +262,23 @@ export class Component extends CoreObject
     {
         return null;
     }
-    private mounted():void
+    private beforeMounted():void
     {
         this.template.$parent.$emit('new-component', this);
+    }
+    private mounted():void
+    {
+        //this.template.$parent.$emit('new-component', this);
         if(this["onMounted"])
             this["onMounted"]();
     }
     public setParent(parent:any):void
     {
         this.parent = parent;
+    }
+    public setRoot(root:any):void
+    {
+        this.root = root;
     }
     public $test()
     {
@@ -365,6 +396,28 @@ export class Component extends CoreObject
             Vue.component('component-'+name, Component.load.bind(Component, name));
         }
     }
+    public $proxy(method:string, ...params):void
+    {
+        if(this["$"+method])
+        {
+            return this["$"+method](...params);
+        }else
+        {
+            var transfert:any[] = [method].concat(params);
+            this.emit("proxy", ...transfert);
+        }
+    }
+     public $rproxy(method:string, ...params):void
+    {
+        if(this["$"+method])
+        {
+            return this["$"+method](...params);
+        }else
+        {
+            var transfert:any[] = [method].concat(params);
+            this.remit("proxy", ...transfert);
+        }
+    }
     protected onModelChanged(name:string, model:any):void
     {
         this.$addData(name, model);
@@ -373,13 +426,24 @@ export class Component extends CoreObject
     {
         
     }
+    protected bindPolyglot():void
+    {
+        Polyglot2.instance().on("resolved", this.onPolyglotResolved, this);
+    }
+    protected onPolyglotResolved():void
+    {
+        if(this.template)
+            this.template.$forceUpdate();
+    }
     protected bootComponents():void
     {
         this.template.$on('new-component',this.onNewComponent.bind(this));
+        this.template.$on('proxy',this.$proxy.bind(this));
     }
     private onNewComponent(component:Component):void
     {
         component.setParent(this);
+        component.setRoot(this.root);
         this.components.push(component);
     }
     private removeComponent(component:Component):void
@@ -434,6 +498,7 @@ export class Component extends CoreObject
     }
     public dispose():void
     {
+        Polyglot2.instance().off("resolved", this.onPolyglotResolved, this);
         console.log("[component] dispose:", this);
         if(this.parent)
         {
@@ -441,5 +506,6 @@ export class Component extends CoreObject
             this.parent = null;
             this.template = null;
         }
+        this.root = null;
     }
 }

@@ -30,6 +30,32 @@
             return Math.floor(Math.random()*(max-min+1)+min);
         }
         /**
+         * Génère un entier aléatoirement compris entre min et max (bornes comprises)
+         * @param min Valeur minimum
+         * @param max Valeur maximum
+         * @return Un entier entre min et max compris.
+         */
+        public static randNumberBetween(min:number, max:number):number
+        {
+            if(max<=min)
+            {
+                return min;
+            }
+            return Math.random()*(max-min)+min;
+        }
+         public static randomize ( myArray:any[] ):any[] {
+                var i = myArray.length;
+                if ( i == 0 ) return myArray;
+                while ( --i ) {
+                    var j = Math.floor( Math.random() * ( i + 1 ) );
+                    var tempi = myArray[i];
+                    var tempj = myArray[j];
+                    myArray[i] = tempj;
+                    myArray[j] = tempi;
+                }
+                return myArray;
+            }
+        /**
          * Gets Winding Number
          * @param points Array of Points (x ,y)
          * @param x X coordinate
