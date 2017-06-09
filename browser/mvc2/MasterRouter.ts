@@ -1,6 +1,8 @@
 import {Router} from "./Router";
 import {IRoute} from "./IRoute";
+
 import {Scope} from "browser/mvc/Scope";
+
 export class MasterRouter
 {
     protected static instances:any[] = [];
@@ -54,7 +56,8 @@ export class MasterRouter
         if(object.scoping && route.scope)
         {
             console.log("prescope:", route.scope);
-            object.scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
+            //object.scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
+            object.scope(Scope.getScope(route.scope));
         }
         var load:any = object.handleRoute(url, route);
         if(load !== false && typeof load != "string")
@@ -78,7 +81,8 @@ export class MasterRouter
                 if(MasterRouter._scopes[scope]===object)
                 {
                         MasterRouter._scopes[scope].handleDisactivation();
-                        MasterRouter._scopes[scope].scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
+                        //MasterRouter._scopes[scope].scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
+                        MasterRouter._scopes[scope].scope(Scope.getScope(route.scope));
                 }
                 console.log("add_new:", object);
                 MasterRouter._scopes[scope] = object;
