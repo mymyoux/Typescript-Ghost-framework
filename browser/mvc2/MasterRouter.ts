@@ -72,7 +72,7 @@ export class MasterRouter
                     scope = (<any>scope).name();
                 }
                 console.log("scope_name:", scope);
-                if(MasterRouter._scopes[scope] && (MasterRouter._scopes[scope]!==object || MasterRouter._scopes[scope].scope().name()!=scope))
+                if(MasterRouter._scopes[scope] && (MasterRouter._scopes[scope]!==object || (typeof MasterRouter._scopes[scope].scope().name === 'function' && MasterRouter._scopes[scope].scope().name()!=scope)))
                 {
                 console.log("remove_old:", MasterRouter._scopes[scope]);
                     console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);
