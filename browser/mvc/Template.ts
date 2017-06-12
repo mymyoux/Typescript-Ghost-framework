@@ -141,7 +141,7 @@ import {IRawTemplate} from "./IRawTemplate";
                 debugger;
             }
             this.parsed = Ractive["parse"](this.content, options); 
-            if(window.location.host.indexOf(".local")==-1 && window.location.host.indexOf("local.")==-1)
+            if(!this.isLocal())
             {
                 Template.cache().setItem(this.url, {
                     url:this.url,
@@ -154,7 +154,10 @@ import {IRawTemplate} from "./IRawTemplate";
 
         }
 
-
+        public isLocal():boolean
+        {
+            return window.location.host.indexOf(".local")!=-1 || window.location.host.indexOf("local.")!=-1;
+        }
         protected getTypeFromURL(): string {
             if (!this._type) {
                 var parts: string[] = window.location.pathname.split("/");
