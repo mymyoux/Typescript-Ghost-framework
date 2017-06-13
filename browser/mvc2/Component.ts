@@ -70,19 +70,28 @@ export class Component extends CoreObject
                 }
                 var methods:string[] = [];
                 var computed:string[] = [];
+                var watchers:string[] = [];
                 const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$rproxy"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
-                    if(typeof cls.prototype[p] == "function" && p.substring(0, 1)=="$" && restricted.indexOf(p)==-1)
+                    if(typeof cls.prototype[p] == "function")
                     {
+                        if(restricted.indexOf(p)!=-1)
+                            continue
+                        if(p.substring(0, 1)=="$")
+                        {
                             if(p.substring(1, 2) == "$")
                             {
                                 computed.push(p.substring(2));
                             }else{
                                 methods.push(p.substring(1));
                             }
-                        //this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
+
+                        }else if(p.substring(0, 1)=="W")
+                        {
+                            watchers.push(p.substring(1));
+                        }
                     } 
                 }
 
@@ -112,6 +121,17 @@ export class Component extends CoreObject
                             if(!component)
                                 return;
                             return component["$$"+method]().apply(this, data);
+                        };
+                        return previous;
+                    }, {}),
+                    watch:watchers.reduce(function(previous:any, method:string):any
+                    {   
+                        previous[method] = function(...data:any[])
+                        {
+                            var component:Component = Component.getComponentFromVue(this);
+                            if(!component)
+                                return;
+                            return component["W"+method](...data);
                         };
                         return previous;
                     }, {}),
@@ -388,6 +408,10 @@ export class Component extends CoreObject
     protected $addComputedProperty(name:string, computed:Function):void
     {
         throw new Error("you can't use component#$addComputedProperty you must use $$method syntax instead");
+    }
+    protected $addWatcher(name:string, bind:Function):void
+    {
+        throw new Error("you can't use component#$addWatcher you must use Wmethod syntax instead");
     }
     protected $addComponent(name:string):void
     {

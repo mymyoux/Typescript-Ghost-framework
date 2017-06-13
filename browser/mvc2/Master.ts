@@ -267,6 +267,13 @@ export class Master
         }
         this.vueConfig.computed[name] = computed;
     }
+    protected $addWatcher(name:string, bind:Function):void{
+        if(!this.vueConfig.watch)
+        {
+            this.vueConfig.watch = {};
+        }
+        this.vueConfig.watch[name] = bind;
+    }
     protected $addData(name:string, value:any):void
     {
         if(!this.vueConfig.data)
@@ -350,14 +357,24 @@ export class Master
         //add $Methods by defaut
         for(var p in this)
         {
-            if(typeof this[p] == "function" && p.substring(0, 1)=="$" && restricted.indexOf(p)==-1)
+            if(typeof this[p] == "function")
             {
-                if(p.substring(1, 2) == "$")
+                if(restricted.indexOf(p)!=-1)
                 {
-                    this.$addComputedProperty(p.substring(2), (<any>this[p])());
-                }else
+                    continue;
+                }
+                if(p.substring(0, 1)=="$")
                 {
-                    this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
+                    if(p.substring(1, 2) == "$")
+                    {
+                        this.$addComputedProperty(p.substring(2), (<any>this[p])());
+                    }else
+                    {
+                        this.$addMethod(p.substring(1), (<any>this[p]).bind(this));
+                    }
+                }else if(p.substring(0, 1) == "W")
+                {
+                    this.$addWatcher(p.substring(1), (<any>this[p]).bind(this));
                 }
             } 
         }

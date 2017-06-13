@@ -10,6 +10,7 @@ import {Buffer} from "ghost/utils/Buffer";
 export class AutocompleteComponent extends Component
 {
     protected throttlingTyping:any;
+    protected blurLater:any;
     public constructor(template:any)
     {
         super(template);
@@ -17,10 +18,6 @@ export class AutocompleteComponent extends Component
     }
     public props():any {
         return {
-            "list":
-            {
-                required:true
-            } ,
             "name":
             {
                 required:false
@@ -32,6 +29,11 @@ export class AutocompleteComponent extends Component
             {
                 type:Boolean,
                 default:false
+            },
+             "selection":
+            {
+                type:String,
+                default:""
             }
             // "actions":
             // {
@@ -57,7 +59,12 @@ export class AutocompleteComponent extends Component
      protected bindVue():void
     {
         this.$addData('choice', "");
+        this.$addData('list', []);
         this.$addData('selected', -1);
+    }
+    public setAutocomplete(data:any[]):void
+    {
+        this.template.list = data;
     }
     public $click(item:any):void
     {
@@ -76,31 +83,53 @@ export class AutocompleteComponent extends Component
         }
         this.select({name:this.template.choice});
     }
+    protected $focus():void
+    {
+
+    }
+    protected $blur():void{
+
+        if(this.blurLater)
+        {
+            clearTimeout(this.blurLater);
+        }
+        this.blurLater = setTimeout(()=>
+        {
+            this.blurLater = null;
+            this.template.list = [];
+        },100);
+    }
     protected select(choice:any):void{
         this.emit('autocompleteChoice', this, choice);
         this.template.choice = choice.name;
+        this.template.list = [];
     }
-    public $typing(event):void
+    public $typing(event):any
     {
         if(event.keyCode == 13)
             return;
         if([38,40].indexOf(event.keyCode)!=-1 )
         {
-            return this.$selectChange(event.keyCode);
+            return this.$selectChange(event.keyCode == 38);//false;
         }
         this.throttlingTyping();
     }
-    protected $selectChange(key:number):void
+    public Wselection()
+    {
+        this.template.choice = this.template.selection;
+    }
+    protected $selectChange(up:boolean):boolean
     {
         //up
-        if(key == 38)
+        if(up)
         {
             if(this.template.selected>0 || (this.template.selected > -1 && this.template.allow_custom))
                 this.template.selected--;
-        }else if(key == 40){
+        }else{
             if(this.template.selected < this.template.list.length-1)
                 this.template.selected++;
         }
+        return false;
     }
     protected throttleTyping():void
     {
@@ -119,6 +148,11 @@ export class AutocompleteComponent extends Component
     {
         return this.template.choice;
     }
+    protected onMounted():void
+    {
+        this.Wselection();
+    }
     public activate():void{
+        
     }
 }
