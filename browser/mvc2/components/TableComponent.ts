@@ -11,7 +11,6 @@ export class TableComponent extends Component
 
     protected bindVue():void
     {
-        window["table"]    = this;
     }
 
     public props():any {

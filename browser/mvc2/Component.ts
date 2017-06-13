@@ -290,11 +290,11 @@ export class Component extends CoreObject
      * @param name event's name
      * @param data optional data
      */
-    private emit(name:string, ...data:any[]):void
+    protected emit(name:string, ...data:any[]):void
     {
         if(this.parent)
         {
-            name = "$on"+name.substring(0, 1)+name.substring(1);
+            name = "$on"+name.substring(0, 1).toUpperCase()+name.substring(1);
             if(this.parent[name])
             {
                 this.parent[name](...data);
@@ -310,7 +310,7 @@ export class Component extends CoreObject
      * @param name event's name
      * @param data optional data
      */
-    private remit(name:string, ...data:any[]):void
+    protected remit(name:string, ...data:any[]):void
     {
         if(this.parent)
         {
