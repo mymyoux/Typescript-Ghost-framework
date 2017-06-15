@@ -174,7 +174,10 @@ import {Strings} from "ghost/utils/Strings";
 				this._next();
 
 				if (reject)
+				{
+					debugger;
 					reject(reason);
+				}
 			});
 			return <any>this;
 		}
