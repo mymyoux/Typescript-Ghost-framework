@@ -253,8 +253,7 @@ import {MasterRouter} from "browser/mvc2/MasterRouter";
          */
         public getCurrentController():Controller
         {
-            MasterRouter;
-            return <any>require("browser/mvc2/MasterRouter").MasterRouter.getCurrentMaster(this.name());
+            return MasterRouter.getCurrentMaster(this.name());
          //   return this._currentController;
         }
         /**
