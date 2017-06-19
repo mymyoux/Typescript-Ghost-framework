@@ -2292,6 +2292,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
         }
         protected geocode():void
         {
+            debugger;
             GMap.autocomplete({input:this.data[this.name],
                 types:this.types
             }).then((result:any[])=>{

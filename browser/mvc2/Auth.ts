@@ -14,6 +14,7 @@ export class Auth
     }
     public static setUser(user:any):void
     {
+        window["user"] = user;
         Auth._user = user;
         if(user && user.token)
         {
