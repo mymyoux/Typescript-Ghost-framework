@@ -17,6 +17,7 @@ export class Model extends EventDispatcher
         ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
     public static PATH_UPDATE:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+
     private _firstData:boolean;
     private _pathLoaded:any = {};
     protected _modelName:string;

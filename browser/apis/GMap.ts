@@ -43,6 +43,8 @@ import {Configuration} from "ghost/data/Configuration";
 				window["__initialize__gmap"]["resolve"] = resolve;
 				var script = document.createElement('script');
 				script.type = 'text/javascript';
+
+				//script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyCZMnz7QrMxbmDX-10ROySrfD58ZaXGbkk&callback=initMap';
 				script.src =  'https://maps.googleapis.com/maps/api/js?'+(key?'key='+key+'&':'')+'v=3.exp&' + 'libraries=places'+'&callback=__initialize__gmap&language=en';
 				document.body.appendChild(script);
 			});
