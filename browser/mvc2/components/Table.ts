@@ -14,7 +14,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             sortable:false,
             filterable:false,
             visible:true,
-            link:false
+            link:false,
+            editable:false
         };
         constructor(...args: any[]) {
             super(...args);
@@ -79,7 +80,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             if(!options.type)
             {
                 options.type = null;
-                options.prop = name;
+                if(!options.prop)
+                    options.prop = name.toLowerCase();
             }else
             {
                 console.log("ICI");
@@ -104,6 +106,7 @@ export interface IColumn
     headerClasses?:string[];
     columns?:string[];
     link?:boolean|string;
+    editable?:boolean;
 
     //order
     up?:boolean;

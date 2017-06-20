@@ -88,7 +88,7 @@
 		}
 		protected log(...data:any[]):void
 		{
-			console.log("route:", ...data);
+			//console.log("route:", ...data);
 		}
 		public gotoLastReject(scope:string = "main"):boolean
 		{
