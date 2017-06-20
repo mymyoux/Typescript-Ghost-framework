@@ -3,8 +3,6 @@ import {Model} from "browser/mvc2/Model";
 import {Inst} from "browser/mvc2/Inst";
 import {Auth} from "browser/mvc2/Auth";
 import {Router} from "browser/mvc2/Router";
-//import {JobBoardModel} from "resources/assets/ts/yb/main/models/JobBoardModel";
-import {JobBoardModel} from "yb/main/models/JobBoardModel";
 import {Component} from "browser/mvc2/Component";
 
 export class ModalComponent extends Component
