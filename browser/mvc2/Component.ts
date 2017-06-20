@@ -71,7 +71,7 @@ export class Component extends CoreObject
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
-                const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$rproxy"];
+                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$rproxy"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
@@ -405,6 +405,16 @@ export class Component extends CoreObject
             return this.$getData(model);
         return this.$getData(model.prototype.getModelName.call(model));
     }
+    protected $getProp(name:string):any
+    {
+        if (this.template && this.template.$options && this.template.$options.propsData[name])
+            return this.template.$options.propsData[name];
+        
+        debugger;
+        console.warn('prop ' + name + ' not exist on template', this.template);
+
+        return null;
+    }    
     protected $addComputedProperty(name:string, computed:Function):void
     {
         throw new Error("you can't use component#$addComputedProperty you must use $$method syntax instead");
