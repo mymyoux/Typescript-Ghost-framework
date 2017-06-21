@@ -10,6 +10,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         protected config:any;
         public filter:any;
         public search:any;
+        protected _getPromise:any;
         private static defaultOptions:any = 
         {
             resizable:true,
@@ -42,11 +43,18 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             {
                 request.param("filter", this.filter);
             }
-
+            this._getPromise = request;
             return request.then(function(data)
             {
                 return data;
             });
+        }
+        public cancelGet():void
+        {
+            if(this._getPromise)
+            {
+                this._getPromise.cancel();
+            }
         }
         public order(index:number | string | string[], direction:number|number[] = 1):void
         {

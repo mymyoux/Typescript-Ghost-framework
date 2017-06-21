@@ -175,7 +175,7 @@ import {Strings} from "ghost/utils/Strings";
 
 				if (reject)
 				{
-					debugger;
+					console.warn(reason);
 					reject(reason);
 				}
 			});

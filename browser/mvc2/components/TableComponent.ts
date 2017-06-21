@@ -4,17 +4,24 @@ import {Inst} from "browser/mvc2/Inst";
 import {Auth} from "browser/mvc2/Auth";
 import {Router} from "browser/mvc2/Router";
 import {Component} from "browser/mvc2/Component";
+import {Buffer} from "ghost/utils/Buffer";
 
 
 export class TableComponent extends Component
 {
     protected saveObject:any;
     protected savePromise:Promise<any> = null;
-    protected searchPromise:any;
+    protected reload:any;
+    public constructor(template:any)
+    {
+        super(template);
+        this.reload = Buffer.throttle(this._reload.bind(this), 200);
+    }
     protected bindVue():void
     {
         this.$addData("edition", false);
         this.$addData("deleting", false);
+        this.$addData("loading", false);
     }
 
     public props():any {
@@ -51,7 +58,14 @@ export class TableComponent extends Component
     }
 
     protected $paginate():void {
-        this.$getModel("list").nextAll().then();
+        this.$addData("loading", true);
+        this.$getModel("list").nextAll().then(()=>
+        {
+            this.$addData("loading", false);
+        },()=>
+        {
+            this.$addData("loading", false);
+        });
     }
     protected getPromise(event?:any):Promise<any>
     {
@@ -207,7 +221,7 @@ export class TableComponent extends Component
         }
         promise.then((success:boolean)=>
         {
-            debugger;
+            {debugger;}
             var model:any = this.$getData("edition");
             var list:any = this.$getProp('list');
             if(!model)
@@ -221,7 +235,7 @@ export class TableComponent extends Component
             }else{
                 if(this.saveObject)
                 {
-                    debugger;
+                    {debugger;}
                     for(var p in this.saveObject)
                     {
                         model[p] = this.saveObject[p];
@@ -266,11 +280,19 @@ export class TableComponent extends Component
     }
     protected $onSearch(column:any, event:any):void
     {
-        if(this.searchPromise)
+        this.$getProp('list').cancelGet();
+        this.reload();
+    }
+    protected _reload():void
+    {
+        this.$addData("loading", true);
+        this.$getProp('list').clear();
+        this.$getProp('list').loadGet().then(()=>
         {
-            this.searchPromise.cancel();
-        }
-        this.searchPromise = this.$getProp('list').loadGet();
+            this.$addData("loading", false);
+        }).catch(()=>{
+            this.$addData("loading", false);
+        });
     }
     protected save(item:any):void
     {
