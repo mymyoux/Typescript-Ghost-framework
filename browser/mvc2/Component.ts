@@ -140,18 +140,19 @@ export class Component extends CoreObject
                         console.log("comp-before-create:"+this._uid+" "+name);
                         (new cls(this)).boot();
                     },
-                    beforeMount:function()
-                    {
-                        var component:Component = Component.getComponentFromVue(this);
-                        if(!component)
-                            return;
-                        component.beforeMounted();
-                    },
+                    // beforeMount:function()
+                    // {
+                    //     var component:Component = Component.getComponentFromVue(this);
+                    //     if(!component)
+                    //         return;
+                    //     component.beforeMounted();
+                    // },
                     mounted:function()
                     {
                         var component:Component = Component.getComponentFromVue(this);
                         if(!component)
                             return;
+                        component.beforeMounted();
                         component.mounted();
                     },
                     beforeDestroy:function()
@@ -284,7 +285,7 @@ export class Component extends CoreObject
     }
     private beforeMounted():void
     {
-        this.template.$parent.$emit('new-component', this);
+        this.template.$parent.$onNewComponent(this);//$emit('new-component', this);
     }
     private mounted():void
     {
@@ -471,10 +472,10 @@ export class Component extends CoreObject
     }
     protected bootComponents():void
     {
-        this.template.$on('new-component',this.onNewComponent.bind(this));
+       // this.template.$on('new-component',this.onNewComponent.bind(this));
         this.template.$on('proxy',this.$proxy.bind(this));
     }
-    private onNewComponent(component:Component):void
+    private $onNewComponent(component:Component):void
     {
         component.setParent(this);
         component.setRoot(this.root);

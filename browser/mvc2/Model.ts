@@ -16,7 +16,7 @@ export class Model extends EventDispatcher
     public static PATH_DELETE:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
     public static PATH_UPDATE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true});
 
     private _firstData:boolean;
     private _pathLoaded:any = {};
@@ -114,7 +114,7 @@ export class Model extends EventDispatcher
     }
     protected path(path:string):string
     {
-        if(path.substring(0, 1)==".")
+       if(path.substring(0, 1)==".")
         {
             path = this.getRootPath()+"/"+path.substring(1);
         }
@@ -132,6 +132,11 @@ export class Model extends EventDispatcher
         {
             if(this[p] === undefined)
                 this.invalidate();
+            if(typeof this[p] == "function")
+            {
+                console.warn("you overwrite function: "+p);
+                debugger;
+            }
             this[p] = input[p];
         }
         this.triggerFirstData();
@@ -213,6 +218,9 @@ export class Model extends EventDispatcher
                         {
                             value = value.replace('%'+key+'%', this[key]);
                         }
+                    }else if(value == '%'+key+'%')
+                    {
+                        value = null;
                     }
                 }
             });

@@ -1,6 +1,6 @@
 import {Objects} from "ghost/utils/Objects";
 import {Component} from "browser/mvc2/Component";
-
+import {API2} from "browser/api/API2";
 type Constructor<T extends any> = new(...args: any[]) => T;
 
 export function Table<X extends Constructor<any>>( Child:X ) {
@@ -8,6 +8,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
     return class K extends Child {
         protected columns:IColumn[];
         protected config:any;
+        public filter:any;
+        public search:any;
         private static defaultOptions:any = 
         {
             resizable:true,
@@ -15,13 +17,36 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             filterable:false,
             visible:true,
             link:false,
-            editable:false
+            editable:false,
+            searchable:false,
+            //edition:false,
+            error:null,
+            search:null
         };
         constructor(...args: any[]) {
             super(...args);
+            this.filter = {};
+            this.search = null;
             this.columns = [];
             this.bootColumns();
-            window["taa"] = this;
+        }
+        public loadGet(params?:any):Promise<any>
+        {
+            var request:API2 =  this.request();
+
+            for (var key in params)
+            {
+                request.param(key, params[key]);
+            }
+            if(this.filter && (!params || !params.filter))
+            {
+                request.param("filter", this.filter);
+            }
+
+            return request.then(function(data)
+            {
+                return data;
+            });
         }
         public order(index:number | string | string[], direction:number|number[] = 1):void
         {
@@ -46,9 +71,12 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         protected bootColumns():void
         {
             this.columns = [];
-            this.config = {};
+            this.config = {
+                creatable:false,
+                searchable:false,
+                deletable:false
+            };
             this.bindColumns();
-
         }
         public bindColumns()
         {
@@ -76,6 +104,14 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                     }
                 }
             }
+            if(options.searchable)
+            {
+                this.config.searchable = true;
+                if(options.prop)
+                {
+                    this.filter[options.prop] = "";
+                }
+            }
             options.title = name;
             if(!options.type)
             {
@@ -88,6 +124,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                 Component.addVueComponent("table-"+options.type, {props:["item","column","data"]});
                 options.type = "component-table-"+options.type;
             }
+           
            
             this.columns.push(options);
         }
@@ -107,7 +144,10 @@ export interface IColumn
     columns?:string[];
     link?:boolean|string;
     editable?:boolean;
-
+    searchable?:boolean;
+    search?:string;
+ //   edition?:string; 
+    error?:string;
     //order
     up?:boolean;
     down?:boolean;

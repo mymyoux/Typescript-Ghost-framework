@@ -353,7 +353,7 @@ export class Master
             name:this._getName(),
             template:this._template.getContent()
         }; 
-        const restricted:string[] = ["$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy"];
+        const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy"];
         //add $Methods by defaut
         for(var p in this)
         {
@@ -415,7 +415,7 @@ export class Master
     }
     protected bootComponents():void
     {
-        this.template.$on('new-component',this.onNewComponent.bind(this));
+        //this.template.$on('new-component',this.onNewComponent.bind(this));
         this.template.$on('updated-component',this.onUpdatedComponent.bind(this));
         this.template.$on('proxy',this.$proxy.bind(this));
         this.template.$on('trad', function()
@@ -427,7 +427,7 @@ export class Master
     {
         this.onTemplateUpdated();
     }
-    private onNewComponent(component:Component):void
+    private $onNewComponent(component:Component):void
     {
         component.setParent(this);
         component.setRoot(this);

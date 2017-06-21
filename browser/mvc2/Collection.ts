@@ -18,9 +18,15 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         public models:T[] = [];
         private _request:API2;
         protected _isFullLoaded:boolean;
+        protected _modelClass:any;
         constructor(...args: any[]) {
             super(...args);
+            this._modelClass = eval('_super');
             this.models = [];
+        }
+        public createModel():T
+        {
+            return new this._modelClass();
         }
         public clear():void
         {
