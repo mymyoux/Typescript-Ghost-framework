@@ -334,6 +334,19 @@ import {Root} from "ghost/core/Root";
         {
             return !Hardware.isPortrait();
         }
+        public static supportPassive():boolean
+        {
+            var supportsPassive:boolean = false;
+            try {
+                var opts = Object.defineProperty({}, 'passive', {
+                    get: function() {
+                    supportsPassive = true;
+                    }
+                });
+                Root.getRoot().addEventListener("test", null, opts);
+            } catch (e) {}
+         return supportsPassive;
+        }
         /**
          * Main device's data to object
          * @returns {object}

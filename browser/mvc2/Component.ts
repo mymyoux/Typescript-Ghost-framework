@@ -27,6 +27,7 @@ export class Component extends CoreObject
         // if(!Vue.component('component-'+name))
         //     Vue.component('component-'+name, Component.load.bind(Component, name));
     }
+
     public static addVueComponent(name:string, options?:any):void
     {
         if(!Vue.component('component-'+name))
@@ -152,7 +153,10 @@ export class Component extends CoreObject
                         var component:Component = Component.getComponentFromVue(this);
                         if(!component)
                             return;
+                        console.log("comp-mounted");
+                           debugger;
                         component.beforeMounted();
+                           debugger;
                         component.mounted();
                     },
                     beforeDestroy:function()
@@ -236,6 +240,22 @@ export class Component extends CoreObject
         Component.instances.push(this);
         Component.instancesVue.push(this.template);
     }
+    protected bindEvents():void
+    {
+
+    }
+    protected scroll(listener:any):void
+    protected scroll(selector:string, listener:any):void
+    protected scroll(selector:any, listener?:any):void
+    {       
+        if(!listener)
+        {
+            listener = selector;
+            selector = this.template.$el;
+            debugger;
+        }
+        $('.table').parents().each(function(item){ console.log($(this).css('overflow-y'));})
+    }
     public $trad(key:string, options?:any):any
     {   
         var prefix:string = this.root.getTradKey();
@@ -285,10 +305,13 @@ export class Component extends CoreObject
     }
     private beforeMounted():void
     {
+        debugger;
         this.template.$parent.$onNewComponent(this);//$emit('new-component', this);
     }
     private mounted():void
     {
+        debugger;
+        this.bindEvents();
         //this.template.$parent.$emit('new-component', this);
         if(this["onMounted"])
             this["onMounted"]();

@@ -17,6 +17,13 @@ export class TableComponent extends Component
         super(template);
         this.reload = Buffer.throttle(this._reload.bind(this), 200);
     }
+    protected bindEvents():void
+    {
+            this.scroll(function()
+            {
+                debugger;
+            });
+    }
     protected bindVue():void
     {
         this.$addData("edition", false);
@@ -205,7 +212,7 @@ export class TableComponent extends Component
                     return;
                 var elmt:any = this.template.$el.querySelector("[data-create='true']");
                 delete model._creating;
-                if(elmt)
+                if(elmt) 
                 {
                     $(elmt).find('input').eq(0).focus();
                 }

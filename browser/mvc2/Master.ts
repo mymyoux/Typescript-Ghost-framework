@@ -252,6 +252,18 @@ export class Master
     {
         throw new Error('override this');
     }
+    protected scroll(listener:any):void
+    protected scroll(selector:string, listener:any):void
+    protected scroll(selector:any, listener?:any):void
+    {       
+        if(!listener)
+        {
+            listener = selector;
+            selector = this.template.$el;
+            debugger;
+        }
+        $('.table').parents().each(function(item){ console.log($(this).css('overflow-y'));})
+    }
     protected $addComponent(name:string):void
     {
         if(!Vue.component('component-'+name))
