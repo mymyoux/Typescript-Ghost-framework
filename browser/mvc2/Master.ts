@@ -9,16 +9,18 @@ import {Polyglot2} from "browser/i18n/Polyglot2";
 import {Strings} from "ghost/utils/Strings";
 export class Master 
 {
-    protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bindPolyglot","bootComponents"];
+    protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bindEvents","bindPolyglot","bootComponents"];
     protected _template:Template;
     protected template:any;
     protected container:HTMLElement;
     protected vueConfig:any;
     protected components:Component[];
     protected params:any;
+    protected _bindedEvents:any[];
     public constructor() 
     {
         this.components = [];
+        this._bindedEvents = [];
     }
     /**
      * Called by MasterRouter on initilisation
@@ -252,6 +254,19 @@ export class Master
     {
         throw new Error('override this');
     }
+    protected bindEvents():void
+    {
+
+    }
+    protected unbindEvents():void
+    {
+        var event:any;
+        while(this._bindedEvents.length)
+        {
+            event = this._bindedEvents.shift();
+            $(event.elmt).off(event.type, event.listener);
+        }
+    }
     protected scroll(listener:any):void
     protected scroll(selector:string, listener:any):void
     protected scroll(selector:any, listener?:any):void
@@ -260,9 +275,26 @@ export class Master
         {
             listener = selector;
             selector = this.template.$el;
-            debugger;
         }
-        $('.table').parents().each(function(item){ console.log($(this).css('overflow-y'));})
+        if(!listener)
+            throw new Error('you must specify at least a listener');
+
+        var elmts:any[] = $(selector).parents().addBack().toArray();
+        for(var elmt of elmts)
+        {
+            if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
+            {
+                
+                return this.bindEvent(elmt, "scroll",listener);
+            }
+        }
+    }
+    protected bindEvent(selector:string, type:string, listener:any):void
+    protected bindEvent(elmt:any, type:string, listener:any):void
+    protected bindEvent(elmt:any, type:string, listener:any):void
+    {
+        this._bindedEvents.push({elmt:elmt,type:type,listener:listener});
+        $(elmt).on(type, listener);
     }
     protected $addComponent(name:string):void
     {

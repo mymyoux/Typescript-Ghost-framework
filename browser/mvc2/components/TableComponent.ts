@@ -12,6 +12,7 @@ export class TableComponent extends Component
     protected saveObject:any;
     protected savePromise:Promise<any> = null;
     protected reload:any;
+    protected $paginating:any;
     public constructor(template:any)
     {
         super(template);
@@ -19,10 +20,28 @@ export class TableComponent extends Component
     }
     protected bindEvents():void
     {
-            this.scroll(function()
-            {
-                debugger;
-            });
+        var _self:any = this;
+        this.scroll(function()
+        {
+            if(_self.$paginating)
+                return;
+           var element:any = this;
+           var a = element.scrollTop;
+           var b = element.scrollHeight - element.clientHeight;
+           var c = a / b;
+           console.log("scroll:"+c); 
+           if(c>0.7)
+           {
+               _self.$paginating = _self.$paginate();
+               _self.$paginating.then(function()
+               {
+                    _self.$paginating = null;
+               }, function()
+               {
+                    _self.$paginating = null;
+               });
+           }
+        });
     }
     protected bindVue():void
     {
@@ -66,7 +85,7 @@ export class TableComponent extends Component
 
     protected $paginate():void {
         this.$addData("loading", true);
-        this.$getModel("list").nextAll().then(()=>
+        return this.$getModel("list").nextAll().then(()=>
         {
             this.$addData("loading", false);
         },()=>

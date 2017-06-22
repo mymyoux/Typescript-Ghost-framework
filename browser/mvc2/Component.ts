@@ -154,9 +154,7 @@ export class Component extends CoreObject
                         if(!component)
                             return;
                         console.log("comp-mounted");
-                           debugger;
                         component.beforeMounted();
-                           debugger;
                         component.mounted();
                     },
                     beforeDestroy:function()
@@ -165,6 +163,7 @@ export class Component extends CoreObject
                         var index:number = Component.instancesVue.indexOf(this);
                         if(index != -1)
                         {
+                            Component.instances[index].unbindEvents();
                             Component.instances[index].dispose();
                             Component.instances.splice(index, 1);
                             Component.instancesVue.splice(index, 1);
@@ -201,7 +200,6 @@ export class Component extends CoreObject
     }
     private static onTemplateUpdated(template:Template, name:string):void
     {
-        debugger;
         this.reloadComponentTemplate(name);
         for(var component of Component.instances)
         {
@@ -232,9 +230,11 @@ export class Component extends CoreObject
     private vueConfig:any;
     protected steps:string[] = ["bindVue","bindPolyglot","bootComponents"];
     protected components:Component[];
+    protected _bindedEvents:any[];
     public constructor(public template:any)
     {
         super();
+        this._bindedEvents = [];
         this.vueConfig = {};
         this.components = [];
         Component.instances.push(this);
@@ -244,6 +244,15 @@ export class Component extends CoreObject
     {
 
     }
+    protected unbindEvents():void
+    {
+        var event:any;
+        while(this._bindedEvents.length)
+        {
+            event = this._bindedEvents.shift();
+            $(event.elmt).off(event.type, event.listener);
+        }
+    }
     protected scroll(listener:any):void
     protected scroll(selector:string, listener:any):void
     protected scroll(selector:any, listener?:any):void
@@ -252,9 +261,27 @@ export class Component extends CoreObject
         {
             listener = selector;
             selector = this.template.$el;
-            debugger;
         }
-        $('.table').parents().each(function(item){ console.log($(this).css('overflow-y'));})
+        if(!listener)
+            throw new Error('you must specify at least a listener');
+
+        var elmts:any[] = $(selector).parents().addBack().toArray();
+        for(var elmt of elmts)
+        {
+            if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
+            {
+                
+                return this.bindEvent(elmt, "scroll",listener);
+            }
+        }
+    }
+    protected bindEvent(selector:string, type:string, listener:any):void
+    protected bindEvent(elmt:any, type:string, listener:any):void
+    protected bindEvent(elmt:any, type:string, listener:any):void
+    {
+        this._bindedEvents.push({elmt:elmt,type:type,listener:listener});
+        console.log('bindEvent', this._bindedEvents[this._bindedEvents.length-1]);
+        $(elmt).on(type, listener);
     }
     public $trad(key:string, options?:any):any
     {   
@@ -305,12 +332,10 @@ export class Component extends CoreObject
     }
     private beforeMounted():void
     {
-        debugger;
-        this.template.$parent.$onNewComponent(this);//$emit('new-component', this);
+        this.template.$parent.onNewComponent(this);//$emit('new-component', this);
     }
     private mounted():void
     {
-        debugger;
         this.bindEvents();
         //this.template.$parent.$emit('new-component', this);
         if(this["onMounted"])
