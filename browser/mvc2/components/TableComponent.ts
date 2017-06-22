@@ -13,6 +13,7 @@ export class TableComponent extends Component
     protected savePromise:Promise<any> = null;
     protected reload:any;
     protected $paginating:any;
+    protected search:string;
     public constructor(template:any)
     {
         super(template);
@@ -48,6 +49,7 @@ export class TableComponent extends Component
         this.$addData("edition", false);
         this.$addData("deleting", false);
         this.$addData("loading", false);
+        this.$addData("search_open", false);
     }
 
     public props():any {
@@ -73,7 +75,14 @@ export class TableComponent extends Component
             }
         };
     }
-
+    public $openSearch():void
+    {
+        this.$addData('search_open', true);
+        setTimeout(()=>
+        {
+            $(this.template.$el).find('.searchbox input').get(0).focus();
+        },0);
+    }
     protected $click(item:any, column:any, event:any):void
     {
         if(column.link !== true)
@@ -306,6 +315,22 @@ export class TableComponent extends Component
     {
         this.$getProp('list').cancelGet();
         this.reload();
+    }
+    protected $onSearchGlobal(event:any, blur:boolean = false)
+    {
+        var list:any = this.$getProp('list');
+        if(blur)
+        {
+            if(!list.search)
+            {
+                this.$addData("search_open", false);
+            }
+        }
+        if(this.search != list.search)
+        {
+            this.search = list.search;
+            this.$onSearch(null, event);
+        }
     }
     protected _reload():void
     {

@@ -10,6 +10,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         protected config:any;
         public filter:any;
         public search:any;
+        public choices:any;
+        public choosen:any;
         protected _getPromise:any;
         private static defaultOptions:any = 
         {
@@ -29,6 +31,8 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             this.filter = {};
             this.search = null;
             this.columns = [];
+            this.choices = {};
+            this.choosen = {};
             this.bootColumns();
         }
         public loadGet(params?:any):Promise<any>
@@ -42,6 +46,15 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             if(this.filter && (!params || !params.filter))
             {
                 request.param("filter", this.filter);
+            }
+            if(this.search)
+                request.param("search", this.search);
+            for(var p in this.choosen)
+            {
+                if(this.choosen[p])
+                {
+                    request.param(p, this.choosen[p]);
+                }
             }
             this._getPromise = request;
             return request.then(function(data)
@@ -93,6 +106,18 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         {
 
         }
+        protected addChoice(name:string, list:(IList|string)[])
+        {
+            this.choices[name] = (<any>list).map(function(item:any):IList
+            {
+                if(typeof item == "string")
+                {
+                    return {value:item,label:item};
+                }
+                return item;
+            });
+            this.choosen[name] = null;
+        }
         protected addColumn(name:string, options?:IColumn)
         {
             if(!options)
@@ -139,6 +164,11 @@ export function Table<X extends Constructor<any>>( Child:X ) {
 
     }
 };
+export interface IList
+{
+    label:string;
+    value:string;
+}
 export interface IColumn
 {
     type?:string;
