@@ -152,9 +152,9 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         {
             return this.splice();
         }
-         protected path(path:string):string
+         protected _path(path:string):string
         {
-            var path:string = super.path(path);
+            var path:string = super._path(path);
             return path.replace('collection', '');
         }
         public request():API2

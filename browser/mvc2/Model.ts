@@ -112,7 +112,7 @@ export class Model extends EventDispatcher
         }
         return this._modelName;
     }
-    protected path(path:string):string
+    protected _path(path:string):string
     {
        if(path.substring(0, 1)==".")
         {
@@ -352,7 +352,7 @@ export class Model extends EventDispatcher
         return request;
     }
     protected getPathRequest(path:string, params:any, config:IModelConfig):API2{
-        path = this.path(path);
+        path = this._path(path);
         return this.api(path).path(path).params(params);
     }
 

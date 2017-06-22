@@ -9,6 +9,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         protected columns:IColumn[];
         protected config:any;
         public filter:any;
+        protected filterMapping:any;
         public search:any;
         public choices:any;
         public choosen:any;
@@ -29,6 +30,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         constructor(...args: any[]) {
             super(...args);
             this.filter = {};
+            this.filterMapping = {};
             this.search = null;
             this.columns = [];
             this.choices = {};
@@ -45,7 +47,18 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             }
             if(this.filter && (!params || !params.filter))
             {
-                request.param("filter", this.filter);
+                var filter:any = {};
+                for(var p in this.filter)
+                {
+                    if(this.filterMapping[p])
+                    {
+                        filter[this.filterMapping[p]] = this.filter[p];
+                    }else{
+                        filter[p] = this.filter[p];
+
+                    }
+                }
+                request.param("filter", filter);
             }
             if(this.search)
                 request.param("search", this.search);
@@ -157,7 +170,10 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                 Component.addVueComponent("table-"+options.type, {props:["item","column","data"]});
                 options.type = "component-table-"+options.type;
             }
-           
+            if(options.filter)
+            {
+                this.filterMapping[options.prop] = options.filter;
+            }
            
             this.columns.push(options);
         }
@@ -184,6 +200,7 @@ export interface IColumn
     editable?:boolean;
     searchable?:boolean;
     search?:string;
+    filter?:string;
  //   edition?:string; 
     error?:string;
     //order
