@@ -247,7 +247,6 @@ export class TableComponent extends Component
         }
         promise.then((success:boolean)=>
         {
-            {debugger;}
             var model:any = this.$getData("edition");
             var list:any = this.$getProp('list');
             if(!model)
@@ -261,7 +260,6 @@ export class TableComponent extends Component
             }else{
                 if(this.saveObject)
                 {
-                    {debugger;}
                     for(var p in this.saveObject)
                     {
                         model[p] = this.saveObject[p];
