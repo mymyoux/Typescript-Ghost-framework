@@ -21,11 +21,18 @@ export class Component extends CoreObject
     }
      public static addComponent(cls:any):void
     {
-        var name:string = cls.prototype.getComponentName.call(cls.prototype);
-        Component.components[name] = cls;
-        console.log("add component:"+name);
-        // if(!Vue.component('component-'+name))
-        //     Vue.component('component-'+name, Component.load.bind(Component, name));
+        var name:string|string[] = cls.prototype.getComponentName.call(cls.prototype);
+        if(typeof name == "string")
+        {
+            Component.components[name] = cls;
+            console.log("add component:"+name);
+        }else{
+            for(var n of name)
+            {
+                Component.components[n] = cls;
+                console.log("add component:"+n);
+            }
+        }
     }
 
     public static addVueComponent(name:string, options?:any):void
@@ -280,7 +287,6 @@ export class Component extends CoreObject
     protected bindEvent(elmt:any, type:string, listener:any):void
     {
         this._bindedEvents.push({elmt:elmt,type:type,listener:listener});
-        console.log('bindEvent', this._bindedEvents[this._bindedEvents.length-1]);
         $(elmt).on(type, listener);
     }
     public $trad(key:string, options?:any):any
@@ -567,7 +573,7 @@ export class Component extends CoreObject
 
     }
     
-    public getComponentName():String
+    public getComponentName():string|string[]
     {
         if(!this._shortName)
         {
