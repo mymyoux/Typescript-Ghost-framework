@@ -114,6 +114,9 @@ import {IRawTemplate} from "./IRawTemplate";
          * Parsed template
          */
         public parsed:any;
+
+        public locale: string = null;
+
         public constructor()
         {
             super();
@@ -147,7 +150,8 @@ import {IRawTemplate} from "./IRawTemplate";
                     url:this.url,
                     md5:this.md5,
                     content:this.content,
-                    version:this.version 
+                    version:this.version,
+                    locale: this.locale
                  //   parsed:this.parsed
                 });
             }
@@ -208,6 +212,7 @@ import {IRawTemplate} from "./IRawTemplate";
             template.version = rawTemplate.version;
             template.md5 = rawTemplate.md5;
             template.expired = false;
+            template.locale = rawTemplate.locale;
             Template._templates[template.url] = template;
 
             this.trigger(Template.EVENT_LOADED + ":" + template.url, template);
@@ -301,7 +306,7 @@ import {IRawTemplate} from "./IRawTemplate";
                 var template: Template;
                 if (!forceReload && ((template=Template.getTemplate(name)) != null))
                 {
-                    if (!template.loaded()) {
+                    if (!template.loaded() || (template.loaded() && template.locale != this.locale)) {
                         template = null;
                     }
                     if(template)
@@ -328,6 +333,9 @@ import {IRawTemplate} from "./IRawTemplate";
                         {
                             template = null;
                         }
+
+                        if (template.locale != this.locale)
+                            template = null;
                     }
                     if(!template || forceReload)
                     {

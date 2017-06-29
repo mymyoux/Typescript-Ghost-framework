@@ -7,6 +7,7 @@
         url:string;
         parsed:string;
         version:number;
+        locale:string;
         components: any[];    
         loaded:()=> boolean;
     }
