@@ -239,6 +239,8 @@ import {IRawTemplate} from "./IRawTemplate";
                 }else {
                     requestTemplate.md5 = template.md5;
                 } 
+                requestTemplate.locale = template.locale;
+                
                 templates.push(requestTemplate);
             }).then(()=>
             {
