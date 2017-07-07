@@ -19,7 +19,7 @@ export function Modal<X extends Constructor<any>>( Child:X ) {
 
         constructor(...args: any[]) {
             super(...args);
-            window["mod"] = this;
+            window["modal"] = this;
         }
     }
 };

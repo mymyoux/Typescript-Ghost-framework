@@ -18,7 +18,7 @@ export class ModalComponent extends Component
 
     protected bindVue():void
     {
-        window["modal"]    = this;
+        window["modal"] = this;
     }
 
     public props():any {
@@ -35,7 +35,7 @@ export class ModalComponent extends Component
         };
     }
 
-    public $closemodal():void
+    public $closeModal():void
     {
         $(".job").find('.modal').addClass('hide');
     }
@@ -75,7 +75,7 @@ export class ModalComponent extends Component
     {
         debugger;
     }
-   
+
     public activate():void{
         debugger;
     }
