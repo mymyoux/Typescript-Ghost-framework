@@ -60,6 +60,12 @@ export class MasterRouter
             object.scope(Scope.getScope(route.scope));
         }
         var load:any = object.handleRoute(url, route);
+
+        if (typeof load == 'object' && typeof object.scope() != "string")
+        {
+            load = false;
+        }
+
         if(load !== false && typeof load != "string")
         {
             var scope:string = object.scope();

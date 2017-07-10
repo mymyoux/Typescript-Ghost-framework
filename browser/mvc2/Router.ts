@@ -286,7 +286,7 @@
 							}
 							//maybe handle more type - assume it's always Scope
 							var scope: string = this.staticRoutes[priority][url].scope;
-							if(result !== true && result.name())
+							if(result !== true && typeof result.name === 'function' && result.name())
 							{
 								scope = result.name();
 							}
@@ -321,7 +321,7 @@
 										return this.goto(result, null, false);
 									}
 									var scope: string = route.scope;
-									if (result !== true) {
+									if (result !== true && typeof result.name === 'function' && result.name()) {
 										scope = result.name();
 									}
 									//end = route found 
