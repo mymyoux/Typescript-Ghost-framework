@@ -139,7 +139,7 @@ export class Application
     }
     public isLocal():boolean
     {
-        return window.location.href.indexOf("local.") != -1 || window.location.href.indexOf(".local") != -1;
+        return window.location.href.indexOf("local.") != -1 || window.location.href.indexOf(".local") != -1 || window.location.href.indexOf("alpha2") != -1;
     }
     protected initTemplate():void
     {
