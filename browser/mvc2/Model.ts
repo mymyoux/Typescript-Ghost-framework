@@ -10,13 +10,13 @@ export class Model extends EventDispatcher
     public static EVENT_FIRST_DATA:string = "first_data";
     public static EVENT_FORCE_CHANGE:string = "force_change";
     public static PATH_CREATE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/create", null,{replaceDynamicParams:true});
+        ()=>new ModelLoadRequest("%root-path%/create", null,{replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
     public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/get", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
     public static PATH_DELETE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+        ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
     public static PATH_UPDATE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true});
+        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
 
     private _firstData:boolean;
     private _pathLoaded:any = {};
