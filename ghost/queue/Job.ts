@@ -9,7 +9,7 @@ import {Beanstalk} from "ghost/queue/Beanstalk";
     export class Job{
 
 
-      
+
       protected beanstalk: Beanstalk;
       public static STATE_EXECUTING: string = "executing";
       public static STATE_EXECUTED: string = "executed";
@@ -23,6 +23,7 @@ import {Beanstalk} from "ghost/queue/Beanstalk";
       public id_database: string;
       public start_time: number;
       public hard_failed: boolean = false;
+      public queue:string;
       public constructor(beanstalk:Beanstalk, id:string, data:any, databaseData?:any)
       {
           this.beanstalk = beanstalk;
@@ -51,7 +52,7 @@ import {Beanstalk} from "ghost/queue/Beanstalk";
       public hardFail()
       {
         console.log("hard faile:"+this.id);
-          this.state = Job.STATE_FAILED;  
+          this.state = Job.STATE_FAILED;
           this.hard_failed = true;
           this.beanstalk.fail(this);
       }
@@ -61,7 +62,7 @@ import {Beanstalk} from "ghost/queue/Beanstalk";
         {
           this.state = Job.STATE_RETRYING;
         }else{
-          this.state = Job.STATE_FAILED;  
+          this.state = Job.STATE_FAILED;
         }
         this.beanstalk.fail(this);
       }
