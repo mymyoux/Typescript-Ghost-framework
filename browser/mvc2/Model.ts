@@ -339,14 +339,18 @@ export class Model extends EventDispatcher
             {
                 if(config.readExternal !== false)
                 {
+                    
                     this.readExternal(data, <string>path);
                     this.validate();
                 }
                 return data;
             }, (error:any)=>
             {
-                debugger;
                 console.error(error);
+                if(error.exception)
+                    throw error.exception
+                else
+                    throw error;
             });
         }
         return request;

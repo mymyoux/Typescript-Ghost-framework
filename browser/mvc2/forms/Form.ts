@@ -1,6 +1,7 @@
 export class Form
 {
     protected error:any = {};
+    protected globalError:string = null;
     protected _fields:any = {};
     public addInput(name:string, config?:IConfig):void
     {
@@ -9,6 +10,7 @@ export class Form
     public validate():Promise<any>
     {
         this.error = {};
+        this.globalError = null;
         var keys:string[] = Object.keys(this._fields);
         return new Promise<any>((resolve:any, reject:any):void=>
         {
@@ -32,6 +34,10 @@ export class Form
             this.addError(field, 'required');
         }
         return true;
+    }
+    public addGlobalError(message:string):void
+    {
+        this.globalError = message;
     }
     protected addError(field:string, message:string):void
     {
