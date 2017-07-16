@@ -22,6 +22,10 @@ export class TableComponent extends Component
     protected bindEvents():void
     {
         var _self:any = this;
+        if(this.$getProp('scroll')===false)
+        {
+            return;
+        }
         this.scroll(function()
         {
             if(_self.$paginating)
@@ -72,6 +76,10 @@ export class TableComponent extends Component
             {
                 required:false,
                 default:null
+            },
+            "scroll":
+            {
+                default:true
             }
         };
     }
