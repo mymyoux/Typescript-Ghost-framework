@@ -2,15 +2,18 @@ export class Form
 {
     protected error:any = {};
     protected globalError:string = null;
+    protected globalMessage:string = null;
     protected _fields:any = {};
     public addInput(name:string, config?:IConfig):void
     {
         this._fields[name] = config?config:{};
+        this[name] = null;
     } 
     public validate():Promise<any>
     {
         this.error = {};
         this.globalError = null;
+        this.globalMessage = null;
         var keys:string[] = Object.keys(this._fields);
         return new Promise<any>((resolve:any, reject:any):void=>
         {
@@ -35,13 +38,21 @@ export class Form
         }
         return true;
     }
-    public addGlobalError(message:string):void
+    public setGlobalError(message:string):void
     {
         this.globalError = message;
+    }
+    public setGlobalMessage(message:string):void
+    {
+        this.globalMessage = message;
     }
     protected addError(field:string, message:string):void
     {
         this.error[field] = message;
+    }
+    public getFields():string[]
+    {
+        return Object.keys(this._fields);
     }
     public getValues():any
     {
