@@ -4,11 +4,16 @@ export class Form
     protected globalError:string = null;
     protected globalMessage:string = null;
     protected _fields:any = {};
+    protected _validators:any = [];
     public addInput(name:string, config?:IConfig):void
     {
         this._fields[name] = config?config:{};
         this[name] = null;
     } 
+    public addValidator(f:()=>Promise<any>|boolean):void
+    {
+        this._validators.push(f);
+    }
     public validate():Promise<any>
     {
         this.error = {};
@@ -17,7 +22,7 @@ export class Form
         var keys:string[] = Object.keys(this._fields);
         return new Promise<any>((resolve:any, reject:any):void=>
         {
-            Promise.all(keys.map((name:string)=>this.validateField(name))).then((data:any):void=>
+            Promise.all(keys.map((name:string)=>this.validateField(name)).concat(this._validators.map((item)=>item()))).then((data:any):void=>
             {
                 var keys:string[] = Object.keys(this.error);
                 if(keys.length)
@@ -46,7 +51,7 @@ export class Form
     {
         this.globalMessage = message;
     }
-    protected addError(field:string, message:string):void
+    public addError(field:string, message:string):void
     {
         this.error[field] = message;
     }
