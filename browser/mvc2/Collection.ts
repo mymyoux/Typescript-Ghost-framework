@@ -377,7 +377,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
         {
             return this._unicity && this._unicity.length>0;
         }
-        private _registerKey(model:T):void
+        protected _registerKey(model:T):void
         {
             if(!this._hasUnicity())
                 return;
