@@ -14,18 +14,152 @@ export class TableComponent extends Component
     protected reload:any;
     protected $paginating:any;
     protected search:string;
+    protected _mouseStart:number;
+    protected _mouseLast:number;
+    protected _itemChanged:number[];
+    protected _mousedown:any;
+    protected _mouseup:any;
+    protected _mousemove:any;
     public constructor(template:any)
     {
         super(template);
+        this._itemChanged = [];
         this.reload = Buffer.throttle(this._reload.bind(this), 200);
+      
+    }
+    protected _onMouseDown(event:any):void
+    {
+        event.preventDefault();
+
+        this._mouseStart = null;
+        var index:number = $(event.currentTarget).index()-1;
+        if(index<0)
+            return;
+        var model:any =  this.$getProp('list').models[index];
+        if(!model)
+            return;
+        if(!event.shiftKey)
+        {
+            this._mouseLast = index;
+        }else{
+            if(!event.metaKey && !event.ctrlKey)
+            {
+                this.$getProp('list').models.forEach((item)=>
+                {
+                    item.selected = false;
+                });
+            }
+            this._mouseStart = this._mouseLast;
+            this._onMouseUp(event);
+            //handle like mouseup
+            return;
+        }
+        this._mouseStart = index;
+        this._itemChanged = [index];
+        model._previousSelected = model.selected;
+        if(!event.metaKey && !event.ctrlKey)
+        {
+            this.$getProp('list').models.forEach((item)=>
+            {
+                item.selected = false;
+            });
+            model.selected = !model.selected;
+        }else
+        {
+            model.selected = true;
+        }
+    }
+    protected _onMouseMove(event:any):void
+    {
+        if(this._mouseStart == null)
+        {
+            return;
+        }
+         event.preventDefault();
+        var index:number = $(event.currentTarget).index()-1;
+        if(index<0)
+            return;
+        var index1:number = Math.min(index, this._mouseStart);
+        var index2:number = Math.max(index, this._mouseStart);
+        var model:any;
+            for(var p of this._itemChanged)
+        {
+                model =  this.$getProp('list').models[p];
+                model.selected = model._previousSelected;
+        }
+        for(var i:number=index1; i<=index2; i++)
+        {
+            model =  this.$getProp('list').models[i];
+            if(!model)
+                continue;
+            if(this._itemChanged.indexOf(i)==-1)
+            {
+                model._previousSelected = model.selected;
+                this._itemChanged.push(i);
+            }
+            
+                if(event.metaKey || event.ctrlKey)
+            {
+                model.selected = !model.selected;
+            }else
+            {
+                model.selected = true;
+            }
+        }
+    }
+    protected _onMouseUp(event:any):void
+    {
+        if(this._mouseStart == null)
+        {
+            return;
+        }
+         event.preventDefault();
+        var index:number = $(event.currentTarget).index()-1;
+        if(index<0)
+            return;
+        
+        var index1:number = Math.min(index, this._mouseStart);
+        var index2:number = Math.max(index, this._mouseStart);
+
+        this._mouseStart = null;
+        var model:any;
+        for(var p of this._itemChanged)
+        {
+                model =  this.$getProp('list').models[p];
+                model.selected = model._previousSelected;
+                delete model._previousSelected;
+        }
+        for(var i:number=index1; i<=index2; i++)
+        {
+            model =  this.$getProp('list').models[i];
+            if(!model)
+                continue;
+                if(event.metaKey || event.ctrlKey)
+            {
+                model.selected = !model.selected;
+            }else
+            {
+                model.selected = true;
+            }
+        }
     }
     protected bindEvents():void
     {
         var _self:any = this;
+         if(this.$getProp('list').config.selectable)
+        {
+            this._mousedown = this._onMouseDown.bind(this);
+            this._mouseup = this._onMouseUp.bind(this);
+            this._mousemove = this._onMouseMove.bind(this);
+            $(this.template.$el).on('mousedown','.col>div', this._mousedown);
+            $(this.template.$el).on('mousemove','.col>div', this._mousemove);
+            $(this.template.$el).on('mouseup','.col>div', this._mouseup);
+        }
         if(this.$getProp('scroll')===false)
         {
             return;
         }
+       
         this.scroll(function()
         {
             if(_self.$paginating)
@@ -47,6 +181,16 @@ export class TableComponent extends Component
                });
            }
         });
+    }
+    protected unbindEvents():void
+    {
+        super.unbindEvents();
+        if(this._mousedown)
+             $(this.template.$el).on('mousedown','.col>div', this._mousedown);
+        if(this._mousemove)
+            $(this.template.$el).on('mousemove','.col>div', this._mousemove);
+        if(this._mouseup)
+            $(this.template.$el).on('mouseup','.col>div', this._mouseup);
     }
     protected bindVue():void
     {
