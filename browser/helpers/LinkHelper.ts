@@ -55,7 +55,7 @@
                        window.open($a.attr("href"), $a.attr("target"));
                    }else
                    {
-                    if($a.attr("href").substring(0,1)=="#")
+                    if($a.attr("href") && $a.attr("href").substring(0,1)=="#")
                     {
                         $a.trigger("click", event.originalEvent);
                     }else
