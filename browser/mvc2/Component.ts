@@ -465,7 +465,6 @@ export class Component extends CoreObject
         if (this.template && this.template.$options && this.template.$options.propsData[name])
             return this.template.$options.propsData[name];
         
-        debugger;
         console.warn('prop ' + name + ' not exist on template', this.template);
 
         return null;

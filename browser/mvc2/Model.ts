@@ -4,6 +4,7 @@ import {Inst} from "./Inst";
 import {Strings} from "ghost/utils/Strings";
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
+import {Arrays} from "ghost/utils/Arrays";
 export class Model extends EventDispatcher
 {
     public static EVENT_CHANGE:string = "change";
@@ -211,12 +212,23 @@ export class Model extends EventDispatcher
                 {
                     if(this[key])
                     {
-                        if(typeof this[key] == "function")
+                        var v:any = this[key];
+                        if(typeof v == "function")
+                            v = v();
+                        if(value == '%'+key+'%')
                         {
-                            value = value.replace('%'+key+'%', this[key]());
-                        }else
-                        {
-                            value = value.replace('%'+key+'%', this[key]);
+                            if(typeof v == "object")
+                            {
+                                //TODO:maybe json of that
+                                value = v;
+
+                                if(Arrays.isArray(v))
+                                {
+                                    value = v;
+                                }
+                            }else{
+                                value = value.replace('%'+key+'%', v); 
+                            }
                         }
                     }else if(value == '%'+key+'%')
                     {
