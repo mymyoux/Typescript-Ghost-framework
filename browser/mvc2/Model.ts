@@ -135,7 +135,6 @@ export class Model extends EventDispatcher
             if(typeof this[p] == "function")
             {
                 console.warn("you overwrite function: "+p);
-                debugger;
             }
             this[p] = input[p];
         }

@@ -79,6 +79,7 @@ export class TableComponent extends Component
             },
             "scroll":
             {
+                type:Boolean,
                 default:true
             }
         };

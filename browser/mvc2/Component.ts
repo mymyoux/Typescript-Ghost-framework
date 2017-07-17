@@ -462,7 +462,7 @@ export class Component extends CoreObject
     }
     protected $getProp(name:string):any
     {
-        if (this.template && this.template.$options && this.template.$options.propsData[name])
+        if (this.template && this.template.$options && this.template.$options.propsData[name]!==undefined)
             return this.template.$options.propsData[name];
         
         debugger;
