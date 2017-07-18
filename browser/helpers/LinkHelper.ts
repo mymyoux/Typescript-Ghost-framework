@@ -55,7 +55,13 @@
                        window.open($a.attr("href"), $a.attr("target"));
                    }else
                    {
-                       $a.trigger("click", event.originalEvent);
+                    if($a.attr("href") && $a.attr("href").substring(0,1)=="#")
+                    {
+                        $a.trigger("click", event.originalEvent);
+                    }else
+                    {
+                        window.location.href = $a.attr("href");
+                    }
                    }
                }
             });
