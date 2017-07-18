@@ -641,5 +641,6 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
                 request.order(this._order, this._orderDirection);
             return request;
         }
+
     }
 }

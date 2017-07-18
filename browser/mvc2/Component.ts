@@ -1,10 +1,11 @@
 import {Template} from "./Template";
 import {CoreObject} from "ghost/core/CoreObject";
+import {EventDispatcher} from "ghost/events/EventDispatcher";
 import {Inst} from "./Inst";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "../i18n/Polyglot2";
 
-export class Component extends CoreObject
+export class Component extends EventDispatcher
 {
     protected static components:any = {};
     protected static instances:Component[] = [];
@@ -79,7 +80,7 @@ export class Component extends CoreObject
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
-                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$rproxy"];
+                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
@@ -257,7 +258,13 @@ export class Component extends CoreObject
         while(this._bindedEvents.length)
         {
             event = this._bindedEvents.shift();
-            $(event.elmt).off(event.type, event.listener);
+            if(event.liveselector)
+            {
+                $(event.elmt).off(event.type, event.listener, event.liveselector);
+            }else
+            {
+                $(event.elmt).off(event.type, event.listener);
+            }
         }
     }
     protected scroll(listener:any):void
@@ -288,6 +295,17 @@ export class Component extends CoreObject
     {
         this._bindedEvents.push({elmt:elmt,type:type,listener:listener});
         $(elmt).on(type, listener);
+    }
+    protected bindLiveEvent(selector:string, type:string, liveselector:any, listener:any):void
+    protected bindLiveEvent(elmt:any, type:string, liveselector:any, listener:any):void
+    protected bindLiveEvent(elmt:any, type:string, liveselector:any, listener:any):void
+    {
+        if(!elmt)
+        {
+            elmt = this.template.$el;
+        }
+        this._bindedEvents.push({elmt:elmt,type:type,liveselector:liveselector,listener:listener});
+        $(elmt).on(type, liveselector, listener);
     }
     public $trad(key:string, options?:any):any
     {   
@@ -491,8 +509,14 @@ export class Component extends CoreObject
             return this["$"+method](...params);
         }else
         {
-            var transfert:any[] = [method].concat(params);
-            this.emit("proxy", ...transfert);
+            if(this.parent && this.parent.$proxy)
+            {
+                this.parent.$proxy(method, ...params);
+            }else{
+                var transfert:any[] = [method].concat(params);
+                    this.emit("proxy", ...transfert);
+
+            }
         }
     }
      public $rproxy(method:string, ...params):void
@@ -502,8 +526,15 @@ export class Component extends CoreObject
             return this["$"+method](...params);
         }else
         {
-            var transfert:any[] = [method].concat(params);
-            this.remit("proxy", ...transfert);
+             if(this.root && this.root.$proxy)
+            {
+                this.root.$proxy(method, ...params);
+            }else
+            {
+                var transfert:any[] = [method].concat(params);
+                this.remit("proxy", ...transfert);
+
+            }
         }
     }
     protected onModelChanged(name:string, model:any):void
@@ -528,7 +559,7 @@ export class Component extends CoreObject
        // this.template.$on('new-component',this.onNewComponent.bind(this));
         this.template.$on('proxy',this.$proxy.bind(this));
     }
-    private $onNewComponent(component:Component):void
+    protected $onNewComponent(component:Component):void
     {
         component.setParent(this);
         component.setRoot(this.root);

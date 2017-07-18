@@ -19,6 +19,7 @@ export class TableComponent extends Component
     protected _itemChanged:number[];
     protected _mousedown:any;
     protected _mouseup:any;
+    protected _allmouse:any;
     protected _mousemove:any;
     public constructor(template:any)
     {
@@ -142,6 +143,15 @@ export class TableComponent extends Component
                 model.selected = true;
             }
         }
+        this.trigger("selection");
+    }
+    /**
+     * @param event Called when ctrl+A,cmd+A used
+     */
+    protected _onMouseAll(event):void
+    {
+        this.$getProp('list').models.forEach((item)=>item.selected=true);
+        this.trigger("selection");
     }
     protected bindEvents():void
     {
@@ -151,9 +161,11 @@ export class TableComponent extends Component
             this._mousedown = this._onMouseDown.bind(this);
             this._mouseup = this._onMouseUp.bind(this);
             this._mousemove = this._onMouseMove.bind(this);
+            this._allmouse = this._onMouseAll.bind(this);
             $(this.template.$el).on('mousedown','.col>div', this._mousedown);
             $(this.template.$el).on('mousemove','.col>div', this._mousemove);
             $(this.template.$el).on('mouseup','.col>div', this._mouseup);
+            $(this.template.$el).on('all_selection', this._allmouse);
         }
         if(this.$getProp('scroll')===false)
         {

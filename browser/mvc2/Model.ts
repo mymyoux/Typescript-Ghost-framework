@@ -350,7 +350,13 @@ export class Model extends EventDispatcher
             {
                 if(config.readExternal !== false)
                 {
-                    
+                    if(config.removePreviousModels)
+                    {
+                        if(this["clearModels"])
+                        {
+                            this["clearModels"]();
+                        }
+                    }
                     this.readExternal(data, <string>path);
                     this.validate();
                 }
@@ -380,6 +386,11 @@ export interface IModelConfig
      * default:true
      */
     readExternal?:boolean;
+    /**
+     * remove previous models when loaded. Work only on collections with readexternal = true
+     * default:false
+     */
+    removePreviousModels?:boolean;
      /**
      * Load will be called immediatly (return instance of Promise instead of API2)
      * @default true
@@ -406,6 +417,7 @@ export interface IModelConfig
      * @default false
      */
     replaceDynamicParams?:boolean;
+    
 }
 
 export class ModelLoadRequest

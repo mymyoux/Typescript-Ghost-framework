@@ -6,7 +6,7 @@ type Constructor<T extends any> = new(...args: any[]) => T;
 export function Table<X extends Constructor<any>>( Child:X ) {
     type T =  typeof Child.prototype;
     return class K extends Child {
-        protected columns:IColumn[];
+        public columns:IColumn[];
         protected config:any;
         public filter:any;
         protected filterMapping:any;
@@ -25,7 +25,9 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             searchable:false,
             //edition:false,
             error:null,
-            search:null
+            search:null,
+            up:false,
+            down:false
         };
         constructor(...args: any[]) {
             super(...args);
