@@ -418,7 +418,8 @@ export class Component extends CoreObject
             this.vueConfig.data[name] = value;
             return;
         }
-        this.template.$set(this.template, name, value);
+        if (this.template)
+            this.template.$set(this.template, name, value);
     }
     protected $getData(name:string):any
     {
