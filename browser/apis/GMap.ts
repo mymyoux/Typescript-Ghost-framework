@@ -235,7 +235,7 @@ import {Configuration} from "ghost/data/Configuration";
 				{
 					GMap.init().then(()=>
 					{
-						this.geocode(params, simplified).then(resolve, reject);
+						this.geocode(params, simplified).then(<any>resolve, <any>reject);
 					});
 					return;
 				}
@@ -248,7 +248,7 @@ import {Configuration} from "ghost/data/Configuration";
 							resolve(results[0].geometry.location);
 						}else
 						{
-							resolve(results);
+							resolve(<any>results);
 						}
 					}else
 					{

@@ -39,11 +39,11 @@ import {Strings} from "ghost/utils/Strings";
 			super();
 			this._always = true;
 		}
-		public param(param: string, data: any): API2 {
+		public param(param: string, data: any):this {
 			super.param(param, data);
 			return this;
 		}
-		public params(params:any): API2 {
+		public params(params:any): this {
 			for(var p in params)
 			{
 				if(params[p] === null || params[p]===undefined)
@@ -52,7 +52,7 @@ import {Strings} from "ghost/utils/Strings";
 			super.params(params);
 			return this;
 		}
-		public path(path:string):API2
+		public path(path:string):this
 		{
 			this._path = path;
 			return this;
@@ -61,9 +61,9 @@ import {Strings} from "ghost/utils/Strings";
 		{
 			return this._path;
 		}
-		public config(options: IAPIOptions): API2
+		public config(options: IAPIOptions): this
 		{
-			return <API2>super.config(options);
+			return <this>super.config(options);
 		}
 		protected getRequest(): any {
 			var request: any = super.getRequest();
@@ -93,7 +93,11 @@ import {Strings} from "ghost/utils/Strings";
 				super.then(rs, rj);
 			}).then(resolve, reject);
 		}
-		protected _then(request: any, resolve: any, reject: any, token: string): API2 {
+		protected getPromiseRequest(request:any, options:any):any
+		{
+			return ajax(request, options);
+		}
+		protected _then(request: any, resolve: any, reject: any, token: string): this {
 			for (var p in APIExtended.middlewares) {
 				if (APIExtended.middlewares[p].request) {
 					APIExtended.middlewares[p].request(request);
@@ -106,9 +110,10 @@ import {Strings} from "ghost/utils/Strings";
 				console.error("UNDEFINED URL", request);
 				return resolve();
 			}
-			var promise = ajax(request, { asObject: true });//this.getPromise();
+			var promise = this.getPromiseRequest(request, {asObject:true});//ajax(request, { asObject: true });//this.getPromise();
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
+				console.log('RESULT', rawData);
 				if (promise === this._previousPromise) {
 					this._previousPromise = null;
 				}
@@ -116,6 +121,8 @@ import {Strings} from "ghost/utils/Strings";
 				var data: any;
 				if (rawData && rawData.data) {
 					data = rawData.data;
+				}else{
+					data = rawData;
 				}
 				if (data && token && this._cacheManager) {
 					this._cacheManager.remove(token);
@@ -127,7 +134,6 @@ import {Strings} from "ghost/utils/Strings";
 						reject(data);
 					return;
 				}
-
 				var parsed: any = this.parseResult(data);
 				this.trigger(API.EVENT_DATA, data);
 				if (resolve)
@@ -195,30 +201,30 @@ import {Strings} from "ghost/utils/Strings";
 			}
 			return data;
 		}
-		public always(value: boolean): API2 {
+		public always(value: boolean): this {
 			super.always(value);
 			return this;
 		}
-		public name(name: string): API2 {
+		public name(name: string): this {
 			this._name = name;
 			return this;
 		}
-		public request(): API2 {
+		public request(): this {
 			var c: any = super.request();
 			return c; 
 		}
-		public clone(): API2 
+		public clone(): this 
 		{
-			var clone:API2 = <API2>super.clone();
+			var clone:this = <this>super.clone();
 			clone.path(this._path);
 			clone.always(this._always);
 			return clone;
 		}
-		protected service(serviceName: string, property: string, data): API2 {
+		protected service(serviceName: string, property: string, data): this {
 			super.service(serviceName, property, data);
 			return this;
 		}
-		public order(id: string | string[], direction: number | number[] = 1): API2 {
+		public order(id: string | string[], direction: number | number[] = 1): this {
 			if (typeof direction == "number") {
 				direction = [direction];
 			}
@@ -232,7 +238,7 @@ import {Strings} from "ghost/utils/Strings";
 			this._direction = direction;
 			return this.service("paginate", "keys", id).service("paginate", "directions", direction);
 		}
-		public paginate(key: string): API2 {
+		public paginate(key: string): this {
 			return this.service("paginate", "keys", key);
 		}
 	}

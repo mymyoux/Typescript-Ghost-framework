@@ -213,6 +213,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     {
                         //TODO:check id too
                         var model:T = Inst.get(rawModel.__class);
+                        this.prepareModel(model);
                         model.readExternal(rawModel);
                         this.push(model);
                     }else
@@ -260,10 +261,12 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                                 //     }*/
                                 // }
 
+                                this.prepareModel(model);
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else
                             {
+                                this.prepareModel(model);
                                 model.readExternal(rawModel);
                             }
 
@@ -273,11 +276,16 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                             console.error("RawModel must be object, given ", rawModel);
                         }
                     }
+                    
                 }, this);
                 this.detectedFullLoad( api );
                 this.triggerFirstData();
                 this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
             }
+        }
+        protected prepareModel(model:T):void
+        {
+            
         }
         protected detectedFullLoad(api:API2):void
         {
@@ -369,7 +377,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
         {
             return this._unicity && this._unicity.length>0;
         }
-        private _registerKey(model:T):void
+        protected _registerKey(model:T):void
         {
             if(!this._hasUnicity())
                 return;
