@@ -30,8 +30,12 @@ export class TableComponent extends Component
     }
     protected _onMouseDown(event:any):void
     {
+        
+        if(this.$getData("edition"))
+        {
+            return;
+        }
         event.preventDefault();
-
         this._mouseStart = null;
         var index:number = $(event.currentTarget).index()-1;
         if(index<0)
