@@ -124,7 +124,6 @@ export class AutocompleteListComponent extends Component
     protected $blur(event):void{
 
         console.log('bluring', event.target);
-        debugger;
         if(this.blurLater)
         {
             clearTimeout(this.blurLater);
