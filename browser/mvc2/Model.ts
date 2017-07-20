@@ -245,9 +245,9 @@ export class Model extends EventDispatcher
         }
         return value;
     }
-    public loadGet(params?:any):Promise<any>
+    public loadGet(params?:any, config?:IModelConfig):Promise<any>
     {
-        return this.load(this.constructor["PATH_GET"], params);
+        return this.load(this.constructor["PATH_GET"], params, config);
     }
     public loadCreate(params?:any):Promise<any>
     {
