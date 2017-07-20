@@ -20,6 +20,7 @@ export class TableComponent extends Component
     protected _mousedown:any;
     protected _mouseup:any;
     protected _allmouse:any;
+    protected _alldelete:any;
     protected _mousemove:any;
     public constructor(template:any)
     {
@@ -31,7 +32,7 @@ export class TableComponent extends Component
     protected _onMouseDown(event:any):void
     {
         
-        if(this.$getData("edition"))
+        if(this.$getData("edition") || event.button != 0)
         {
             return;
         }
@@ -78,6 +79,12 @@ export class TableComponent extends Component
     {
         if(this._mouseStart == null)
         {
+            return;
+        }
+        //no button
+        if(event.buttons == 0)
+        {
+            this._onMouseUp(event);
             return;
         }
          event.preventDefault();
@@ -157,6 +164,18 @@ export class TableComponent extends Component
         this.$getProp('list').models.forEach((item)=>item.selected=true);
         this.trigger("selection");
     }
+    protected _onMouseDelete(event):void
+    {
+        if(this.template.edition)
+        {
+            return;
+        }
+        this.$removeAll(this.$getProp('list').models.filter((item)=>item.selected), event);
+    }
+    public $removeAll(items:any[], event:any):void
+    {
+        items.forEach((item)=>this.$remove(item, event));
+    }
     protected bindEvents():void
     {
         var _self:any = this;
@@ -166,10 +185,12 @@ export class TableComponent extends Component
             this._mouseup = this._onMouseUp.bind(this);
             this._mousemove = this._onMouseMove.bind(this);
             this._allmouse = this._onMouseAll.bind(this);
+            this._alldelete = this._onMouseDelete.bind(this);
             $(this.template.$el).on('mousedown','.col>div', this._mousedown);
             $(this.template.$el).on('mousemove','.col>div', this._mousemove);
             $(this.template.$el).on('mouseup','.col>div', this._mouseup);
-            $(this.template.$el).on('all_selection', this._allmouse);
+            $(this.template.$el).on('key_all_selection', this._allmouse);
+            $(this.template.$el).on('key_delete', this._alldelete);
         }
         if(this.$getProp('scroll')===false)
         {
@@ -387,10 +408,10 @@ export class TableComponent extends Component
      * Called on create item button
      * @param event 
      */
-    public $create(event:any):void
+    public $create(event:any):Promise<any>
     {
         var promise:any = this.getPromise(event);
-        promise.then((success:boolean)=>
+        return promise.then((success:boolean)=>
         {
             if(success === false)
                 return;
@@ -403,7 +424,7 @@ export class TableComponent extends Component
                 if(column.editable)
                     break;
             
-            this.$edit(model, column, event).then((success:boolean)=>
+            return this.$edit(model, column, event).then((success:boolean)=>
             {
                 if(success === false)
                     return;
@@ -413,6 +434,7 @@ export class TableComponent extends Component
                 {
                     $(elmt).find('input').eq(0).focus();
                 }
+                return model;
             });
         });
     }
