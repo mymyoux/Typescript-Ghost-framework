@@ -1,11 +1,11 @@
-import {EventDispatcher} from "ghost/events/EventDispatcher";
-import {Eventer} from "ghost/events/Eventer";
+import {CoreObject} from "ghost/core/CoreObject";
+import {EventDispatcher} from "ghost/events/EventDispatcher"
 import {Inst} from "./Inst";
 import {Strings} from "ghost/utils/Strings";
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Arrays} from "ghost/utils/Arrays";
-export class Model extends EventDispatcher
+export class Model extends CoreObject
 {
     public static EVENT_CHANGE:string = "change";
     public static EVENT_FIRST_DATA:string = "first_data";
