@@ -200,7 +200,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     //needed to not break the flow
                     this.detectedFullLoad( api );
                     this.triggerFirstData();
-                    this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
+                    this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
                     return;
                 }
                 input.forEach(function(rawModel:any):void
@@ -270,7 +270,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                                 model.readExternal(rawModel);
                             }
 
-                         //   this.trigger(Collection.EVENT_CHANGE, model);
+                         //   this._trigger(Collection.EVENT_CHANGE, model);
                         }else
                         {
                             console.error("RawModel must be object, given ", rawModel);
@@ -280,7 +280,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 }, this);
                 this.detectedFullLoad( api );
                 this.triggerFirstData();
-                this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
+                this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
             }
         }
         protected prepareModel(model:T):void

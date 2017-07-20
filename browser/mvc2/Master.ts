@@ -359,7 +359,8 @@ export class Master
         }
         model = Inst.get(model);
         name = name?name:model.getModelName();
-        model.on(model.constructor.EVENT_FORCE_CHANGE, this.onModelChanged, this, name, model);
+        if(model.on)
+            model.on(model.constructor.EVENT_FORCE_CHANGE, this.onModelChanged, this, name, model);
         this.$addData(name, model);
         return model;
     }

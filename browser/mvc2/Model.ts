@@ -80,20 +80,27 @@ export class Model extends EventDispatcher
     }
     protected triggerChange(key:string):void
     {
-        this.trigger(Model.EVENT_CHANGE, key, this[key]);
+        this._trigger(Model.EVENT_CHANGE, key, this[key]);
     }
      protected triggerForceChange(key:string = null):void
     {
         if(key)
-            this.trigger(Model.EVENT_FORCE_CHANGE, key, this[key]);
+            this._trigger(Model.EVENT_FORCE_CHANGE, key, this[key]);
         else
-            this.trigger(Model.EVENT_FORCE_CHANGE);
+            this._trigger(Model.EVENT_FORCE_CHANGE);
+    }
+    protected _trigger(...params:any[]):void
+    {
+        if(this["trigger"])
+        {
+            (<any>this["trigger"])(...params);
+        }
     }
      protected triggerFirstData(): void {
         if (!this._firstData) {
             this._firstData = true;
             setTimeout(() => {
-                this.trigger(Model.EVENT_FIRST_DATA);
+                this._trigger(Model.EVENT_FIRST_DATA);
             }, 0);
         }
     }
@@ -155,7 +162,7 @@ export class Model extends EventDispatcher
         if(!this.isInvalidated())
             return;
         this._invalidated = false;
-        this.trigger(Model.EVENT_FORCE_CHANGE);
+        this._trigger(Model.EVENT_FORCE_CHANGE);
     }
      /**
      * Returns model's data
