@@ -26,12 +26,12 @@ export class Component extends EventDispatcher
         if(typeof name == "string")
         {
             Component.components[name] = cls;
-            console.log("add component:"+name);
+            //console.log("add component:"+name);
         }else{
             for(var n of name)
             {
                 Component.components[n] = cls;
-                console.log("add component:"+n);
+                //console.log("add component:"+n);
             }
         }
     }
@@ -80,6 +80,7 @@ export class Component extends EventDispatcher
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
+                var directives:any = {};
                 const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
@@ -99,7 +100,16 @@ export class Component extends EventDispatcher
 
                         }else if(p.substring(0, 1)=="W")
                         {
-                            watchers.push(p.substring(1));
+                            if(p.substring(1, 2)=="W")
+                            {
+                                var object:any =  cls.prototype[p]();
+                                watchers.push({name:object.name?object.name:p.substring(2),...object});
+                            }else{
+                                watchers.push(p.substring(1));
+                            }
+                        }else if(p.substring(0, 1)=="D")
+                        {
+                            directives[p.substring(1)] = cls.prototype[p]();//.push(p.substring(1));
                         }
                     } 
                 }
@@ -114,7 +124,7 @@ export class Component extends EventDispatcher
                     {   
                         previous[method] = function(...data:any[])
                         {
-                            console.log("comp-call-"+method+":"+this._uid+" "+name);
+                            //console.log("comp-call-"+method+":"+this._uid+" "+name);
                             var component:Component = Component.getComponentFromVue(this);
                             if(!component)
                                 return;
@@ -133,8 +143,12 @@ export class Component extends EventDispatcher
                         };
                         return previous;
                     }, {}),
-                    watch:watchers.reduce(function(previous:any, method:string):any
+                    watch:watchers.reduce(function(previous:any, method:any):any
                     {   
+                        if(typeof method != "string")
+                        {
+                            previous[method.name] = method;
+                        }else
                         previous[method] = function(...data:any[])
                         {
                             var component:Component = Component.getComponentFromVue(this);
@@ -144,9 +158,10 @@ export class Component extends EventDispatcher
                         };
                         return previous;
                     }, {}),
+                    directives:directives,
                     beforeCreate:function()
                     {
-                        console.log("comp-before-create:"+this._uid+" "+name);
+                        //console.log("comp-before-create:"+this._uid+" "+name);
                         (new cls(this)).boot();
                     },
                     // beforeMount:function()
@@ -161,13 +176,13 @@ export class Component extends EventDispatcher
                         var component:Component = Component.getComponentFromVue(this);
                         if(!component)
                             return;
-                        console.log("comp-mounted");
+                        //console.log("comp-mounted");
                         component.beforeMounted();
                         component.mounted();
                     },
                     beforeDestroy:function()
                     {
-                        console.log("comp-before-destroyed:"+this._uid+" "+name);
+                        //console.log("comp-before-destroyed:"+this._uid+" "+name);
                         var index:number = Component.instancesVue.indexOf(this);
                         if(index != -1)
                         {
@@ -181,7 +196,7 @@ export class Component extends EventDispatcher
                     },
                      destroyed:function()
                     {
-                        console.log("comp-destroyed:"+this._uid+" "+name);
+                        //console.log("comp-destroyed:"+this._uid+" "+name);
                     },
                     data:function()
                     {
@@ -195,7 +210,7 @@ export class Component extends EventDispatcher
                 {
                     get:function()
                     {
-                        console.log("comp-get-template:"+name);
+                        //console.log("comp-get-template:"+name);
                         return template.getContent()
                     },
                       enumerable: true,
@@ -393,7 +408,7 @@ export class Component extends EventDispatcher
                 this.parent[name](...data);
                 return;
             }
-            console.log(name+" not found on parent - emit default event", this.parent);
+            //console.log(name+" not found on parent - emit default event", this.parent);
         }
         this.template.$parent.$emit(name, this);
     }
@@ -420,7 +435,7 @@ export class Component extends EventDispatcher
                     parent[name](...data);
                     return;
                 }
-                console.log(name+" not found on root - emit default event", parent);
+                //console.log(name+" not found on root - emit default event", parent);
             }
         }
         this.template.$root.$emit(name, this);
@@ -620,7 +635,7 @@ export class Component extends EventDispatcher
     public dispose():void
     {
         Polyglot2.instance().off("resolved", this.onPolyglotResolved, this);
-        console.log("[component] dispose:", this);
+        //console.log("[component] dispose:", this);
         if(this.parent)
         {
             this.parent.removeComponent(this);

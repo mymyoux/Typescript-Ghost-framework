@@ -224,44 +224,26 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                             var model:T;
                             if(rawModel)
                             {
-                                if(rawModel && rawModel.id != undefined)
+                                if(this.__isUnique)
                                 {
-                                    model = this.getModelByID(rawModel.id );
-                                }else
-                                {
-                                    var id:string = this.getIDName();
-                                    if(rawModel[id])
+                                    if(rawModel && rawModel.id != undefined)
                                     {
-                                        model = this.getModelByID(rawModel[id]);
-                                    }
+                                        model = this.getModelByID(rawModel.id );
+                                    }else
+                                    {
+                                        var id:string = this.getIDName();
+                                        if(rawModel[id])
+                                        {
+                                            model = this.getModelByID(rawModel[id]);
+                                        }
 
+                                    }
                                 }
                             }
                             if(!model)
                             {
                                 model  = Inst.get(cls);
-                                //TODO:check if mixins from collection is useful
-                                // if (this._mixins != undefined || this.getMixins())
-                                // {
-                                //     if(!this._mixins)
-                                //         this._mixins = this.getMixins();
-                                //     this._mixins.forEach((mixin:any)=>
-                                //     {
-                                //         if(mixin instanceof MixinConfig)
-                                //         {
-                                //             applyMixins(model, [mixin.mixin], mixin.config);
-                                //         }else{
-                                //             applyMixins(model, [mixin]);
-                                //         }
-                                //     });
-                                //     /*var mixins: any[] = this.getMixins();
-                                //     for(var p in mixins)
-                                //     {
-                                //         applyMixins()
-                                //     }*/
-                                // }
-
-                                this.prepareModel(model);
+                                 this.prepareModel(model);
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else
@@ -269,8 +251,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                                 this.prepareModel(model);
                                 model.readExternal(rawModel);
                             }
-
-                         //   this._trigger(Collection.EVENT_CHANGE, model);
                         }else
                         {
                             console.error("RawModel must be object, given ", rawModel);

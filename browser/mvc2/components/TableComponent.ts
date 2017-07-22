@@ -50,10 +50,12 @@ export class TableComponent extends Component
         }else{
             if(!event.metaKey && !event.ctrlKey)
             {
-                this.$getProp('list').models.forEach((item)=>
-                {
-                    item.selected = false;
-                });
+                this.template.selected.forEach((item)=>item.selected=false);
+                this.template.selected = [];
+                // this.$getProp('list').models.forEach((item)=>
+                // {
+                //     item.selected = false;
+                // });
             }
             this._mouseStart = this._mouseLast;
             this._onMouseUp(event);
@@ -65,13 +67,26 @@ export class TableComponent extends Component
         model._previousSelected = model.selected;
         if(!event.metaKey && !event.ctrlKey)
         {
-            this.$getProp('list').models.forEach((item)=>
-            {
-                item.selected = false;
-            });
+            this.template.selected.forEach((item)=>item.selected=false);
+            this.template.selected = [];
+            // this.$getProp('list').models.forEach((item)=>
+            // {
+            //     item.selected = false;
+            // });
             model.selected = !model.selected;
+            if(model.selected)
+            {
+                this.template.selected.push(model);
+            }else{
+                var index:number = this.template.selected.indexOf(model);
+                if(index != -1)
+                    this.template.selected.splice(index, 1);
+            }
         }else
         {
+            
+            if(!model.selected)
+                this.template.selected.push(model);
             model.selected = true;
         }
     }
@@ -94,10 +109,18 @@ export class TableComponent extends Component
         var index1:number = Math.min(index, this._mouseStart);
         var index2:number = Math.max(index, this._mouseStart);
         var model:any;
-            for(var p of this._itemChanged)
+        for(var p of this._itemChanged)
         {
                 model =  this.$getProp('list').models[p];
                 model.selected = model._previousSelected;
+                if(model.selected && this.template.selected.indexOf(model) == -1)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
         }
         for(var i:number=index1; i<=index2; i++)
         {
@@ -110,11 +133,21 @@ export class TableComponent extends Component
                 this._itemChanged.push(i);
             }
             
-                if(event.metaKey || event.ctrlKey)
+            if(event.metaKey || event.ctrlKey)
             {
                 model.selected = !model.selected;
+                if(model.selected)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
             }else
             {
+                if(!model.selected)
+                    this.template.selected.push(model);
                 model.selected = true;
             }
         }
@@ -139,6 +172,14 @@ export class TableComponent extends Component
         {
                 model =  this.$getProp('list').models[p];
                 model.selected = model._previousSelected;
+                if(model.selected && this.template.selected.indexOf(model) == -1)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
                 delete model._previousSelected;
         }
         for(var i:number=index1; i<=index2; i++)
@@ -146,11 +187,21 @@ export class TableComponent extends Component
             model =  this.$getProp('list').models[i];
             if(!model)
                 continue;
-                if(event.metaKey || event.ctrlKey)
+            if(event.metaKey || event.ctrlKey)
             {
                 model.selected = !model.selected;
+                if(model.selected)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
             }else
             {
+                if(!model.selected)
+                    this.template.selected.push(model);
                 model.selected = true;
             }
         }
@@ -161,7 +212,8 @@ export class TableComponent extends Component
      */
     protected _onMouseAll(event):void
     {
-        this.$getProp('list').models.forEach((item)=>item.selected=true);
+        
+        this.$getProp('list').models.forEach((item)=>{if(!item.selected){this.template.selected.push(item);}item.selected=true; });
         this.trigger("selection");
     }
     protected _onMouseDelete(event):void
@@ -235,6 +287,7 @@ export class TableComponent extends Component
         this.$addData("deleting", false);
         this.$addData("loading", false);
         this.$addData("search_open", false);
+        this.$addData("selected", []);
     }
 
     public props():any {
