@@ -224,7 +224,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                             var model:T;
                             if(rawModel)
                             {
-                                if(this.__isUnique)
+                                if(this['__isUnique'])
                                 {
                                     if(rawModel && rawModel.id != undefined)
                                     {
