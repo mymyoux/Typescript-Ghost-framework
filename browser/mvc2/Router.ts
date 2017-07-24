@@ -116,14 +116,15 @@
 			index++;
 			while(index-->0 && history.length)
 			{
-				route = history.pop();
+				history.pop();
+				route = history[history.length-1];
 			}
 			if(route && route!==this.current) 
 			{
 				return this.goto(route.url, route.params); 
 			}else
 			{
-				debugger;
+			//	debugger;
 			}
 			this.trigger('remove_all', scope);
 			return false;

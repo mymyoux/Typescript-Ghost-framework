@@ -156,7 +156,7 @@ export function MEventDispatcher<X extends Constructor<{}>>( Child:X ) {
         {
             return this.__on(false, name, callback, scope, parameters);
         }
-        private __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
+        public __on(once:boolean, name:string, callback:Function, scope:any, parameters:any[]):void
         {
             if (!this._listeners) {
                 //disposed

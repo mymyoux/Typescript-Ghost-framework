@@ -37,6 +37,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             this.columns = [];
             this.choices = {};
             this.choosen = {};
+            this.selected = [];
             this.bootColumns();
         }
         public loadGet(params?:any):Promise<any>
