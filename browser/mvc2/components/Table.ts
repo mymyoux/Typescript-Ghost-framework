@@ -169,8 +169,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                     options.prop = name.toLowerCase();
             }else
             {
-                console.log("ICI");
-                Component.addVueComponent("table-"+options.type, {props:["item","column","data"]});
+                Component.addVueComponent("table-"+options.type, {props:options.props?options.props:["item","column","data"]});
                 options.type = "component-table-"+options.type;
             }
             if(options.filter)
@@ -191,6 +190,8 @@ export interface IList
 export interface IColumn
 {
     type?:string;
+    //used to list props component for type
+    props?:string[];
     title?:string;
     prop?:string;
     sortable?:boolean;
