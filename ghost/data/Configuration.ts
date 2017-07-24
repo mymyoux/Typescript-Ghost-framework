@@ -42,7 +42,6 @@ import {Objects} from "ghost/utils/Objects";
 		}
 		public static readExternal(data:any):void
 		{
-			debugger;
 			this.data = data;
 		}
 	}

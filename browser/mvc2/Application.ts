@@ -12,10 +12,10 @@ import {Step} from "../performance/Step";
 import {Polyglot2} from "../i18n/Polyglot2";
 export class Application
 {
-    protected steps:string[] = ["initAPI", "initAuth","initUser","initTemplate","initPolyglot","initComponents","initRoute"];
+    protected steps:string[];
     public constructor()
     {
-
+        this.steps = ["initAPI", "initAuth","initUser","initTemplate","initPolyglot","initComponents","initRoute"];
     }
     protected boot():void
     {
