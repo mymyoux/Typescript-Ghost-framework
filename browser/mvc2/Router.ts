@@ -116,7 +116,8 @@
 			index++;
 			while(index-->0 && history.length)
 			{
-				route = history.pop();
+				history.pop();
+				route = history[history.length-1];
 			}
 			if(route && route!==this.current) 
 			{

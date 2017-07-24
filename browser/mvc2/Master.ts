@@ -446,6 +446,11 @@ export class Master
 
     protected renderVue():void
     {
+        if(this.vueConfig.__ob__)
+        {
+            delete this.vueConfig.__ob__;
+            console.warn("Vue observer already existed on object", this, this.vueConfig);
+        }
         this.template = new Vue(this.vueConfig);
         this._template.once(Template.EVENT_CHANGE,this.onTemplateUpdated.bind(this));
     }

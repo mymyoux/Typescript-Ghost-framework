@@ -4,6 +4,7 @@ import {EventDispatcher} from "ghost/events/EventDispatcher";
 import {Inst} from "./Inst";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "../i18n/Polyglot2";
+import {Objects} from "ghost/utils/Objects";
 
 export class Component extends EventDispatcher
 {
@@ -203,7 +204,13 @@ export class Component extends EventDispatcher
                         var component:Component = Component.getComponentFromVue(this);
                         if(!component)
                             return null;
-                        return component.data();
+                        var object:any = component.data();
+                        if(object.__ob__)
+                        {
+                            delete object.__ob__;
+                            console.warn("Vue observer already existed on object", this,component, object);
+                        }
+                        return object;
                     },
                 };
                 Object.defineProperty(componentDefinition, "template",
