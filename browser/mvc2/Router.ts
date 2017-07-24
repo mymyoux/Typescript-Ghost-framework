@@ -124,7 +124,7 @@
 				return this.goto(route.url, route.params); 
 			}else
 			{
-				debugger;
+			//	debugger;
 			}
 			this.trigger('remove_all', scope);
 			return false;
