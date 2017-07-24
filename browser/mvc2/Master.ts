@@ -318,6 +318,14 @@ export class Master
         }
         this.vueConfig.watch[name] = bind;
     }
+    protected $addFilter(name:string, bind:Function):void
+    {
+        if(!this.vueConfig.filters)
+        {
+            this.vueConfig.filters = {};
+        }
+        this.vueConfig.filters[name] = bind;
+    }
     protected $addData(name:string, value:any):void
     {
         if(!this.vueConfig.data)
@@ -398,7 +406,7 @@ export class Master
             name:this._getName(),
             template:this._template.getContent()
         }; 
-        const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy"];
+        const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$addFilter"];
         //add $Methods by defaut
         for(var p in this)
         {
@@ -420,6 +428,9 @@ export class Master
                 }else if(p.substring(0, 1) == "W")
                 {
                     this.$addWatcher(p.substring(1), (<any>this[p]).bind(this));
+                }else if(p.substring(0, 1) == "F")
+                {
+                    this.$addFilter(p.substring(1), (<any>this[p]).bind(this));
                 }
             } 
         }

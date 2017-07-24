@@ -80,7 +80,8 @@ export class Component extends EventDispatcher
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
-                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
+                var filters:any = {};
+                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$addFilter","$addWatcher"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
@@ -100,10 +101,12 @@ export class Component extends EventDispatcher
                         }else if(p.substring(0, 1)=="W")
                         {
                             watchers.push(p.substring(1));
+                        }else if(p.substring(0, 1)=="F")
+                        {
+                            filters[p.substring(1)] = cls.prototype[p];
                         }
                     } 
                 }
-
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
 
@@ -144,6 +147,7 @@ export class Component extends EventDispatcher
                         };
                         return previous;
                     }, {}),
+                     filters:filters,
                     beforeCreate:function()
                     {
                         console.log("comp-before-create:"+this._uid+" "+name);
