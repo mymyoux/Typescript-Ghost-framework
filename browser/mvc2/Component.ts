@@ -2,6 +2,7 @@ import {Template} from "./Template";
 import {CoreObject} from "ghost/core/CoreObject";
 import {EventDispatcher} from "ghost/events/EventDispatcher";
 import {Inst} from "./Inst";
+import {Model} from "./Model";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "../i18n/Polyglot2";
 import {Objects} from "ghost/utils/Objects";
@@ -81,8 +82,9 @@ export class Component extends EventDispatcher
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
+                var filters:any = {};
+                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$addFilter","$addWatcher"];
                 var directives:any = {};
-                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent"];
                 //add $Methods by defaut
                 for(var p in cls.prototype)
                 {
@@ -108,13 +110,16 @@ export class Component extends EventDispatcher
                             }else{
                                 watchers.push(p.substring(1));
                             }
+                        }else if(p.substring(0, 1)=="F")
+                        {
+                            filters[p.substring(1)] = cls.prototype[p];
+                            
                         }else if(p.substring(0, 1)=="D")
                         {
                             directives[p.substring(1)] = cls.prototype[p]();//.push(p.substring(1));
                         }
                     } 
                 }
-
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
 
@@ -159,6 +164,7 @@ export class Component extends EventDispatcher
                         };
                         return previous;
                     }, {}),
+                     filters:filters,
                     directives:directives,
                     beforeCreate:function()
                     {
@@ -641,6 +647,15 @@ export class Component extends EventDispatcher
     }
     public dispose():void
     {
+        if(this.vueConfig && this.vueConfig.data)
+        {
+            for(var p in this.vueConfig.data)
+            {
+                if(this.vueConfig.data[p] && this.vueConfig.data[p].off){
+                    this.vueConfig.data[p].off(Model.EVENT_FORCE_CHANGE, this.onModelChanged, this);
+                }   
+            }
+        }
         Polyglot2.instance().off("resolved", this.onPolyglotResolved, this);
         //console.log("[component] dispose:", this);
         if(this.parent)
