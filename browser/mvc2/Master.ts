@@ -3,6 +3,7 @@ import {IRoute} from "./IRoute";
 import {Template} from "./Template";
 import {Inst} from "./Inst";
 import {Component} from "./Component";
+import {Model} from "./Model";
 import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "browser/i18n/Polyglot2";
@@ -154,6 +155,15 @@ export class Master
     }
     private dispose():void
     {
+        if(this.vueConfig && this.vueConfig.data)
+        {
+            for(var p in this.vueConfig.data)
+            {
+                if(this.vueConfig.data[p] && this.vueConfig.data[p].off){
+                    this.vueConfig.data[p].off(Model.EVENT_FORCE_CHANGE, this.onModelChanged, this);
+                }   
+            }
+        }
         Polyglot2.instance().off("resolved", this.onPolyglotResolved, this);
         console.log("[master] dispose:", this);
         this.disposeTemplate();
