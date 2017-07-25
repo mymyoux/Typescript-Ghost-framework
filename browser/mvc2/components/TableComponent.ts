@@ -14,14 +14,241 @@ export class TableComponent extends Component
     protected reload:any;
     protected $paginating:any;
     protected search:string;
+    protected _mouseStart:number;
+    protected _mouseLast:number;
+    protected _itemChanged:number[];
+    protected _mousedown:any;
+    protected _mouseup:any;
+    protected _allmouse:any;
+    protected _alldelete:any;
+    protected _mousemove:any;
     public constructor(template:any)
     {
         super(template);
+        this._itemChanged = [];
         this.reload = Buffer.throttle(this._reload.bind(this), 200);
+      
+    }
+    protected _onMouseDown(event:any):void
+    {
+        
+        if(this.$getData("edition") || event.button != 0)
+        {
+            return;
+        }
+        event.preventDefault();
+        this._mouseStart = null;
+        var index:number = $(event.currentTarget).index()-1;
+        if(index<0)
+            return;
+        var model:any =  this.$getProp('list').models[index];
+        if(!model)
+            return;
+        if(!event.shiftKey)
+        {
+            this._mouseLast = index;
+        }else{
+            if(!event.metaKey && !event.ctrlKey)
+            {
+                this.template.selected.forEach((item)=>item.selected=false);
+                this.template.selected = [];
+                // this.$getProp('list').models.forEach((item)=>
+                // {
+                //     item.selected = false;
+                // });
+            }
+            this._mouseStart = this._mouseLast;
+            this._onMouseUp(event);
+            //handle like mouseup
+            return;
+        }
+        this._mouseStart = index;
+        this._itemChanged = [index];
+        model._previousSelected = model.selected;
+        if(!event.metaKey && !event.ctrlKey)
+        {
+            this.template.selected.forEach((item)=>item.selected=false);
+            this.template.selected = [];
+            // this.$getProp('list').models.forEach((item)=>
+            // {
+            //     item.selected = false;
+            // });
+            model.selected = !model.selected;
+            if(model.selected)
+            {
+                this.template.selected.push(model);
+            }else{
+                var index:number = this.template.selected.indexOf(model);
+                if(index != -1)
+                    this.template.selected.splice(index, 1);
+            }
+        }else
+        {
+            
+            if(!model.selected)
+                this.template.selected.push(model);
+            model.selected = true;
+        }
+    }
+    protected _onMouseMove(event:any):void
+    {
+        if(this._mouseStart == null)
+        {
+            return;
+        }
+        //no button
+        if(event.buttons == 0)
+        {
+            this._onMouseUp(event);
+            return;
+        }
+         event.preventDefault();
+        var index:number = $(event.currentTarget).index()-1;
+        if(index<0)
+            return;
+        var index1:number = Math.min(index, this._mouseStart);
+        var index2:number = Math.max(index, this._mouseStart);
+        var model:any;
+        for(var p of this._itemChanged)
+        {
+                model =  this.$getProp('list').models[p];
+                model.selected = model._previousSelected;
+                if(model.selected && this.template.selected.indexOf(model) == -1)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
+        }
+        for(var i:number=index1; i<=index2; i++)
+        {
+            model =  this.$getProp('list').models[i];
+            if(!model)
+                continue;
+            if(this._itemChanged.indexOf(i)==-1)
+            {
+                model._previousSelected = model.selected;
+                this._itemChanged.push(i);
+            }
+            
+            if(event.metaKey || event.ctrlKey)
+            {
+                model.selected = !model.selected;
+                if(model.selected)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
+            }else
+            {
+                if(!model.selected)
+                    this.template.selected.push(model);
+                model.selected = true;
+            }
+        }
+    }
+    protected _onMouseUp(event:any):void
+    {
+        if(this._mouseStart == null)
+        {
+            return;
+        }
+         event.preventDefault();
+        var index:number = $(event.currentTarget).index()-1;
+        if(index<0)
+            return;
+        
+        var index1:number = Math.min(index, this._mouseStart);
+        var index2:number = Math.max(index, this._mouseStart);
+
+        this._mouseStart = null;
+        var model:any;
+        for(var p of this._itemChanged)
+        {
+                model =  this.$getProp('list').models[p];
+                model.selected = model._previousSelected;
+                if(model.selected && this.template.selected.indexOf(model) == -1)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
+                delete model._previousSelected;
+        }
+        for(var i:number=index1; i<=index2; i++)
+        {
+            model =  this.$getProp('list').models[i];
+            if(!model)
+                continue;
+            if(event.metaKey || event.ctrlKey)
+            {
+                model.selected = !model.selected;
+                if(model.selected)
+                {
+                    this.template.selected.push(model);
+                }else{
+                    var index:number = this.template.selected.indexOf(model);
+                    if(index != -1)
+                        this.template.selected.splice(index, 1);
+                }
+            }else
+            {
+                if(!model.selected)
+                    this.template.selected.push(model);
+                model.selected = true;
+            }
+        }
+        this.trigger("selection");
+    }
+    /**
+     * @param event Called when ctrl+A,cmd+A used
+     */
+    protected _onMouseAll(event):void
+    {
+        
+        this.$getProp('list').models.forEach((item)=>{if(!item.selected){this.template.selected.push(item);}item.selected=true; });
+        this.trigger("selection");
+    }
+    protected _onMouseDelete(event):void
+    {
+        if(this.template.edition)
+        {
+            return;
+        }
+        this.$removeAll(this.$getProp('list').models.filter((item)=>item.selected), event);
+    }
+    public $removeAll(items:any[], event:any):void
+    {
+        items.forEach((item)=>this.$remove(item, event));
     }
     protected bindEvents():void
     {
         var _self:any = this;
+         if(this.$getProp('list').config.selectable)
+        {
+            this._mousedown = this._onMouseDown.bind(this);
+            this._mouseup = this._onMouseUp.bind(this);
+            this._mousemove = this._onMouseMove.bind(this);
+            this._allmouse = this._onMouseAll.bind(this);
+            this._alldelete = this._onMouseDelete.bind(this);
+            $(this.template.$el).on('mousedown','.col>div', this._mousedown);
+            $(this.template.$el).on('mousemove','.col>div', this._mousemove);
+            $(this.template.$el).on('mouseup','.col>div', this._mouseup);
+            $(this.template.$el).on('key_all_selection', this._allmouse);
+            $(this.template.$el).on('key_delete', this._alldelete);
+        }
+        if(this.$getProp('scroll')===false)
+        {
+            return;
+        }
+       
         this.scroll(function()
         {
             if(_self.$paginating)
@@ -44,12 +271,23 @@ export class TableComponent extends Component
            }
         });
     }
+    protected unbindEvents():void
+    {
+        super.unbindEvents();
+        if(this._mousedown)
+             $(this.template.$el).on('mousedown','.col>div', this._mousedown);
+        if(this._mousemove)
+            $(this.template.$el).on('mousemove','.col>div', this._mousemove);
+        if(this._mouseup)
+            $(this.template.$el).on('mouseup','.col>div', this._mouseup);
+    }
     protected bindVue():void
     {
         this.$addData("edition", false);
         this.$addData("deleting", false);
         this.$addData("loading", false);
         this.$addData("search_open", false);
+        this.$addData("selected", []);
     }
 
     public props():any {
@@ -72,6 +310,11 @@ export class TableComponent extends Component
             {
                 required:false,
                 default:null
+            },
+            "scroll":
+            {
+                type:Boolean,
+                default:true
             }
         };
     }
@@ -218,10 +461,10 @@ export class TableComponent extends Component
      * Called on create item button
      * @param event 
      */
-    public $create(event:any):void
+    public $create(event:any):Promise<any>
     {
         var promise:any = this.getPromise(event);
-        promise.then((success:boolean)=>
+        return promise.then((success:boolean)=>
         {
             if(success === false)
                 return;
@@ -234,7 +477,7 @@ export class TableComponent extends Component
                 if(column.editable)
                     break;
             
-            this.$edit(model, column, event).then((success:boolean)=>
+            return this.$edit(model, column, event).then((success:boolean)=>
             {
                 if(success === false)
                     return;
@@ -244,6 +487,7 @@ export class TableComponent extends Component
                 {
                     $(elmt).find('input').eq(0).focus();
                 }
+                return model;
             });
         });
     }

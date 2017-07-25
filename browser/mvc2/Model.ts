@@ -1,22 +1,23 @@
-import {EventDispatcher} from "ghost/events/EventDispatcher";
-import {Eventer} from "ghost/events/Eventer";
+import {CoreObject} from "ghost/core/CoreObject";
+import {EventDispatcher} from "ghost/events/EventDispatcher"
 import {Inst} from "./Inst";
 import {Strings} from "ghost/utils/Strings";
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
-export class Model extends EventDispatcher
+import {Arrays} from "ghost/utils/Arrays";
+export class Model extends CoreObject
 {
     public static EVENT_CHANGE:string = "change";
     public static EVENT_FIRST_DATA:string = "first_data";
     public static EVENT_FORCE_CHANGE:string = "force_change";
     public static PATH_CREATE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/create", null,{replaceDynamicParams:true});
+        ()=>new ModelLoadRequest("%root-path%/create", null,{replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
     public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/get", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
     public static PATH_DELETE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+        ()=>new ModelLoadRequest("%root-path%/delete", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
     public static PATH_UPDATE:()=>ModelLoadRequest =
-        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true});
+        ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
 
     private _firstData:boolean;
     private _pathLoaded:any = {};
@@ -79,20 +80,27 @@ export class Model extends EventDispatcher
     }
     protected triggerChange(key:string):void
     {
-        this.trigger(Model.EVENT_CHANGE, key, this[key]);
+        this._trigger(Model.EVENT_CHANGE, key, this[key]);
     }
      protected triggerForceChange(key:string = null):void
     {
         if(key)
-            this.trigger(Model.EVENT_FORCE_CHANGE, key, this[key]);
+            this._trigger(Model.EVENT_FORCE_CHANGE, key, this[key]);
         else
-            this.trigger(Model.EVENT_FORCE_CHANGE);
+            this._trigger(Model.EVENT_FORCE_CHANGE);
+    }
+    protected _trigger(...params:any[]):void
+    {
+        if(this["trigger"])
+        {
+            (<any>this["trigger"])(...params);
+        }
     }
      protected triggerFirstData(): void {
         if (!this._firstData) {
             this._firstData = true;
             setTimeout(() => {
-                this.trigger(Model.EVENT_FIRST_DATA);
+                this._trigger(Model.EVENT_FIRST_DATA);
             }, 0);
         }
     }
@@ -135,7 +143,6 @@ export class Model extends EventDispatcher
             if(typeof this[p] == "function")
             {
                 console.warn("you overwrite function: "+p);
-                debugger;
             }
             this[p] = input[p];
         }
@@ -155,7 +162,7 @@ export class Model extends EventDispatcher
         if(!this.isInvalidated())
             return;
         this._invalidated = false;
-        this.trigger(Model.EVENT_FORCE_CHANGE);
+        this._trigger(Model.EVENT_FORCE_CHANGE);
     }
      /**
      * Returns model's data
@@ -211,12 +218,23 @@ export class Model extends EventDispatcher
                 {
                     if(this[key])
                     {
-                        if(typeof this[key] == "function")
+                        var v:any = this[key];
+                        if(typeof v == "function")
+                            v = v();
+                        if(value == '%'+key+'%')
                         {
-                            value = value.replace('%'+key+'%', this[key]());
-                        }else
-                        {
-                            value = value.replace('%'+key+'%', this[key]);
+                            if(typeof v == "object")
+                            {
+                                //TODO:maybe json of that
+                                value = v;
+
+                                if(Arrays.isArray(v))
+                                {
+                                    value = v;
+                                }
+                            }else{
+                                value = value.replace('%'+key+'%', v); 
+                            }
                         }
                     }else if(value == '%'+key+'%')
                     {
@@ -227,9 +245,9 @@ export class Model extends EventDispatcher
         }
         return value;
     }
-    public loadGet(params?:any):Promise<any>
+    public loadGet(params?:any, config?:IModelConfig):Promise<any>
     {
-        return this.load(this.constructor["PATH_GET"], params);
+        return this.load(this.constructor["PATH_GET"], params, config);
     }
     public loadCreate(params?:any):Promise<any>
     {
@@ -339,14 +357,24 @@ export class Model extends EventDispatcher
             {
                 if(config.readExternal !== false)
                 {
+                    if(config.removePreviousModels)
+                    {
+                        if(this["clearModels"])
+                        {
+                            this["clearModels"]();
+                        }
+                    }
                     this.readExternal(data, <string>path);
                     this.validate();
                 }
                 return data;
             }, (error:any)=>
             {
-                debugger;
                 console.error(error);
+                if(error.exception)
+                    throw error.exception
+                else
+                    throw error;
             });
         }
         return request;
@@ -365,6 +393,11 @@ export interface IModelConfig
      * default:true
      */
     readExternal?:boolean;
+    /**
+     * remove previous models when loaded. Work only on collections with readexternal = true
+     * default:false
+     */
+    removePreviousModels?:boolean;
      /**
      * Load will be called immediatly (return instance of Promise instead of API2)
      * @default true
@@ -391,6 +424,7 @@ export interface IModelConfig
      * @default false
      */
     replaceDynamicParams?:boolean;
+    
 }
 
 export class ModelLoadRequest

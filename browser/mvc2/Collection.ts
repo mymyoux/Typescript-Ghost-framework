@@ -200,7 +200,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     //needed to not break the flow
                     this.detectedFullLoad( api );
                     this.triggerFirstData();
-                    this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
+                    this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
                     return;
                 }
                 input.forEach(function(rawModel:any):void
@@ -213,6 +213,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     {
                         //TODO:check id too
                         var model:T = Inst.get(rawModel.__class);
+                        this.prepareModel(model);
                         model.readExternal(rawModel);
                         this.push(model);
                     }else
@@ -223,61 +224,48 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                             var model:T;
                             if(rawModel)
                             {
-                                if(rawModel && rawModel.id != undefined)
+                                if(this['__isUnique'])
                                 {
-                                    model = this.getModelByID(rawModel.id );
-                                }else
-                                {
-                                    var id:string = this.getIDName();
-                                    if(rawModel[id])
+                                    if(rawModel && rawModel.id != undefined)
                                     {
-                                        model = this.getModelByID(rawModel[id]);
-                                    }
+                                        model = this.getModelByID(rawModel.id );
+                                    }else
+                                    {
+                                        var id:string = this.getIDName();
+                                        if(rawModel[id])
+                                        {
+                                            model = this.getModelByID(rawModel[id]);
+                                        }
 
+                                    }
                                 }
                             }
                             if(!model)
                             {
                                 model  = Inst.get(cls);
-                                //TODO:check if mixins from collection is useful
-                                // if (this._mixins != undefined || this.getMixins())
-                                // {
-                                //     if(!this._mixins)
-                                //         this._mixins = this.getMixins();
-                                //     this._mixins.forEach((mixin:any)=>
-                                //     {
-                                //         if(mixin instanceof MixinConfig)
-                                //         {
-                                //             applyMixins(model, [mixin.mixin], mixin.config);
-                                //         }else{
-                                //             applyMixins(model, [mixin]);
-                                //         }
-                                //     });
-                                //     /*var mixins: any[] = this.getMixins();
-                                //     for(var p in mixins)
-                                //     {
-                                //         applyMixins()
-                                //     }*/
-                                // }
-
+                                 this.prepareModel(model);
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else
                             {
+                                this.prepareModel(model);
                                 model.readExternal(rawModel);
                             }
-
-                         //   this.trigger(Collection.EVENT_CHANGE, model);
                         }else
                         {
                             console.error("RawModel must be object, given ", rawModel);
                         }
                     }
+                    
                 }, this);
                 this.detectedFullLoad( api );
                 this.triggerFirstData();
-                this.trigger(this.constructor["EVENT_FORCE_CHANGE"]);
+                this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
             }
+        }
+        protected prepareModel(model:T):void
+        {
+            
         }
         protected detectedFullLoad(api:API2):void
         {
@@ -369,7 +357,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
         {
             return this._unicity && this._unicity.length>0;
         }
-        private _registerKey(model:T):void
+        protected _registerKey(model:T):void
         {
             if(!this._hasUnicity())
                 return;
@@ -633,5 +621,6 @@ export function Sorted<X extends Constructor<ModelClass>>( Model: X ) {
                 request.order(this._order, this._orderDirection);
             return request;
         }
+
     }
 }

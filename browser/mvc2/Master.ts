@@ -3,6 +3,7 @@ import {IRoute} from "./IRoute";
 import {Template} from "./Template";
 import {Inst} from "./Inst";
 import {Component} from "./Component";
+import {Model} from "./Model";
 import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "browser/i18n/Polyglot2";
@@ -154,6 +155,15 @@ export class Master
     }
     private dispose():void
     {
+        if(this.vueConfig && this.vueConfig.data)
+        {
+            for(var p in this.vueConfig.data)
+            {
+                if(this.vueConfig.data[p] && this.vueConfig.data[p].off){
+                    this.vueConfig.data[p].off(Model.EVENT_FORCE_CHANGE, this.onModelChanged, this);
+                }   
+            }
+        }
         Polyglot2.instance().off("resolved", this.onPolyglotResolved, this);
         console.log("[master] dispose:", this);
         this.disposeTemplate();
@@ -318,6 +328,14 @@ export class Master
         }
         this.vueConfig.watch[name] = bind;
     }
+    protected $addFilter(name:string, bind:Function):void
+    {
+        if(!this.vueConfig.filters)
+        {
+            this.vueConfig.filters = {};
+        }
+        this.vueConfig.filters[name] = bind;
+    }
     protected $addData(name:string, value:any):void
     {
         if(!this.vueConfig.data)
@@ -359,7 +377,8 @@ export class Master
         }
         model = Inst.get(model);
         name = name?name:model.getModelName();
-        model.on(model.constructor.EVENT_FORCE_CHANGE, this.onModelChanged, this, name, model);
+        if(model.on)
+            model.on(model.constructor.EVENT_FORCE_CHANGE, this.onModelChanged, this, name, model);
         this.$addData(name, model);
         return model;
     }
@@ -397,7 +416,7 @@ export class Master
             name:this._getName(),
             template:this._template.getContent()
         }; 
-        const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy"];
+        const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$addFilter"];
         //add $Methods by defaut
         for(var p in this)
         {
@@ -419,6 +438,9 @@ export class Master
                 }else if(p.substring(0, 1) == "W")
                 {
                     this.$addWatcher(p.substring(1), (<any>this[p]).bind(this));
+                }else if(p.substring(0, 1) == "F")
+                {
+                    this.$addFilter(p.substring(1), (<any>this[p]).bind(this));
                 }
             } 
         }
@@ -445,6 +467,11 @@ export class Master
 
     protected renderVue():void
     {
+        if(this.vueConfig.__ob__)
+        {
+            delete this.vueConfig.__ob__;
+            console.warn("Vue observer already existed on object", this, this.vueConfig);
+        }
         this.template = new Vue(this.vueConfig);
         this._template.once(Template.EVENT_CHANGE,this.onTemplateUpdated.bind(this));
     }
