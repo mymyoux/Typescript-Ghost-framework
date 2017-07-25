@@ -6,6 +6,7 @@ import {Router} from "browser/mvc2/Router";
 import {Component} from "browser/mvc2/Component";
 import {AutocompleteComponent} from "browser/mvc2/components/Autocomplete";
 import {API2} from "browser/api/API2";
+import {PositionCollection} from "yb/main/collections/Marketplace/PositionCollection";
 
 export class ModalComponent extends Component
 {
@@ -21,7 +22,7 @@ export class ModalComponent extends Component
 
     protected bindVue():void
     {
-        window["modal"] = this;
+        this.$addModel(PositionCollection).loadGet();
     }
 
     public props():any {
