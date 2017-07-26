@@ -77,6 +77,7 @@ export class Component extends EventDispatcher
                         cls = Component;
                      }
                 }
+                debugger;
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
