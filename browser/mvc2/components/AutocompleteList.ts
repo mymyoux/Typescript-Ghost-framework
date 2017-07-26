@@ -43,6 +43,7 @@ export class AutocompleteListComponent extends Component
                 type:Boolean,
                 default:false
             },
+            
              "selection":
             {
                 type:String,
@@ -136,7 +137,7 @@ export class AutocompleteListComponent extends Component
             this.template.onrest = true;
         },100);
     }
-    protected select(choice:any):void{
+    public select(choice:any):void{
         this.emit('autocompleteChoice', this, choice);
         this.remit('autocompleteChoice', this, choice);
         this.template.choice = choice.name;
@@ -195,7 +196,7 @@ export class AutocompleteListComponent extends Component
     }
     public getChoice():any
     {
-        return this.template.choice;
+        return this.template.selected_item;
     }
     protected onMounted():void
     {

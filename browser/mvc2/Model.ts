@@ -289,6 +289,7 @@ export class Model extends CoreObject
             {
                 for(var p in path.config)
                 {
+                    if(config[p] == undefined)
                     config[p] = path.config[p];
                 }
             }
@@ -298,7 +299,8 @@ export class Model extends CoreObject
             {
                 for(var p in path.params)
                 {
-                    params[p] = path.params[p];
+                    if(params[p] == undefined)
+                        params[p] = path.params[p];
                 }
             }
             path = path.path;
