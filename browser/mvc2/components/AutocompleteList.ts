@@ -5,16 +5,29 @@ import {Auth} from "browser/mvc2/Auth";
 import {Router} from "browser/mvc2/Router";
 import {Component} from "browser/mvc2/Component";
 import {Buffer} from "ghost/utils/Buffer";
+import {Strings} from "ghost/utils/Strings";
 
 
-export class AutocompleteComponent extends Component
+export class AutocompleteListComponent extends Component
 {
     protected throttlingTyping:any;
     protected blurLater:any;
+    public getComponentName():string
+    {
+        return "autocomplete-list";
+    }
     public constructor(template:any)
     {
         super(template);
         this.throttlingTyping = Buffer.throttle(this.throttleTyping.bind(this), 200);
+    }
+    public $outside(event):void
+    {
+        console.log("outside",event.target);
+    }
+    public bindEvents():void
+    {
+        this.bindEvent(document, "click", this.$outside.bind(this));
     }
     public props():any {
         return {
@@ -30,10 +43,15 @@ export class AutocompleteComponent extends Component
                 type:Boolean,
                 default:false
             },
+            
              "selection":
             {
                 type:String,
                 default:""
+            },
+            "list":
+            {
+                required:true
             }
             // "actions":
             // {
@@ -58,9 +76,20 @@ export class AutocompleteComponent extends Component
     }
      protected bindVue():void
     {
+        this.$addData('hidden', true);
         this.$addData('choice', "");
-        this.$addData('list', []);
         this.$addData('selected', -1);
+        this.$addData('selected_item', null);
+        this.$addData('onrest', true);
+    }
+    public $activate():void
+    {
+        this.template.onrest = false;
+        setTimeout(()=>
+        {
+
+            $(this.template.$el).find("input").focus();
+        }, 0);
     }
     public setAutocomplete(data:any[]):void
     {
@@ -68,6 +97,7 @@ export class AutocompleteComponent extends Component
     }
     public $click(item:any):void
     {
+        console.log('click', item);
         this.select(item);
         
         //this.template.list = [];
@@ -75,39 +105,55 @@ export class AutocompleteComponent extends Component
     public $enter():void{
         if(this.template.selected>-1)
         {
-            return this.select(this.template.list[this.template.selected]);
+            return this.select(this.template.list.models[this.template.selected]);
         }
         if(!this.template.allow_custom)
         {
+            if(this.$getProp('list').models.length && Strings.trim(this.template.choice))
+            {
+                return this.select(this.template.list.models[0]);
+            }
             return;
         }
         this.select({name:this.template.choice});
     }
     protected $focus():void
-    {
-
+    { 
+        this.template.hidden = false;
+        this.$getProp('list').loadAutocomplete({choice:""});
     }
-    protected $blur():void{
+    protected $blur(event):void{
 
+        console.log('bluring', event.target);
         if(this.blurLater)
         {
             clearTimeout(this.blurLater);
         }
         this.blurLater = setTimeout(()=>
         {
+            console.log('blur');
             this.blurLater = null;
-            this.template.list = [];
+            this.template.hidden = true;
+            this.template.onrest = true;
         },100);
     }
-    protected select(choice:any):void{
+    public select(choice:any):void{
         this.emit('autocompleteChoice', this, choice);
+        this.remit('autocompleteChoice', this, choice);
         this.template.choice = choice.name;
-        this.template.list = [];
+        this.template.selected_item = choice;
+        this.template.hidden = true;
+        this.template.onrest = true;
     }
     public $typing(event):any
     {
         if(event.keyCode == 13)
             return;
+        this.template.selected_item = null;
+        // if(this.template.choice)
+        //     this.template.hidden = false;
+        // else
+        this.template.hidden = false;
         if([38,40].indexOf(event.keyCode)!=-1 )
         {
             return this.$selectChange(event.keyCode == 38);//false;
@@ -134,23 +180,23 @@ export class AutocompleteComponent extends Component
     protected throttleTyping():void
     {
         var choice:string = this.template.choice;
-        if(!choice)
-            return; 
-        this.emit('autocomplete', this);
-        if(this.template.name)
+        // if(!choice)
+        //     return; 
+        // this.emit('autocomplete', this);
+        // if(this.template.name)
+        // {
+        //     this.emit('autocomplete:'+this.template.name, choice, this);
+        // }
+        this.template.list.loadAutocomplete(
         {
-            this.emit('autocomplete:'+this.template.name, choice, this);
-        }
+            choice:choice
+        });
         console.log("choice: "+choice);
         //debugger;
     }
-    public getName() : string
-    {
-        return this.template.name;
-    }
     public getChoice():any
     {
-        return this.template.choice;
+        return this.template.selected_item;
     }
     protected onMounted():void
     {

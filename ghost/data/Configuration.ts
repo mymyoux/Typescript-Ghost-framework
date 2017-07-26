@@ -36,4 +36,12 @@ import {Objects} from "ghost/utils/Objects";
 		{
 			Configuration.data[key] = value;
 		}
+		public static writeExternal():any
+		{
+			return Objects.clone(this.data);
+		}
+		public static readExternal(data:any):void
+		{
+			this.data = data;
+		}
 	}

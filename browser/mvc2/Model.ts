@@ -1,11 +1,11 @@
-import {EventDispatcher} from "ghost/events/EventDispatcher";
-import {Eventer} from "ghost/events/Eventer";
+import {CoreObject} from "ghost/core/CoreObject";
+import {EventDispatcher} from "ghost/events/EventDispatcher"
 import {Inst} from "./Inst";
 import {Strings} from "ghost/utils/Strings";
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Arrays} from "ghost/utils/Arrays";
-export class Model extends EventDispatcher
+export class Model extends CoreObject
 {
     public static EVENT_CHANGE:string = "change";
     public static EVENT_FIRST_DATA:string = "first_data";
@@ -80,20 +80,27 @@ export class Model extends EventDispatcher
     }
     protected triggerChange(key:string):void
     {
-        this.trigger(Model.EVENT_CHANGE, key, this[key]);
+        this._trigger(Model.EVENT_CHANGE, key, this[key]);
     }
      protected triggerForceChange(key:string = null):void
     {
         if(key)
-            this.trigger(Model.EVENT_FORCE_CHANGE, key, this[key]);
+            this._trigger(Model.EVENT_FORCE_CHANGE, key, this[key]);
         else
-            this.trigger(Model.EVENT_FORCE_CHANGE);
+            this._trigger(Model.EVENT_FORCE_CHANGE);
+    }
+    protected _trigger(...params:any[]):void
+    {
+        if(this["trigger"])
+        {
+            (<any>this["trigger"])(...params);
+        }
     }
      protected triggerFirstData(): void {
         if (!this._firstData) {
             this._firstData = true;
             setTimeout(() => {
-                this.trigger(Model.EVENT_FIRST_DATA);
+                this._trigger(Model.EVENT_FIRST_DATA);
             }, 0);
         }
     }
@@ -155,7 +162,7 @@ export class Model extends EventDispatcher
         if(!this.isInvalidated())
             return;
         this._invalidated = false;
-        this.trigger(Model.EVENT_FORCE_CHANGE);
+        this._trigger(Model.EVENT_FORCE_CHANGE);
     }
      /**
      * Returns model's data
@@ -238,9 +245,9 @@ export class Model extends EventDispatcher
         }
         return value;
     }
-    public loadGet(params?:any):Promise<any>
+    public loadGet(params?:any, config?:IModelConfig):Promise<any>
     {
-        return this.load(this.constructor["PATH_GET"], params);
+        return this.load(this.constructor["PATH_GET"], params, config);
     }
     public loadCreate(params?:any):Promise<any>
     {
@@ -282,6 +289,7 @@ export class Model extends EventDispatcher
             {
                 for(var p in path.config)
                 {
+                    if(config[p] == undefined)
                     config[p] = path.config[p];
                 }
             }
@@ -291,7 +299,8 @@ export class Model extends EventDispatcher
             {
                 for(var p in path.params)
                 {
-                    params[p] = path.params[p];
+                    if(params[p] == undefined)
+                        params[p] = path.params[p];
                 }
             }
             path = path.path;

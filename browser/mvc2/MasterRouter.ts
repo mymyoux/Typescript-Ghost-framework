@@ -116,7 +116,6 @@ export class MasterRouter
     }
     public static onRemoveAll(scope:string):void
     {
-        debugger;
         if(MasterRouter._scopes[scope])
         {
             console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);

@@ -20,12 +20,12 @@ window.onerror = function(err, url, line){
          * Classname
          */
         private _className:string;
-        protected __instance:number;
-        private static __id:number = 0;
+        //protected __instance:number;
+        //private static __id:number = 0;
         constructor()
         {
             //TODO:remove instances
-            this.__instance = CoreObject.__id++;//Maths.getUniqueID();
+            //this.__instance = CoreObject.__id++;//Maths.getUniqueID();
         }
         
         /**
@@ -92,8 +92,12 @@ window.onerror = function(err, url, line){
         {
             throw new Error("you must implement getFullClassName method before using it");
         }
-        public getUniqueInstance():number
+        // public getUniqueInstance():number
+        // {
+        //     return this.__instance;
+        // }
+        public dispose():void
         {
-            return this.__instance;
+
         }
     }
