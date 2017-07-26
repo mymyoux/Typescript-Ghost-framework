@@ -144,6 +144,10 @@ export class AutocompleteComponent extends Component
         console.log("choice: "+choice);
         //debugger;
     }
+    public getName() : string
+    {
+        return this.template.name;
+    }
     public getChoice():any
     {
         return this.template.choice;
