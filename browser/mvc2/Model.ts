@@ -340,6 +340,11 @@ export class Model extends CoreObject
             //already loaded
             if(this._pathLoaded[<string>path])
             {
+                if(typeof this._pathLoaded[<string>path] != "boolean")
+                {
+                    //return promise
+                    return this._pathLoaded[<string>path];
+                }
                 console.log("shortcircuit: "+path);
                 return new Promise<any>((resolve, reject)=>
                 {
@@ -355,7 +360,7 @@ export class Model extends CoreObject
         .always(config.always===true);
         if(config.execute !== false)
         {
-            return request.then((data:any)=>
+            return this._pathLoaded[<string>path] = request.then((data:any)=>
             {
                 if(config.readExternal !== false)
                 {
