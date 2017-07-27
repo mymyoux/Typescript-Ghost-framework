@@ -113,11 +113,13 @@
 			{
 				history.length = 0;
 			}
-			index++;
+			//index++;
 			while(index-->0 && history.length)
 			{
 				history.pop();
 				route = history[history.length-1];
+				if(index == 0)
+					history.pop();
 			}
 			if(route && route!==this.current) 
 			{
@@ -484,7 +486,7 @@
 							}
 						}
 						var fallback:string  = parts.slice(1).join('/');
-						if(!this.back(0, scope))
+						if(!this.back(1, scope))
 						{
 							if(fallback)
 								this.goto(fallback);
