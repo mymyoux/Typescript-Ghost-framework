@@ -255,6 +255,22 @@
 			if (url.substring(0, 1) == "!") {
 				url = url.substring(1);
 			}
+			if(url=="back" || Strings.startsWith(url, "back/") || Strings.startsWith(url, "back-"))
+			{
+				var parts:string[] = url.split('/');
+				var scope:string = "main";
+				if(~parts[0].indexOf('-'))
+				{
+					scope = parts[0].split('-').slice(1).join('-');	
+				}
+				var fallback:string  = parts.slice(1).join('/');
+				if(!this.back(1, scope))
+				{
+					if(fallback)
+						this.goto(fallback);
+				}
+				return false;
+			}
 			var historyResult: boolean | number;
 			if ((historyResult = this._detectHistory(url, params)) !== false)
 			{ 
