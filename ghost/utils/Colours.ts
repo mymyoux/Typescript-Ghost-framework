@@ -26,7 +26,7 @@
                 green = result.green;
                 blue = result.blue;
             }
-            return Colours.RGBToHSL(<number>red, green,blue).ligthness;
+            return Colours.RGBToHSL(<number>red, green,blue).lightness;
             //return 0.2126*(<number>red)+0.7152*green+0.0722*blue;
         }
         public static RGBToHSL(red:number, green:number, blue:number):any{
@@ -47,7 +47,7 @@
                 h /= 6;
             }
 
-            return {hue:Math.floor(h * 360), saturation:Math.floor(s * 100), ligthness:Math.floor(l * 100)};
+            return {hue:Math.floor(h * 360), saturation:Math.floor(s * 100), lightness:Math.floor(l * 100)};
         }
         private static _componentToHexadecimal(component:number):string 
         {
