@@ -113,11 +113,13 @@
 			{
 				history.length = 0;
 			}
-			index++;
+			//index++;
 			while(index-->0 && history.length)
 			{
 				history.pop();
 				route = history[history.length-1];
+				if(index == 0)
+					history.pop();
 			}
 			if(route && route!==this.current) 
 			{
@@ -252,6 +254,22 @@
 			}
 			if (url.substring(0, 1) == "!") {
 				url = url.substring(1);
+			}
+			if(url=="back" || Strings.startsWith(url, "back/") || Strings.startsWith(url, "back-"))
+			{
+				var parts:string[] = url.split('/');
+				var scope:string = "main";
+				if(~parts[0].indexOf('-'))
+				{
+					scope = parts[0].split('-').slice(1).join('-');	
+				}
+				var fallback:string  = parts.slice(1).join('/');
+				if(!this.back(1, scope))
+				{
+					if(fallback)
+						this.goto(fallback);
+				}
+				return false;
 			}
 			var historyResult: boolean | number;
 			if ((historyResult = this._detectHistory(url, params)) !== false)
@@ -484,7 +502,7 @@
 							}
 						}
 						var fallback:string  = parts.slice(1).join('/');
-						if(!this.back(0, scope))
+						if(!this.back(1, scope))
 						{
 							if(fallback)
 								this.goto(fallback);
