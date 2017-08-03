@@ -42,7 +42,10 @@ import {Maths} from "ghost/utils/Maths";
             {
                 return false;
             }
-            return str.lastIndexOf(needle) == str.length - needle.length;
+            var index:number = str.lastIndexOf(needle);
+            if(!~index)
+                return false;
+            return index == str.length - needle.length;
         }
         public static camel(text:string, delimiter:string = "-")
         {
