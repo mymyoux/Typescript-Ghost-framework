@@ -28,21 +28,24 @@ import {Maths} from "ghost/utils/Maths";
                 str = Strings.replaceAll(str, norm[i], spec[i]);
             return str;
         }
-        public static startsWith(value:string, start:string):boolean
+        public static startsWith(str:string, needle:string):boolean
         {
-            if(!value || !start)
+            if(!str || !needle)
             {
                 return false;
             }
-            return value.indexOf(start) == 0;
+            return str.indexOf(needle) == 0;
         }
-         public static endsWith(value:string, end:string):boolean
+         public static endsWith(str:string, needle:string):boolean
         {
-            if(!value || !end)
+            if(!str || !needle)
             {
                 return false;
             }
-            return value.indexOf(end) == value.length - end.length;
+            var index:number = str.lastIndexOf(needle);
+            if(!~index)
+                return false;
+            return index == str.length - needle.length;
         }
         public static camel(text:string, delimiter:string = "-")
         {

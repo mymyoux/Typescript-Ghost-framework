@@ -113,11 +113,13 @@
 			{
 				history.length = 0;
 			}
-			index++;
+			//index++;
 			while(index-->0 && history.length)
 			{
 				history.pop();
 				route = history[history.length-1];
+				if(index == 0)
+					history.pop();
 			}
 			if(route && route!==this.current) 
 			{
@@ -252,6 +254,22 @@
 			}
 			if (url.substring(0, 1) == "!") {
 				url = url.substring(1);
+			}
+			if(url=="back" || Strings.startsWith(url, "back/") || Strings.startsWith(url, "back-"))
+			{
+				var parts:string[] = url.split('/');
+				var scope:string = "main";
+				if(~parts[0].indexOf('-'))
+				{
+					scope = parts[0].split('-').slice(1).join('-');	
+				}
+				var fallback:string  = parts.slice(1).join('/');
+				if(!this.back(1, scope))
+				{
+					if(fallback)
+						this.goto(fallback);
+				}
+				return false;
 			}
 			var historyResult: boolean | number;
 			if ((historyResult = this._detectHistory(url, params)) !== false)
@@ -451,7 +469,7 @@
                 return;
             }
             this.listenening = true;
-			$(document).on("click", "a[href^='#']", this.onhref.bind(this));
+			$(document).on("click", "[href^='#']", this.onhref.bind(this));
 			Eventer.on(Eventer.HASH_CHANGE, this.onHashChange, this);
 			Eventer.on(Eventer.KEYBOARD_BACK_BUTTON, this.onBackButton, this);
 		}
@@ -460,16 +478,37 @@
 			var hash:string = window.location.hash;
 			if(hash.length>1)
 				this.onHashChange({newURL:window.location.href, oldURL:window.location.href.substring(0, window.location.href.indexOf("#"))});
-		}
+		} 
 		protected onhref(jqueryEvent: any, event: any): void {
 
 			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
-console.log("[router:href]"+href);
+			console.log("[router:href]"+href);
 			if(href)
 			{
 				var hrefs:string[] = href.split("+");
 				for(href of hrefs)
 				{
+					if(href=="back" || Strings.startsWith(href, "back/") || Strings.startsWith(href, "back-"))
+					{
+						var parts:string[] = href.split('/');
+						var scope:string;
+						if(~parts[0].indexOf('-'))
+						{
+							scope = parts[0].split('-').slice(1).join('-');	
+						}else{
+							if(jqueryEvent && jqueryEvent.target)
+							{
+								scope = $(jqueryEvent.target).closest("[data-scope]").attr("data-scope");
+							}
+						}
+						var fallback:string  = parts.slice(1).join('/');
+						if(!this.back(1, scope))
+						{
+							if(fallback)
+								this.goto(fallback);
+						}
+						continue;
+					}
 					this.goto(href);
 				}
 			}

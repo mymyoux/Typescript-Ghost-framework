@@ -81,14 +81,13 @@ import {Objects} from "ghost/utils/Objects";
 							return;
 						}
 						if (request._instance != this.instance()) {
-							debugger; 
 							if(Strings.endsWith(request.url, "undefined/undefined"))
 							{
-								debugger;
 								this.war().removeItem(key);
 								console.warn("[ignoring] api -reexecute: ", request);
 								return;
 							}
+							//debugger; 
 							console.warn("api -reexecute: ", request);
 							if (request.data) {
 								if (request.data._reloaded_count == undefined) {

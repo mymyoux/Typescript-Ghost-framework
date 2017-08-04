@@ -153,4 +153,8 @@
             }
             return sum;
         }
+        public static isNumeric(data:any):boolean
+        {
+            return !isNaN(parseFloat(data)) && isFinite(data);
+        }
     }

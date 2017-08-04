@@ -21,17 +21,6 @@ export function MEventDispatcher<X extends Constructor<{}>>( Child:X ) {
         {
             ALL : "all"
         };
-        public _eventsK1: any = {};
-        public _eventsK2: any = {};
-        /**
-         * named indexed objects for each event
-         */
-        public _events:any = {};
-        /**
-         * named indexed objects for each event. Used by once function
-         */
-
-        public _eventsOnce:any= {};
 
         /**
          * Mute the dispatcher
@@ -311,18 +300,6 @@ export function MEventDispatcher<X extends Constructor<{}>>( Child:X ) {
         {
             ALL : "all"
         };
-        public _eventsK1: any = {};
-        public _eventsK2: any = {};
-        /**
-         * named indexed objects for each event
-         */
-        public _events:any = {};
-        /**
-         * named indexed objects for each event. Used by once function
-         */
-
-        public _eventsOnce:any= {};
-
         /**
          * Mute the dispatcher
          */
