@@ -1,6 +1,61 @@
 
 
-	export class Gradient
+    export class Colours
+    {   
+        public static hexadecimalToRGB(value:string):any
+        {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(value);
+            return result ? {
+                red: parseInt(result[1], 16),
+                green: parseInt(result[2], 16),
+                blue: parseInt(result[3], 16)
+            } : null;
+        }
+        public static RGBToHexadecimal(red:number, green:number, blue:number):string
+        {
+            return "#" + Colours._componentToHexadecimal(red) + Colours._componentToHexadecimal(green) + Colours._componentToHexadecimal(blue);
+        }
+        public static ligthness(red:number, green:number, blue:number):number
+        public static ligthness(value:string):number
+        public static ligthness(red:string|number, green?:number, blue?:number):number
+        {
+            if(typeof red == "string")
+            {
+                var result:any = Colours.hexadecimalToRGB(red);
+                red = result.red;
+                green = result.green;
+                blue = result.blue;
+            }
+            return Colours.RGBToHSL(<number>red, green,blue).lightness;
+            //return 0.2126*(<number>red)+0.7152*green+0.0722*blue;
+        }
+        public static RGBToHSL(red:number, green:number, blue:number):any{
+            red /= 255, green /= 255, blue /= 255;
+            var max = Math.max(red, green, blue), min = Math.min(red, green, blue);
+            var h, s, l = (max + min) / 2;
+
+            if(max == min){
+                h = s = 0; // achromatic
+            }else{
+                var d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch(max){
+                    case red: h = (green - blue) / d + (green < blue ? 6 : 0); break;
+                    case green: h = (blue - red) / d + 2; break;
+                    case blue: h = (red - green) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return {hue:Math.floor(h * 360), saturation:Math.floor(s * 100), lightness:Math.floor(l * 100)};
+        }
+        private static _componentToHexadecimal(component:number):string 
+        {
+            var hex = component.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+    }
+    export class Gradient
     {
         private count:number = 100;
         private colours:string[] = ['ff0000', 'ffff00', '00ff00', '0000ff']; 

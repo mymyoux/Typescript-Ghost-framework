@@ -38,6 +38,7 @@ import {log} from "ghost/logging/log";
         private app: any;
         private stats:any; 
         private applications: Application[];
+
         public constructor(options:any)
         {
             super();

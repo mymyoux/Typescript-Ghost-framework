@@ -53,11 +53,34 @@ export class MasterRouter
         }
         object = MasterRouter.instances[index];
          //TODO:remove only for mvc1 compatibility
-        if(object.scoping && route.scope)
+        if(object.scoping)
         {
+            var scoping:string = route?route.scope:null;
+            if(!scoping)
+            {
+                if(typeof object.scoping()=="string")
+                {
+                    scoping = object.scoping();
+                }else
+                {
+                    if(route.route && route.route)
+                       {
+
+                        var scopes:string[] = object.scoping();
+                        for(var p in scopes)
+                        {
+                            if(~route.route.indexOf(scopes[p]))
+                            {
+                                scoping = scopes[p];
+                                debugger;
+                            }
+                        }
+                    }
+                }
+            }
             console.log("prescope:", route.scope);
-            //object.scope(require("browser/mvc/Scope").Scope.getScope(route.scope));
-            object.scope(Scope.getScope(route.scope));
+            if(scoping)
+                object.scope(Scope.getScope(scoping));
         }
         var load:any = object.handleRoute(url, route);
 
@@ -80,6 +103,7 @@ export class MasterRouter
                 console.log("scope_name:", scope);
                 if(MasterRouter._scopes[scope] && (MasterRouter._scopes[scope]!==object || (typeof MasterRouter._scopes[scope].scope().name === 'function' && MasterRouter._scopes[scope].scope().name()!=scope)))
                 {
+                    
                 console.log("remove_old:", MasterRouter._scopes[scope]);
                     console.log("[MASTERROUTER]disactivation:"+scope, MasterRouter._scopes[scope]);
                     MasterRouter._scopes[scope].handleDisactivation();
