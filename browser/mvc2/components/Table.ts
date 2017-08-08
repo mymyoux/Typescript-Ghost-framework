@@ -29,6 +29,26 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             up:false,
             down:false
         };
+        
+        public multiFilters() : boolean
+        {
+            return false;
+        }
+
+        public filterData( list : any, params : any ) : Promise <any>
+        {
+            list.clear();
+
+            return list.loadGet( params ).then( (data : any) => {
+                debugger;
+            });
+        }
+
+        public displayFilters() : any
+        {
+            return [];
+        }
+
         constructor(...args: any[]) {
             super(...args);
             this.filter = {};
