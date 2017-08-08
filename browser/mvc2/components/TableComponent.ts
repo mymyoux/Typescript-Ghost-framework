@@ -22,13 +22,36 @@ export class TableComponent extends Component
     protected _allmouse:any;
     protected _alldelete:any;
     protected _mousemove:any;
+
+    public current_filter:string = null;
+    public current_filters:string[] = [];
+    public current_search:string = null;
+    
     public constructor(template:any)
     {
         super(template);
         this._itemChanged = [];
         this.reload = Buffer.throttle(this._reload.bind(this), 200);
-      
     }
+
+    public multiFilters() : boolean
+    {
+        return false;
+    }
+
+    // public filterData( params ) : APIExtended
+    // {
+    //     // this.clear();
+    //     // this.loading = true;
+    //     // this.triggerChange();
+    //     // return this._getRequest(Model.PART_DEFAULT, params);
+    // }
+
+    public displayFilters() : any
+    {
+        return [];
+    }
+
     protected _onMouseDown(event:any):void
     {
         
