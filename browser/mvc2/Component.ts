@@ -78,6 +78,7 @@ export class Component extends EventDispatcher
                         cls = Component;
                      }
                 }
+                debugger;
                 var methods:string[] = [];
                 var computed:string[] = [];
                 var watchers:string[] = [];
@@ -420,7 +421,7 @@ export class Component extends EventDispatcher
                 this.parent[name](...data);
                 return;
             }
-            //console.log(name+" not found on parent - emit default event", this.parent);
+            console.log(name+" not found on parent - emit default event", this.parent);
         }
         this.template.$parent.$emit(name, this);
     }
