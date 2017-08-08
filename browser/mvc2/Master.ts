@@ -126,17 +126,14 @@ export class Master
             return this.activate();
         }
         Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
-        console.log(this._getName()+'-init-'+this.activationSteps[step]);
         var result:Promise<any> = this[this.activationSteps[step]]();
         if(!result)
         {
             Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
-            console.log(this._getName()+'-done-'+this.activationSteps[step]);
             return this._nextActivationStep(step+1);
         }
         result.then(()=>
         {
-            console.log(this._getName()+'-done-'+this.activationSteps[step]);
             Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
             this._nextActivationStep(step+1);
         }, (error:any)=>
