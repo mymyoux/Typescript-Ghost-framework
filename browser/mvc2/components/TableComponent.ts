@@ -612,31 +612,58 @@ export class TableComponent extends Component
         this.filterAction( list );
     }
 
-
-    public filterAction( list : any ) : Promise <any>
+    public $sorting( list : any, column : any ) : void
     {
-        return list.filterData( list, this.getParams( list ) ).then( (data : any) => {
-            debugger;
+        if(!column.sortable)
+            return;
+    
+        if(!column.columns)
+        {
+            column.columns = [ column.prop ];
+        }
+
+        if (typeof column.order === 'undefined')
+        {
+            column.order = [-1];
+            while(column.columns.length>column.order.length)
+            {
+                column.order.push(-1);
+            }
+        }
+
+        column.order[0] = (-1 === column.order[0] ? 1 : -1);
+
+        column.selected = true;
+        for (var i in list.columns)
+        {
+            if (list.columns[i].title !== column.title)
+            {
+                list.columns[i].selected = false;
+                if (list.columns[i].order)
+                    list.columns[i].order[0] = -1;
+            }
+        }
+        // list.order_name = column.columns;
+        // list.order_direction = column.order;
+
+        // list.setLoading(true);
+        // this.scrollLoading = true;
+
+        return list.filterData( column ).then(() => {
+            // list.setLoading(false);
+            // this.scrollLoading = false;
+        }, () => {
+            // list.setLoading(false);
+            // this.scrollLoading = false;
         });
     }
 
-    private getParams( list ) : any
+
+    public filterAction( list : any ) : Promise <any>
     {
-        var params : any = {};
+        return list.filterData().then( (data : any) => {
 
-        if (list.current_search)
-            params.search = list.current_search;
-
-        if (!list.multiFilters()) {
-            if (list.current_filter)
-                params.types = [list.current_filter];
-        }
-        else
-        {
-            if (list.current_filters)
-                params.types = list.current_filters;
-        }
-
-        return params;
+        });
     }
+
 }

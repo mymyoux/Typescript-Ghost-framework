@@ -40,18 +40,24 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             return false;
         }
 
-        public filterData( list : any, params : any ) : Promise <any>
+        public filterData( column : any = null) : Promise <any>
         {
-            list.clear();
+            this.clear();
 
-            return list.loadGet( params ).then( (data : any) => {
-                debugger;
+            return this.loadGet( this.getFilterParams(), column ).then( (data : any) => {
+                this.afterFilterData( data );
             });
         }
 
         public displayFilters() : any
         {
             return [];
+        }
+        
+        public afterFilterData( data : any ) : void
+        {
+            console.warn('need to override this');
+            debugger;
         }
 
         constructor(...args: any[]) {
@@ -65,7 +71,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             this.selected = [];
             this.bootColumns();
         }
-        public loadGet(params?:any):Promise<any>
+        public loadGet(params?:any, column?:any):Promise<any>
         {
             var request:API2 =  this.request();
 
@@ -97,7 +103,23 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                     request.param(p, this.choosen[p]);
                 }
             }
+            if (column)
+            {
+                request.order(column.columns, column.order);   
+            }
+            else
+            {
+                for (column of this.columns)
+                {
+                    if (column.selected)
+                    {
+                        request.order(column.columns, column.order);   
+                        break;
+                    }
+                }
+            }
             this._getPromise = request;
+            
             return request.then(function(data)
             {
                 return data;
@@ -234,7 +256,9 @@ export interface IColumn
  //   edition?:string; 
     error?:string;
     //order
-    up?:boolean;
-    down?:boolean;
+    selected?:boolean,
+    order?:string[],
+    // up?:boolean;
+    // down?:boolean;
 }
 
