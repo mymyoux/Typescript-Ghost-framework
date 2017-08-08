@@ -22,13 +22,11 @@ export class TableComponent extends Component
     protected _allmouse:any;
     protected _alldelete:any;
     protected _mousemove:any;
-    public constructor(template:any)
-    {
-        super(template);
-        this._itemChanged = [];
-        this.reload = Buffer.throttle(this._reload.bind(this), 200);
-      
-    }
+
+    public current_filter:string = null;
+    public current_filters:string[] = [];
+    public current_search:string = null;
+
     protected _onMouseDown(event:any):void
     {
         
@@ -596,5 +594,40 @@ export class TableComponent extends Component
     }
    
     public activate():void{
+    }
+
+    // FILTERS
+    public $filterChange( list : any ) : void
+    {
+        list.current_filter = list.current_filter.length ? list.current_filter : null;
+        
+        this.filterAction( list, list.current_filter);
+    }
+
+    public filterAction( list : any, type : string ) : Promise <any>
+    {
+        return list.filterData( list, this.getParams( list ) ).then( (data : any) => {
+            debugger;
+        });
+    }
+
+    private getParams( list ) : any
+    {
+        var params : any = {};
+
+        if (list.current_search)
+            params.search = list.current_search;
+
+        if (!list.multiFilters()) {
+            if (list.current_filter)
+                params.types = [list.current_filter];
+        }
+        else
+        {
+            if (list.current_filters)
+                params.types = list.current_filters;
+        }
+
+        return params;
     }
 }
