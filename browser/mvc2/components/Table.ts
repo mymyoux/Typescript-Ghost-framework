@@ -29,6 +29,11 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             up:false,
             down:false
         };
+
+        public current_filter:string = null;
+        public current_filters:string[] = [];
+        public current_search:string = null;
+
         
         public multiFilters() : boolean
         {

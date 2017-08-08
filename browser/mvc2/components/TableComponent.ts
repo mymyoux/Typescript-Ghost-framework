@@ -23,10 +23,6 @@ export class TableComponent extends Component
     protected _alldelete:any;
     protected _mousemove:any;
 
-    public current_filter:string = null;
-    public current_filters:string[] = [];
-    public current_search:string = null;
-
     protected _onMouseDown(event:any):void
     {
         
@@ -601,10 +597,23 @@ export class TableComponent extends Component
     {
         list.current_filter = list.current_filter.length ? list.current_filter : null;
         
-        this.filterAction( list, list.current_filter);
+        this.filterAction( list );
     }
 
-    public filterAction( list : any, type : string ) : Promise <any>
+    public $addFilterMultiSelect( list : any, type : string ) : void
+    {
+        var pos = list.current_filters.indexOf(type);
+
+        if (pos == -1)
+            list.current_filters.push(type);
+        else
+            list.current_filters.splice(pos, 1);
+
+        this.filterAction( list );
+    }
+
+
+    public filterAction( list : any ) : Promise <any>
     {
         return list.filterData( list, this.getParams( list ) ).then( (data : any) => {
             debugger;
