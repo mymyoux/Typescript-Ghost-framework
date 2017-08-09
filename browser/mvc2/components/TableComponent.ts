@@ -22,12 +22,10 @@ export class TableComponent extends Component
     protected _allmouse:any;
     protected _alldelete:any;
     protected _mousemove:any;
-    public constructor(template:any)
+    public constructor(template:string)
     {
         super(template);
-        this._itemChanged = [];
-        this.reload = Buffer.throttle(this._reload.bind(this), 200);
-      
+        this.reload = this._reload.bind(this);
     }
     protected _onMouseDown(event:any):void
     {
@@ -597,4 +595,79 @@ export class TableComponent extends Component
    
     public activate():void{
     }
+
+    // FILTERS
+    public $filterChange( list : any ) : void
+    {
+        list.current_filter = list.current_filter.length ? list.current_filter : null;
+        
+        this.filterAction( list );
+    }
+
+    public $addFilterMultiSelect( list : any, type : string ) : void
+    {
+        var pos = list.current_filters.indexOf(type);
+
+        if (pos == -1)
+            list.current_filters.push(type);
+        else
+            list.current_filters.splice(pos, 1);
+
+        this.filterAction( list );
+    }
+
+    public $sorting( list : any, column : any ) : void
+    {
+        if(!column.sortable)
+            return;
+    
+        if(!column.columns)
+        {
+            column.columns = [ column.prop ];
+        }
+
+        if (typeof column.order === 'undefined')
+        {
+            column.order = [-1];
+            while(column.columns.length>column.order.length)
+            {
+                column.order.push(-1);
+            }
+        }
+
+        column.order[0] = (-1 === column.order[0] ? 1 : -1);
+
+        column.selected = true;
+        for (var i in list.columns)
+        {
+            if (list.columns[i].title !== column.title)
+            {
+                list.columns[i].selected = false;
+                if (list.columns[i].order)
+                    list.columns[i].order[0] = -1;
+            }
+        }
+        // list.order_name = column.columns;
+        // list.order_direction = column.order;
+
+        // list.setLoading(true);
+        // this.scrollLoading = true;
+
+        return list.filterData( column ).then(() => {
+            // list.setLoading(false);
+            // this.scrollLoading = false;
+        }, () => {
+            // list.setLoading(false);
+            // this.scrollLoading = false;
+        });
+    }
+
+
+    public filterAction( list : any ) : Promise <any>
+    {
+        return list.filterData().then( (data : any) => {
+
+        });
+    }
+
 }

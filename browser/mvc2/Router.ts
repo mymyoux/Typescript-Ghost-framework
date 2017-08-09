@@ -485,6 +485,7 @@
 			console.log("[router:href]"+href);
 			if(href)
 			{
+				jqueryEvent.preventDefault();
 				var hrefs:string[] = href.split("+");
 				for(href of hrefs)
 				{

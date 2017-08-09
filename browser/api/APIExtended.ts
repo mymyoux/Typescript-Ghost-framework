@@ -306,7 +306,7 @@ import {Objects} from "ghost/utils/Objects";
 				}
 
 
-				if (data.paginate.next) {
+				if (data.paginate.next && data.paginate.next.length) {
 					this._apiData.paginate.next = data.paginate.next;
 					var isNextAll: boolean = !this._apiData.paginate.nextAll;
 					if (!isNextAll) {
@@ -329,7 +329,7 @@ import {Objects} from "ghost/utils/Objects";
 					}
 
 				}
-				if (data.paginate.previous) {
+				if (data.paginate.previous && data.paginate.previous.length) {
 					this._apiData.paginate.previous = data.paginate.previous;
 
 					var isPreviousAll: boolean = !this._apiData.paginate.previousAll;
