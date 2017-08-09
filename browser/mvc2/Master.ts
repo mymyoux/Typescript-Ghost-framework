@@ -534,6 +534,12 @@ export class Master
                     return comp;
                 }
             }
+            return null;
+        }
+        for(var comp of this.components)
+        {
+            if(comp instanceof component)
+                return comp;
         }
         return null;
     }

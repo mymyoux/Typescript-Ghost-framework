@@ -408,10 +408,6 @@ export class Component extends EventDispatcher
     {
         this.root = root;
     }
-    public $test()
-    {
-        return 45;
-    }
     /**
      * Emit event to parent. Will try to call $onEvent method on parent before and fallback
      * to using this.template.$parent.$emit(event) method
