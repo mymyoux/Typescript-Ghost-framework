@@ -105,7 +105,7 @@ export class Component extends EventDispatcher
                             if(p.substring(1, 2)=="W")
                             {
                                 var object:any =  cls.prototype[p]();
-                                watchers.push({name:object.name?object.name:p.substring(2),...object});
+                                watchers.push({name:object.name?object.name:p.substring(2),method:object.method,...object});
                             }else{
                                 watchers.push(p.substring(1));
                             }
@@ -152,7 +152,15 @@ export class Component extends EventDispatcher
                     {   
                         if(typeof method != "string")
                         {
-                            previous[method.name] = method;
+                             previous[method.name] = function(...data:any[])
+                            {
+                                var component:Component = Component.getComponentFromVue(this);
+                                if(!component)
+                                    return;
+                                if(typeof method.method == "string")
+                                    return component[method.method](...data);
+                                return method.method.apply(component, data);
+                            };
                         }else
                         previous[method] = function(...data:any[])
                         {
