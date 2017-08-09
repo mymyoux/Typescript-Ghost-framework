@@ -258,7 +258,7 @@ export interface IColumn
     //order
     selected?:boolean,
     order?:string[],
-    // up?:boolean;
-    // down?:boolean;
+    up?:boolean;
+    down?:boolean;
 }
 
