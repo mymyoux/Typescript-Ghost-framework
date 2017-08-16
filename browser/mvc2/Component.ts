@@ -302,6 +302,21 @@ export class Component extends EventDispatcher
             }
         }
     }
+    public isInTemplate(element:any):boolean
+    {
+        if(!this.template)
+            return false;
+        do
+        {
+            if(element == null)
+                return false;
+            if(element == this.template.$el)
+            {
+                return true;   
+            }
+        }while(element = element.parentNode);
+        return false;
+    }
     protected scroll(listener:any):void
     protected scroll(selector:string, listener:any):void
     protected scroll(selector:any, listener?:any):void
@@ -528,11 +543,11 @@ export class Component extends EventDispatcher
     {
         throw new Error("you can't use component#$addWatcher you must use Wmethod syntax instead");
     }
-    protected $addComponent(name:string):void
+    protected $addComponent(name:string, options?:any):void
     {
         if(!Vue.component('component-'+name))
         {
-            Vue.component('component-'+name, Component.load.bind(Component, name));
+            Vue.component('component-'+name, Component.load.bind(Component, name, options));
         }
     }
     public $proxy(method:string, ...params):void

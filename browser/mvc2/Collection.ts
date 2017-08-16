@@ -6,13 +6,11 @@ import {Inst} from "./Inst";
 import {Buffer} from "ghost/utils/Buffer";
 import {Objects} from "ghost/utils/Objects";
 
-
 export type Constructor<T extends ModelClass> = new(...args: any[]) => T;
-
 
 export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
     type T =  typeof Model.prototype;
-    return class Collection extends Model {
+    return class _Collection extends Model {
         public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
         public models:T[] = [];
@@ -21,7 +19,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         protected _modelClass:any;
         constructor(...args: any[]) {
             super(...args);
-            this._modelClass = eval('_super');
+            this._modelClass = Model;//eval('_super');
             this.models = [];
         }
         public createModel():T
@@ -190,7 +188,11 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             if(!Arrays.isArray(input))
             {
-                input = [input];
+                //readExternal for collection like models
+                var data:any = input;
+                input = input["models"];   
+                delete data.models;
+                super.readExternal(data);
             }
             if(input)
             {
@@ -226,6 +228,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                             {
                                 if(this['__isUnique'])
                                 {
+                                    
                                     if(rawModel && rawModel.id != undefined)
                                     {
                                         model = this.getModelByID(rawModel.id );
@@ -240,14 +243,21 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                                     }
                                 }
                             }
+                            //TODO:handle unique/sort collections
                             if(!model)
                             {
-                                model  = Inst.get(cls);
+                                if(rawModel && rawModel.models)
+                                {
+                                    model  = Inst.get(Collection(cls));
+                                }else{
+                                    model  = Inst.get(cls);
+                                }
                                  this.prepareModel(model);
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else
                             {
+                                //TODO:transform existing model into collection if rawModel.models exists
                                 this.prepareModel(model);
                                 model.readExternal(rawModel);
                             }
