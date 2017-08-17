@@ -62,6 +62,7 @@ export class Component extends EventDispatcher
     
     public static load(name:string, options?:any):Promise<any>
     {
+        
         return new Promise<any>((resolve, reject)=>
         {
             Inst.get(Step).register('component-'+name+'-init');
@@ -85,7 +86,8 @@ export class Component extends EventDispatcher
                 const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$addFilter","$addWatcher"];
                 var directives:any = {};
                 //add $Methods by defaut
-                for(var p in cls.prototype)
+                var properties:string[] = Objects.getAllPropertiesName(cls.prototype);
+                for(var p of properties)
                 {
                     if(typeof cls.prototype[p] == "function")
                     {
@@ -121,7 +123,7 @@ export class Component extends EventDispatcher
                 }
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
-
+               console.log(name, methods);
                var componentDefinition:any = {
                   
                     props:props,
@@ -406,6 +408,12 @@ export class Component extends EventDispatcher
     }
     private beforeMounted():void
     {
+        
+        if(!this.template.$parent.onNewComponent)
+        {
+            console.log(this);
+            debugger;
+        }
         this.template.$parent.onNewComponent(this);//$emit('new-component', this);
     }
     private mounted():void

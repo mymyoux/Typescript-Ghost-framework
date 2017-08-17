@@ -8,6 +8,7 @@ import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "browser/i18n/Polyglot2";
 import {Strings} from "ghost/utils/Strings";
+import {Objects} from "ghost/utils/Objects";
 export class Master 
 {
     protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bindEvents","bindPolyglot","bootComponents"];
@@ -410,6 +411,7 @@ export class Master
     }
     protected bootVue():void
     {
+        console.log('bootVue:', this);
         this.disposeTemplate();
         this.vueConfig = {
             el:this.getContainer(),
@@ -418,7 +420,8 @@ export class Master
         }; 
         const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$addFilter"];
         //add $Methods by defaut
-        for(var p in this)
+        var properties:string[] = Objects.getAllPropertiesName(this);
+        for(var p of properties)
         {
             if(typeof this[p] == "function")
             {
