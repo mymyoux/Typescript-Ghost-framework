@@ -531,7 +531,12 @@ export class Component extends EventDispatcher
         if (this.template && this.template.$options && this.template.$options.propsData[name]!==undefined)
             return this.template.$options.propsData[name];
         
-        console.warn('prop ' + name + ' not exist on template', this.template);
+        var props:any = this.props();
+        if(props && props[name] && props[name].default !== undefined)
+        {
+            return props[name].default;
+        }
+        console.warn('prop ' + name + ' not exist on template', this,this.template);
 
         return null;
     }    
