@@ -160,4 +160,24 @@
 
             return finalObject;
         }
+        public static getAllPropertiesName(object)
+        {
+            var properties:string[] = [];
+            if(Object.getOwnPropertyNames && Object.getPrototypeOf)
+            {
+                properties = properties.concat(Object.getOwnPropertyNames(object));
+                var proto:any = Object.getPrototypeOf(object);
+                if(proto)
+                {
+                    properties = properties.concat(this.getAllPropertiesName(proto));   
+                }
+            }else{
+                
+                for(var p in object)
+                {
+                    properties.push(p);
+                }
+            }
+            return properties;
+        }
     }
