@@ -10,7 +10,6 @@ import {Buffer} from "ghost/utils/Buffer";
 export class AutocompleteComponent extends Component
 {
     protected throttlingTyping:any;
-    protected blurLater:any;
     public constructor(template:any)
     {
         super(template);
@@ -61,16 +60,34 @@ export class AutocompleteComponent extends Component
         this.$addData('choice', "");
         this.$addData('list', []);
         this.$addData('selected', -1);
+        this.$addData('open', false);
     }
+    public bindEvents():void
+    {
+        this.bindEvent(window,"click", this.onGlobalClick.bind(this));
+    }
+
     public setAutocomplete(data:any[]):void
     {
+        if(!this.template.open)
+            return;
         this.template.list = data;
     }
     public $click(item:any):void
     {
+        console.log('click:', item);
         this.select(item);
         
         //this.template.list = [];
+    }
+    public onGlobalClick(event:any):void
+    {
+        console.log(event.target);
+        if(!this.isInTemplate(event.target))
+        {
+            console.log('outside');
+            this.$blur();
+        }
     }
     public $enter():void{
         if(this.template.selected>-1)
@@ -85,19 +102,13 @@ export class AutocompleteComponent extends Component
     }
     protected $focus():void
     {
-
+        this.template.open = true;
+        this.throttlingTyping();
     }
     protected $blur():void{
 
-        if(this.blurLater)
-        {
-            clearTimeout(this.blurLater);
-        }
-        this.blurLater = setTimeout(()=>
-        {
-            this.blurLater = null;
-            this.template.list = [];
-        },100);
+        this.template.open = false;
+        this.template.list = [];
     }
     protected select(choice:any):void{
         this.emit('autocompleteChoice', this, choice);
@@ -112,6 +123,12 @@ export class AutocompleteComponent extends Component
         {
             return this.$selectChange(event.keyCode == 38);//false;
         }
+        //tab
+         if([9].indexOf(event.keyCode)!=-1 )
+        {
+            return this.$blur();
+        }
+        this.template.open = true;
         this.throttlingTyping();
     }
     public Wselection()
