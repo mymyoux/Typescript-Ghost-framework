@@ -154,7 +154,8 @@ export class Component extends EventDispatcher
                     {   
                         if(typeof method != "string")
                         {
-                             previous[method.name] = function(...data:any[])
+                             previous[method.name] = method;
+                             method.handler = function(...data:any[])
                             {
                                 var component:Component = Component.getComponentFromVue(this);
                                 if(!component)
@@ -291,6 +292,8 @@ export class Component extends EventDispatcher
     }
     protected unbindEvents():void
     {
+
+        
         var event:any;
         while(this._bindedEvents.length)
         {
