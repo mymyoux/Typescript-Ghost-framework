@@ -21,8 +21,6 @@ export class ModalComponent extends Component
 
     protected bindVue():void
     {
-        throw new Error("can't use this here -> it's framework");
-       // this.$addModel(PositionCollection).loadGet();
     }
 
     public props():any {
