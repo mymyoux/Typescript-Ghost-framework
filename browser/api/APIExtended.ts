@@ -293,11 +293,11 @@ import {Objects} from "ghost/utils/Objects";
 			return data;
 		}
 		protected parseAPIData(data: any): void {
-			if (!data) {
-				return;
-			}
 			if (!this._apiData) {
 				this._apiData = {};
+			}
+			if (!data) {
+				return;
 			}
 			var keys = ["allowed", "direction", "key", "limit", "previous", "next"];
 			if (data.paginate) {
