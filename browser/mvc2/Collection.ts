@@ -34,6 +34,13 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             this._request = null;
             this.clearModels();
         }
+        public resetPaginate():void{
+            this.request().reset();
+        }
+        public reset():void{
+            this.clear();
+            this.resetPaginate();
+        }
         protected getRootPath():string
         {
             return super.getModelName();
