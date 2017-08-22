@@ -111,6 +111,7 @@ export class Component extends EventDispatcher
                             }else{
                                 watchers.push(p.substring(1));
                             }
+                            
                         }else if(p.substring(0, 1)=="F")
                         {
                             filters[p.substring(1)] = cls.prototype[p];
@@ -123,7 +124,6 @@ export class Component extends EventDispatcher
                 }
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
-               console.log(name, methods);
                var componentDefinition:any = {
                   
                     props:props,

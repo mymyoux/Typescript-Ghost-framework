@@ -14,6 +14,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
     return class _Collection extends Model {
         public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+        
         public models:T[] = [];
         private _request:API2;
         protected _isFullLoaded:boolean;
@@ -212,7 +213,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             return promise;
         }
-       public readExternal(input:any[], path?:string, api?:API2):void
+       public readExternal(input:any[], path?:any, api?:API2):void
         {
             if(!input)
                 return;
@@ -222,11 +223,17 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             if(!Arrays.isArray(input))
             {
+
                 //readExternal for collection like models
-                var data:any = input;
-                input = input["models"];   
-                delete data.models;
-                super.readExternal(data);
+                if(!path || path.allowNoArray === true)
+                {
+                    var data:any = input;
+                    input = input["models"];   
+                    delete data.models;
+                    super.readExternal(data);
+                }else{
+                    input = [input];
+                }
             }
             if(input)
             {

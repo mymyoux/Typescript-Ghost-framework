@@ -134,7 +134,7 @@ export class Model extends CoreObject
     public cache(): LocalForage {
         return LocalForage.instance().war(this.getClassName());
     }
-    public readExternal(input:any, path:string = null):void
+    public readExternal(input:any, path:any = null):void
     {
         for(var p in input)
         {
@@ -386,7 +386,7 @@ export class Model extends CoreObject
                             this["clearModels"]();
                         }
                     }
-                    this.readExternal(data, <string>path);
+                    this.readExternal(data, {...config,path:path});
                     this.validate();
                 }
                 return data;
@@ -446,6 +446,10 @@ export interface IModelConfig
      * @default false
      */
     replaceDynamicParams?:boolean;
+    /**
+     * Allow collection to readExternal data without forcing array conversion. Default false
+     */
+    allowNoArray?:boolean;
     
 }
 
