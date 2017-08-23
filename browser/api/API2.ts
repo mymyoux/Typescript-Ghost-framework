@@ -32,7 +32,6 @@ import {Strings} from "ghost/utils/Strings";
 		public static request(name: string = null): API2 {
 			return <API2>API2.instance(name).request();
 		}
-
 		protected _path: string;
 		public constructor()
 		{
@@ -92,6 +91,10 @@ import {Strings} from "ghost/utils/Strings";
 			{
 				super.then(rs, rj);
 			}).then(resolve, reject);
+		}
+		public reset(): this {
+			super.reset();
+			return this;
 		}
 		protected getPromiseRequest(request:any, options:any):any
 		{
@@ -187,11 +190,11 @@ import {Strings} from "ghost/utils/Strings";
 			});
 			return <any>this;
 		}
+		public hasNoPaginate():boolean{
+			return this._apiData && !this._apiData.paginate;
+		}
 		protected parseResult(data: any): any {
-			if(data.api_data)
-			{
-				this.parseAPIData(data.api_data);
-			}
+			this.parseAPIData(data.api_data);
 			if(data.data !== undefined)
 			{
 				if (data.data) {

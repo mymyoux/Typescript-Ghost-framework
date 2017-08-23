@@ -20,7 +20,7 @@ export class Model extends CoreObject
         ()=>new ModelLoadRequest("%root-path%/update", {'%id-name%':'%id%'}, {replaceDynamicParams:true,ignorePathLoadState:true, marksPathAsLoaded:false});
 
     private _firstData:boolean;
-    private _pathLoaded:any = {};
+    protected _pathLoaded:any = {};
     protected _modelName:string;
     public id:number;
     private _invalidated:boolean;
@@ -134,7 +134,7 @@ export class Model extends CoreObject
     public cache(): LocalForage {
         return LocalForage.instance().war(this.getClassName());
     }
-    public readExternal(input:any, path:string = null):void
+    public readExternal(input:any, path:any = null):void
     {
         for(var p in input)
         {
@@ -265,6 +265,18 @@ export class Model extends CoreObject
     {
         return this.load("user/cv", params, {});
     }
+    public getLoadPath(path:any):string
+    {
+        if(typeof path == "function")
+        {
+            path = path.call(this);
+        }
+        if(path instanceof ModelLoadRequest)
+        {
+            path = path.path;
+        }
+        return path;
+    }
     public load(path:string|Function|ModelLoadRequest, params:any, config:IModelConfig&{execute:false}):API2
     public load(path:string|Function|ModelLoadRequest, params:any, config:IModelConfig&{execute:true}):Promise<any>
     public load(path:string|Function|ModelLoadRequest, params:any, config:IModelConfig):Promise<any>
@@ -358,6 +370,9 @@ export class Model extends CoreObject
         }
         var request:API2 = this.getPathRequest(<string>path, params, config)
         .always(config.always===true);
+
+        request["model_config"] = config;
+
         if(config.execute !== false)
         {
             return this._pathLoaded[<string>path] = request.then((data:any)=>
@@ -371,7 +386,7 @@ export class Model extends CoreObject
                             this["clearModels"]();
                         }
                     }
-                    this.readExternal(data, <string>path);
+                    this.readExternal(data, {...config,path:path});
                     this.validate();
                 }
                 return data;
@@ -431,6 +446,10 @@ export interface IModelConfig
      * @default false
      */
     replaceDynamicParams?:boolean;
+    /**
+     * Allow collection to readExternal data without forcing array conversion. Default false
+     */
+    allowNoArray?:boolean;
     
 }
 

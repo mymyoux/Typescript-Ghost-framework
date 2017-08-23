@@ -3,6 +3,7 @@ import {Arrays} from "ghost/utils/Arrays";
 import {IBinaryResult} from "ghost/utils/IBinaryResult";
 import {API2} from "browser/api/API2";
 import {Inst} from "./Inst";
+import {IModelConfig} from "./Model";
 import {Buffer} from "ghost/utils/Buffer";
 import {Objects} from "ghost/utils/Objects";
 
@@ -13,6 +14,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
     return class _Collection extends Model {
         public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+        
         public models:T[] = [];
         private _request:API2;
         protected _isFullLoaded:boolean;
@@ -31,6 +33,13 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             this._isFullLoaded = false;
             this._request = null;
             this.clearModels();
+        }
+        public resetPaginate():void{
+            this.request().reset();
+        }
+        public reset():void{
+            this.clear();
+            this.resetPaginate();
         }
         protected getRootPath():string
         {
@@ -159,30 +168,63 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             var path:string = super._path(path);
             return path.replace('collection', '');
         }
-        public request():API2
+        public request(config?:any):API2
         {
             if(!this._request)
             {
-                this._request = <API2>this.load(this.constructor["PATH_GET"], null,{execute:false});
+                if(!config)
+                    config = {};
+                config.execute = false;
+                this._request = <API2>this.load(this.constructor["PATH_GET"], null,config);
                 this._request.on(API2.EVENT_DATA, this.readExternal, this, this._request.getPath(), this._request);
             }
             return this._request;
         }
-        public loadGet(params?:any):Promise<any>
+        public loadGet(params?:any, config?:IModelConfig&{execute:false}):Promise<any>
         {
-            var request:API2 =  this.request();
-
+            var tmp:any = config;
+            var request:API2 =  this.request(config);
+            if(tmp)
+            {
+                config = Objects.clone(request["model_config"]);
+                for(var p in tmp)
+                    config[p] = tmp[p];
+                
+            }else
+            {
+                config = request["model_config"];
+            }
+            if(request.hasNoPaginate())
+            {
+                if(this._pathLoaded[request.getPath()] && config.ignorePathLoadState !== true)
+                {
+                    var promise:any = this._pathLoaded[request.getPath()];
+                    if(!promise)
+                        {
+                            promise= new Promise<any>((resolve, reject)=>
+                            {
+                                resolve();
+                            }).then(function(){});
+                        }
+                    return promise; 
+                    
+                }
+            }
             for (var key in params)
             {
                 request.param(key, params[key]);
             }
-
-            return request.then(function(data)
-            {
+            var promise:any =  request.then(function(data)
+            { 
                 return data;
             });
+            if(config.marksPathAsLoaded !== false)
+            {
+                this._pathLoaded[request.getPath()]  = promise; 
+            }
+            return promise;
         }
-       public readExternal(input:any[], path?:string, api?:API2):void
+       public readExternal(input:any[], path?:any, api?:API2):void
         {
             if(!input)
                 return;
@@ -192,11 +234,17 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             if(!Arrays.isArray(input))
             {
+
                 //readExternal for collection like models
-                var data:any = input;
-                input = input["models"];   
-                delete data.models;
-                super.readExternal(data);
+                if(!path || path.allowNoArray === true)
+                {
+                    var data:any = input;
+                    input = input["models"];   
+                    delete data.models;
+                    super.readExternal(data);
+                }else{
+                    input = [input];
+                }
             }
             if(input)
             {

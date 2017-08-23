@@ -111,6 +111,7 @@ export class Component extends EventDispatcher
                             }else{
                                 watchers.push(p.substring(1));
                             }
+                            
                         }else if(p.substring(0, 1)=="F")
                         {
                             filters[p.substring(1)] = cls.prototype[p];
@@ -123,7 +124,6 @@ export class Component extends EventDispatcher
                 }
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
-               console.log(name, methods);
                var componentDefinition:any = {
                   
                     props:props,
@@ -154,7 +154,8 @@ export class Component extends EventDispatcher
                     {   
                         if(typeof method != "string")
                         {
-                             previous[method.name] = function(...data:any[])
+                             previous[method.name] = method;
+                             method.handler = function(...data:any[])
                             {
                                 var component:Component = Component.getComponentFromVue(this);
                                 if(!component)
@@ -291,6 +292,8 @@ export class Component extends EventDispatcher
     }
     protected unbindEvents():void
     {
+
+        
         var event:any;
         while(this._bindedEvents.length)
         {
@@ -539,7 +542,12 @@ export class Component extends EventDispatcher
         if (this.template && this.template.$options && this.template.$options.propsData[name]!==undefined)
             return this.template.$options.propsData[name];
         
-        console.warn('prop ' + name + ' not exist on template', this.template);
+        var props:any = this.props();
+        if(props && props[name] && props[name].default !== undefined)
+        {
+            return props[name].default;
+        }
+        console.warn('prop ' + name + ' not exist on template', this,this.template);
 
         return null;
     }    
