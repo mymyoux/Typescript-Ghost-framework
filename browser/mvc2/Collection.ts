@@ -101,6 +101,10 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         {
             return this.models.unshift(...models);
         }
+        public size():number
+        {
+            return this.models.length;
+        }
         public concat(...models:T[]):this
         {
             var cls:any = this.constructor;
