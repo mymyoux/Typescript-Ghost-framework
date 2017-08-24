@@ -362,7 +362,7 @@ export class Component extends EventDispatcher
         this._bindedEvents.push({elmt:elmt,type:type,liveselector:liveselector,listener:listener});
         $(elmt).on(type, liveselector, listener);
     }
-    public $trad(key:string, options?:any):any
+    public $trad(key:string, options?:any, context:boolean = false):any
     {   
         var prefix:string = this.root.getTradKey();
         if(prefix)
