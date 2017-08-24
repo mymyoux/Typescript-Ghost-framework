@@ -516,6 +516,7 @@ export class Master
         }
     }
     public getComponent(componentClass:typeof Component):Component
+    public getComponent(componentHTML:HTMLElement):Component
     public getComponent(name:string):Component
     public getComponent(index:number):Component
     public getComponent(component:any):Component
@@ -523,6 +524,15 @@ export class Master
         if(typeof component == "number")
         {
             return this.components[component];
+        }
+        if(component instanceof HTMLElement)
+        {
+            debugger;
+            for(var comp of this.components)
+            {
+                if(comp.template && comp.template.$el === component)
+                    return comp;
+            }
         }
         if(typeof component == "string")
         {
@@ -539,6 +549,7 @@ export class Master
             }
             return null;
         }
+        if(typeof component == "object")
         for(var comp of this.components)
         {
             if(comp instanceof component)

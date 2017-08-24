@@ -364,6 +364,10 @@ export class Component extends EventDispatcher
     }
     public $trad(key:string, options?:any, context:boolean = false):any
     {   
+        if(!this.root)
+        {
+            this.announceToParent(); 
+        }
         var prefix:string = this.root.getTradKey();
         if(prefix)
         {
@@ -417,7 +421,12 @@ export class Component extends EventDispatcher
             console.log(this);
             debugger;
         }
-        this.template.$parent.onNewComponent(this);//$emit('new-component', this);
+        this.announceToParent();
+    }
+    protected announceToParent():void
+    {
+        if(!this.root || !this.parent)
+            this.template.$parent.onNewComponent(this);
     }
     private mounted():void
     {
@@ -638,6 +647,7 @@ export class Component extends EventDispatcher
         }
     }
     public getComponent(componentClass:typeof Component):Component
+    public getComponent(componentHTML:HTMLElement):Component
     public getComponent(name:string):Component
     public getComponent(index:number):Component
     public getComponent(component:any):Component
@@ -645,6 +655,15 @@ export class Component extends EventDispatcher
         if(typeof component == "number")
         {
             return this.components[component];
+        }
+        if(component instanceof HTMLElement)
+        {
+            debugger;
+            for(var comp of this.components)
+            {
+               if(comp.template && comp.template.$el === component)
+                    return comp;
+            }
         }
         if(typeof component == "string")
         {
@@ -659,6 +678,12 @@ export class Component extends EventDispatcher
                     return comp;
                 }
             }
+        }
+        if(typeof component == "object")
+        for(var comp of this.components)
+        {
+            if(comp instanceof component)
+                return comp;
         }
         return null;
     }
