@@ -658,7 +658,6 @@ export class Component extends EventDispatcher
         }
         if(component instanceof HTMLElement)
         {
-            debugger;
             for(var comp of this.components)
             {
                if(comp.template && comp.template.$el === component)
