@@ -7,7 +7,7 @@ import {Root} from "ghost/core/Root";
     {
         public static getName(cls:Function):string
         {
-            var funcNameRegex = /function (.{1,})\(/;
+            var funcNameRegex = /function ([^\(]{1,})\(/;
             var results  = (funcNameRegex).exec(cls+"");
             return (results && results.length > 1) ? results[1] : "";
         }
