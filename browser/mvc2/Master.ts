@@ -290,13 +290,47 @@ export class Master
         if(!listener)
             throw new Error('you must specify at least a listener');
 
-        var elmts:any[] = $(selector).parents().addBack().toArray();
+        var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
         for(var elmt of elmts)
         {
             if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
             {
-                
+                 
                 return this.bindEvent(elmt, "scroll",listener);
+            }
+        } 
+    }
+    protected smartScroll(listener:any):void
+    protected smartScroll(selector:string, listener:any):void
+    protected smartScroll(selector:any, listener?:any):void
+    {       
+        if(!listener)
+        {
+            listener = selector;
+            selector = this.template.$el;
+        }
+        if(!listener)
+            throw new Error('you must specify at least a listener');
+
+        var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
+        for(var elmt of elmts)
+        {
+            if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
+            {
+                var scrollListener:any = function(event)
+                {
+                    var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
+                    if(!down)
+                        return;
+                    var target:any = event.currentTarget;
+                    if(target.scrollHeight - target.scrollTop <= target.clientHeight*2)
+                    {
+                        //needs to load
+                        listener(event);
+                    }
+                };
+                this.bindEvent(elmt, "wheel",scrollListener)
+                return this.bindEvent(elmt, "scroll",scrollListener);
             }
         }
     }
