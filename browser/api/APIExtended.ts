@@ -359,7 +359,12 @@ import {Objects} from "ghost/utils/Objects";
 
 				}
 				if (data.paginate.limit)
+				{
 					this._apiData.paginate.limit = data.paginate.limit;
+					if(data.paginate.next)
+						this._apiData.paginate.full = this._apiData.paginate.limit>data.paginate.count;
+
+				}
 
 				for (var p in data.paginate) {
 					if (keys.indexOf(p) == -1) {
