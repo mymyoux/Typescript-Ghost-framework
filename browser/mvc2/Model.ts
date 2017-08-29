@@ -188,9 +188,9 @@ export class Model extends CoreObject
         }
         return external;
     }
-    private static regexp = /%([^%]+)%/g;
+    public static regexp = /%([^%]+)%/g;
     /**
-     * Replace %key% in strings
+     * Replace %key% in strings 
      *
      */
     protected replace(value:string):string
