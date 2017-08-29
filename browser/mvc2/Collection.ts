@@ -3,26 +3,32 @@ import {Arrays} from "ghost/utils/Arrays";
 import {IBinaryResult} from "ghost/utils/IBinaryResult";
 import {API2} from "browser/api/API2";
 import {Inst} from "./Inst";
-import {IModelConfig} from "./Model";
+import {IModelConfig, Model} from "./Model";
 import {Buffer} from "ghost/utils/Buffer";
 import {Objects} from "ghost/utils/Objects";
 
 export type Constructor<T extends ModelClass> = new(...args: any[]) => T;
 
-export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
-    type T =  typeof Model.prototype;
-    return class _Collection extends Model {
+export function Collection<X extends Constructor<ModelClass>>( A:X ) {
+    type T =  typeof A.prototype;
+    return class _Collection extends A {
         public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
         
         public models:T[] = [];
         private _request:API2;
-        protected _isFullLoaded:boolean;
         protected _modelClass:any;
         constructor(...args: any[]) {
             super(...args);
-            this._modelClass = Model;//eval('_super');
+            this._modelClass = A;//eval('_super');
             this.models = [];
+        }
+        public isFullLoaded():boolean
+        {
+            var apiData:any =this.request().getAPIData()
+            if(apiData && apiData.paginate && apiData.paginate.full)
+                return true;
+            return false;
         }
         public createModel():T
         {
@@ -30,7 +36,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         }
         public clear():void
         {
-            this._isFullLoaded = false;
             this._request = null;
             this.clearModels();
         }
@@ -178,6 +183,54 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 this._request = <API2>this.load(this.constructor["PATH_GET"], null,config);
                 this._request.on(API2.EVENT_DATA, this.readExternal, this, this._request.getPath(), this._request);
             }
+            var path:any = this.constructor["PATH_GET"];
+            if(typeof path == "function")
+                path = path();
+            var params:any = {};
+            if(path.params)
+            {
+                for(var p in path.params)
+                {
+                    if(params[p] == undefined)
+                        params[p] = path.params[p];
+                }
+                path = path.path;
+            }
+            if(this._request["model_config"].replaceDynamicParams)
+            {
+                path = this.replace(<string>path);
+                if(params)
+                {
+                    var k:string;
+                    for(var p in params)
+                    {
+    
+                        if(Model.regexp.test(params[p]))
+                        {
+                            params[p] = this.replace(params[p]);
+                            if(params[p] == "undefined")
+                            {
+                                delete params[p];
+                            }
+                        }
+                        if(Model.regexp.test(p))
+                        {
+                            k =  this.replace(p);
+                            if(k!=p)
+                            {
+                                params[k] = params[p];
+                                delete params[p];
+                            }
+                        }
+                    }
+    
+                }
+            }
+            for(var p in params)
+            {
+                this._request.param(p, params[p]);
+            }
+
             return this._request;
         }
         public loadGet(params?:any, config?:IModelConfig&{execute:false}):Promise<any>
@@ -252,7 +305,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 if(!input.length || !input.forEach)
                 {
                     //needed to not break the flow
-                    this.detectedFullLoad( api );
                     this.triggerFirstData();
                     this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
                     return;
@@ -274,7 +326,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     {
                         if(typeof rawModel == "object")
                         {
-                            var cls:any = Model;
+                            var cls:any = A;
                             var model:T;
                             if(rawModel)
                             {
@@ -320,7 +372,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     }
                     
                 }, this);
-                this.detectedFullLoad( api );
                 this.triggerFirstData();
                 this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
             }
@@ -329,28 +380,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         {
             
         }
-        protected detectedFullLoad(api:API2):void
-        {
-            if(!api)
-            {
-                return;
-            }
-            var apidata : any = api.getAPIData();
-            var request: any;
-            if(api)
-            {
-                request = api.getLastRequest();
-            }
-            if (request && request.data && request.data.paginate && request.data.paginate.direction != undefined && request.data.paginate.key)
-            {
-                if (apidata && apidata.paginate && apidata.paginate.limit && length < apidata.paginate.limit) {
-                    if (request.data.paginate.next || (!request.data.paginate.next && !request.data.paginate.previous))
-                    {
-                        this._isFullLoaded = true;
-                    }
-                }
-            }
-        }
+        
 
         public next(quantity:number):API2
         public next():API2
