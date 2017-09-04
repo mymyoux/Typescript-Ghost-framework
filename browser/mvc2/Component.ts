@@ -669,6 +669,10 @@ export class Component extends EventDispatcher
     protected $onNewComponent(component:Component):void
     {
         component.setParent(this);
+        if(!this.root)
+        {
+            this.announceToParent();
+        }
         component.setRoot(this.root);
         this.components.push(component);
     }
