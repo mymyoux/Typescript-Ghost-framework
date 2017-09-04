@@ -103,7 +103,7 @@
         public setNotification(name:string, value:any):void
         {
             this._muted = true;
-             this.notification(name).add(value);
+             this.notification(name).set(value);
             this._muted = false;
         }
         public clearNotification(name:string):void
