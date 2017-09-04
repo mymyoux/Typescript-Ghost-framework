@@ -276,6 +276,10 @@ import {Objects} from "ghost/utils/Objects";
 			this._data[param] = data;
 			return this;
 		}
+		public hasParam(name:string):boolean
+		{
+			return this._data && this._data[name] !== undefined;
+		}
 		public paginate(key: string): APIExtended {
 			return this.service("paginate", "key", key);
 		}

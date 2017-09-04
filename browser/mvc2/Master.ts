@@ -32,7 +32,7 @@ export class Master
     {
         if(typeof this["path"] == "function")
         {
-            var path:string = this["path"]();
+            var path:any = this["path"]();
             var type:string = Router.TYPE_STATIC;
             if(typeof path == "string")
             {
@@ -582,7 +582,7 @@ export class Master
             }
             return null;
         }
-        if(typeof component == "object")
+        if(typeof component == "function")
         for(var comp of this.components)
         {
             if(comp instanceof component)

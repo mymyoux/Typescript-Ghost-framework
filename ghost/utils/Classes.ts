@@ -1,7 +1,6 @@
 //convert
  /* ghost.core.Root.*/
 import {Root} from "ghost/core/Root";
-///<reference path="../core/core.class.d.ts"/>
 
     export class Classes
     {

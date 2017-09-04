@@ -712,7 +712,7 @@ export class Component extends EventDispatcher
                 }
             }
         }
-        if(typeof component == "object")
+        if(typeof component == "function")
         for(var comp of this.components)
         {
             if(comp instanceof component)

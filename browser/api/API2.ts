@@ -96,6 +96,12 @@ import {Strings} from "ghost/utils/Strings";
 			super.reset();
 			return this;
 		}
+		public resetPaginate():void
+		{
+			var data = this._data;
+			this.reset();
+			this._data = data;
+		}
 		protected getPromiseRequest(request:any, options:any):any
 		{
 			return ajax(request, options);

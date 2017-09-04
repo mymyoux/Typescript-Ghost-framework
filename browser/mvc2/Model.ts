@@ -261,10 +261,6 @@ export class Model extends CoreObject
     {
         return this.load(this.constructor["PATH_DELETE"], params);
     }
-    public loadCV(params?:any):Promise<any>
-    {
-        return this.load("user/cv", params, {});
-    }
     public getLoadPath(path:any):string
     {
         if(typeof path == "function")

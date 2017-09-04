@@ -181,7 +181,7 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                     config = {};
                 config.execute = false;
                 this._request = <API2>this.load(this.constructor["PATH_GET"], null,config);
-                this._request.on(API2.EVENT_DATA, this.readExternal, this, this._request.getPath(), this._request);
+                this._request.on(API2.EVENT_DATA, this.prereadExternal, this, this._request.getPath(), this._request);
             }
             var path:any = this.constructor["PATH_GET"];
             if(typeof path == "function")
@@ -228,7 +228,8 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             }
             for(var p in params)
             {
-                this._request.param(p, params[p]);
+                if(!this._request.hasParam(p))
+                    this._request.param(p, params[p]);
             }
 
             return this._request;
@@ -276,6 +277,12 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                 this._pathLoaded[request.getPath()]  = promise; 
             }
             return promise;
+        }
+        protected prereadExternal(data:any, ...args)
+        {
+            if(data && data.data)
+                data = data.data;
+            this.readExternal(data, ...args);
         }
        public readExternal(input:any[], path?:any, api?:API2):void
         {
@@ -326,7 +333,7 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                     {
                         if(typeof rawModel == "object")
                         {
-                            var cls:any = A;
+                            var cls:any = this._modelClass;//A;
                             var model:T;
                             if(rawModel)
                             {
@@ -354,7 +361,9 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                                 {
                                     model  = Inst.get(Collection(cls));
                                 }else{
-                                    model  = Inst.get(cls);
+                                    //TODO: this createModel ?
+                                    //model  = Inst.get(cls);
+                                    model = this.createModel();
                                 }
                                  this.prepareModel(model);
                                 model.readExternal(rawModel);
