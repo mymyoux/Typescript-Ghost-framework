@@ -276,6 +276,10 @@ import {Objects} from "ghost/utils/Objects";
 			this._data[param] = data;
 			return this;
 		}
+		public hasParam(name:string):boolean
+		{
+			return this._data && this._data[name] !== undefined;
+		}
 		public paginate(key: string): APIExtended {
 			return this.service("paginate", "key", key);
 		}
@@ -293,11 +297,11 @@ import {Objects} from "ghost/utils/Objects";
 			return data;
 		}
 		protected parseAPIData(data: any): void {
-			if (!data) {
-				return;
-			}
 			if (!this._apiData) {
 				this._apiData = {};
+			}
+			if (!data) {
+				return;
 			}
 			var keys = ["allowed", "direction", "key", "limit", "previous", "next"];
 			if (data.paginate) {
@@ -306,7 +310,7 @@ import {Objects} from "ghost/utils/Objects";
 				}
 
 
-				if (data.paginate.next) {
+				if (data.paginate.next && data.paginate.next.length) {
 					this._apiData.paginate.next = data.paginate.next;
 					var isNextAll: boolean = !this._apiData.paginate.nextAll;
 					if (!isNextAll) {
@@ -329,7 +333,7 @@ import {Objects} from "ghost/utils/Objects";
 					}
 
 				}
-				if (data.paginate.previous) {
+				if (data.paginate.previous && data.paginate.previous.length) {
 					this._apiData.paginate.previous = data.paginate.previous;
 
 					var isPreviousAll: boolean = !this._apiData.paginate.previousAll;
@@ -359,7 +363,12 @@ import {Objects} from "ghost/utils/Objects";
 
 				}
 				if (data.paginate.limit)
+				{
 					this._apiData.paginate.limit = data.paginate.limit;
+					if(data.paginate.next)
+						this._apiData.paginate.full = this._apiData.paginate.limit>data.paginate.count;
+
+				}
 
 				for (var p in data.paginate) {
 					if (keys.indexOf(p) == -1) {

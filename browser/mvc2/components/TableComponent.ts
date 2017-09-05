@@ -607,33 +607,73 @@ export class TableComponent extends Component
     {
         list.current_filter = list.current_filter.length ? list.current_filter : null;
         
-        this.filterAction( list, list.current_filter);
+        this.filterAction( list );
     }
 
-    public filterAction( list : any, type : string ) : Promise <any>
+    public $addFilterMultiSelect( list : any, type : string ) : void
     {
-        return list.filterData( list, this.getParams( list ) ).then( (data : any) => {
-            debugger;
+        var pos = list.current_filters.indexOf(type);
+
+        if (pos == -1)
+            list.current_filters.push(type);
+        else
+            list.current_filters.splice(pos, 1);
+
+        this.filterAction( list );
+    }
+
+    public $sorting( list : any, column : any ) : void
+    {
+        if(!column.sortable)
+            return;
+    
+        if(!column.columns)
+        {
+            column.columns = [ column.prop ];
+        }
+
+        if (typeof column.order === 'undefined')
+        {
+            column.order = [-1];
+            while(column.columns.length>column.order.length)
+            {
+                column.order.push(-1);
+            }
+        }
+
+        column.order[0] = (-1 === column.order[0] ? 1 : -1);
+
+        column.selected = true;
+        for (var i in list.columns)
+        {
+            if (list.columns[i].title !== column.title)
+            {
+                list.columns[i].selected = false;
+                if (list.columns[i].order)
+                    list.columns[i].order[0] = -1;
+            }
+        }
+        // list.order_name = column.columns;
+        // list.order_direction = column.order;
+
+        // list.setLoading(true);
+        // this.scrollLoading = true;
+
+        return list.filterData( column ).then(() => {
+            // list.setLoading(false);
+            // this.scrollLoading = false;
+        }, () => {
+            // list.setLoading(false);
+            // this.scrollLoading = false;
         });
     }
 
-    private getParams( list ) : any
+
+    public filterAction( list : any ) : Promise <any>
     {
-        var params : any = {};
+        return list.filterData().then( (data : any) => {
 
-        if (list.current_search)
-            params.search = list.current_search;
-
-        if (!list.multiFilters()) {
-            if (list.current_filter)
-                params.types = [list.current_filter];
-        }
-        else
-        {
-            if (list.current_filters)
-                params.types = list.current_filters;
-        }
-
-        return params;
+        });
     }
+
 }

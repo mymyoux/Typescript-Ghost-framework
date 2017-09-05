@@ -8,6 +8,7 @@ import {Classes} from "ghost/utils/Classes";
 import {Step} from "browser/performance/Step";
 import {Polyglot2} from "browser/i18n/Polyglot2";
 import {Strings} from "ghost/utils/Strings";
+import {Objects} from "ghost/utils/Objects";
 export class Master 
 {
     protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bindEvents","bindPolyglot","bootComponents"];
@@ -31,7 +32,7 @@ export class Master
     {
         if(typeof this["path"] == "function")
         {
-            var path:string = this["path"]();
+            var path:any = this["path"]();
             var type:string = Router.TYPE_STATIC;
             if(typeof path == "string")
             {
@@ -289,13 +290,47 @@ export class Master
         if(!listener)
             throw new Error('you must specify at least a listener');
 
-        var elmts:any[] = $(selector).parents().addBack().toArray();
+        var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
         for(var elmt of elmts)
         {
             if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
             {
-                
+                 
                 return this.bindEvent(elmt, "scroll",listener);
+            }
+        } 
+    }
+    protected smartScroll(listener:any):void
+    protected smartScroll(selector:string, listener:any):void
+    protected smartScroll(selector:any, listener?:any):void
+    {       
+        if(!listener)
+        {
+            listener = selector;
+            selector = this.template.$el;
+        }
+        if(!listener)
+            throw new Error('you must specify at least a listener');
+
+        var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
+        for(var elmt of elmts)
+        {
+            if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
+            {
+                var scrollListener:any = function(event)
+                {
+                    var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
+                    if(!down)
+                        return;
+                    var target:any = event.currentTarget;
+                    if(target.scrollHeight - target.scrollTop <= target.clientHeight*2)
+                    {
+                        //needs to load
+                        listener(event);
+                    }
+                };
+                this.bindEvent(elmt, "wheel",scrollListener)
+                return this.bindEvent(elmt, "scroll",scrollListener);
             }
         }
     }
@@ -410,6 +445,7 @@ export class Master
     }
     protected bootVue():void
     {
+        console.log('bootVue:', this);
         this.disposeTemplate();
         this.vueConfig = {
             el:this.getContainer(),
@@ -418,7 +454,8 @@ export class Master
         }; 
         const restricted:string[] = ["$addWatcher","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$proxy","$addFilter"];
         //add $Methods by defaut
-        for(var p in this)
+        var properties:string[] = Objects.getAllPropertiesName(this);
+        for(var p of properties)
         {
             if(typeof this[p] == "function")
             {
@@ -513,6 +550,7 @@ export class Master
         }
     }
     public getComponent(componentClass:typeof Component):Component
+    public getComponent(componentHTML:HTMLElement):Component
     public getComponent(name:string):Component
     public getComponent(index:number):Component
     public getComponent(component:any):Component
@@ -520,6 +558,14 @@ export class Master
         if(typeof component == "number")
         {
             return this.components[component];
+        }
+        if(component instanceof HTMLElement)
+        {
+            for(var comp of this.components)
+            {
+                if(comp.template && comp.template.$el === component)
+                    return comp;
+            }
         }
         if(typeof component == "string")
         {
@@ -534,6 +580,13 @@ export class Master
                     return comp;
                 }
             }
+            return null;
+        }
+        if(typeof component == "function")
+        for(var comp of this.components)
+        {
+            if(comp instanceof component)
+                return comp;
         }
         return null;
     }

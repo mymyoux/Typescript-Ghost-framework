@@ -3,26 +3,32 @@ import {Arrays} from "ghost/utils/Arrays";
 import {IBinaryResult} from "ghost/utils/IBinaryResult";
 import {API2} from "browser/api/API2";
 import {Inst} from "./Inst";
+import {IModelConfig, Model} from "./Model";
 import {Buffer} from "ghost/utils/Buffer";
 import {Objects} from "ghost/utils/Objects";
 
-
 export type Constructor<T extends ModelClass> = new(...args: any[]) => T;
 
-
-export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
-    type T =  typeof Model.prototype;
-    return class Collection extends Model {
+export function Collection<X extends Constructor<ModelClass>>( A:X ) {
+    type T =  typeof A.prototype;
+    return class _Collection extends A {
         public static PATH_GET:()=>ModelLoadRequest =
         ()=>new ModelLoadRequest("%root-path%/list", {'%id-name%':'%id%'}, {replaceDynamicParams:true});
+        
         public models:T[] = [];
         private _request:API2;
-        protected _isFullLoaded:boolean;
         protected _modelClass:any;
         constructor(...args: any[]) {
             super(...args);
-            this._modelClass = eval('_super');
+            this._modelClass = A;//eval('_super');
             this.models = [];
+        }
+        public isFullLoaded():boolean
+        {
+            var apiData:any =this.request().getAPIData()
+            if(apiData && apiData.paginate && apiData.paginate.full)
+                return true;
+            return false;
         }
         public createModel():T
         {
@@ -30,9 +36,15 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         }
         public clear():void
         {
-            this._isFullLoaded = false;
             this._request = null;
             this.clearModels();
+        }
+        public resetPaginate():void{
+            this.request().reset();
+        }
+        public reset():void{
+            this.clear();
+            this.resetPaginate();
         }
         protected getRootPath():string
         {
@@ -103,6 +115,10 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         {
             return this.models.unshift(...models);
         }
+        public size():number
+        {
+            return this.models.length;
+        }
         public concat(...models:T[]):this
         {
             var cls:any = this.constructor;
@@ -157,30 +173,118 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             var path:string = super._path(path);
             return path.replace('collection', '');
         }
-        public request():API2
+        public request(config?:any):API2
         {
             if(!this._request)
             {
-                this._request = <API2>this.load(this.constructor["PATH_GET"], null,{execute:false});
-                this._request.on(API2.EVENT_DATA, this.readExternal, this, this._request.getPath(), this._request);
+                if(!config)
+                    config = {};
+                config.execute = false;
+                this._request = <API2>this.load(this.constructor["PATH_GET"], null,config);
+                this._request.on(API2.EVENT_DATA, this.prereadExternal, this, this._request.getPath(), this._request);
             }
+            var path:any = this.constructor["PATH_GET"];
+            if(typeof path == "function")
+                path = path();
+            var params:any = {};
+            if(path.params)
+            {
+                for(var p in path.params)
+                {
+                    if(params[p] == undefined)
+                        params[p] = path.params[p];
+                }
+                path = path.path;
+            }
+            if(this._request["model_config"].replaceDynamicParams)
+            {
+                path = this.replace(<string>path);
+                if(params)
+                {
+                    var k:string;
+                    for(var p in params)
+                    {
+    
+                        if(Model.regexp.test(params[p]))
+                        {
+                            params[p] = this.replace(params[p]);
+                            if(params[p] == "undefined")
+                            {
+                                delete params[p];
+                            }
+                        }
+                        if(Model.regexp.test(p))
+                        {
+                            k =  this.replace(p);
+                            if(k!=p)
+                            {
+                                params[k] = params[p];
+                                delete params[p];
+                            }
+                        }
+                    }
+    
+                }
+            }
+            for(var p in params)
+            {
+                if(!this._request.hasParam(p))
+                    this._request.param(p, params[p]);
+            }
+
             return this._request;
         }
-        public loadGet(params?:any):Promise<any>
+        public loadGet(params?:any, config?:IModelConfig&{execute:false}):Promise<any>
         {
-            var request:API2 =  this.request();
-
+            var tmp:any = config;
+            var request:API2 =  this.request(config);
+            if(tmp)
+            {
+                config = Objects.clone(request["model_config"]);
+                for(var p in tmp)
+                    config[p] = tmp[p];
+                
+            }else
+            {
+                config = request["model_config"];
+            }
+            if(request.hasNoPaginate())
+            {
+                if(this._pathLoaded[request.getPath()] && config.ignorePathLoadState !== true)
+                {
+                    var promise:any = this._pathLoaded[request.getPath()];
+                    if(!promise)
+                        {
+                            promise= new Promise<any>((resolve, reject)=>
+                            {
+                                resolve();
+                            }).then(function(){});
+                        }
+                    return promise; 
+                    
+                }
+            }
             for (var key in params)
             {
                 request.param(key, params[key]);
             }
-
-            return request.then(function(data)
-            {
+            var promise:any =  request.then(function(data)
+            { 
                 return data;
             });
+            if(config.marksPathAsLoaded !== false)
+            {
+                this._pathLoaded[request.getPath()]  = promise; 
+            }
+            return promise;
         }
-       public readExternal(input:any[], path?:string, api?:API2):void
+        protected prereadExternal(data:any, ...args)
+        {
+            if(data && data.data)
+                data = data.data;
+            this.readExternal(data, ...args);
+        }
+       public readExternal(input:any[], path?:any, api?:API2):void
         {
             if(!input)
                 return;
@@ -190,7 +294,17 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
             }
             if(!Arrays.isArray(input))
             {
-                input = [input];
+
+                //readExternal for collection like models
+                if(!path || path.allowNoArray === true)
+                {
+                    var data:any = input;
+                    input = input["models"];   
+                    delete data.models;
+                    super.readExternal(data);
+                }else{
+                    input = [input];
+                }
             }
             if(input)
             {
@@ -198,7 +312,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                 if(!input.length || !input.forEach)
                 {
                     //needed to not break the flow
-                    this.detectedFullLoad( api );
                     this.triggerFirstData();
                     this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
                     return;
@@ -220,12 +333,13 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     {
                         if(typeof rawModel == "object")
                         {
-                            var cls:any = Model;
+                            var cls:any = this._modelClass;//A;
                             var model:T;
                             if(rawModel)
                             {
                                 if(this['__isUnique'])
                                 {
+                                    
                                     if(rawModel && rawModel.id != undefined)
                                     {
                                         model = this.getModelByID(rawModel.id );
@@ -240,14 +354,23 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                                     }
                                 }
                             }
+                            //TODO:handle unique/sort collections
                             if(!model)
                             {
-                                model  = Inst.get(cls);
+                                if(rawModel && rawModel.models)
+                                {
+                                    model  = Inst.get(Collection(cls));
+                                }else{
+                                    //TODO: this createModel ?
+                                    //model  = Inst.get(cls);
+                                    model = this.createModel();
+                                }
                                  this.prepareModel(model);
                                 model.readExternal(rawModel);
                                 this.push(model);
                             }else
                             {
+                                //TODO:transform existing model into collection if rawModel.models exists
                                 this.prepareModel(model);
                                 model.readExternal(rawModel);
                             }
@@ -258,7 +381,6 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
                     }
                     
                 }, this);
-                this.detectedFullLoad( api );
                 this.triggerFirstData();
                 this._trigger(this.constructor["EVENT_FORCE_CHANGE"]);
             }
@@ -267,28 +389,7 @@ export function Collection<X extends Constructor<ModelClass>>( Model:X ) {
         {
             
         }
-        protected detectedFullLoad(api:API2):void
-        {
-            if(!api)
-            {
-                return;
-            }
-            var apidata : any = api.getAPIData();
-            var request: any;
-            if(api)
-            {
-                request = api.getLastRequest();
-            }
-            if (request && request.data && request.data.paginate && request.data.paginate.direction != undefined && request.data.paginate.key)
-            {
-                if (apidata && apidata.paginate && apidata.paginate.limit && length < apidata.paginate.limit) {
-                    if (request.data.paginate.next || (!request.data.paginate.next && !request.data.paginate.previous))
-                    {
-                        this._isFullLoaded = true;
-                    }
-                }
-            }
-        }
+        
 
         public next(quantity:number):API2
         public next():API2

@@ -62,6 +62,7 @@ export class Component extends EventDispatcher
     
     public static load(name:string, options?:any):Promise<any>
     {
+        
         return new Promise<any>((resolve, reject)=>
         {
             Inst.get(Step).register('component-'+name+'-init');
@@ -85,7 +86,8 @@ export class Component extends EventDispatcher
                 const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$addFilter","$addWatcher"];
                 var directives:any = {};
                 //add $Methods by defaut
-                for(var p in cls.prototype)
+                var properties:string[] = Objects.getAllPropertiesName(cls.prototype);
+                for(var p of properties)
                 {
                     if(typeof cls.prototype[p] == "function")
                     {
@@ -105,10 +107,11 @@ export class Component extends EventDispatcher
                             if(p.substring(1, 2)=="W")
                             {
                                 var object:any =  cls.prototype[p]();
-                                watchers.push({name:object.name?object.name:p.substring(2),...object});
+                                watchers.push({name:object.name?object.name:p.substring(2),method:object.method,...object});
                             }else{
                                 watchers.push(p.substring(1));
                             }
+                            
                         }else if(p.substring(0, 1)=="F")
                         {
                             filters[p.substring(1)] = cls.prototype[p];
@@ -121,7 +124,6 @@ export class Component extends EventDispatcher
                 }
 
                 var props:any = options && options.props?options.props:cls.prototype.props();
-
                var componentDefinition:any = {
                   
                     props:props,
@@ -152,7 +154,16 @@ export class Component extends EventDispatcher
                     {   
                         if(typeof method != "string")
                         {
-                            previous[method.name] = method;
+                             previous[method.name] = method;
+                             method.handler = function(...data:any[])
+                            {
+                                var component:Component = Component.getComponentFromVue(this);
+                                if(!component)
+                                    return;
+                                if(typeof method.method == "string")
+                                    return component[method.method](...data);
+                                return method.method.apply(component, data);
+                            };
                         }else
                         previous[method] = function(...data:any[])
                         {
@@ -281,6 +292,8 @@ export class Component extends EventDispatcher
     }
     protected unbindEvents():void
     {
+
+        
         var event:any;
         while(this._bindedEvents.length)
         {
@@ -294,6 +307,21 @@ export class Component extends EventDispatcher
             }
         }
     }
+    public isInTemplate(element:any):boolean
+    {
+        if(!this.template)
+            return false;
+        do
+        {
+            if(element == null)
+                return false;
+            if(element == this.template.$el)
+            {
+                return true;   
+            }
+        }while(element = element.parentNode);
+        return false;
+    }
     protected scroll(listener:any):void
     protected scroll(selector:string, listener:any):void
     protected scroll(selector:any, listener?:any):void
@@ -306,13 +334,47 @@ export class Component extends EventDispatcher
         if(!listener)
             throw new Error('you must specify at least a listener');
 
-        var elmts:any[] = $(selector).parents().addBack().toArray();
+        var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
         for(var elmt of elmts)
         {
             if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
             {
                 
                 return this.bindEvent(elmt, "scroll",listener);
+            }
+        }
+    }
+    protected smartScroll(listener:any):void
+    protected smartScroll(selector:string, listener:any):void
+    protected smartScroll(selector:any, listener?:any):void
+    {       
+        if(!listener)
+        {
+            listener = selector;
+            selector = this.template.$el;
+        }
+        if(!listener)
+            throw new Error('you must specify at least a listener');
+
+        var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
+        for(var elmt of elmts)
+        {
+            if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
+            {
+                var scrollListener:any = function(event)
+                {
+                    var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
+                    if(!down)
+                        return;
+                    var target:any = event.currentTarget;
+                    if(target.scrollHeight - target.scrollTop <= target.clientHeight*2)
+                    {
+                        //needs to load
+                        listener(event);
+                    }
+                };
+                this.bindEvent(elmt, "wheel",scrollListener)
+                return this.bindEvent(elmt, "scroll",scrollListener);
             }
         }
     }
@@ -334,8 +396,12 @@ export class Component extends EventDispatcher
         this._bindedEvents.push({elmt:elmt,type:type,liveselector:liveselector,listener:listener});
         $(elmt).on(type, liveselector, listener);
     }
-    public $trad(key:string, options?:any):any
+    public $trad(key:string, options?:any, context:boolean = false):any
     {   
+        if(!this.root)
+        {
+            this.announceToParent(); 
+        }
         var prefix:string = this.root.getTradKey();
         if(prefix)
         {
@@ -383,7 +449,18 @@ export class Component extends EventDispatcher
     }
     private beforeMounted():void
     {
-        this.template.$parent.onNewComponent(this);//$emit('new-component', this);
+        
+        if(!this.template.$parent.onNewComponent)
+        {
+            console.log(this);
+            debugger;
+        }
+        this.announceToParent();
+    }
+    protected announceToParent():void
+    {
+        if(!this.root || !this.parent)
+            this.template.$parent.onNewComponent(this);
     }
     private mounted():void
     {
@@ -399,10 +476,6 @@ export class Component extends EventDispatcher
     public setRoot(root:any):void
     {
         this.root = root;
-    }
-    public $test()
-    {
-        return 45;
     }
     /**
      * Emit event to parent. Will try to call $onEvent method on parent before and fallback
@@ -512,7 +585,12 @@ export class Component extends EventDispatcher
         if (this.template && this.template.$options && this.template.$options.propsData[name]!==undefined)
             return this.template.$options.propsData[name];
         
-        console.warn('prop ' + name + ' not exist on template', this.template);
+        var props:any = this.props();
+        if(props && props[name] && props[name].default !== undefined)
+        {
+            return props[name].default;
+        }
+        console.warn('prop ' + name + ' not exist on template', this,this.template);
 
         return null;
     }    
@@ -524,11 +602,11 @@ export class Component extends EventDispatcher
     {
         throw new Error("you can't use component#$addWatcher you must use Wmethod syntax instead");
     }
-    protected $addComponent(name:string):void
+    protected $addComponent(name:string, options?:any):void
     {
         if(!Vue.component('component-'+name))
         {
-            Vue.component('component-'+name, Component.load.bind(Component, name));
+            Vue.component('component-'+name, Component.load.bind(Component, name, options));
         }
     }
     public $proxy(method:string, ...params):void
@@ -591,6 +669,10 @@ export class Component extends EventDispatcher
     protected $onNewComponent(component:Component):void
     {
         component.setParent(this);
+        if(!this.root)
+        {
+            this.announceToParent();
+        }
         component.setRoot(this.root);
         this.components.push(component);
     }
@@ -603,6 +685,7 @@ export class Component extends EventDispatcher
         }
     }
     public getComponent(componentClass:typeof Component):Component
+    public getComponent(componentHTML:HTMLElement):Component
     public getComponent(name:string):Component
     public getComponent(index:number):Component
     public getComponent(component:any):Component
@@ -610,6 +693,14 @@ export class Component extends EventDispatcher
         if(typeof component == "number")
         {
             return this.components[component];
+        }
+        if(component instanceof HTMLElement)
+        {
+            for(var comp of this.components)
+            {
+               if(comp.template && comp.template.$el === component)
+                    return comp;
+            }
         }
         if(typeof component == "string")
         {
@@ -624,6 +715,12 @@ export class Component extends EventDispatcher
                     return comp;
                 }
             }
+        }
+        if(typeof component == "function")
+        for(var comp of this.components)
+        {
+            if(comp instanceof component)
+                return comp;
         }
         return null;
     }

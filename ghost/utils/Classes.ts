@@ -1,13 +1,12 @@
 //convert
  /* ghost.core.Root.*/
 import {Root} from "ghost/core/Root";
-///<reference path="../core/core.class.d.ts"/>
 
     export class Classes
     {
         public static getName(cls:Function):string
         {
-            var funcNameRegex = /function (.{1,})\(/;
+            var funcNameRegex = /function ([^\(]{1,})\(/;
             var results  = (funcNameRegex).exec(cls+"");
             return (results && results.length > 1) ? results[1] : "";
         }
