@@ -9,6 +9,7 @@ import {Step} from "browser/performance/Step";
 import {Polyglot2} from "browser/i18n/Polyglot2";
 import {Strings} from "ghost/utils/Strings";
 import {Objects} from "ghost/utils/Objects";
+import {Arrays} from "ghost/utils/Arrays";
 export class Master 
 {
     protected activationSteps:string[] = ["bootTemplate", "bootVue","bindVue","renderVue","bindEvents","bindPolyglot","bootComponents"];
@@ -19,6 +20,7 @@ export class Master
     protected components:Component[];
     protected params:any;
     protected _bindedEvents:any[];
+    protected _route:IRoute;
     public constructor() 
     {
         this.components = [];
@@ -30,6 +32,8 @@ export class Master
      */
     public route(masterRouter:any):IRoute
     {
+        if(this._route)
+            return this._route;
         if(typeof this["path"] == "function")
         {
             var path:any = this["path"]();
@@ -49,7 +53,7 @@ export class Master
             }
             var route:IRoute = Router[type](path);
             route.scope = this.scope();
-            return route;
+            return this._route = route;
         }
         return null;
     }
@@ -114,6 +118,30 @@ export class Master
     public param(name:string):any
     {
         return this.params?this.params[name]:null;
+    }
+    public updateURL(suffix:any|any[]):void
+    {
+        var route:any = this._route;
+        if(!Arrays.isArray(suffix))
+        {
+            suffix = [suffix];   
+        }
+        var url:string = null;
+        if(route.starts_with)
+        {
+            url = route.starts_with;
+        }
+        if(!url)
+        {
+            debugger;
+            return;
+        }
+        if(!Strings.endsWith(url, "/"))
+        {
+            url+="/";
+        }
+        url+=suffix.join("/");
+        Router.instance().silentGoto(url, this.scope());
     }
     public handleDisactivation():void
     {
