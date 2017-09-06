@@ -189,6 +189,7 @@
 		}
 		protected _buildURL():string
 		{
+			window["u"] = this;
 			var url:string = "";
 			for(var p in this.history)
 			{
@@ -198,6 +199,19 @@
 				}
 			}
 			return "#!"+url;
+		}
+		public silentGoto(url:string, scope:string):void
+		{
+			if(!this.history[scope]){
+				debugger;
+				return;
+			}
+			this.history[scope].push({
+				params:null,
+				url:url
+			});
+			this._lastURL = this._buildURL();
+			window.location.href = this._lastURL;
 		}
 		protected _detectHistory(url:string, params:any):boolean|any
 		{
@@ -439,6 +453,10 @@
 			var tmp: number = route.route.indexOf("[");
 			index = tmp != -1 && tmp < index ? tmp : index; 
 			route.starts_with = route.route.substring(0, index);
+			if(Strings.endsWith(route.starts_with, "/"))
+			{ 
+				route.starts_with = route.starts_with.substring(0, route.starts_with.length-1);
+			}
 			//convert route to regexp
 			route.paramsNames = [];
 			var temp: any;
@@ -446,6 +464,7 @@
 			{
 				route.paramsNames.push(temp[1]);
 			}
+			console.log(route.route);
 			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
 			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
 
