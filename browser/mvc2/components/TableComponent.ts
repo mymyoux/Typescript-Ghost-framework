@@ -22,11 +22,17 @@ export class TableComponent extends Component
     protected _allmouse:any;
     protected _alldelete:any;
     protected _mousemove:any;
+
+    public current_filter:string = null;
+    public current_filters:string[] = [];
+    public current_search:string = null;
+  
     public constructor(template:string)
     {
         super(template);
         this.reload = this._reload.bind(this);
     }
+    
     protected _onMouseDown(event:any):void
     {
         
