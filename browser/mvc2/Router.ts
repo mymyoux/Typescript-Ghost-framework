@@ -198,7 +198,7 @@
 					url += (url?"+":"")+ this.history[p][this.history[p].length-1].url;
 				}
 			}
-			return "#!"+url;
+			return window.location.pathname + "#!" + url;
 		}
 		public silentGoto(url:string, scope:string):void
 		{
