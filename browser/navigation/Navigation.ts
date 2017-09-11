@@ -182,8 +182,13 @@ import {Eventer} from "ghost/events/Eventer";
                     //log.warn(this);
                 }
             });
-            this._currentHash = this._buildCurrentHash();
-            window.location.href = this._currentHash;
+            this._currentHash = this._buildCurrentHash();            
+            this.goto( this._currentHash );
+        }
+
+        public goto( hash : string ) : void
+        {
+            window.location.href = window.location.pathname + hash;
         }
 
         public getHashByPathname( hash : string ) : string
@@ -350,6 +355,7 @@ import {Eventer} from "ghost/events/Eventer";
             {
                // window.location.hash = "#"+this._last;
             }
+            debugger;
         }
         private _buildCurrentHash():string
         {
@@ -411,7 +417,7 @@ import {Eventer} from "ghost/events/Eventer";
             if(!fromHash)
             {
                 this._currentHash = this._buildCurrentHash();
-                window.location.href = this._currentHash;
+                this.goto( this._currentHash );        
             }
         }
         /**
@@ -423,7 +429,7 @@ import {Eventer} from "ghost/events/Eventer";
         {
             this.getScope(scope).replacePage(page);
             this._currentHash = this._buildCurrentHash();
-            window.location.href = this._currentHash;
+            this.goto( this._currentHash );
         }
         /**
          * Gets current page's name of a scope
@@ -443,7 +449,7 @@ import {Eventer} from "ghost/events/Eventer";
             //log.warn("pop page:"+ scope);
             this.getScope(scope).popPage(count);
             this._currentHash = this._buildCurrentHash();
-            window.location.href = this._currentHash;
+            this.goto( this._currentHash );
         }
         /**
          * Pops all page of a scope
@@ -453,7 +459,7 @@ import {Eventer} from "ghost/events/Eventer";
         {
             this.getScope(scope).popAll();
             this._currentHash = this._buildCurrentHash();
-            window.location.href = this._currentHash;
+            this.goto( this._currentHash );
         }
 
         /**
