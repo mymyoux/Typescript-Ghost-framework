@@ -314,7 +314,6 @@
 								if (save)
 									this._reject(current); 
 								//new url
-								debugger;
 								return this.goto(result, null, false);
 							}
 							//maybe handle more type - assume it's always Scope
@@ -350,7 +349,6 @@
 										//new url
 										if (save)
 											this._reject(current); 
-											debugger;
 										return this.goto(result, null, false);
 									}
 									var scope: string = route.scope;
