@@ -541,7 +541,7 @@
 				this.log("ignoring hash change");
 				return;
 			}
-			if(this._lastURL == window.location.hash)
+			if(this._lastURL ==window.location.pathname + window.location.search+window.location.hash)
 			{
 				this.log("ignoring hash change - same url");
 				return;
