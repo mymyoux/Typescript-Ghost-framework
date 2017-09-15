@@ -139,6 +139,10 @@ export class Application
     }
     public isLocal():boolean
     {
+        return Application.isLocal();
+    }
+    public static isLocal():boolean
+    {
         return window.location.href.indexOf("local.") != -1 || window.location.href.indexOf(".local") != -1 || window.location.href.indexOf("alpha2") != -1;
     }
     protected initTemplate():void
