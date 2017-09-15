@@ -68,18 +68,41 @@ import {Strings} from "ghost/utils/Strings";
 			var request: any = super.getRequest();
 			if(this._path)
 				request.url = this._config.url + this._path;
+			
+			if(!request.data)
+			{
+				request.data = {};
+			}
+			
 			if (this._config[API2.API_TOKEN])
 			{
-				if(!request.data)
-				{
-					request.data = {};
-				}
 				request.data.api_token = this._config[API2.API_TOKEN];
 			}
+
 			if (!this._method && request.data && request.data.method)
 			{
 				delete request.data.method;
 			}
+
+			if (this._config.retry)
+			{
+				request.data.retry = this._config.retry;
+			}
+
+			if (this._config.reexecute === false || this._config.reexecute === true)
+			{
+				request.data.reexecute = this._config.reexecute;
+			}
+			else
+			{
+				request.data.reexecute = true;
+			}
+
+			if (this._config.reexecute_session)
+			{
+				request.data.reexecute_session = this._config.reexecute_session;
+			}
+			
 			return request;
 		}
 		public then(token?: string, request?: any): any 
@@ -106,6 +129,7 @@ import {Strings} from "ghost/utils/Strings";
 		{
 			return ajax(request, options);
 		}
+	
 		protected _then(request: any, resolve: any, reject: any, token: string): this {
 			for (var p in APIExtended.middlewares) {
 				if (APIExtended.middlewares[p].request) {
@@ -119,10 +143,13 @@ import {Strings} from "ghost/utils/Strings";
 				console.error("UNDEFINED URL", request);
 				return resolve();
 			}
-			var promise = this.getPromiseRequest(request, {asObject:true});//ajax(request, { asObject: true });//this.getPromise();
+			var options : any = this._config;
+			options.asObject = true;
+
+			var promise = this.getPromiseRequest(request, { asObject: true });
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
-				console.log('RESULT', rawData);
+				// console.log('RESULT', rawData);
 				if (promise === this._previousPromise) {
 					this._previousPromise = null;
 				}
@@ -133,10 +160,13 @@ import {Strings} from "ghost/utils/Strings";
 				}else{
 					data = rawData;
 				}
-				if (data && token && this._cacheManager) {
+
+				// all good, remove data
+				if (data && token && this._cacheManager)
+				{
 					this._cacheManager.remove(token);
 				}
-
+					
 				// this._promise = null;
 				if (data && data.exception) {
 					if (reject)
@@ -165,18 +195,15 @@ import {Strings} from "ghost/utils/Strings";
 								var exception: any = data.exception;
 								if (exception && exception.fatal && this._cacheManager)
 								{
-									this._cacheManager.remove(token);
+									// always reexexcute on error on the next session
+									if (!this._config.reexecute)
+										this._cacheManager.remove(token);
 								}
-								/*
-								if (data.state_user && data.state_user.id_user != APIExtended._id_user) {
-									//error but bad user id
-									good_user = false;
-								}
-								if (data.api_error_code != undefined) {
-									if (good_user) {
-										APIExtended._cacheManager.remove(token);
-									}
-								}*/
+
+								// if (exception && exception.type === 'APIException')
+								// {
+								// 	// no retry on this by default
+								// }
 							}
 						}
 
