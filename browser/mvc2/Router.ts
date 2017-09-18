@@ -213,6 +213,12 @@
 			this._lastURL = this._buildURL();
 			window.location.href = this._lastURL;
 		}
+
+		public getHash() : string
+		{
+			return this._lastURL.replace(window.location.pathname + window.location.search + "#!", '');
+		}
+
 		protected _detectHistory(url:string, params:any):boolean|any
 		{
 			var history: any[];
