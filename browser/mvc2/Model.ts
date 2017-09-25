@@ -220,7 +220,7 @@ export class Model extends CoreObject
                     {
                         var v:any = this[key];
                         if(typeof v == "function")
-                            v = v();
+                            v = v.call(this);
                         if(value == '%'+key+'%')
                         {
                             if(typeof v == "object")
