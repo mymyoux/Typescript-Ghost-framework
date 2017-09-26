@@ -34,6 +34,10 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
         {
             return new this._modelClass();
         }
+        public isSameCollection(collection:any):boolean
+        {
+            return collection._modelClass === this._modelClass;
+        }
         public clear():void
         {
             this._request = null;
@@ -84,6 +88,17 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             {
                 if((<any>this.models[p]).getID()==id)
                     return this.models[p];
+            }
+            for(var p in this.models)
+            {
+                if(this.models[p].isSameCollection && this.models[p].isSameCollection(this))
+                {
+                    var model = this.models[p].getModelByID(id)
+                    if(model)
+                    {
+                        return model;
+                    }
+                }
             }
             return null;
         }
@@ -179,8 +194,10 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             {
                 if(!config)
                     config = {};
+                var tmp : any;
                 config.execute = false;
                 this._request = <API2>this.load(this.constructor["PATH_GET"], null,config);
+                config.execute = tmp;
                 this._request.on(API2.EVENT_DATA, this.prereadExternal, this, this._request.getPath(), this._request);
             }
             var path:any = this.constructor["PATH_GET"];
@@ -234,7 +251,7 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
 
             return this._request;
         }
-        public loadGet(params?:any, config?:IModelConfig&{execute:false}):Promise<any>
+        public loadGet(params?:any, config?:IModelConfig&{execute:false}):Promise<any>|any
         {
             var tmp:any = config;
             var request:API2 =  this.request(config);
@@ -253,7 +270,7 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                 if(this._pathLoaded[request.getPath()] && config.ignorePathLoadState !== true)
                 {
                     var promise:any = this._pathLoaded[request.getPath()];
-                    if(!promise)
+                    if(!promise || typeof promise == "boolean")
                         {
                             promise= new Promise<any>((resolve, reject)=>
                             {
@@ -272,6 +289,10 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             { 
                 return data;
             });
+            if(config.execute === false)
+            {
+                return request;
+            }
             if(config.marksPathAsLoaded !== false)
             {
                 this._pathLoaded[request.getPath()]  = promise; 

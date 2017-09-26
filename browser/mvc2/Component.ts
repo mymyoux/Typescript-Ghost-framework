@@ -497,6 +497,12 @@ export class Component extends EventDispatcher
         }
         this.template.$parent.$emit(name, this);
     }
+    public $emit(name, ...value:any[]):void
+    {
+        if(!this.template)
+            return;   
+        this.template.$emit(name, ...value);
+    }
     /**
      * Emit event to Root parent. Will try to call $onEvent method on root before and fallback
      * to using this.template.$root.$emit(event) method
