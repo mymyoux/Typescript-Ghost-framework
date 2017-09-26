@@ -83,7 +83,7 @@ export class Component extends EventDispatcher
                 var computed:string[] = [];
                 var watchers:string[] = [];
                 var filters:any = {};
-                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$addFilter","$addWatcher"];
+                const restricted:string[] = ["$getProp","$addData","$addMethod","$addComputedProperty","$addModel","$getModel","$getData","$addComponent","$addFilter","$addWatcher","$emit","$mute","$unmute"];
                 var directives:any = {};
                 //add $Methods by defaut
                 var properties:string[] = Objects.getAllPropertiesName(cls.prototype);
@@ -265,14 +265,18 @@ export class Component extends EventDispatcher
             Vue.component('component-'+name, Component.load.bind(Component, name));
         }
     }
-    /**
-     * @see https://vuejs.org/v2/guide/components.html#Prop-Validation
-     */
     
+    /**
+     * muted value for vue $emit
+     */
+    protected _$muted:boolean = false;
     protected parent:any;
     protected root:any;
     private _shortName:string;
     private _dataLoaded:boolean;
+    /**
+     * @see https://vuejs.org/v2/guide/components.html#Prop-Validation
+     */
     private vueConfig:any;
     protected steps:string[] = ["bindVue","bindPolyglot","bootComponents"];
     protected components:Component[];
@@ -497,9 +501,17 @@ export class Component extends EventDispatcher
         }
         this.template.$parent.$emit(name, this);
     }
+    public $mute():void
+    {
+        this._$muted = true;
+    }
+    public $unmute()
+    {
+        this._$muted = false;
+    }
     public $emit(name, ...value:any[]):void
     {
-        if(!this.template)
+        if(!this.template || this._$muted)
             return;   
         this.template.$emit(name, ...value);
     }
