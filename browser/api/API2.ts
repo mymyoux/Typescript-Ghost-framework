@@ -87,6 +87,14 @@ import {Strings} from "ghost/utils/Strings";
 				}
 				request.data.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
 			}
+			if (this._config[API2.API_IMPERSONATE_TOKEN])
+			{
+				if(!request.data)
+				{
+					request.data = {};
+				}
+				request.data.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
+			}
 			if (!this._method && request.data && request.data.method)
 			{
 				delete request.data.method;
