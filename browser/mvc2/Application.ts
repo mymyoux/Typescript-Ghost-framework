@@ -98,11 +98,12 @@ export class Application
                 config[q] = config[q].replace('%shortorigin%', shortorigin);
                 config[q] = config[q].replace('%protocol%', window.location.protocol);
                 config[q] = config[q].replace('%usertoken%', Auth.check()?Auth.user()["token"]:'');
+                config[q] = config[q].replace('%impersonate_token%', Auth.check() && Auth.user().isImpersonated()?Auth.user().getRealUser()["token"]:'');
                 config[q] = config[q].replace('%id_user%', Auth.id());
                 if(config[q] === "undefined")
                 {   
                     delete config[q];
-                }
+                } 
             } 
             if(api.hasInstance(name))
             {

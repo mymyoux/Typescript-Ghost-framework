@@ -14,6 +14,7 @@ import {Strings} from "ghost/utils/Strings";
 	export class API2 extends APIExtended
 	{
 		protected static API_TOKEN: string = "token";
+		protected static API_IMPERSONATE_TOKEN: string = "token_impersonate";
 		public static instance(name?: string, cls?: API2): API2
 		public static instance(cls?: API2): API2
 		public static instance(name?: any, cls?: API2): API2 {
@@ -78,7 +79,10 @@ import {Strings} from "ghost/utils/Strings";
 			{
 				request.data.api_token = this._config[API2.API_TOKEN];
 			}
-
+			if (this._config[API2.API_IMPERSONATE_TOKEN])
+			{
+				request.data.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
+			}
 			if (!this._method && request.data && request.data.method)
 			{
 				delete request.data.method;
