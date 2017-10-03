@@ -29,6 +29,11 @@ export class AutocompleteComponent extends Component
                 type:Boolean,
                 default:false
             },
+            "allow_empty":
+            {
+                type:Boolean,
+                default:false
+            },
              "selection":
             {
                 type:String,
@@ -94,6 +99,10 @@ export class AutocompleteComponent extends Component
         {
             return this.select(this.template.list[this.template.selected]);
         }
+        if(this.template.allow_empty && !this.template.choice)
+        {
+            return this.select(null);
+        }
         if(!this.template.allow_custom)
         {
             return;
@@ -109,11 +118,15 @@ export class AutocompleteComponent extends Component
 
         this.template.open = false;
         this.template.list = [];
+        if(this.template.allow_empty && !this.template.choice)
+        { 
+            this.select(null);
+        }
     }
     protected select(choice:any):void{
         this.emit('autocompleteChoice', this, choice);
-        this.template.choice = choice.name;
-        this.template.list = [];
+        this.template.choice = choice?choice.name:"";
+        this.template.list = []; 
     }
     public $typing(event):any
     {
@@ -152,7 +165,9 @@ export class AutocompleteComponent extends Component
     {
         var choice:string = this.template.choice;
         if(!choice)
+        {
             return; 
+        }
         this.emit('autocomplete', this);
         if(this.template.name)
         {

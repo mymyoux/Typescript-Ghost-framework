@@ -5,6 +5,7 @@ import {Strings} from "ghost/utils/Strings";
 import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Arrays} from "ghost/utils/Arrays";
+import {Application} from "./Application";
 export class Model extends CoreObject
 {
     public static EVENT_CHANGE:string = "change";
@@ -363,6 +364,12 @@ export class Model extends CoreObject
         if(config.marksPathAsLoaded !== false)
         {
             this._pathLoaded[<string>path] = true;
+        }
+        if(Application.isLocal())
+        {
+            if(!params)
+                params = {};
+            params.__source = this.getClassName();
         }
         var request:API2 = this.getPathRequest(<string>path, params, config)
         .always(config.always===true);

@@ -87,13 +87,27 @@ import {Objects} from "ghost/utils/Objects";
 								console.warn("[ignoring] api -reexecute: ", request);
 								return;
 							}
+							
 							//debugger; 
 							console.warn("api -reexecute: ", request);
 							if (request.data) {
 								if (request.data._reloaded_count == undefined) {
 									request.data._reloaded_count = 0;
 								}
+								if (request.data.reexecute === false)
+								{
+									this.war().removeItem(key);
+									console.warn("[reexecute=false] cancel api -reexecute: ", request);
+									return;
+								}
+								
 								request.data._reloaded_count++;
+								if (request.data.reexecute_session && request.data._reloaded_count >= request.data.reexecute_session)
+								{
+									this.war().removeItem(key);
+									console.warn("[reexecute_session=" + request.data.reexecute_session + "] cancel api -reexecute: ", request);
+									return;
+								}
 								this.war().setItem(key, request);
 							}
 
@@ -488,6 +502,7 @@ import {Objects} from "ghost/utils/Objects";
 			if (!request) {
 				request = this.getRequest();
 			}
+
 			if (this._always && !token) {
 				if(this._cacheManager)
 					token = this._cacheManager.add(request);
@@ -533,6 +548,7 @@ import {Objects} from "ghost/utils/Objects";
 				if (rawData && rawData.data) {
 					data = rawData.data;
 				}
+				
 				if (data && token && this._cacheManager) {
 					this._cacheManager.remove(token);
 				}
@@ -553,13 +569,11 @@ import {Objects} from "ghost/utils/Objects";
 					this._previousPromise = null;
 				}
 				var reason: string = "unknown";
-				debugger;
 				if (error && token) {
 
 					if (error.jqXHR && error.jqXHR.status != undefined) {
 						var status: number = error.jqXHR.status;
 						if (status >= 200 && status < 400) {
-							debugger;
 							var good_user: boolean = true;
 							//server good real error
 							if (error.data) {

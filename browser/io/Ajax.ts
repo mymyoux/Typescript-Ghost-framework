@@ -90,7 +90,7 @@ import {CancelablePromise} from "ghost/io/CancelablePromise";
 	export function ajax(url:string, settings?:any):CancelablePromise<Object>;
 	export function ajax(request: any, settings?: AjaxOptions): CancelablePromise<Object>;
 	export function ajax(request: any, settings?: any): CancelablePromise<Object>;
-	export function ajax(url: any, settings?: AjaxOptions & { count_failed?:number}): CancelablePromise<Object>
+	export function ajax(url: any, settings?: AjaxOptions & { count_failed?:number, reexecute?:boolean, reexecute_session?:any, reexecute_session_done?:any}): CancelablePromise<Object>
 	{
 		if(typeof url == "string")
 		{
@@ -161,6 +161,12 @@ import {CancelablePromise} from "ghost/io/CancelablePromise";
 				{
 					return;
 				}
+				
+				if (settings.reexecute === false)
+				{
+					return;
+				}
+
 				if(settings.retry && textStatus != "abort")
 				{
 					if(settings.retry !== RETRY_INFINITE && settings.retry!==true)
@@ -174,6 +180,8 @@ import {CancelablePromise} from "ghost/io/CancelablePromise";
 					{
 						settings.count_failed++;
 					}
+					
+				
 					if (navigator.onLine === false)
 					{
 						//wait
