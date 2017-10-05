@@ -499,7 +499,8 @@ export class Component extends EventDispatcher
             }
             console.log(name+" not found on parent - emit default event", this.parent);
         }
-        this.template.$parent.$emit(name, this);
+        if(this.template && this.template.$parent)
+            this.template.$parent.$emit(name, this);
     }
     public $mute():void
     {
