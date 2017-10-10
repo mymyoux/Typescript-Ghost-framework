@@ -580,6 +580,8 @@ export class Component extends EventDispatcher
         }
         if(!model)
         {
+            if (typeof name === "string")
+                this.$addData(name, model);
             console.warn('model given is null');
             return;
         }
