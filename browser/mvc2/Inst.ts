@@ -27,7 +27,12 @@ export class Inst
             {
                 throw new Error("No Model named "+cls);
             }else
-            {
+            { 
+                var parts:string[] = cls.split('/');
+                if(model[parts[parts.length-1]])
+                {
+                    model = model[parts[parts.length-1]];
+                }
                 cls = model;
             }
         }

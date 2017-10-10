@@ -129,8 +129,8 @@ export class Model extends CoreObject
         }
         return path;
     }
-    protected api(name: string): API2 {
-        return API2.request().name(this.getClassName()+"_"+name);
+    protected api(name: string, api_name?:string): API2 {
+        return API2.request(api_name).name(this.getClassName()+"_"+name);
     }
     public cache(): LocalForage {
         return LocalForage.instance().war(this.getClassName());
@@ -221,7 +221,7 @@ export class Model extends CoreObject
                     {
                         var v:any = this[key];
                         if(typeof v == "function")
-                            v = v();
+                            v = v.call(this);
                         if(value == '%'+key+'%')
                         {
                             if(typeof v == "object")
@@ -406,7 +406,7 @@ export class Model extends CoreObject
     }
     protected getPathRequest(path:string, params:any, config:IModelConfig):API2{
         path = this._path(path);
-        return this.api(path).path(path).params(params);
+        return this.api(path, config.api_name).path(path).params(params);
     }
 
 }
@@ -453,6 +453,10 @@ export interface IModelConfig
      * Allow collection to readExternal data without forcing array conversion. Default false
      */
     allowNoArray?:boolean;
+    /**
+     * Api's name to use
+     */
+    api_name?:string;
     
 }
 

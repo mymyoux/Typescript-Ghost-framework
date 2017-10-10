@@ -13,6 +13,10 @@
         {
             return Loki.instance().loki;
         }
+        public static save():void
+        {
+            Loki.instance().loki.save();
+        }
         public constructor(pathDb:string, options?:any)
         {
             Loki._instance = this;

@@ -397,7 +397,12 @@ import {Root} from "ghost/core/Root";
     
 
 
+    var f = null;
    // export var forage:ghost.data.Foragehouse = new ghost.data.Foragehouse("root");
-    export var forage:LocalForage = new LocalForage({debug:false});
+   if(Hardware.isBrowser())
+   {
+       f = new LocalForage({debug:false});
+   }
+   export var forage:LocalForage = f;
     
 
