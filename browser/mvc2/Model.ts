@@ -181,11 +181,18 @@ export class Model extends CoreObject
             {
                 continue;
             }
+           
             if (Strings.startsWith(p, "_"))
             {
                 continue;
             }
-            external[p] = this[p];
+
+            if(this[p] && typeof this[p] == "object" && typeof this[p]['writeExternal'] === 'function')
+            {
+                external[p] = this[p]['writeExternal']();
+            }
+            else
+                external[p] = this[p];
         }
         return external;
     }
