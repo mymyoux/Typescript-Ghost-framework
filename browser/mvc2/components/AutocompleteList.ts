@@ -52,6 +52,21 @@ export class AutocompleteListComponent extends Component
             "list":
             {
                 required:true
+            },
+            "tag":
+            {
+                default: false
+            },
+            "index":
+            {
+                required: false,
+                default : 0
+            },
+            "clear":
+            {
+                required: false,
+                default: false,
+                type: Boolean
             }
             // "actions":
             // {
@@ -138,10 +153,16 @@ export class AutocompleteListComponent extends Component
         },100);
     }
     public select(choice:any):void{
-        this.emit('autocompleteChoice', this, choice);
-        this.remit('autocompleteChoice', this, choice);
-        this.template.choice = choice.name;
-        this.template.selected_item = choice;
+        this.emit('autocompleteChoice', this, choice, this.template.index);
+        this.remit('autocompleteChoice', this, choice, this.template.index);
+        if (!this.template.clear)
+        {
+            this.template.choice = choice.name;
+            this.template.selected_item = choice;
+        } else
+        {
+            this.template.choice = '';
+        }
         this.template.hidden = true;
         this.template.onrest = true;
     }
