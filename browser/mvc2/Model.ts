@@ -257,17 +257,17 @@ export class Model extends CoreObject
     {
         return this.load(this.constructor["PATH_GET"], params, config);
     }
-    public loadCreate(params?:any):Promise<any>
+    public loadCreate(params?:any, config?:IModelConfig):Promise<any>
     {
-        return this.load(this.constructor["PATH_CREATE"], params);
+        return this.load(this.constructor["PATH_CREATE"], params, config);
     }
-    public loadUpdate(params?:any):Promise<any>
+    public loadUpdate(params?:any, config?:IModelConfig):Promise<any>
     {
-        return this.load(this.constructor["PATH_UPDATE"], params);
+        return this.load(this.constructor["PATH_UPDATE"], params, config);
     }
-    public loadDelete(params?:any):Promise<any>
+    public loadDelete(params?:any, config?:IModelConfig):Promise<any>
     {
-        return this.load(this.constructor["PATH_DELETE"], params);
+        return this.load(this.constructor["PATH_DELETE"], params, config);
     }
     public getLoadPath(path:any):string
     {
