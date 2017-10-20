@@ -406,6 +406,10 @@ export class Component extends EventDispatcher
         {
             this.announceToParent(); 
         }
+        if (options && $.isNumeric(options))
+        {
+            options = parseInt(options);
+        }
         var prefix:string = this.root.getTradKey();
         if(prefix)
         {
