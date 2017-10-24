@@ -56,7 +56,7 @@ export class Component extends EventDispatcher
         {
              return Component.instances[index];
         }
-        debugger;
+        //debugger;
         return null;
     }
     
@@ -615,7 +615,8 @@ export class Component extends EventDispatcher
         {
             return props[name].default;
         }
-        console.warn('prop ' + name + ' not exist on template', this,this.template);
+        if(!props || !props[name])
+            console.warn('prop ' + name + ' not exist on template', this,this.template);
 
         return null;
     }    

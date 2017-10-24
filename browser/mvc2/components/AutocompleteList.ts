@@ -100,6 +100,10 @@ export class AutocompleteListComponent extends Component
     public $activate():void
     {
         this.template.onrest = false;
+        this.focus();
+    }
+    public focus():void
+    {
         setTimeout(()=>
         {
 
@@ -148,8 +152,11 @@ export class AutocompleteListComponent extends Component
         {
             console.log('blur');
             this.blurLater = null;
-            this.template.hidden = true;
-            this.template.onrest = true;
+            if(this.template)
+            {
+                this.template.hidden = true;
+                this.template.onrest = true;
+            }
         },100);
     }
     public select(choice:any):void{
