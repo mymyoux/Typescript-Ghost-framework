@@ -197,7 +197,6 @@ import {Objects} from "ghost/utils/Objects";
 		}
 		public constructor() {
 			super();
-			console.log('"CONSTRUCTOR"');
 			this._services = [];
 			this._stacklist = [];
 
@@ -560,7 +559,7 @@ import {Objects} from "ghost/utils/Objects";
 					return;
 				}
 
-				var parsed: any = this.parseResult(data);
+				var parsed: any = this.parseResult(rawData.api_data ? rawData : data);
 				this.trigger(API.EVENT_DATA, data);
 				if (resolve)
 					resolve.call(this, parsed, data);

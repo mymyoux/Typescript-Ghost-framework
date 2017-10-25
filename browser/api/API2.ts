@@ -189,7 +189,7 @@ import {Strings} from "ghost/utils/Strings";
 						reject(data);
 					return;
 				}
-				var parsed: any = this.parseResult(data);
+				var parsed: any = this.parseResult(rawData.api_data ? rawData : data);
 				this.trigger(API.EVENT_DATA, data);
 				if (resolve)
 					resolve.call(this, parsed, data);
@@ -240,7 +240,7 @@ import {Strings} from "ghost/utils/Strings";
 			return <any>this;
 		}
 		public hasNoPaginate():boolean{
-			return this._apiData && !this._apiData.paginate;
+			return !!this._apiData && !this._apiData.paginate;
 		}
 		protected parseResult(data: any): any {
 			this.parseAPIData(data.api_data);
