@@ -15,7 +15,7 @@
 		public static instance(): any {
             if(!this._instance)
             {
-                this._instance = new Router();
+				this._instance = new Router();
             }
 			return this._instance;
 		} 
@@ -341,11 +341,22 @@
 				{
 					for (var route of this.irouteRoutes[priority])
 					{
+						var starts_with : string = route.starts_with;
 						//quick test
-						if (Strings.startsWith(url, route.starts_with))
+						if (Strings.startsWith(url, starts_with))
 						{
-							if(route.route.test(url))
+							var test_route : boolean = route.route.test(url);
+
+							if (route.type === Router.TYPE_SEGMENT)
 							{
+								starts_with += (null != route.params ? '/' : '');
+								
+								test_route = test_route && Strings.startsWith(url, starts_with);
+							}
+						
+							if (test_route)
+							{
+								debugger;
 								//good route
 								route = this.parseParam(route, url);
 								result = route.callback(route, url);
@@ -470,7 +481,8 @@
 			}
 			console.log(route.route);
 			console.log("rouge regexp:"+route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
-			route.route  = new RegExp(route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
+			route.base_route 	= route.route;
+			route.route  		= new RegExp(route.route.replace(/((\/?):[^:\/\?\+]+)(\??)/g, "$2$3([^\/\+]+)$3").replace(/\//g, "\\/"));
 
 
 			return route;
