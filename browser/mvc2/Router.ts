@@ -356,7 +356,6 @@
 						
 							if (test_route)
 							{
-								debugger;
 								//good route
 								route = this.parseParam(route, url);
 								result = route.callback(route, url);
