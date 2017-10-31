@@ -347,9 +347,9 @@
 						{
 							var test_route : boolean = route.route.test(url);
 
-							if (route.type === Router.TYPE_SEGMENT)
+							if (route.type === Router.TYPE_SEGMENT && route.params && (<any>Object).values(route.params).filter(function(item){return !!item;}).length)
 							{
-								starts_with += (null != route.params ? '/' : '');
+								starts_with += (route.params ? '/' : '');
 								
 								test_route = test_route && Strings.startsWith(url, starts_with);
 							}
