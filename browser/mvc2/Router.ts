@@ -515,8 +515,22 @@
 		} 
 		protected onhref(jqueryEvent: any, event: any): void {
 
-			var href: string = jqueryEvent.currentTarget.getAttribute("href").substring(1);
-			console.log("[router:href]"+href);
+			var href: string 	= jqueryEvent.currentTarget.getAttribute("href").substring(1);
+			var target : string = jqueryEvent.currentTarget.getAttribute("target");
+			
+			if (!target && (jqueryEvent.metaKey || jqueryEvent.ctrlKey))
+				target = '_blank';
+			
+			if (target)
+			{
+				console.log("[router:href]" + jqueryEvent.currentTarget.getAttribute("href") + ' ' + target);
+			
+				window.open(jqueryEvent.currentTarget.getAttribute("href"), target);
+				return;
+			}
+			
+			console.log("[router:href]" + href);
+
 			if(href)
 			{
 				jqueryEvent.preventDefault();
