@@ -366,19 +366,16 @@ export class Master
 
         if(async)
         {
-            console.log("Scroll ASYNC");   
             var parent:any = document.scrollingElement?document.scrollingElement:document.body;
             debugger;
             this.bindEvent(selector, "wheel",scrollListener, parent)
             return this.bindEvent(selector, "scroll",scrollListener, parent);
         }else{
-            console.log("Scroll NOT ASYNC"); 
             var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
             for(var elmt of elmts)
             {
                 if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
                 {
-                    console.log("SCROLL_ELEMENT:", elmt);
                    
                     this.bindEvent(elmt, "wheel",scrollListener)
                     return this.bindEvent(elmt, "scroll",scrollListener);
