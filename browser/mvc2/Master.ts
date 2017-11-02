@@ -345,6 +345,7 @@ export class Master
         {
             if($(elmt).css('overflow-y') == 'auto' || $(elmt).css('overflow-y') == 'scroll')
             {
+                console.log("SCROLL_ELEMENT:", elmt);
                 var scrollListener:any = function(event)
                 {
                     var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
