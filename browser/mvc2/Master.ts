@@ -366,9 +366,13 @@ export class Master
 
         if(async)
         {
-            this.bindEvent(selector, "wheel",scrollListener, window)
-            return this.bindEvent(selector, "scroll",scrollListener, window);
+            console.log("Scroll ASYNC");   
+            var parent:any = document.scrollingElement?document.scrollingElement:document.body;
+            debugger;
+            this.bindEvent(selector, "wheel",scrollListener, parent)
+            return this.bindEvent(selector, "scroll",scrollListener, parent);
         }else{
+            console.log("Scroll NOT ASYNC"); 
             var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
             for(var elmt of elmts)
             {
