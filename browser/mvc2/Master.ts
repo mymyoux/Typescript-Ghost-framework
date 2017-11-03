@@ -145,6 +145,7 @@ export class Master
     }
     public handleDisactivation():void
     {
+        this.unbindEvents();
         this.disactivate();
         this.dispose();
     }
