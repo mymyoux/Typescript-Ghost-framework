@@ -192,6 +192,23 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             var path:string = super._path(path);
             return path.replace('collection', '');
         }
+        public unselect():this 
+        {
+            for(var p in this.models)
+             {
+                 if(this.models[p].models)
+                 {
+                     for(var q in this.models[p].models)
+                     {
+                         this.models[p].models[q].selected = false;
+                        }
+                }else{
+
+                    this.models[p].selected = false;
+                }
+             }
+             return this;
+        }
         public request(config?:any):API2
         {
             if(!this._request)
