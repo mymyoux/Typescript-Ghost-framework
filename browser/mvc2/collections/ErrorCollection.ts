@@ -16,7 +16,7 @@ function A<X extends Constructor<Model>>( CModel:X ) {
 export class ErrorCollection extends A(Singleton(Table(Unique(Sorted(Collection(ErrorModel))))))
 {
     public static PATH_REALTIME:()=>ModelLoadRequest =
-    ()=>new ModelLoadRequest("error/interval", {}, {replaceDynamicParams:false, removePreviousModels:true, readExternal:true,marksPathAsLoaded:false});
+    ()=>new ModelLoadRequest("error/interval", {}, {replaceDynamicParams:false, removePreviousModels:true, readExternal:true,marksPathAsLoaded:false,ignorePathLoadState:true});
    //
    public max:number = 0;
    public constructor()
@@ -41,6 +41,7 @@ export class ErrorCollection extends A(Singleton(Table(Unique(Sorted(Collection(
         // this.addColumn('type', {prop:"type", editable:true,searchable:true} /*{type:"name",link:true,sortable:true,headerClasses:["TEST","NON"]}*/);
         // this.addChoice('trad',['empty',{label:'empty plurial',value:'empty_plurial'},'all']);
     }
+   
     public loadRealtime(params?:any,config?:any):any
     {
         return this.load(this.constructor["PATH_REALTIME"], params, config);

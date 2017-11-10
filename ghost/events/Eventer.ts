@@ -143,6 +143,11 @@ import {EventDispatcher} from "./EventDispatcher";
          * @type {string}
          */
         public PAGE_CHANGED = "page_changed";
+
+        /**
+         * This event is fired when the page visibility change
+         */
+        public VISIBILITY_CHANGE:string = "visibilitychange";
         /**
          * List all events to listen. (linked to document)
          * @type {Array}
@@ -164,7 +169,8 @@ import {EventDispatcher} from "./EventDispatcher";
             this.BATTERY_CRITICAL,
             this.BATTERY_LOW,
             this.BATTERY_STATUS,
-            this.SCREEN_ORIENTATION_CHANGE
+            this.SCREEN_ORIENTATION_CHANGE,
+            this.VISIBILITY_CHANGE
         ];
         /**
          * List all events to listen. (linked to window)

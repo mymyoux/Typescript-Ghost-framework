@@ -6,7 +6,7 @@ import {Router} from "browser/mvc2/Router";
 import {Component} from "browser/mvc2/Component";
 import {Buffer} from "ghost/utils/Buffer";
 import {ErrorCollection} from "../collections/ErrorCollection";
-
+import {ErrorModel} from "../models/ErrorModel";
 export class ErrorComponent extends Component
 {
     public constructor(template:any)
@@ -20,29 +20,24 @@ export class ErrorComponent extends Component
      protected bindVue():void
     {   
         this.$addModel(ErrorCollection).loadGet();
-        var collection2:any = new ErrorCollection();
-        this.$addModel("errors_realtime", collection2);
-        this.realtime();
     }
-    protected realtime():void
+    public $onErrorSelected(item:ErrorModel):void
     {
-        var collection:any = this.$getModel("errors_realtime");
-        collection.loadRealtime(
-            {start:1501624800,
-            end:1504303200,step:43200}
-        ).then(()=>
-        {
-            collection.max = collection.models.reduce(function(previous, item)
-            {
-                if(item.count>previous)
-                    return item.count;
-                return previous;
-            }, 0);
-        });
+        this.template.errors.clear();
+        this.template.errors.order(["count","last_created_time"],[-1, -1]);
+        this.template.errors.loadGet({start:item.timestamp, end:item.timestamp+60*5});
+    }
+    public $onErrorUnselected():void
+    {
+        this.template.errors.clear();
+        this.template.errors.order(['last_created_time'], [-1]);
+        this.template.errors.loadGet();
     }
     public bindEvents():void
     {
-
+    }
+    public unbindEvents():void
+    {
     }
 
 
