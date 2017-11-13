@@ -38,7 +38,11 @@ export class AutocompleteComponent extends Component
             {
                 type:String,
                 default:""
-            }
+            },
+            placeholder: {
+                required: false,
+                default: null
+            },
             // "actions":
             // {
             //     type:Boolean,
