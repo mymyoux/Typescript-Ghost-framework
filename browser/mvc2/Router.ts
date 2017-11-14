@@ -342,16 +342,16 @@
 					for (var route of this.irouteRoutes[priority])
 					{
 						var starts_with : string = route.starts_with;
+						
 						//quick test
 						if (Strings.startsWith(url, starts_with))
 						{
 							var test_route : boolean = route.route.test(url);
-
-							if (route.type === Router.TYPE_SEGMENT && route.params && (<any>Object).values(route.params).filter(function(item){return !!item;}).length)
+ 
+							if (test_route && url != starts_with && route.type === Router.TYPE_SEGMENT)
 							{
-								starts_with += (route.params ? '/' : '');
-								
-								test_route = test_route && Strings.startsWith(url, starts_with);
+								starts_with += '/';
+								test_route =  Strings.startsWith(url, starts_with);
 							}
 						
 							if (test_route)
@@ -383,6 +383,7 @@
 					}
 				}
 			}
+			debugger;
 			console.warn("route:" + url + " not found");
 			return false;
 		}
