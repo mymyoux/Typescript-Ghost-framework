@@ -724,7 +724,7 @@ import {IPartRequest} from "./IPartRequest";
          * Override this function to modify how reset is handled
          * @param name Part's name
          */
-        protected reset(name:string):void
+        protected reset(name?:string):void
         {
             this._models = [];
         }
