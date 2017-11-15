@@ -526,6 +526,7 @@
 			{
 				console.log("[router:href]" + jqueryEvent.currentTarget.getAttribute("href") + ' ' + target);
 			
+				jqueryEvent.preventDefault();
 				window.open(jqueryEvent.currentTarget.getAttribute("href"), target);
 				return;
 			}
