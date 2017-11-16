@@ -410,12 +410,15 @@ export class Component extends EventDispatcher
         {
             options = parseInt(options);
         }
-        if(!~key.indexOf("."))
+        if (key.indexOf('.') === -1 || key.indexOf('.') === 0)
         {
             var prefix:string = this.root.getTradKey();
             if(prefix)
             {
-                key = prefix+"."+key;
+                if (key.indexOf('.') === 0)
+                    key = prefix + key;
+                else                
+                    key = prefix+"."+key;
             }
         }
         return Polyglot2.instance().t(key, options);
