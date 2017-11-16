@@ -121,7 +121,10 @@ export class AutocompleteListComponent extends Component
         
         //this.template.list = [];
     }
-    public $enter():void{
+    public $enter(event:any):void{
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
         if(this.template.selected>-1)
         {
             return this.select(this.template.list.models[this.template.selected]);
@@ -233,6 +236,14 @@ export class AutocompleteListComponent extends Component
     public getChoice():any
     {
         return this.template.selected_item;
+    }
+    public getChoiceValue():any
+    {
+        return this.template.choice;
+    }
+    public setChoiceValue(value:string):void
+    {
+        this.template.choice = value;
     }
     protected onMounted():void
     {
