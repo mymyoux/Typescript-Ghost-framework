@@ -137,7 +137,9 @@ export class AutocompleteListComponent extends Component
         this.select({name:this.template.choice});
     }
     protected $focus():void
-    { 
+    {
+        if (this.$getProp('list').models)
+            return;
         this.template.hidden = false;
         this.$getProp('list').loadAutocomplete({choice:""});
     }
@@ -177,6 +179,12 @@ export class AutocompleteListComponent extends Component
     {
         if(event.keyCode == 13)
             return;
+        if (this.template.choice.length == 0)
+        {
+            this.template.hidden = true;
+            return;
+        }
+
         this.template.selected_item = null;
         // if(this.template.choice)
         //     this.template.hidden = false;
