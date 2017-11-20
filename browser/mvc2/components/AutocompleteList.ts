@@ -62,6 +62,11 @@ export class AutocompleteListComponent extends Component
                 required: false,
                 default : 0
             },
+            "tabindex":
+            {
+                required: false,
+                type: Number
+            },
             "clear":
             {
                 required: false,
