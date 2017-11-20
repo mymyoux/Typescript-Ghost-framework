@@ -354,7 +354,7 @@ export class Master
 
         var scrollListener:any = function(event)
         {
-            var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
+            var down:boolean =(event.originalEvent.deltaY !== undefined && event.originalEvent.deltaY>0) || (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
             if(!down)
                 return;
             var target:any = event.currentTarget;
@@ -368,9 +368,12 @@ export class Master
         if(async)
         {
             var parent:any = document.scrollingElement?document.scrollingElement:document.body;
-            debugger;
+            // parent = document.body;
+            // debugger;
             this.bindEvent(selector, "wheel",scrollListener, parent)
-            return this.bindEvent(selector, "scroll",scrollListener, parent);
+            this.bindEvent(selector, "scroll",scrollListener, parent);
+
+            return;
         }else{
             var elmts:any[] = $(selector).parents().addBack().toArray().reverse();
             for(var elmt of elmts)

@@ -12,7 +12,6 @@ export class ErrorComponent extends Component
     public constructor(template:any)
     {
         super(template);
-        debugger;
     }
     public props():any {
         return {
@@ -42,12 +41,10 @@ export class ErrorComponent extends Component
     }
     public activate():void
     {
-        debugger;
         $("body").addClass("hide_front");
     }
     public disactivate():void
     {
-        debugger;
         $("body").removeClass("hide_front");
     }
 

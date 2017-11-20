@@ -314,7 +314,7 @@ export class Component extends EventDispatcher
     }
     protected disactivate():void
     {
-        
+
     }
     public isInTemplate(element:any):boolean
     {
@@ -372,7 +372,7 @@ export class Component extends EventDispatcher
             {
                 var scrollListener:any = function(event)
                 {
-                    var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
+                    var down:boolean =(event.originalEvent.deltaY !== undefined && event.originalEvent.deltaY>0) || (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
                     if(!down)
                         return;
                     var target:any = event.currentTarget;
