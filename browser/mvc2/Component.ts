@@ -204,6 +204,7 @@ export class Component extends EventDispatcher
                         if(index != -1)
                         {
                             Component.instances[index].unbindEvents();
+                            Component.instances[index].disactivate();
                             Component.instances[index].dispose();
                             Component.instances.splice(index, 1);
                             Component.instancesVue.splice(index, 1);
@@ -311,6 +312,10 @@ export class Component extends EventDispatcher
             }
         }
     }
+    protected disactivate():void
+    {
+
+    }
     public isInTemplate(element:any):boolean
     {
         if(!this.template)
@@ -367,7 +372,7 @@ export class Component extends EventDispatcher
             {
                 var scrollListener:any = function(event)
                 {
-                    var down:boolean = (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
+                    var down:boolean =(event.originalEvent.deltaY !== undefined && event.originalEvent.deltaY>0) || (event.originalEvent.wheelDeltaY !== undefined && event.originalEvent.wheelDeltaY<0) || (event.originalEvent.wheelDeltaY==undefined && event.originalEvent.wheelDelta<0);
                     if(!down)
                         return;
                     var target:any = event.currentTarget;
@@ -410,12 +415,15 @@ export class Component extends EventDispatcher
         {
             options = parseInt(options);
         }
-        if(!~key.indexOf("."))
+        if (key.indexOf('.') === -1 || key.indexOf('.') === 0)
         {
             var prefix:string = this.root.getTradKey();
             if(prefix)
             {
-                key = prefix+"."+key;
+                if (key.indexOf('.') === 0)
+                    key = prefix + key;
+                else                
+                    key = prefix+"."+key;
             }
         }
         return Polyglot2.instance().t(key, options);
