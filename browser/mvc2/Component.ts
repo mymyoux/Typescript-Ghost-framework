@@ -204,6 +204,7 @@ export class Component extends EventDispatcher
                         if(index != -1)
                         {
                             Component.instances[index].unbindEvents();
+                            Component.instances[index].disactivate();
                             Component.instances[index].dispose();
                             Component.instances.splice(index, 1);
                             Component.instancesVue.splice(index, 1);
@@ -310,6 +311,10 @@ export class Component extends EventDispatcher
                 $(event.elmt).off(event.type, event.listener);
             }
         }
+    }
+    protected disactivate():void
+    {
+        
     }
     public isInTemplate(element:any):boolean
     {
