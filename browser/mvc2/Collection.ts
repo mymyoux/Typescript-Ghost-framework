@@ -287,19 +287,19 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                 config = request["model_config"];
             }
            
-            if(!request.hasNoPaginate() && this._pathLoaded[request.getPath()] && (!config || config.ignorePathLoadState !== true))
-            {
-                if(typeof this._pathLoaded[request.getPath()] != "boolean" && !this._pathLoaded[request.getPath()].done)
-                {
-                    try{
+            // if(!request.hasNoPaginate() && this._pathLoaded[request.getPath()] && (!config || config.ignorePathLoadState !== true))
+            // {
+            //     if(typeof this._pathLoaded[request.getPath()] != "boolean" && !this._pathLoaded[request.getPath()].done)
+            //     {
+            //         try{
 
-                        await this._pathLoaded[request.getPath()];
-                    }catch(error)
-                    {
-                        //if request failed or been cancelled
-                    }
-                }
-            }
+            //             await this._pathLoaded[request.getPath()];
+            //         }catch(error)
+            //         {
+            //             //if request failed or been cancelled
+            //         }
+            //     }
+            // }
 
             if(request.hasNoPaginate())
             {
@@ -315,6 +315,21 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                         }
                     return promise; 
                     
+                }
+            }else{
+                //useful if two calls are made before one gets a result so we don't know if there is any paginate
+                if(this._pathLoaded[request.getPath()] && (!config || config.ignorePathLoadState !== true))
+                {
+                    if(typeof this._pathLoaded[request.getPath()] != "boolean")
+                    {
+                        try{
+
+                            await this._pathLoaded[request.getPath()];
+                        }catch(error)
+                        {
+                            //if request failed or been cancelled
+                        }
+                    }
                 }
             }
             for (var key in params)
