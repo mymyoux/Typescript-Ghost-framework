@@ -24,6 +24,8 @@
             });
              $(document).on("click", ".link-inside", function(event, originalEvent = null)
             { 
+                console.log("on href:link-inside");
+                debugger;
               if(originalEvent)
               {
                   //already triggered
