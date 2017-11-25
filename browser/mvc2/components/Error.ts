@@ -39,6 +39,14 @@ export class ErrorComponent extends Component
     public unbindEvents():void
     {
     }
+    public activate():void
+    {
+        $("body").addClass("hide_front");
+    }
+    public disactivate():void
+    {
+        $("body").removeClass("hide_front");
+    }
 
 
 }
