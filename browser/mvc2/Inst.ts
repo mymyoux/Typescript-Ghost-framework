@@ -63,7 +63,7 @@ export class Inst
                     }
                 }   
             }
-            model = new cls();
+            model = new cls(); 
             model.setID(id);
             return model;
         }
