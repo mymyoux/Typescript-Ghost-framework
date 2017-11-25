@@ -36,8 +36,7 @@ export class MasterRouter
     }
     public static register(route:IRoute, cls:any)
     {
-        
-        Router.instance().register(route, this.onRoute.bind(null, cls));
+        MasterRouter.router().register(route, this.onRoute.bind(null, cls));
     }
     protected static onRoute(cls:any, route:IRoute, url:string):any
     {
@@ -135,8 +134,8 @@ export class MasterRouter
     }
     public static listen():void
     {
-        Router.instance().listen();
-        Router.instance().on('remove_all',this.onRemoveAll);
+        MasterRouter.router().listen();
+        MasterRouter.router().on('remove_all',this.onRemoveAll);
     }
     public static onRemoveAll(scope:string):void
     {
@@ -149,7 +148,7 @@ export class MasterRouter
     }
     public static parseInitialUrl():void
     {
-        Router.instance().parseInitialUrl();
+        MasterRouter.router().parseInitialUrl();
     }
     public static getCurrentMaster(scope:string):any
     {

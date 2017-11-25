@@ -80,7 +80,11 @@
                         {
                             console.log("clicoutside")
                             $ul.removeClass("selected mousedown");
-                            $(document).off("click", "*", listener);
+                            if(listener)
+                            {
+                                console.log("big remove");
+                                $(document).off("click", "*", listener);
+                            }
                             listener = null;
                             target = null;
                             if($ul.find(e.target).length)
