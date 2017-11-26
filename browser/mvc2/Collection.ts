@@ -568,6 +568,10 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
         {
             if(this._unicity.length == 1)
             {
+                if(typeof model[this._unicity[0]] == "function")
+                {
+                    return model[this._unicity[0]]();
+                }
                 return model[this._unicity[0]];
             }else{
                 return this._unicity.map(function(key:string):any
