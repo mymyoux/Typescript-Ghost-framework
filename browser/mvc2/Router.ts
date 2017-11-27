@@ -516,8 +516,7 @@
 		} 
 		protected onhref(jqueryEvent: any, event: any): void {
 
-			console.log("on href");
-			debugger;
+			console.log("on href:router ");
 			var href: string 	= jqueryEvent.currentTarget.getAttribute("href").substring(1);
 			var target : string = jqueryEvent.currentTarget.getAttribute("target");
 			
