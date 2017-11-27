@@ -143,7 +143,7 @@ export class Model extends CoreObject
                 this.invalidate();
             if(typeof this[p] == "function")
             {
-                console.warn("you overwrite function: "+p);
+                // console.warn("you overwrite function: "+p);
             }
             this[p] = input[p];
         }
@@ -169,7 +169,7 @@ export class Model extends CoreObject
      * Returns model's data
      * @returns {any}
      */
-    public writeExternal():any
+    public writeExternal( remove_null_values = false ):any
     {
         var external: any = {};
         for(var p in this)
@@ -187,9 +187,14 @@ export class Model extends CoreObject
                 continue;
             }
 
+            if (remove_null_values === true && this[p] === null)
+            {
+                continue;
+            }
+
             if(this[p] && typeof this[p] == "object" && typeof this[p]['writeExternal'] === 'function')
             {
-                external[p] = this[p]['writeExternal']();
+                external[p] = this[p]['writeExternal']( remove_null_values );
             }
             else
                 external[p] = this[p];

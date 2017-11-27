@@ -136,8 +136,7 @@
 			this.back(-1, scope);
 			setTimeout(()=>
 			{
-
-			window.location.href = this._buildURL();
+				this.setUrl(this._buildURL() );
 			}, 0);
 		}
 
@@ -178,15 +177,21 @@
 			// }
 			var url:string = this._lastURL = this._buildURL();
 		//	window.location.href = url;
-				setTimeout(function()
+				setTimeout(() =>
 				{
-								window.location.href  = url;
+					this.setUrl( url );
 				},0);
 			this.log("set url:",  url);
 
 			this.listenening = true;
 			this.log("start listening");
 		}
+
+		protected setUrl( url : string ) : void
+		{
+			window.location.href = url;
+		}
+
 		protected _buildURL():string
 		{
 			window["u"] = this;
@@ -211,7 +216,7 @@
 				url:url
 			});
 			this._lastURL = this._buildURL();
-			window.location.href = this._lastURL;
+			this.setUrl(this._lastURL);
 		}
 
 		public getHash() : string
@@ -589,6 +594,7 @@
 			if (oldHash.substring(0, 1) == "!") {
 				oldHash = oldHash.substring(1);
 			}
+
 			var hashes:string[] = newHash.split('+');
 			var current: any;
 			var hash:string;

@@ -70,13 +70,15 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
         {
             this.models     = [];
         }
-        public remove(model:T):void
+        
+        public remove(model:T):T
         {
            var index:number = this.models.indexOf(model);
            if(index != -1)
            {
                this.models.splice(index, 1);
            }
+           return model;
         }
         public getModel(index:number):T
         {
@@ -401,6 +403,7 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                         var model:T = Inst.get(rawModel.__class);
                         this.prepareModel(model);
                         model.readExternal(rawModel);
+                        this.postModel(model);
                         this.push(model);
                     }else
                     {
@@ -440,12 +443,14 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
                                 }
                                  this.prepareModel(model);
                                 model.readExternal(rawModel);
+                                this.postModel(model);
                                 this.push(model);
                             }else
                             {
                                 //TODO:transform existing model into collection if rawModel.models exists
                                 this.prepareModel(model);
                                 model.readExternal(rawModel);
+                                this.postModel(model);
                             }
                         }else
                         {
@@ -462,7 +467,10 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
         {
             
         }
-        
+        protected postModel(model:T):void
+        {
+            
+        }
 
         public next(quantity:number):API2
         public next():API2
@@ -560,6 +568,10 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
         {
             if(this._unicity.length == 1)
             {
+                if(typeof model[this._unicity[0]] == "function")
+                {
+                    return model[this._unicity[0]]();
+                }
                 return model[this._unicity[0]];
             }else{
                 return this._unicity.map(function(key:string):any
@@ -622,7 +634,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
         }
 
 
-        public remove(model:T):void
+        public remove(model:T):T
         {
            var index:number = this.models.indexOf(model);
            if(index != -1)
@@ -630,6 +642,7 @@ export function Unique<X extends Constructor<ModelClass>>( Model: X) {
                this.models.splice(index, 1);
                this._keys.splice(index, 1);
            }
+           return model;
         }
         public pop():T
         {
