@@ -237,12 +237,36 @@ import {Maths} from "ghost/utils/Maths";
         }
         private static _tokenCars:string[]="0123456789abcdef".split("");
         private static _tokenCarsLength:number = Strings._tokenCars.length-1;
+        
+        // public static getUniqueToken(size:number = 64):string
+        // {
+        //     var token:string = Date.now()+"";
+        //     while(token.length<size)
+        //     {
+        //         token+=Strings._tokenCars[Maths.randBetween(0,Strings._tokenCarsLength)];
+        //     }
+        //     return token;
+        // }
+        private static _syllabus:string[] = ["par","to","mon","issu","na","bac","dat","cou","lac","son","tri","rot"];
         public static getUniqueToken(size:number = 64):string
-        {
-            var token:string = Date.now()+"";
+        { 
+            var count = Maths.randBetween(1, 3);
+            var tokens:string[] = [];
+            while(count)
+            {
+                tokens.push(Strings._syllabus[Maths.randBetween(0, Strings._syllabus.length-1)]);
+                count--;
+            }
+            tokens.push(Maths.randBetween(1, 1000)+"");
+            var token:string = tokens.join("-");
+            token+= Date.now()+"-";
             while(token.length<size)
             {
                 token+=Strings._tokenCars[Maths.randBetween(0,Strings._tokenCarsLength)];
+            }
+            while(token.length>size)
+            {
+                token = token.substring(1);
             }
             return token;
         }
