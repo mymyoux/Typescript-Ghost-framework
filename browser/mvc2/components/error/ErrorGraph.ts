@@ -30,8 +30,8 @@ export class ErrorGraphComponent extends Component
         };
     }
      protected bindVue():void
-    {   
-        var collection2:any = this.$getProp("collection")?this.$getProp("collection"):new ErrorCollection();
+    {     
+        var collection2:any = /*this.$getProp("collection")?this.$getProp("collection"):*/new ErrorCollection();
         collection2.order(['time'], [1]);
         this.$addModel("errors_realtime", collection2);
         this.$addData("selected", null);

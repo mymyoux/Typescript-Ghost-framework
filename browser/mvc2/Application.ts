@@ -92,7 +92,9 @@ export class Application
             for(var q in config)
             {
                 if (typeof config[q] != "string")
+                {
                     continue;
+                }
                 config[q] = config[q].replace('%origin%', window.location.origin);
                 config[q] = config[q].replace('%pathname%', name);
                 config[q] = config[q].replace('%shortorigin%', shortorigin);
@@ -100,16 +102,17 @@ export class Application
                 config[q] = config[q].replace('%usertoken%', Auth.check()?Auth.user()["token"]:'');
                 config[q] = config[q].replace('%impersonate_token%', Auth.check() && Auth.user().isImpersonated()?Auth.user().getRealUser()["token"]:'');
                 config[q] = config[q].replace('%id_user%', Auth.id());
+
                 if(config[q] === "undefined")
                 {   
                     delete config[q];
                 } 
             } 
-            if(api.hasInstance(name))
+            if(api.hasInstance(p))
             {
-                api.instance(name).config(config);
+                api.instance(p).config(config);
             }else
-                api.instance(config.name, new api()).config(config);
+                api.instance(p, new api()).config(config);
         }
     }
     protected initAuth():void

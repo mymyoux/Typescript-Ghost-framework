@@ -13,7 +13,7 @@ function A<X extends Constructor<Model>>( CModel:X ) {
    }
 } 
 
-export class ErrorCollection extends A(Singleton(Table(Unique(Sorted(Collection(ErrorModel))))))
+export class ErrorCollection extends A(Table(Unique(Sorted(Collection(ErrorModel)))))
 {
     public static PATH_REALTIME:()=>ModelLoadRequest =
     ()=>new ModelLoadRequest("error/interval", {}, {replaceDynamicParams:false, removePreviousModels:true, readExternal:true,marksPathAsLoaded:false,ignorePathLoadState:true});
