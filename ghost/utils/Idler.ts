@@ -1,6 +1,6 @@
 import { setTimeout } from "timers";
 
-class Idler
+export class Idler
 {
     protected static _idle:any[] = [];
     protected static _request:any = null;
@@ -11,9 +11,9 @@ class Idler
     }
     public static pushUnique(object:any, method:string, ...params:any[])
     {
-        for(var object of this._idle)
+        for(var obj of this._idle)
         {
-            if(object.object === object && method === method)
+            if(obj.object === object && obj.method === method)
             {
                 return;
             }
@@ -23,8 +23,13 @@ class Idler
     public static execute():void
     {
         var object:any = this._idle.shift();
-       var result:any =  object.object[object.method](...object.params);
-       console.log("[IDLER] - execution");
+        try{
+
+            var result:any =  object.object[object.method](...object.params);
+        }catch(error)
+        {
+            debugger;
+        }
        if(result instanceof Promise)
        {
            result.then(()=>{}, ()=>{});
@@ -33,6 +38,7 @@ class Idler
     }
     protected static checkNext():void
     {
+        
         if(this._request === null)
         {
             this.next();
@@ -47,9 +53,9 @@ class Idler
         }
         if(window.requestAnimationFrame)
         {
-            this._request = window.requestAnimationFrame(this.execute);
+            this._request = window.requestAnimationFrame(this.execute.bind(this));
         }else{
-            this._request = setTimeout(this.execute, 100);
+            this._request = setTimeout(this.execute.bind(this), 100);
         }
     }
 }
