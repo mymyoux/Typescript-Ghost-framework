@@ -19,7 +19,8 @@ export class ErrorComponent extends Component
     }
      protected bindVue():void
     {   
-        this.$addModel(ErrorCollection).loadGet();
+        this.$addModel(ErrorCollection);
+        this.loadOneHour();
     }
     public $onErrorSelected(item:ErrorModel):void
     {
@@ -29,9 +30,20 @@ export class ErrorComponent extends Component
     }
     public $onErrorUnselected():void
     {
+       
         this.template.errors.clear();
         this.template.errors.order(['last_created_time'], [-1]);
-        this.template.errors.loadGet();
+        this.loadOneHour();
+    }
+    protected loadOneHour()
+    {
+        var time:Date = new Date();//Date(1504303200*1000+60*1000*5*12);
+        time.setSeconds(0);
+        time.setMilliseconds(0);
+        time.setMinutes(time.getMinutes()-time.getMinutes()%5);
+        time.setMinutes(time.getMinutes()+5);
+        this.$getModel("errors").loadGet({start:time.getTime()-60*1000*5*12,
+            end:time.getTime(),step:60*5});
     }
     public bindEvents():void
     {
