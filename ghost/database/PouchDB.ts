@@ -27,6 +27,14 @@ export class PouchDB
         {
             fs.mkdirSync(dirname);
         }
+        Pouch.on("error", function(error)
+    {
+        console.log("ERROR", error);
+    })
+        Pouch.on("openError", function(error)
+    {
+        console.log("EOPEN RROR", error);
+    })
         Pouch.debug.enable('*');
         Pouch.plugin(require('pouchdb-find'));
         

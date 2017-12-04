@@ -5,10 +5,6 @@ export class Database
     {
         this.db = db;
     }
-    public info(...params)
-    {
-        return this.db.info(...params);
-    }
     public put(...params)
     {
         return this.db.put(...params);
@@ -27,6 +23,14 @@ export class Database
         {
             return null;
         }
+    }
+    public getRaw(...params)
+    {
+        return this.db.get(...params);
+    }
+    public info()
+    {
+        return this.db.info();
     }
     public async find(...params)
     {
