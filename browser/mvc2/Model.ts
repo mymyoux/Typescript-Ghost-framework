@@ -67,12 +67,14 @@ export class Model extends CoreObject
     }
     public getID():number
     {
+        var id_name:string = this.getIDName();
+        if(id_name && this[id_name])
+            return this[id_name];
         if(this["id"])
         {
             return this["id"];
-        }else{
-            return this[this.getIDName()];
         }
+        return null;
     }
     public setID(value:number):void
     {
