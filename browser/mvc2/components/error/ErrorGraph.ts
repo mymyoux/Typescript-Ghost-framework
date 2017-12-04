@@ -26,6 +26,10 @@ export class ErrorGraphComponent extends Component
             "collection":
             {
                 required:false
+            },
+            tick : {
+                required: false,
+                default: 1
             }
         };
     }
@@ -60,7 +64,7 @@ export class ErrorGraphComponent extends Component
         var collection:any = this.$getModel("errors_realtime");
         if(!collection)
         {
-            this.interval = setTimeout(this.realtime.bind(this), 1000);
+            this.interval = setTimeout(this.realtime.bind(this), this.$getProp('tick') * 1000);
             return;
         }
         var time:Date = new Date();//Date(1504303200*1000+60*1000*5*12);
@@ -84,11 +88,11 @@ export class ErrorGraphComponent extends Component
                 item.color = this.colors.getColour(Math.floor(item.count/collection.max*100)-1);
                 return item;
             }, 0);
-            this.interval = setTimeout(this.realtime.bind(this), 1000);
+            
+            this.interval = setTimeout(this.realtime.bind(this), this.$getProp('tick') * 1000);
         }, ()=>
         {
-            this.interval = setTimeout(this.realtime.bind(this), 1000);
-        
+            this.interval = setTimeout(this.realtime.bind(this), this.$getProp('tick') * 1000);
         });
      
     }

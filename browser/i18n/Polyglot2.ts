@@ -403,6 +403,7 @@ import {Auth} from "browser/mvc2/Auth";
 			if (key === undefined ||  key === null || key == "" || key.substring(key.lastIndexOf(".") + 1) == "undefined" || key.substring(key.lastIndexOf(".") + 1) == "null") {
 				return "";
 			}
+			key = key.replace(/[\(\)]/g,'');
 
 			key = Strings.trim(key.toLowerCase());
 		
