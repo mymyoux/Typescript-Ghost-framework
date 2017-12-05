@@ -35,7 +35,7 @@ export class PouchDB
     {
         console.log("EOPEN RROR", error);
     })
-        Pouch.debug.enable('*');
+        //Pouch.debug.enable('*');
         Pouch.plugin(require('pouchdb-find'));
         
         

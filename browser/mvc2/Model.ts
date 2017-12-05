@@ -196,12 +196,40 @@ export class Model extends CoreObject
 
             if(this[p] && typeof this[p] == "object" && typeof this[p]['writeExternal'] === 'function')
             {
+                console.log("child writeExtenral", this[p]);
                 external[p] = this[p]['writeExternal']( remove_null_values );
             }
             else
+            {
                 external[p] = this[p];
+                // if(Arrays.isArray(external[p]))
+                // {
+                //     external[p] = this._writeExternal(external[p].slice());
+                // }
+            }
         }
         return external;
+    }
+    protected _writeExternal(data:any)
+    {
+        console.log(data);
+        for(var i:number=0; i<data.length; i++)
+        {
+            //TODO:check this not sure if needed
+            // if(!this.hasOwnProperty(p))
+            //     continue;
+            if(data[i] && typeof data[i] == "object" && typeof data[i]['writeExternal'] === 'function')
+            {
+                console.log("subchild writeExtenral", data[i]);
+                data[i] = data[i]['writeExternal']( );
+            }else
+            if(Arrays.isArray(data[i]))
+            {
+                console.log("is array: ["+i+"]", data[i]);
+                data[i] = this._writeExternal(data[i].slice());
+            }
+        }
+        return data;
     }
     public static regexp = /%([^%]+)%/g;
     /**
@@ -394,18 +422,29 @@ export class Model extends CoreObject
         {
             return this._pathLoaded[<string>path] = request.then((data:any)=>
             {
+                if(config.removePreviousModels)
+                {
+                    if(this["clearModels"])
+                    {
+                        this["clearModels"]();
+                    }
+                }
+                if(config.callback)
+                {
+                    if(typeof config.callback == "function")
+                    {
+                        config.callback(data, {...config,path:path});
+                    }else{
+                        this[config.callback](data, {...config,path:path});
+                    }
+
+                }
                 if(config.readExternal !== false)
                 {
-                    if(config.removePreviousModels)
-                    {
-                        if(this["clearModels"])
-                        {
-                            this["clearModels"]();
-                        }
-                    }
                     this.readExternal(data, {...config,path:path});
-                    this.validate();
                 }
+                if(config.readExternal !== false || config.callback)
+                this.validate();
                 return data;
             }, (error:any)=>
             {
@@ -471,6 +510,10 @@ export interface IModelConfig
      * Api's name to use
      */
     api_name?:string;
+    /**
+     * Callback method instead of readExternal
+     */
+    callback?:any;
     
 }
 

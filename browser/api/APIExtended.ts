@@ -167,7 +167,7 @@ import {Objects} from "ghost/utils/Objects";
 				request.data._id = Strings.getUniqueToken();
 				if (this._cacheManager)
 					request.data._instance = this._cacheManager.instance();
-				request.data._timestamp = Date.now();
+				request.data.__timestamp = Date.now();
 			}
 			return request;
 		}

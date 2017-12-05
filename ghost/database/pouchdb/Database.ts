@@ -1,3 +1,5 @@
+import { Strings } from "ghost/utils/Strings";
+
 export class Database 
 {
     public db:any;
@@ -7,16 +9,37 @@ export class Database
     }
     public put(...params)
     {
+        console.log("DATABASE PUT:", params);
+        params = this._clearParams(params);
         return this.db.put(...params);
     }
     public post(...params)
     {
+        params = this._clearParams(params);
         return this.db.post(...params);
+    }
+    private _clearParams(p:any[]):any[]
+    {
+        if(!p)
+            return p;
+        var params:any;
+        for(var q in p)
+        {
+            params = p[q];
+            var keys:string[] = Object.keys(params).filter((item)=>Strings.startsWith(item,"__"));
+            for(var k of keys)
+            {
+                delete params[k];
+            }
+
+        }
+        return p;
     }
     public async get(...params)
     {
         try{
 
+            params = this._clearParams(params);
             var result = await this.db.get(...params);
             return result;
         }catch(error)
@@ -26,6 +49,7 @@ export class Database
     }
     public getRaw(...params)
     {
+        params = this._clearParams(params);
         return this.db.get(...params);
     }
     public info()
@@ -35,7 +59,6 @@ export class Database
     public async find(...params)
     {
         try{
-            
             var result = await this.db.find(...params);
             if(result && result.docs)
             {
@@ -74,6 +97,7 @@ export class Database
     }
     public remove(...params)
     {
+        params = this._clearParams(params);
         return this.db.remove(...params);
     }
     public getIndexes(...params)
