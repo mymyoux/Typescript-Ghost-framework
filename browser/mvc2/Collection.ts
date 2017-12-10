@@ -104,6 +104,14 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             }
             return null;
         }
+        public first():T
+        {
+            return this.models.length?this.models[0]:null;
+        }
+        public last():T
+        {
+            return this.models.length?this.models[this.models.length-1]:null;
+        }
         public pop():T
         {
             return this.models.pop();
