@@ -271,4 +271,31 @@ import {Maths} from "ghost/utils/Maths";
             return token;
         }
 
+
+        protected static _SOUNDEX:any = {b:1,f:1,p:1,v:1,c:2,g:2,j:2,k:2,q:2,s:2,x:2,z:2,d:3,t:3,l:4,m:5,n:5,r:6 };
+        public static soundex(text:string, sizeMax?:number):string
+        {
+            var code:string = text.substring(0, 1);
+            text = text.toLowerCase().replace(/wh/g,'');
+            var i:number = 1;
+            var last:number;
+            for(i; i<text.length && (!sizeMax || code.length<4);i++)
+            {
+                if(text[i-1] == text[i] || last == this._SOUNDEX[text[i]])
+                {
+                    continue;
+                }
+                if(this._SOUNDEX[text[i]])
+                {
+                    last = this._SOUNDEX[text[i]];
+                    code+=this._SOUNDEX[text[i]];
+                }
+            }
+            while(code.length<4)
+            {
+                code+="0";
+            }
+            return code;
+        }
+
     }
