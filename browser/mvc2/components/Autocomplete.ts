@@ -95,7 +95,10 @@ export class AutocompleteComponent extends Component
         if(!this.isInTemplate(event.target))
         {
             console.log('outside');
-            this.$blur();
+            // resolved bug click on an element and setting a new choice value but choice was null (in debugger it wasn't)
+            window.setTimeout(() => {
+                this.$blur();
+            }, 0);
         }
     }
     public $enter():void{
@@ -123,7 +126,7 @@ export class AutocompleteComponent extends Component
         this.template.open = false;
         this.template.list = [];
         if(this.template.allow_empty && !this.template.choice)
-        { 
+        {
             this.select(null);
         }
     }

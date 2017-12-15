@@ -1,6 +1,7 @@
 //convert
  /* ghost.core.Root.*/
 import {Root} from "ghost/core/Root";
+import { Strings } from "ghost/utils/Strings";
 
     export class Classes
     {
@@ -8,7 +9,13 @@ import {Root} from "ghost/core/Root";
         {
             var funcNameRegex = /function ([^\(]{1,})\(/;
             var results  = (funcNameRegex).exec(cls+"");
-            return (results && results.length > 1) ? results[1] : "";
+            if (results && results.length > 1)
+            {
+                return results[1];
+            }
+            var funcNameRegex = /class ([^\({]{1,}){/;
+            var results  = (funcNameRegex).exec(cls+"");
+            return (results && results.length > 1) ? Strings.trim(results[1]) : "";
         }
         /**
          * Tests if a class exists

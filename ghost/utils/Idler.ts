@@ -1,5 +1,3 @@
-import { setTimeout } from "timers";
-
 export class Idler
 {
     protected static _idle:any[] = [];
