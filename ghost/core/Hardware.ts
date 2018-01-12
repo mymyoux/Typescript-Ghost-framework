@@ -131,7 +131,7 @@ import {Root} from "ghost/core/Root";
             {
                 return  Hardware.OS_BlackBerry;
             }else
-            if(agent.indexOf("iphone")!=-1 || agent.indexOf("ipod")!=-1/* || agent.indexOf("ipad")!=-1)*/
+            if(agent.indexOf("iphone")!=-1 || agent.indexOf("ipod")!=-1)/* || agent.indexOf("ipad")!=-1)*/
             {
                 return  Hardware.OS_IOS;
             }else
