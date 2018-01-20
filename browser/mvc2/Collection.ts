@@ -346,8 +346,13 @@ export function Collection<X extends Constructor<ModelClass>>( A:X ) {
             {
                 request.param(key, params[key]);
             }
-            var promise:any =  request.then(function(data)
+            if(config.removePreviousModels)
+            {
+                this.models = [];
+            }
+            var promise:any =  request.then((data)=>
             { 
+                
                 return data;
             });
             if(config.execute === false)
