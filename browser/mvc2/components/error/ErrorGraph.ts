@@ -38,6 +38,10 @@ export class ErrorGraphComponent extends Component
             front: {
                 required: false,
                 default: true
+            },
+            back: {
+                required: false,
+                default: true
             }
         };
     }
@@ -85,7 +89,8 @@ export class ErrorGraphComponent extends Component
             end     : time.getTime(),
             step    : 60 * 5,
             is_api  : this.$getProp('is_api'),
-            front   : this.$getProp('front')
+            front   : this.$getProp('front'),
+            back    : this.$getProp('back')
         }).then(()=> {
             collection.max = collection.models.reduce(function(previous, item)
             {

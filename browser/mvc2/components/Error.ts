@@ -22,6 +22,7 @@ export class ErrorComponent extends Component
     {   
         this.$addData('is_api', true);
         this.$addData('front', true);
+        this.$addData('back', true);
         this.$addModel(ErrorCollection);
         this.loadOneHour();
     }
@@ -43,6 +44,13 @@ export class ErrorComponent extends Component
         this.$onErrorUnselected();
     }
 
+    public $setBack( value : boolean ) : void
+    {
+        this.$addData('back', value);
+
+        this.$onErrorUnselected();
+    }
+
     public $onErrorSelected(item:ErrorModel):void
     {
         this.template.errors.clear();
@@ -52,6 +60,7 @@ export class ErrorComponent extends Component
             end     : item.timestamp + 60 * 5,
             is_api  : this.$getData('is_api'),
             front   : this.$getData('front'),
+            back    : this.$getData('back'),
         });
     }
     public $onErrorUnselected():void
@@ -73,6 +82,7 @@ export class ErrorComponent extends Component
             step    : 60 * 5,
             is_api  : this.$getData('is_api'),
             front   : this.$getData('front'),
+            back    : this.$getData('back'),
         });
     }
     public bindEvents():void
