@@ -472,9 +472,11 @@ export class Component extends EventDispatcher
         if(!this.template.$parent.onNewComponent)
         {
             console.log(this);
-            debugger;
         }
-        this.announceToParent();
+        else
+        {
+            this.announceToParent();
+        }
     }
     protected announceToParent():void
     {
