@@ -522,7 +522,9 @@
 
 		public sameURL(jqueryEvent : any)
 		{
-			return jqueryEvent.target.closest("[href^='#']").getAttribute("href") == jqueryEvent.currentTarget.getAttribute("href");
+			if (jqueryEvent && jqueryEvent.target && jqueryEvent.target.closest("[href^='#']") && jqueryEvent.currentTarget)
+				return jqueryEvent.target.closest("[href^='#']").getAttribute("href") == jqueryEvent.currentTarget.getAttribute("href");
+			return true;
 		}
 		protected onhref(jqueryEvent: any, event: any): void {
 
