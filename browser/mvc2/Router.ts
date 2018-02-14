@@ -520,11 +520,23 @@
 			if(hash.length>1)
 				this.onHashChange({newURL:window.location.href, oldURL:window.location.href.substring(0, window.location.href.indexOf("#"))});
 		} 
+
+		public sameURL(jqueryEvent : any)
+		{
+			if (jqueryEvent && jqueryEvent.target && jqueryEvent.target.closest("[href^='#']") && jqueryEvent.currentTarget)
+				return jqueryEvent.target.closest("[href^='#']").getAttribute("href") == jqueryEvent.currentTarget.getAttribute("href");
+			return true;
+		}
 		protected onhref(jqueryEvent: any, event: any): void {
 
 			console.log("on href:router ");
 			var href: string 	= jqueryEvent.currentTarget.getAttribute("href").substring(1);
 			var target : string = jqueryEvent.currentTarget.getAttribute("target");
+
+			if (!this.sameURL(jqueryEvent))
+			{
+				return;
+			}
 			
 			if (!target && (jqueryEvent.metaKey || jqueryEvent.ctrlKey))
 				target = '_blank';

@@ -30,6 +30,18 @@ export class ErrorGraphComponent extends Component
             tick : {
                 required: false,
                 default: 1
+            },
+            is_api : {
+                required: false,
+                default: true
+            },
+            front: {
+                required: false,
+                default: true
+            },
+            back: {
+                required: false,
+                default: true
             }
         };
     }
@@ -72,11 +84,14 @@ export class ErrorGraphComponent extends Component
         time.setMilliseconds(0);
         time.setMinutes(time.getMinutes()-time.getMinutes()%5);
         time.setMinutes(time.getMinutes()+5);
-        collection.loadRealtime(
-            {start:time.getTime()-60*1000*5*12,
-            end:time.getTime(),step:60*5}
-        ).then(()=>
-        {
+        collection.loadRealtime({
+            start   : time.getTime() - 60 * 1000 * 5 * 12,
+            end     : time.getTime(),
+            step    : 60 * 5,
+            is_api  : this.$getProp('is_api'),
+            front   : this.$getProp('front'),
+            back    : this.$getProp('back')
+        }).then(()=> {
             collection.max = collection.models.reduce(function(previous, item)
             {
                 if(item.count>previous)
