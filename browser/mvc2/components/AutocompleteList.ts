@@ -43,7 +43,12 @@ export class AutocompleteListComponent extends Component
                 type:Boolean,
                 default:false
             },
-            
+
+            "picture":
+            {
+                type:Boolean,
+                default:false
+            },
              "selection":
             {
                 type:String,

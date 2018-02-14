@@ -102,6 +102,7 @@
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
+			debugger;
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];

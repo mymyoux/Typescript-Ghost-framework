@@ -119,7 +119,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                 }
             }
             this._getPromise = request;
-            
+
             return request.then(function(data)
             {
                 return data;

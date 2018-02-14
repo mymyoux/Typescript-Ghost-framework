@@ -252,7 +252,7 @@ export class TableComponent extends Component
         {
             return;
         }
-       
+
         this.scroll(function()
         {
             if(_self.$paginating)
