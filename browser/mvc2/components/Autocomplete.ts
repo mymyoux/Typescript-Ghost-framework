@@ -102,6 +102,7 @@ export class AutocompleteComponent extends Component
         }
     }
     public $enter():void{
+
         if(this.template.selected>-1)
         {
             return this.select(this.template.list[this.template.selected]);

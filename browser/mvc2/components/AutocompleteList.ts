@@ -23,7 +23,7 @@ export class AutocompleteListComponent extends Component
     }
     public $outside(event):void
     {
-        console.log("outside",event.target);
+        console.log("outside : ",event.target);
     }
     public bindEvents():void
     {
@@ -43,7 +43,11 @@ export class AutocompleteListComponent extends Component
                 type:Boolean,
                 default:false
             },
-
+            "allow_new":
+            {
+                type:Boolean,
+                default:false
+            },
             "picture":
             {
                 type:Boolean,
@@ -139,7 +143,7 @@ export class AutocompleteListComponent extends Component
         {
             return this.select(this.template.list.models[this.template.selected]);
         }
-        if(!this.template.allow_custom)
+        if(!this.template.allow_custom && !this.template.allow_new)
         {
             if(this.$getProp('list').models.length && Strings.trim(this.template.choice))
             {
@@ -147,8 +151,27 @@ export class AutocompleteListComponent extends Component
             }
             return;
         }
+        if (this.template.allow_new)
+        {
+            this.selectCustom();
+            return;
+        }
         this.select({name:this.template.choice});
     }
+
+    protected selectCustom():void
+    {
+        var choice = [];
+        choice['name'] = this.template.choice;
+        choice['id_new_tag'] = 1;
+        //this.template.selected_item = this.template.choice;
+        this.template.hidden = true;
+        this.template.onrest = true;
+
+        this.emit('autocompleteChoice', this, choice, this.template.index);
+        this.remit('autocompleteChoice', this, choice, this.template.index);
+    }
+
     protected $focus():void
     {
         if (this.$getProp('list').models)
@@ -159,6 +182,11 @@ export class AutocompleteListComponent extends Component
     protected $blur(event):void{
 
         console.log('bluring', event.target);
+
+        if (this.template.allow_new && !this.template.hidden)
+        {
+            this.selectCustom();
+        }
         if(this.blurLater)
         {
             clearTimeout(this.blurLater);
