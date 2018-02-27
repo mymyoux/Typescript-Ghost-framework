@@ -21,6 +21,9 @@ export class Master
     protected params:any;
     protected _bindedEvents:any[];
     protected _route:IRoute;
+    private _deactivation: boolean = false;
+    private _activated: boolean = false;
+
     public constructor() 
     {
         this.components = [];
@@ -114,6 +117,9 @@ export class Master
         }
         console.log('[master] handle activation: ',this);
         this._nextActivationStep(0);
+
+        this._activated = false;
+        this._deactivation = false;
     }
     public param(name:string):any
     {
@@ -145,14 +151,33 @@ export class Master
     }
     public handleDisactivation():void
     {
-        this.unbindEvents();
-        this.disactivate();
-        this.dispose();
+        if (this._activated)
+        {
+            this.unbindEvents();
+            this.disactivate();
+            this.dispose();
+            this._activated = false;
+            this._deactivation = false;
+        }
+        else
+        {
+            // gracefully deactivate (wait for the controller to be activate first)
+            this._deactivation = true;
+
+            // case never activated ? Add a timer to auto deactivate ?
+        }
     }
     private _nextActivationStep(step:number):void
     {
         if(step>=this.activationSteps.length)
         {
+            this._activated = true;
+
+            if (this._deactivation)
+            {
+                // gracefully deactivate after the activation
+                return this.handleDisactivation();
+            }
             return this.activate();
         }
         Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
@@ -170,6 +195,7 @@ export class Master
         {
             debugger;
             console.error("activation error, step="+step, error);
+            // do we deactivate ?
         });
     }
     /**
