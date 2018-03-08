@@ -102,7 +102,6 @@
 		}
 		public back(index:number = 1, scope:string = "main"):boolean
 		{
-			debugger;
 			this.log("back", index);
 			var route: any;
 			var history: any[]  = this.history[scope];
@@ -132,13 +131,12 @@
 			this.trigger('remove_all', scope);
 			return false;
 		}
+
 		public backAll(scope:string = "main"):void
 		{
 			this.back(-1, scope);
-			setTimeout(()=>
-			{
-				this.setUrl(this._buildURL() );
-			}, 0);
+			this._lastURL = this._buildURL();
+			this.setUrl(this._lastURL);
 		}
 
 		public getHistorySize(scope:string = "main") : number
