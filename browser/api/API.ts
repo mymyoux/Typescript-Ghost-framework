@@ -241,7 +241,7 @@ import {Arrays} from "ghost/utils/Arrays";
            // var temp: string[] = window.location.hostname.split(".");
             //var short: string = temp[temp.length - 2] + "." + temp[temp.length - 1];
             var short: string = "/"+window.location.hostname+"/";   
-            if (this._config.jsonp || (request.url.indexOf(short) == -1 && !window['EXTENSION_CONFIG']))
+            if (this._config.jsonp/* || (request.url.indexOf(short) == -1 && !window['EXTENSION_CONFIG'])*/)
             {
                 //crossdomain
                 request.dataType = "jsonp";
