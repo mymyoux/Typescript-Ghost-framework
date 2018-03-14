@@ -21,7 +21,7 @@ import {IBinaryResult} from "./IBinaryResult";
 				//searchElement = property ? element[property] : element;
 
 				while (minIndex <= maxIndex) {
-					currentIndex = (minIndex + maxIndex) / 2 | 0;
+					currentIndex = (minIndex + maxIndex) >> 1;
 //					currentElement = property ? (array[currentIndex] ? array[currentIndex][property] : null) : array[currentIndex];
 
 					lesser = null;
@@ -81,7 +81,7 @@ import {IBinaryResult} from "./IBinaryResult";
 				searchElement = property?searchElement[property]:searchElement;
 
 			while (minIndex <= maxIndex) {
-				currentIndex = (minIndex + maxIndex) / 2 | 0;
+				currentIndex = (minIndex + maxIndex) >> 1;
 				currentElement = property?(array[currentIndex]?array[currentIndex][property]:null):array[currentIndex];
 
 				if ((order == 1 && currentElement < searchElement) ||  (order == -1 && currentElement > searchElement)){
