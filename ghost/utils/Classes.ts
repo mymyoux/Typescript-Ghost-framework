@@ -5,17 +5,27 @@ import { Strings } from "ghost/utils/Strings";
 
     export class Classes
     {
-        public static getName(cls:Function):string
+        public static getName(cls:any):string
         {
+            //es6
+            if(cls && cls.constructor && cls.constructor.name)
+            {
+                return cls.constructor.name;
+            }
+            var clsText:string = cls+"";
             var funcNameRegex = /function ([^\(]{1,})\(/;
-            var results  = (funcNameRegex).exec(cls+"");
+            var results  = (funcNameRegex).exec(clsText);
             if (results && results.length > 1)
             {
                 return results[1];
             }
             var funcNameRegex = /class ([^\({]{1,}){/;
-            var results  = (funcNameRegex).exec(cls+"");
-            return (results && results.length > 1) ? Strings.trim(results[1]) : "";
+            var results  = (funcNameRegex).exec(clsText);
+            if(results != null && (results && results.length > 1) )
+            {
+                return Strings.trim(results[1]);
+            }
+            return "";
         }
         /**
          * Tests if a class exists
