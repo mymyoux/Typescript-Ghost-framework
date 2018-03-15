@@ -8,10 +8,7 @@ import { Strings } from "ghost/utils/Strings";
         public static getName(cls:any):string
         {
             //es6
-            if(cls && cls.constructor && cls.constructor.name)
-            {
-                return cls.constructor.name;
-            }
+       
             var clsText:string = cls+"";
             var funcNameRegex = /function ([^\(]{1,})\(/;
             var results  = (funcNameRegex).exec(clsText);
@@ -24,6 +21,10 @@ import { Strings } from "ghost/utils/Strings";
             if(results != null && (results && results.length > 1) )
             {
                 return Strings.trim(results[1]);
+            }
+            if(cls && cls.constructor && cls.constructor.name)
+            {
+                return cls.constructor.name;
             }
             return "";
         }
