@@ -541,9 +541,15 @@
 			
 			if (target)
 			{
-				console.log("[router:href]" + jqueryEvent.currentTarget.getAttribute("href") + ' ' + target);
+				var url: string = jqueryEvent.currentTarget.getAttribute("href");
+
+				if (url.indexOf(window.location.origin) === 0 || url.indexOf('/') === 0)
+				{
+					url += window.location.search;
+				}
+				console.log("[router:href]" + url + ' ' + target);
 				jqueryEvent.preventDefault();
-				window.open(jqueryEvent.currentTarget.getAttribute("href"), target);
+				window.open(url, target);
 				return;
 			}
 			
