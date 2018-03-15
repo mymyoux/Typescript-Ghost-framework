@@ -3,6 +3,7 @@ import {API2} from "browser/api/API2";
 import {Auth} from "./Auth";
 import {EventDispatcher} from "ghost/events/EventDispatcher";
 import {Component} from "./Component";
+import { Polyglot2 } from "browser/i18n/Polyglot2";
 export class Template extends EventDispatcher
 {
     public static EVENT_CHANGE:string = "change";
@@ -124,7 +125,7 @@ export class Template extends EventDispatcher
     {
         return new Promise<any>((resolve, reject):void=>
         {
-            Template.api().path("vue/get").param('path', this.name).then((data:any)=>
+            Template.api().path("vue/get").param('path', this.name).param('locale', Polyglot2.instance().locale()).then((data:any)=>
             {
                 this.readExternal(data);
                 resolve(this);
