@@ -47,7 +47,7 @@ import {Maths} from "ghost/utils/Maths";
                 return false;
             return index == str.length - needle.length;
         }
-        public static camel(text:string, delimiter:string = "-")
+        public static camel(text:string, delimiter:string = "-|_")
         {
             if(!text)
             {
@@ -69,6 +69,14 @@ import {Maths} from "ghost/utils/Maths";
             text = text.replace(/[A-Z]/g, " $1");
             text = text.replace(/ /g,delimiter);
             return text.toLowerCase();
+        }
+        public static firstUpperCase(text:string):string
+        {
+            if(!text)
+            {
+                return text;
+            }
+            return text.charAt(0).toUpperCase()+text.substring(1);
         }
         public static capitalizeAllWords(text:string):string
         {
