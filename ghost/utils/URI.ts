@@ -44,7 +44,7 @@
             }
             return url;
         }
-        protected static objectToString(object:any, prefix:string = null):string
+        public static objectToString(object:any, prefix:string = null):string
         {
             if(!object)
             {
