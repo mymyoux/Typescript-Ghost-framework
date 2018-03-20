@@ -44,8 +44,12 @@
             }
             return url;
         }
-        protected static objectToString(object:any, prefix:string = null):string
+        public static objectToString(object:any, prefix:string = null):string
         {
+            if(!object)
+            {
+                return object;
+            }
             return Object.keys(object).map(function(key) {
                 if (object[key] == null)
                 {
