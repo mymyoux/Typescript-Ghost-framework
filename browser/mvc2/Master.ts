@@ -426,11 +426,11 @@ export class Master
             $(elmt).on(type, listener);
         }
     }
-    protected $addComponent(name:string):void
+    protected $addComponent(name:string, options?:any):void
     {
         if(!Vue.component('component-'+name))
         {
-            Vue.component('component-'+name, Component.load.bind(Component, name));
+            Vue.component('component-'+name, Component.load.bind(Component, name, options));
         }
     }
     protected $addComputedProperty(name:string, computed:Function):void
