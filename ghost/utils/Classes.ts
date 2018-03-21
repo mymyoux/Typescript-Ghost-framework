@@ -67,7 +67,7 @@ import { Strings } from "ghost/utils/Strings";
                 return require(name);
             }
             var root:any = Root.getRoot();
-            var names:string[] = name.split(".");
+            var names:string[] = name.split(".");   
             
             var len:number = names.length;
             for(var i:number=0; i<len; i++)
