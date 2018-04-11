@@ -61,8 +61,7 @@ export class Component extends EventDispatcher
     }
     
     public static load(name:string, options?:any):Promise<any>
-    {
-        
+    { 
         return new Promise<any>((resolve, reject)=>
         {
             Inst.get(Step).register('component-'+name+'-init');

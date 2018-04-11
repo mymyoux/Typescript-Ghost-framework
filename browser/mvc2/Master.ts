@@ -158,21 +158,23 @@ export class Master
             this.dispose();
             this._activated = false;
             this._deactivation = false;
+            console.warn('[Master.ts : handleDisactivation] done ' + this._getName());
         }
         else
         {
             // gracefully deactivate (wait for the controller to be activate first)
             this._deactivation = true;
-
+            console.warn('[Master.ts : handleDisactivation] deactivation = true ' + this._getName());
             // case never activated ? Add a timer to auto deactivate ?
         }
     }
     private _nextActivationStep(step:number):void
     {
+        // console.log(step + ' ' + this._getName() + '-init-' + this.activationSteps[step]);
+        
         if(step>=this.activationSteps.length)
         {
             this._activated = true;
-
             if (this._deactivation)
             {
                 // gracefully deactivate after the activation
@@ -180,6 +182,13 @@ export class Master
             }
             return this.activate();
         }
+        else
+        {
+            if (this._deactivation) {
+                return this._nextActivationStep(step + 1);
+            }
+        }
+
         Inst.get(Step).register(this._getName()+'-init-'+this.activationSteps[step]);
         var result:Promise<any> = this[this.activationSteps[step]]();
         if(!result)
@@ -426,11 +435,11 @@ export class Master
             $(elmt).on(type, listener);
         }
     }
-    protected $addComponent(name:string):void
+    protected $addComponent(name:string, options?:any):void
     {
         if(!Vue.component('component-'+name))
         {
-            Vue.component('component-'+name, Component.load.bind(Component, name));
+            Vue.component('component-'+name, Component.load.bind(Component, name, options));
         }
     }
     protected $addComputedProperty(name:string, computed:Function):void
