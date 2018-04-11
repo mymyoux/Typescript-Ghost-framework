@@ -44,6 +44,11 @@ import {Strings} from "ghost/utils/Strings";
 			return this;
 		}
 		public params(params:any): this {
+			if(params && params instanceof FormData )
+			{
+				super.params(params);
+				return this;
+			}
 			for(var p in params)
 			{
 				if(params[p] === null || params[p]===undefined)
@@ -74,51 +79,61 @@ import {Strings} from "ghost/utils/Strings";
 			{
 				request.data = {};
 			}
-			
+
+			var additional:any = {};
 			if (this._config[API2.API_TOKEN])
 			{
-				request.data.api_token = this._config[API2.API_TOKEN];
+				additional.api_token = this._config[API2.API_TOKEN];
 			}
 			if (this._config[API2.API_IMPERSONATE_TOKEN])
 			{
-				if(!request.data)
-				{
-					request.data = {};
-				}
-				request.data.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
+				additional.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
 			}
 			if (this._config[API2.API_IMPERSONATE_TOKEN])
 			{
-				if(!request.data)
-				{
-					request.data = {};
-				}
-				request.data.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
+				additional.api_token_impersonate = this._config[API2.API_IMPERSONATE_TOKEN];
 			}
-			if (!this._method && request.data && request.data.method)
-			{
-				delete request.data.method;
-			}
+		
 
 			if (this._config.retry)
 			{
-				request.data.retry = this._config.retry;
+				additional.retry = this._config.retry;
 			}
 
 			if (this._config.reexecute === false || this._config.reexecute === true)
 			{
-				request.data.reexecute = this._config.reexecute;
+				additional.reexecute = this._config.reexecute;
 			}
 			else
 			{
-				request.data.reexecute = true;
+				additional.reexecute = true;
 			}
 
 			if (this._config.reexecute_session)
 			{
-				request.data.reexecute_session = this._config.reexecute_session;
+				additional.reexecute_session = this._config.reexecute_session;
 			}
-			
+			if(request.data instanceof FormData)
+			{
+				for(var p in additional)
+				{
+					request.data.append(p, additional[p]);
+				}
+				if (!this._method && request.data && request.data.method)
+				{
+					request.data.delete('method');
+				}
+			}else
+			{
+				for(var p in additional)
+				{
+					request.data[p] = additional[p];
+				}
+				if (!this._method && request.data && request.data.method)
+				{
+					delete request.data.method;
+				}
+			}
 			return request;
 		}
 		public then(token?: string, request?: any): any 
@@ -162,7 +177,7 @@ import {Strings} from "ghost/utils/Strings";
 			var options : any = this._config;
 			options.asObject = true;
 
-			var promise = this.getPromiseRequest(request, { asObject: true });
+			var promise = this.getPromiseRequest(request, { asObject: true,processData:!request.data || !(request.data instanceof FormData)  });
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
 				// console.log('RESULT', rawData);

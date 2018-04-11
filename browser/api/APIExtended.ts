@@ -164,10 +164,19 @@ import {Objects} from "ghost/utils/Objects";
 		protected getRequest(): any {
 			var request: any = super.getRequest();
 			if (request.data) {
-				request.data._id = Strings.getUniqueToken();
-				if (this._cacheManager)
-					request.data._instance = this._cacheManager.instance();
-				request.data.__timestamp = Date.now();
+				if(request.data instanceof FormData)
+				{
+					request.data.append('_id',Strings.getUniqueToken() );
+					request.data.append('_instance' ,this._cacheManager.instance());
+					request.data.append('__timestamp' , Date.now());
+				}else
+				{
+					request.data._id = Strings.getUniqueToken();
+					if (this._cacheManager)
+						request.data._instance = this._cacheManager.instance();
+
+						request.data.__timestamp = Date.now();
+				}
 			}
 			return request;
 		}
@@ -229,6 +238,10 @@ import {Objects} from "ghost/utils/Objects";
 			return this._data != null || this._services.length != 0;
 		}
 		protected getData(): any {
+			if(this._data && this._data instanceof FormData)
+			{
+				return this._data;
+			}
 			var data: any = this._data ? Objects.clone(this._data) : {};
 			data = this._services.reduce(function(previous: any, item: any): any {
 				if (!previous[item.name])
@@ -273,6 +286,11 @@ import {Objects} from "ghost/utils/Objects";
 			return this.service("paginate", "key", id).service("paginate", "direction", direction);
 		}
 		public params(params: any): APIExtended {
+			if(params instanceof FormData )
+			{
+				this._data = params;
+				return this;
+			}
 			for (var p in params) {
 				if (params[p] != null)
 					this.param(p, params[p]);
@@ -536,7 +554,7 @@ import {Objects} from "ghost/utils/Objects";
 				} 
 			}
 			this.lastRequest = request;
-			var promise = ajax(request, { asObject: true });//this.getPromise();
+			var promise = ajax(request, { asObject: true,processData:!request.data || !(request.data instanceof FormData) });//this.getPromise();
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
 				if (promise === this._previousPromise) {

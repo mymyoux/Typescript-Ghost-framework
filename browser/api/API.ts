@@ -233,7 +233,13 @@ import {Arrays} from "ghost/utils/Arrays";
             {
                 request.data = {};
             }
-            request.data.method = this._method?this._method:'GET';
+            if(request.data instanceof FormData)
+            {
+                request.data.append('method', this._method?this._method:'GET');
+            }else
+            {
+                request.data.method = this._method?this._method:'GET';
+            }
         //      request.data.__timestamp = Date.now();
             request.retry = this._config.retry != undefined ? this._config.retry:RETRY_INFINITE;
             request.url = this._config.url+this._controller+"/"+this._action+(this._id!=undefined?'/'+this._id:'');
