@@ -10,6 +10,7 @@ import {APIExtended} from "./APIExtended";
 //convert-files
 import {IMiddleWare} from "./IMiddleWare";
 import {Strings} from "ghost/utils/Strings";
+import { RequestsModel } from "../../../mobiskill/main/models/RequestsModel";
 
 	export class API2 extends APIExtended
 	{
@@ -175,9 +176,17 @@ import {Strings} from "ghost/utils/Strings";
 				return resolve();
 			}
 			var options : any = this._config;
+			options = {};
 			options.asObject = true;
-
-			var promise = this.getPromiseRequest(request, { asObject: true,processData:!request.data || !(request.data instanceof FormData)  });
+			
+			let useFormData:boolean = request.data && request.data instanceof FormData;
+			options.processData = !useFormData;
+			if(useFormData)
+			{
+				options.contentType = false;
+			}
+			
+			var promise = this.getPromiseRequest(request,options);
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
 				// console.log('RESULT', rawData);

@@ -554,7 +554,19 @@ import {Objects} from "ghost/utils/Objects";
 				} 
 			}
 			this.lastRequest = request;
-			var promise = ajax(request, { asObject: true,processData:!request.data || !(request.data instanceof FormData) });//this.getPromise();
+
+
+			let options:any = {};
+			options.asObject = true;
+			
+			let useFormData:boolean = request.data && request.data instanceof FormData;
+			options.processData = !useFormData;
+			if(useFormData)
+			{
+				options.contentType = false;
+			}
+			
+			var promise = ajax(request,options);//this.getPromise();
 			this._previousPromise = promise;
 			promise.then((rawData: any) => {
 				if (promise === this._previousPromise) {
