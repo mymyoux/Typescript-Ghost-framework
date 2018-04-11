@@ -73,6 +73,10 @@ export class ErrorGraphComponent extends Component
     }
     protected realtime():void
     {
+        if(window.location.href.indexOf(".local")!=-1)
+        {
+            return;
+        }
         var collection:any = this.$getModel("errors_realtime");
         if(!collection)
         {
