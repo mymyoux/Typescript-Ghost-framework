@@ -193,6 +193,8 @@ export class Master
             this._nextActivationStep(step+1);
         }, (error:any)=>
         {
+            console.error("Error step: " +this.activationSteps[step], this);
+            console.log(error);
             debugger;
             console.error("activation error, step="+step, error);
             // do we deactivate ?
