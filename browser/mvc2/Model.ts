@@ -411,7 +411,13 @@ export class Model extends CoreObject
         {
             if(!params)
                 params = {};
-            params.__source = this.getClassName();
+            if(params && params instanceof FormData)
+            {
+                params.append('__source', this.getClassName());
+            }else
+            {
+                params.__source = this.getClassName();
+            }
         }
         var request:API2 = this.getPathRequest(<string>path, params, config)
         .always(config.always===true);
