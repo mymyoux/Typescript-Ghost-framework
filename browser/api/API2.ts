@@ -10,7 +10,6 @@ import {APIExtended} from "./APIExtended";
 //convert-files
 import {IMiddleWare} from "./IMiddleWare";
 import {Strings} from "ghost/utils/Strings";
-import { RequestsModel } from "../../../mobiskill/main/models/RequestsModel";
 
 	export class API2 extends APIExtended
 	{
