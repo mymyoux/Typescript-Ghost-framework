@@ -38,6 +38,7 @@ import {Auth} from "browser/mvc2/Auth";
 		shortname?: string;
 		type: string;
 		updated_time: string;
+		path:string;
 	}
 	export interface IKey {
 		controller?: string;
@@ -56,6 +57,7 @@ import {Auth} from "browser/mvc2/Auth";
 			if (!this._instance) {
 				this._instance = new this();
 			}
+			window['polyglot'] = this._instance;
 			return this._instance;
 		}
 		protected static clone(source: any): any {

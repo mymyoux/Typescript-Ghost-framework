@@ -65,7 +65,7 @@ export class Template extends EventDispatcher
             { 
                 return;
             }
-            return API2.request().path('vue/get-expired').param("templates", templates);
+            return API2.request().path('vue/get-expired').param("templates", templates).param('locale', Polyglot2.instance().locale());
         }).then((data:any)=>
         { 
             //no expired or no cached templates
