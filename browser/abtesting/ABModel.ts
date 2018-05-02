@@ -7,7 +7,7 @@ import {APIExtended} from "browser/api/APIExtended";
     //convert-import
 import {ModelAPI} from "browser/mvc/ModelAPI";
     //convert-import
-import {Model} from "browser/mvc/Model";
+import {Model} from "browser/mvc/Model"; 
        //convert-import
 import {Application} from "browser/mvc/Application";
 /**
