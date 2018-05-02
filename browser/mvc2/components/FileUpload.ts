@@ -53,7 +53,6 @@ export class FileUpload extends Component
 
         API2.request().path('file/upload').params(formData).then((data) =>
         {
-            console.log('coooool ça marche');
         });
 
         var reader = new FileReader();
