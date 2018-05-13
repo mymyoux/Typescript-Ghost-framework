@@ -6,6 +6,8 @@ import {LocalForage} from "browser/data/Forage";
 import {API2} from "browser/api/API2";
 import {Arrays} from "ghost/utils/Arrays";
 import {Application} from "./Application";
+import { Objects } from "ghost/utils/Objects";
+
 export class Model extends CoreObject
 {
     public static EVENT_CHANGE:string = "change";
@@ -174,12 +176,11 @@ export class Model extends CoreObject
     public writeExternal( remove_null_values = false ):any
     {
         var external: any = {};
-        for(var p in this)
+        var data : any = this;
+
+        for (var p in data)
         {
-            //TODO:check this not sure if needed
-            // if(!this.hasOwnProperty(p))
-            //     continue;
-            if(typeof this[p] == "function")
+            if (typeof data[p] == "function")
             {
                 continue;
             }
@@ -189,23 +190,33 @@ export class Model extends CoreObject
                 continue;
             }
 
-            if (remove_null_values === true && this[p] === null)
+            if (remove_null_values === true && data[p] === null)
             {
                 continue;
             }
 
-            if(this[p] && typeof this[p] == "object" && typeof this[p]['writeExternal'] === 'function')
+            if (data[p] && typeof data[p] == "object" && typeof data[p]['writeExternal'] === 'function')
             {
-                console.log("child writeExtenral", this[p]);
-                external[p] = this[p]['writeExternal']( remove_null_values );
+                // console.log("child writeExtenral", data[p]);
+                external[p] = data[p]['writeExternal']( remove_null_values );
             }
             else
             {
-                external[p] = this[p];
-                // if(Arrays.isArray(external[p]))
-                // {
-                //     external[p] = this._writeExternal(external[p].slice());
-                // }
+                if(Arrays.isArray(data[p]))
+                {
+                    external[p] = [];
+                    for (var i in data[p])
+                    {
+                        if (data[p][i] && typeof data[p][i] == "object" && typeof data[p][i]['writeExternal'] === 'function')
+                            external[p][i] = data[p][i]['writeExternal'](remove_null_values);
+                        else
+                            external[p][i] = data[p][i];
+                    }
+                }
+                else
+                {
+                    external[p] = data[p];
+                }
             }
         }
         return external;
