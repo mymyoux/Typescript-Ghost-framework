@@ -78,7 +78,7 @@
             if (obj instanceof Array) {
                 var copy_array:any[] = [];
                 for (var i = 0, len = obj.length; i < len; i++) {
-                    copy_array[i] = Objects.clone(obj[i], null, hidePrivate);
+                    copy_array[i] = Objects.clone(obj[i], ignore, hidePrivate);
                 }
                 return copy_array;
             }
@@ -96,7 +96,7 @@
                             copy_object[attr] =  copy_object;
                         }else
                         {
-                            copy_object[attr] = Objects.clone(obj[attr], null, hidePrivate);
+                            copy_object[attr] = Objects.clone(obj[attr], ignore, hidePrivate);
                         }
 
                     }
