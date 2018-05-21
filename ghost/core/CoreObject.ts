@@ -43,7 +43,7 @@ window.onerror = function(err, url, line){
                         this._className = this["constructor"]["name"];
                     }else
                     {
-                        var funcNameRegex = /function (.{1,})\(/;
+                        var funcNameRegex = /function ([^\(]{1,})\(/;
                         var results  = (funcNameRegex).exec(this["constructor"].toString());
                         this._className = (results && results.length > 1) ? results[1] : "";
                     }
@@ -54,7 +54,7 @@ window.onerror = function(err, url, line){
                        return this["name"];
                     }else
                     {
-                        var funcNameRegex = /function (.{1,})\(/;
+                        var funcNameRegex = /function ([^\(]{1,})\(/;
                         var results  = (funcNameRegex).exec(this["toString"]());
                         return (results && results.length > 1) ? results[1] : "";
                     }
@@ -71,7 +71,7 @@ window.onerror = function(err, url, line){
                         return  this["constructor"]["name"];
                     }else
                     {
-                        var funcNameRegex = /function (.{1,})\(/;
+                        var funcNameRegex = /function ([^\(]{1,})\(/;
                         var results  = (funcNameRegex).exec(this["constructor"].toString());
                         return (results && results.length > 1) ? results[1] : "";
                     }
@@ -82,7 +82,7 @@ window.onerror = function(err, url, line){
                        return this["name"];
                     }else
                     {
-                        var funcNameRegex = /function (.{1,})\(/;
+                        var funcNameRegex = /function ([^\(]{1,})\(/;
                         var results  = (funcNameRegex).exec(this["toString"]());
                         return (results && results.length > 1) ? results[1] : "";
                     }
