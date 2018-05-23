@@ -480,7 +480,10 @@ export class Component extends EventDispatcher
     protected announceToParent():void
     {
         if(!this.root || !this.parent)
-            this.template.$parent.onNewComponent(this);
+        {
+            if (typeof this.template.$parent.onNewComponent === 'function')
+                this.template.$parent.onNewComponent(this);
+        }
     }
     private mounted():void
     {
