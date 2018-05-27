@@ -467,15 +467,7 @@ export class Component extends EventDispatcher
     }
     private beforeMounted():void
     {
-        
-        if(!this.template.$parent.onNewComponent)
-        {
-            console.log(this);
-        }
-        else
-        {
-            this.announceToParent();
-        }
+        this.announceToParent();
     }
     protected announceToParent():void
     {
