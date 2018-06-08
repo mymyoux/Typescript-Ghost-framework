@@ -45,3 +45,4 @@ import {Objects} from "ghost/utils/Objects";
 			this.data = data;
 		}
 	}
+//	window["config"] = Configuration;
