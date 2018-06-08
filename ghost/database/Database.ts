@@ -23,7 +23,9 @@ import {log} from "ghost/logging/log";
             Database._instance = this;
             if(!options)
             {
-                options = {};
+                options = {
+                    logging: console.log
+                };
             }
             if(!options.dialect)
             {
