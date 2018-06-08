@@ -9,6 +9,16 @@ import {Objects} from "ghost/utils/Objects";
 
 export class Component extends EventDispatcher
 {
+    public getID()
+    {
+        return this.template._uid;
+    }
+
+    public $getID()
+    {
+        return this.getID();
+    }
+
     protected static components:any = {};
     protected static instances:Component[] = [];
     protected static instancesVue:any[] = [];
