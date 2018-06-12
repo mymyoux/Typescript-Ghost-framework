@@ -138,6 +138,9 @@ import {Maths} from "ghost/utils/Maths";
                              if (!results.length)
                              {
                                  console.log("beanstalk mysql error: no beanstalkd with id = ", data._id_beanstalkd);
+
+                                 var job: Job = new Job(this, id, data, null);
+                                 callback(job, true);
                                  return;
                              }
                              var job: Job = new Job(this, id, data, results[0]);
