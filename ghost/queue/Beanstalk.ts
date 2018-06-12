@@ -57,7 +57,7 @@ import {Maths} from "ghost/utils/Maths";
         }
         public onError(error)
         {
-            console.error("beanstalkd error - ",error);
+            console.log("beanstalkd error - ",error);
             this.trigger(Beanstalk.EVENT_ERROR,error);
         }
         public onClose()
@@ -107,7 +107,7 @@ import {Maths} from "ghost/utils/Maths";
                 console.log('reserved:' + reserve_id+" => "+id);
                     if(error)
                     {
-                        console.error("beanstalk reserve error:", error);
+                        console.log("beanstalk reserve error:", error);
                         console.log(id);
                         console.log(payload);
                         if(error == Beanstalk.EVENT_DEADLINE_SOON)
@@ -127,16 +127,17 @@ import {Maths} from "ghost/utils/Maths";
                     
                     if(data && data._id_beanstalkd)
                     {
+                        console.log('id_beanstlakd:' +data._id_beanstalkd);
                         Database.instance().query('SELECT * FROM beanstalkd_log WHERE id=?', [data._id_beanstalkd], (error, results, fields)=>
                         {
                              if(error)
                              {
-                                 console.error("beanstalk reserve mysql error:", error);
+                                 console.log("beanstalk reserve mysql error:", error);
                                  return;
                              }   
                              if (!results.length)
                              {
-                                 console.error("beanstalk mysql error: no beanstalkd with id = ", data._id_beanstalkd);
+                                 console.log("beanstalk mysql error: no beanstalkd with id = ", data._id_beanstalkd);
                                  return;
                              }
                              var job: Job = new Job(this, id, data, results[0]);
@@ -144,14 +145,16 @@ import {Maths} from "ghost/utils/Maths";
                              Database.instance().query('UPDATE beanstalkd_log SET state=?,tries=? WHERE id=?', [job.state, job.tries, job.id_database], function(error) 
                              {
                                  if (error) {
-                                     console.error("beanstalk reserve mysql update error:", error);
+                                     console.log("beanstalk reserve mysql update error:", error);
                                      return;
                                  }   
                                  callback(job);
                              });
                         });
-                    }else
+                    }else{
+                        console.log('no beanstlakd id');
                         callback(new Job(this, id, data));
+                    }
                 });
         }
         public success(job: Job): void
