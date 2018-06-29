@@ -1,6 +1,7 @@
 import {Objects} from "ghost/utils/Objects";
 import {Component} from "browser/mvc2/Component";
 import {API2} from "browser/api/API2";
+import {IModelConfig} from "browser/mvc2/Model";
 type Constructor<T extends any> = new(...args: any[]) => T;
 
 export function Table<X extends Constructor<any>>( Child:X ) {
@@ -44,7 +45,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
         {
             this.clear();
 
-            return this.loadGet( this.getFilterParams(), column ).then( (data : any) => {
+           return  <any>(<any>this.loadGet( this.getFilterParams(), column )).then( (data : any) => {
                 this.afterFilterData( data );
             });
         }
@@ -71,7 +72,7 @@ export function Table<X extends Constructor<any>>( Child:X ) {
             this.selected = [];
             this.bootColumns();
         }
-        public loadGet(params?:any, column?:any):Promise<any>
+        public loadGet(params?:any, column?:any, config?:IModelConfig&{execute:false}):Promise<any>|API2
         {
             var request:API2 =  this.request();
 
@@ -119,7 +120,10 @@ export function Table<X extends Constructor<any>>( Child:X ) {
                 }
             }
             this._getPromise = request;
-
+            if(config && config.execute === false)
+            {
+                return <any>request;
+            }
             return request.then(function(data)
             {
                 return data;

@@ -670,7 +670,7 @@ export class Master
         {
             for(var comp of this.components)
             {
-                if(typeof component == "string" && comp.getComponentName()==component)
+                if(typeof component == "string" && ((typeof comp.getComponentName() == "string" && comp.getComponentName()==component)  || (Array.isArray(comp.getComponentName()) && ~comp.getComponentName().indexOf(component)))) 
                 {
                     return comp;
                 }

@@ -306,6 +306,10 @@ import {Strings} from "ghost/utils/Strings";
 			if (typeof id == "string") {
 				id = [id];
 			}
+			if(!id)
+			{
+				debugger;
+			}
 			if (direction.length != id.length) {
 				debugger;
 				throw new Error("direction != keys");

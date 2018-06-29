@@ -387,7 +387,6 @@
 					}
 				}
 			}
-			debugger;
 			console.warn("route:" + url + " not found");
 			return false;
 		}
