@@ -29,6 +29,15 @@ export class FileUpload extends Component
             {
                 required:false,
                 default:'user'
+            },
+            "picture":
+            {
+                required:false,
+                default:'profile'
+            },
+            "index":
+            {
+                required:false
             }
         };
     }
@@ -51,24 +60,36 @@ export class FileUpload extends Component
         formData.append('file', file[0]);
         formData.append('id_user', this.template.user.id_user);
 
+        if (this.template.type == 'picture')
+        {
+            formData.append('picture', this.template.picture);
+            if (this.template.picture == 'picture')
+            {
+                var index = this.template.index;
+                var pictures = this.template.user.company.profile.pictures;
+                formData.append('id_picture', pictures[index].id_picture);
+            }
+        }
+
         API2.request().path('file/upload').params(formData).then((data) =>
         {
+            if (this.template.picture == 'picture')
+            {
+                var index = this.template.index;
+                this.template.user.company.profile.pictures[index].picture = data['picture'];
+            }
         });
 
         var reader = new FileReader();
         reader.onload = (event:any) => {
             this.template.image = event.target.result;
-            /*API2.request().path('file/upload').params({file : event.target.result, id_user : this.template.user.id_user}).then((data) =>
-            {
-                console.log('done');
-            });*/
         };
         reader.readAsDataURL(file[0]);
     }
 
     public $open():void
     {
-        var input = $('.file-upload').find("input[type='file']").click();
+        var input = $(this.template.$el).find("input[type='file']").click();
     }
 
     public activate():void{
