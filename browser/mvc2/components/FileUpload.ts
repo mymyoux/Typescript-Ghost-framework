@@ -73,11 +73,7 @@ export class FileUpload extends Component
 
         API2.request().path('file/upload').params(formData).then((data) =>
         {
-            if (this.template.picture == 'picture')
-            {
-                var index = this.template.index;
-                this.template.user.company.profile.pictures[index].picture = data['picture'];
-            }
+            this.emit("updatePicture", data, this.template.picture, this.template.index);
         });
 
         var reader = new FileReader();
