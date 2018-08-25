@@ -319,6 +319,11 @@ export class TableComponent extends Component
             {
                 type:Boolean,
                 default:true
+            },
+            "title":
+            {
+                type:Boolean,
+                default:true
             }
         };
     }
