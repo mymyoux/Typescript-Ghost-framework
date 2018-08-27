@@ -254,6 +254,7 @@ export interface IColumn
     link?:boolean|string;
     editable?:boolean;
     searchable?:boolean;
+    filter?:boolean;
     search?:string;
     exists?:Function;
     filter?:string;

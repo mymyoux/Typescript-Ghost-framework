@@ -324,6 +324,11 @@ export class TableComponent extends Component
             {
                 type:Boolean,
                 default:true
+            },
+            "filter":
+            {
+                type:Boolean,
+                default:false
             }
         };
     }
@@ -676,8 +681,10 @@ export class TableComponent extends Component
 
     public filterAction( list : any ) : Promise <any>
     {
-        return list.filterData().then( (data : any) => {
+        this.template.loading = true;
 
+        return list.filterData().then( (data : any) => {
+            this.template.loading = false;
         });
     }
 
