@@ -170,4 +170,9 @@
                 roman = (key[+digits.pop() + (i * 10)] || "") + roman;
             return Array(+digits.join("") + 1).join("M") + roman;
         }
+
+        public static format(number : number, locale : string = 'en') : string
+        {
+            return new Intl.NumberFormat(locale).format(number);
+        }
     }
