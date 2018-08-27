@@ -257,7 +257,6 @@ export interface IColumn
     filter?:boolean;
     search?:string;
     exists?:Function;
-    filter?:string;
  //   edition?:string; 
     error?:string;
     //order
