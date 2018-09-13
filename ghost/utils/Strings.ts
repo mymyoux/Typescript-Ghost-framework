@@ -8,6 +8,13 @@ import {Maths} from "ghost/utils/Maths";
     {
         private static exceptWords:string[] = ["de","des","du","dans","la","le","les","au","aux"];
 
+        public static empty(str : string) : boolean
+        {
+            if (!str || str.length === 0)
+                return true;
+            return false;
+        }
+
         public static replaceAll(str:string, search:string, repl:string):string
         {
              while (str.indexOf(search) != -1)
