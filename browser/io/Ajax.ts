@@ -256,7 +256,8 @@ import {CancelablePromise} from "ghost/io/CancelablePromise";
 		 * Calback called with result data. If keyword is set, only this part of the data will be given.
 		 * @param data
 		 */
-		success?:(data:any)=>any|void;
+		success?: (data: any) => any | void;
+		error?:(data:any)=>any|void;
 		/**
 		 * If set it will be used to remove the middleware from the list
 		 */
