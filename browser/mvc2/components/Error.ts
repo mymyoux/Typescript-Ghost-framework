@@ -54,7 +54,7 @@ export class ErrorComponent extends Component
     public $onErrorSelected(item:ErrorModel):void
     {
         this.template.errors.clear();
-        this.template.errors.order(["count","last_created_at"],[-1, -1]);
+        this.template.errors.order(["count","last_created_time"],[-1, -1]);
         this.template.errors.loadGet({
             start   : item.timestamp,
             end     : item.timestamp + 60 * 5,
@@ -66,7 +66,7 @@ export class ErrorComponent extends Component
     public $onErrorUnselected():void
     {
         this.template.errors.clear();
-        this.template.errors.order(['last_created_at'], [-1]);
+        this.template.errors.order(['last_created_time'], [-1]);
         this.loadOneHour();
     }
     protected loadOneHour()
