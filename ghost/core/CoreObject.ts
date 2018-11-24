@@ -55,7 +55,8 @@ window.onerror = function(err, url, line){
                     }else
                     {
                         var funcNameRegex = /function ([^\(]{1,})\(/;
-                        var results  = (funcNameRegex).exec(this["toString"]());
+                        var toString = (<any>this["toString"])();
+                        var results = (funcNameRegex).exec(toString);
                         return (results && results.length > 1) ? results[1] : "";
                     }
                 }
@@ -72,7 +73,8 @@ window.onerror = function(err, url, line){
                     }else
                     {
                         var funcNameRegex = /function ([^\(]{1,})\(/;
-                        var results  = (funcNameRegex).exec(this["constructor"].toString());
+                        var constructor = (<any>this["constructor"]).toString();
+                        var results = (funcNameRegex).exec(constructor);
                         return (results && results.length > 1) ? results[1] : "";
                     }
                 }else{
