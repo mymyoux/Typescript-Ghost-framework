@@ -259,13 +259,11 @@ export class Component extends EventDispatcher
         this.reloadComponentTemplate(name);
         for(var component of Component.instances)
         {
-            if(component instanceof Component.components[name])
-            {
+            if ((Component.components[name] && component instanceof Component.components[name]) ||
+                (Component.components[name.replace(/-/g, '')] && component instanceof Component.components[name.replace(/-/g, '')])) {
                 component.onTemplateUpdated();
             }
         }
-
-        //this.template.$root.$emit('reload-component', this);
     }
     private static reloadComponentTemplate(name:string):void
     {
