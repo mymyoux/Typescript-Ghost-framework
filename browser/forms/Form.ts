@@ -2069,7 +2069,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
                 this.dispose();
             }else
             {
-                this.remove_timeout =setTimeout(this.remove.bind(this), 500);
+                this.remove_timeout = window.setTimeout(this.remove.bind(this), 500);
             }
         }
         public dispose():void
@@ -2157,7 +2157,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
             }else
             {
                 console.warn("no id yet", this);
-                this.change_timeout = setTimeout(this.delayChange.bind(this), 500);
+                this.change_timeout = window.setTimeout(this.delayChange.bind(this), 500);
             }
         }
     }
@@ -2433,11 +2433,11 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
     {
         public static selector:string = "[data-type='picture']";
         private inputFile:HTMLInputElement;
-        private preview:HTMLImageElement;
+        private preview:any;
         private $triggerInput:JQuery;
         private $triggerRemove:JQuery;
         private preview_type:string;
-        private picture:string;
+        private picture: string;
         protected init():void
         {
             super.init();
@@ -2504,7 +2504,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
                                       var pheight:number = $(this.preview).height();
 
                                       var image = new Image();
-                                      image.src = file.result;
+                                      image.src = <any>file.result;
 
                                       image.onload = ()=> {
 
@@ -2535,7 +2535,7 @@ import {RETRY_INFINITE} from "browser/io/Ajax";
                                   }
                                   this.$input.addClass("preview");
                               }
-                            this.picture = file.result;
+                            this.picture = <any>file.result;
                             this.onChangeBinded();
 
                         }, (error:any):void=>
