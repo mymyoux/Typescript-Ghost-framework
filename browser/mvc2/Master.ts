@@ -325,6 +325,7 @@ export class Master
        }
        this.vueConfig = config;
        this.renderVue();
+       this.bootComponents(); // need to reboot component everytime you update to rebind
     }
     
     protected bindVue():void
