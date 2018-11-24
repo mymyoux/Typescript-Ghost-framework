@@ -10,6 +10,12 @@ export class Template extends EventDispatcher
     protected static _templates:any = {};
     protected static _api:API2;
     protected static cacheEnabled:boolean = true;
+
+    public static getTemplate() : any
+    {
+        return this._templates;
+    }
+    
     public static get(name:string):Promise<any>
     {
         return new Promise<any>((resolve, reject):void=>
