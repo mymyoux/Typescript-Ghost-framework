@@ -320,6 +320,11 @@ export class TableComponent extends Component
                 type:Boolean,
                 default:true
             },
+            "searchable":
+            {
+                type:Boolean,
+                default:true
+            },
             "title":
             {
                 type:Boolean,
@@ -615,8 +620,8 @@ export class TableComponent extends Component
     // FILTERS
     public $filterChange( list : any ) : void
     {
-        list.current_filter = list.current_filter.length ? list.current_filter : null;
-        
+        list.current_filter = (list.current_filter && list.current_filter.length) ? list.current_filter : null;
+
         this.filterAction( list );
     }
 
@@ -682,7 +687,6 @@ export class TableComponent extends Component
     public filterAction( list : any ) : Promise <any>
     {
         this.template.loading = true;
-
         return list.filterData().then( (data : any) => {
             this.template.loading = false;
         });
