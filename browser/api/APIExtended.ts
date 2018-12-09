@@ -167,7 +167,8 @@ import {Objects} from "ghost/utils/Objects";
 				if(request.data instanceof FormData)
 				{
 					request.data.append('_id',Strings.getUniqueToken() );
-					request.data.append('_instance' ,this._cacheManager.instance());
+					if (this._cacheManager)
+						request.data.append('_instance' ,this._cacheManager.instance());
 					request.data.append('__timestamp' , Date.now());
 				}else
 				{
@@ -175,7 +176,7 @@ import {Objects} from "ghost/utils/Objects";
 					if (this._cacheManager)
 						request.data._instance = this._cacheManager.instance();
 
-						request.data.__timestamp = Date.now();
+					request.data.__timestamp = Date.now();
 				}
 			}
 			return request;
