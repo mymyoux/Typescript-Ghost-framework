@@ -704,8 +704,8 @@ export class Component extends EventDispatcher
     }
     protected bootComponents():void
     {
-       // this.template.$on('new-component',this.onNewComponent.bind(this));
-        this.template.$on('proxy',this.$proxy.bind(this));
+        if (this.template)
+            this.template.$on('proxy',this.$proxy.bind(this));
     }
     protected $onNewComponent(component:Component):void
     {
