@@ -8,7 +8,6 @@ import { Strings } from "ghost/utils/Strings";
         public static getName(cls:any):string
         {
             //es6
-       
             var clsText:string = cls+"";
             var funcNameRegex = /function ([^\(]{1,})\(/;
             var results  = (funcNameRegex).exec(clsText);
@@ -20,7 +19,13 @@ import { Strings } from "ghost/utils/Strings";
             var results  = (funcNameRegex).exec(clsText);
             if(results != null && (results && results.length > 1) )
             {
-                return Strings.trim(results[1]);
+                const clsName: string = Strings.trim(results[1]);
+
+                if (clsName.indexOf(' ') !== -1) {
+                    return clsName.substr(0, clsName.indexOf(' '));
+                } else {
+                    return clsName;
+                }
             }
             if(cls && cls.constructor && cls.constructor.name)
             {
