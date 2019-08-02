@@ -479,6 +479,9 @@ export class Model extends CoreObject
         return this.api(path, config.api_name).path(path).params(params);
     }
 
+    public clear() : void {
+        this.readExternal([]);
+    }
 }
 
 export interface IModelConfig
